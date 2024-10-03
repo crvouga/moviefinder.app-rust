@@ -1,3 +1,4 @@
+mod feed;
 mod http;
 mod res;
 mod respond;
@@ -12,9 +13,12 @@ fn handle_request(req: http::Request) -> http::Response {
 
     let html_response = res::to_http_response(response);
 
-    html_response
+    return html_response;
 }
 
 fn main() {
-    http::start_server("127.0.0.1:8080", handle_request);
+    let port = 8080;
+    let address = "127.0.0.1:".to_owned() + &port.to_string();
+    println!("Listening on http://localhost:{}", port);
+    http::start_server(&address, handle_request);
 }

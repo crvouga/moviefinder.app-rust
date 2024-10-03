@@ -7,8 +7,12 @@ pub enum Res {
 
 pub fn to_http_response(res: Res) -> http::Response {
     match res {
-        Res::Html(body) => http::Response::new(200, body),
+        Res::Html(body) => http::Response::new(200, body, vec![]),
 
-        Res::Redirect(location) => http::Response::new(302, location),
+        Res::Redirect(location) => http::Response::new(
+            302,
+            "".to_owned(),
+            vec![(String::from("Location"), location)],
+        ),
     }
 }
