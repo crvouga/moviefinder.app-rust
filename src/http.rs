@@ -6,6 +6,7 @@ pub struct Request {
     pub path: String,
 }
 
+#[derive(Debug)]
 pub struct Response {
     pub status_code: u16,
     pub body: String,

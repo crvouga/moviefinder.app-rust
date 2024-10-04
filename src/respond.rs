@@ -1,6 +1,6 @@
 use crate::res::Res;
 use crate::route::Route;
-use crate::{feed, route};
+use crate::route;
 
 pub fn respond(route: Route) -> Res {
     match route {
@@ -8,6 +8,6 @@ pub fn respond(route: Route) -> Res {
 
         Route::Account => Res::Html("<h1>Account</h1>".to_string()),
 
-        Route::Unknown => Res::Redirect(route::encode(Route::Feed(feed::route::Route::Index))),
+        Route::Unknown => Res::Redirect(route::encode(Route::Account)),
     }
 }

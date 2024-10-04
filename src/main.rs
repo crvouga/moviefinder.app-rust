@@ -4,21 +4,23 @@ mod res;
 mod respond;
 mod route;
 
-fn handle_request(req: http::Request) -> http::Response {
-    println!("{} {}", req.method, req.path);
+fn respond(req: http::Request) -> http::Response {
+    let route = route::decode(req.path);
 
-    let decoded = route::decode(req.path);
+    println!("{} {:?}", req.method, route);
 
-    let response = respond::respond(decoded);
+    let response = respond::respond(route);
 
-    let html_response = res::to_http_response(response);
+    let http_respond = res::to_http_response(response);
 
-    return html_response;
+    println!("{:?}", http_respond);
+
+    return http_respond;
 }
 
 fn main() {
     let port = 8080;
     let address = "127.0.0.1:".to_owned() + &port.to_string();
     println!("Listening on http://localhost:{}", port);
-    http::start_server(&address, handle_request);
+    http::start_server(&address, respond);
 }
