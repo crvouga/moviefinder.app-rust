@@ -1,6 +1,6 @@
 use crate::res::Res;
-use crate::route::Route;
 use crate::route;
+use crate::route::Route;
 
 pub fn respond(route: Route) -> Res {
     match route {
