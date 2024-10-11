@@ -4,6 +4,7 @@ use std::net::{TcpListener, TcpStream};
 pub struct Request {
     pub method: String,
     pub path: String,
+    pub headers: Vec<(String, String)>,
 }
 
 #[derive(Debug)]
@@ -60,8 +61,13 @@ fn handle_connection(mut stream: TcpStream, handle_request: fn(Request) -> Respo
 
     let method = parts.next().unwrap_or("").to_string();
     let path = parts.next().unwrap_or("/").to_string();
+    let headers = vec![];
 
-    let request = Request { method, path };
+    let request = Request {
+        method,
+        path,
+        headers,
+    };
 
     let response = handle_request(request);
 
