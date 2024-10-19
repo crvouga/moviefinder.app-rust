@@ -57,10 +57,6 @@ pub fn render_attrs(attrs: &[Attr]) -> String {
         .join("")
 }
 
-pub fn safe_html(value: &str) -> Elem {
-    Elem::Safe(value.to_string())
-}
-
 fn escape_html(content: &str) -> String {
     content
         .replace("&", "&amp;")

@@ -1,4 +1,4 @@
-use crate::feed;
+use crate::feed::{self};
 use base64::{decode as base64_decode, encode as base64_encode};
 use serde::{Deserialize, Serialize};
 
@@ -9,12 +9,18 @@ pub enum Route {
     Unknown,
 }
 
+const SEPERATOR: &'static str = "___";
+
 pub fn encode(route: Route) -> String {
     let encoded = serde_json::to_string(&route).unwrap_or("".to_owned());
 
     let base_64_encoded = base64_encode(encoded);
 
-    base_64_encoded
+    let human_friendly = to_human_friendly_str(route);
+
+    let joined = format!("{}{}{}", human_friendly, SEPERATOR, base_64_encoded);
+
+    joined
 }
 
 pub fn remove_leading_slash(path: &str) -> String {
@@ -26,7 +32,13 @@ pub fn remove_leading_slash(path: &str) -> String {
 }
 
 pub fn decode(base_64_encoded: String) -> Route {
-    let decoded_bytes = base64_decode(remove_leading_slash(&base_64_encoded)).unwrap_or(vec![]);
+    let without_slash = remove_leading_slash(&base_64_encoded);
+
+    let seperated: Vec<&str> = without_slash.split(SEPERATOR).collect();
+
+    let second = seperated.get(1).unwrap_or(&"");
+
+    let decoded_bytes = base64_decode(second).unwrap_or(vec![]);
 
     let encoded = String::from_utf8(decoded_bytes).unwrap_or("".to_owned());
 
@@ -35,9 +47,25 @@ pub fn decode(base_64_encoded: String) -> Route {
     decoded
 }
 
+pub fn to_human_friendly_str<T: Serialize>(route: T) -> String {
+    let serialized = serde_json::to_string(&route).unwrap_or("".to_owned());
+
+    let mut human_friendly = serialized
+        .replace(r#"""#, "")
+        .replace(":", ".")
+        .replace("{", "")
+        .replace("}", "")
+        .replace(",", ".")
+        .replace(" ", "");
+
+    human_friendly.truncate(human_friendly.len().min(100));
+    human_friendly
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::feed::route;
 
     #[test]
     fn test_encode_decode_account_route() {
@@ -69,5 +97,17 @@ mod tests {
         let encoded_with_leading_slash = format!("/{}", encoded);
         let decoded = decode(encoded_with_leading_slash);
         assert_eq!(decoded, feed_route);
+    }
+
+    #[test]
+    fn test_to_human_friendly_str_account() {
+        let account_route = Route::Account;
+        assert_eq!(to_human_friendly_str(account_route), "Account");
+    }
+
+    #[test]
+    fn test_to_human_friendly_str_feed_index() {
+        let feed_route = Route::Feed(route::Route::Index);
+        assert_eq!(to_human_friendly_str(feed_route), "Feed.Index");
     }
 }

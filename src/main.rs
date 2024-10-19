@@ -1,8 +1,10 @@
 use html::*;
+use route::Route;
 
 mod feed;
 mod html;
 mod http;
+mod hx;
 mod res;
 mod respond;
 mod route;
@@ -28,7 +30,10 @@ pub fn view_root() -> Elem {
             &[
                 div(
                     &[
-                        id(ROOT_ID), class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden")
+                        id(ROOT_ID),
+                        class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden"),
+                        hx::get(&route::encode(Route::Feed(feed::route::Route::Index))),
+                        hx::Trigger::Load.attr(),
                     ],
                     &[
                         div(&[class("w-full h-full flex items-center justify-center")], &[

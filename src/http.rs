@@ -61,7 +61,16 @@ fn handle_connection(mut stream: TcpStream, handle_request: fn(Request) -> Respo
 
     let method = parts.next().unwrap_or("").to_string();
     let path = parts.next().unwrap_or("/").to_string();
-    let headers = vec![];
+
+    let mut headers = Vec::new();
+    for line in &request_lines[1..] {
+        if line.is_empty() {
+            break;
+        }
+        if let Some((key, value)) = line.split_once(": ") {
+            headers.push((key.to_string(), value.to_string()));
+        }
+    }
 
     let request = Request {
         method,
