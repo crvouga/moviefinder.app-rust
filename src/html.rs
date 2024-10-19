@@ -49,7 +49,6 @@ pub fn render_children(children: &[Elem], indent_level: usize) -> String {
         .join("")
 }
 
-
 pub fn render_attrs(attrs: &[Attr]) -> String {
     attrs
         .iter()
@@ -70,7 +69,6 @@ fn escape_html(content: &str) -> String {
         .replace("\"", "&quot;")
         .replace("'", "&#39;")
 }
-
 
 pub fn unsafe_html(content: &str) -> Elem {
     Elem::Unsafe(content.to_string())
