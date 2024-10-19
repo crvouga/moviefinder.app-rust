@@ -6,8 +6,12 @@ mod http;
 mod res;
 mod respond;
 mod route;
+mod ui;
 
-pub fn view_root(children: Elem) -> Elem {
+const ROOT_ID: &'static str = "app";
+pub const ROOT_SELECTOR: &'static str = "#app";
+
+pub fn view_root() -> Elem {
     return html(&[
         head(&[
             meta(&[charset("UTF-8")]),
@@ -24,11 +28,13 @@ pub fn view_root(children: Elem) -> Elem {
             &[
                 div(
                     &[
-                        id("app"), class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden")
+                        id(ROOT_ID), class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden")
                     ],
                     &[
                         div(&[class("w-full h-full flex items-center justify-center")], &[
-                            children
+                            ui::icon::spinner(
+                                &[class("size-16 animate-spin")]
+                            ),
                         ]),
                     ]
                 ),
@@ -52,7 +58,7 @@ fn respond(req: http::Request) -> http::Response {
         return html_response;
     }
 
-    let html = view_root(div(&[], &[text("Hello, world!")])).render();
+    let html = view_root().render(0);
 
     let response = res::Res::Html(html);
 
