@@ -1,15 +1,22 @@
-use crate::feed::{self};
+use crate::account;
+use crate::feed;
 use base64::{decode as base64_decode, encode as base64_encode};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
     Feed(feed::route::Route),
-    Account,
+    Account(account::route::Route),
     Unknown,
 }
 
 const SEPERATOR: &'static str = "___";
+
+impl Route {
+    pub fn encode(&self) -> String {
+        encode(self.clone())
+    }
+}
 
 pub fn encode(route: Route) -> String {
     let encoded = serde_json::to_string(&route).unwrap_or("".to_owned());
@@ -69,7 +76,7 @@ mod tests {
 
     #[test]
     fn test_encode_decode_account_route() {
-        let account_route = Route::Account;
+        let account_route = Route::Account(account::route::Route::Index);
         let encoded = encode(account_route.clone());
         let decoded = decode(encoded);
         assert_eq!(decoded, account_route);
@@ -101,8 +108,8 @@ mod tests {
 
     #[test]
     fn test_to_human_friendly_str_account() {
-        let account_route = Route::Account;
-        assert_eq!(to_human_friendly_str(account_route), "Account");
+        let account_route = Route::Account(account::route::Route::Index);
+        assert_eq!(to_human_friendly_str(account_route), "Account.Index");
     }
 
     #[test]

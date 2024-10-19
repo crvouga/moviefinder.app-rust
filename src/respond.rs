@@ -1,13 +1,17 @@
+use crate::account;
+use crate::feed;
 use crate::res::Res;
 use crate::route;
 use crate::route::Route;
 
 pub fn respond(route: Route) -> Res {
     match route {
-        Route::Feed(_) => Res::Html("<h1>Feed</h1>".to_string()),
+        Route::Feed(child) => feed::respond::respond(child),
 
-        Route::Account => Res::Html("<h1>Account</h1>".to_string()),
+        Route::Account(child) => account::respond::respond(child),
 
-        Route::Unknown => Res::Redirect(route::encode(Route::Account)),
+        Route::Unknown => {
+            Res::Redirect(route::encode(Route::Account(account::route::Route::Index)))
+        }
     }
 }

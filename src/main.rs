@@ -1,6 +1,8 @@
 use html::*;
 use route::Route;
 
+mod account;
+mod app;
 mod feed;
 mod html;
 mod http;
@@ -31,8 +33,8 @@ pub fn view_root() -> Elem {
                 div(
                     &[
                         id(ROOT_ID),
-                        class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden"),
-                        hx::get(&route::encode(Route::Feed(feed::route::Route::Index))),
+                        class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden flex flex-col"),
+                        hx::get(&Route::Feed(feed::route::Route::Index).encode()),
                         hx::Trigger::Load.attr(),
                     ],
                     &[

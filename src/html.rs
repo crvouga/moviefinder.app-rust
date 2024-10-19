@@ -81,6 +81,10 @@ pub fn charset(value: &str) -> Attr {
     attr("charset", value)
 }
 
+pub fn text(value: &str) -> Elem {
+    Elem::Safe(value.to_string())
+}
+
 pub fn name(value: &str) -> Attr {
     attr("name", value)
 }
@@ -155,4 +159,8 @@ pub fn head(children: &[Elem]) -> Elem {
 
 pub fn body(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("body", attrs, children)
+}
+
+pub fn a(attrs: &[Attr], children: &[Elem]) -> Elem {
+    elem("a", attrs, &children)
 }
