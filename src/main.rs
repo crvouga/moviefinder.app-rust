@@ -57,6 +57,11 @@ fn respond(req: http::Request) -> http::Response {
 
     let is_hx_request = req.headers.iter().any(|(key, _value)| key == "HX-Request");
 
+    // print method and route
+    for (key, value) in req.headers.iter() {
+        println!("{}: {}", key, value);
+    }
+
     if is_hx_request {
         let response = respond::respond(route);
 
