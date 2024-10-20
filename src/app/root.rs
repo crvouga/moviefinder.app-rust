@@ -17,9 +17,14 @@ pub fn view_root(route: &route::Route) -> Elem {
             ]),
             script(&[src("https://cdn.tailwindcss.com")], ""),
             script(&[src("https://unpkg.com/htmx.org@2.0.1")], ""),
+            script(&[src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js")], ""),
+
         ]),
         body(
-            &[class("bg-black text-white flex flex-col items-center justify-center w-full h-[100dvh] max-h-[100dvh]")],
+            &[
+                class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh]"),
+                hx::ext("preload")
+            ],
             &[
                 div(
                     &[
