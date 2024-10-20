@@ -23,7 +23,7 @@ pub fn view(buttons: &[Button]) -> Elem {
                         hx::Swap::InnerHtml.attr(),
                         hx::push_url(&btn.hx_get),
                         class(
-                            "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5",
+                            "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5 cursor-pointer",
                         ),
                     ],
                 &[btn.icon.clone(), text(&btn.text)],
