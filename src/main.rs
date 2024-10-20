@@ -1,6 +1,3 @@
-use html::*;
-use route::Route;
-
 mod account;
 mod app;
 mod feed;
@@ -12,50 +9,15 @@ mod respond;
 mod route;
 mod ui;
 
-const ROOT_ID: &'static str = "app";
-pub const ROOT_SELECTOR: &'static str = "#app";
-
-pub fn view_root() -> Elem {
-    return html(&[
-        head(&[
-            meta(&[charset("UTF-8")]),
-            meta(&[name("viewport"), content("width=device-width, initial-scale=1")]),
-            link(&[
-                rel("stylesheet"),
-                href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>")
-            ]),
-            script(&[src("https://cdn.tailwindcss.com")], ""),
-            script(&[src("https://unpkg.com/htmx.org@2.0.1")], ""),
-        ]),
-        body(
-            &[class("bg-black text-white flex flex-col items-center justify-center w-full h-[100dvh] max-h-[100dvh]")],
-            &[
-                div(
-                    &[
-                        id(ROOT_ID),
-                        class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden flex flex-col"),
-                        hx::get(&Route::Feed(feed::route::Route::Index).encode()),
-                        hx::Trigger::Load.attr(),
-                    ],
-                    &[
-                        div(&[class("w-full h-full flex items-center justify-center")], &[
-                            ui::icon::spinner(
-                                &[class("size-16 animate-spin")]
-                            ),
-                        ]),
-                    ]
-                ),
-            ]
-        ),
-    ]);
-}
-
 fn respond(req: http::Request) -> http::Response {
     let route = route::decode(req.path);
 
     println!("{} {:?}", req.method, route);
 
-    let is_hx_request = req.headers.iter().any(|(key, _value)| key == "Hx-Request");
+    let is_hx_request = req
+        .headers
+        .iter()
+        .any(|(key, _value)| key.to_ascii_lowercase() == "hx-request");
 
     // print method and route
     for (key, value) in req.headers.iter() {
@@ -67,20 +29,20 @@ fn respond(req: http::Request) -> http::Response {
     if is_hx_request {
         let response = respond::respond(route);
 
-        let html_response = res::to_http_response(response);
+        let http_response = res::to_http_response(response);
 
-        return html_response;
+        return http_response;
     }
 
-    let html = view_root().render(0);
+    let html = app::root::view_root().render(0);
 
     let response = res::Res::Html(html);
 
-    let http_respond = res::to_http_response(response);
+    let http_response = res::to_http_response(response);
 
-    println!("{:?}", http_respond);
+    println!("{:?}", http_response);
 
-    return http_respond;
+    return http_response;
 }
 
 fn main() {

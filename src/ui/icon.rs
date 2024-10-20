@@ -35,6 +35,6 @@ const USER_CIRCLE_HTML: &'static str = r#"
 </svg>
 "#;
 
-pub fn user_circle(attrs: &[Attr]) -> Elem {
+pub fn user_circle(_attrs: &[Attr]) -> Elem {
     return unsafe_html(USER_CIRCLE_HTML);
 }

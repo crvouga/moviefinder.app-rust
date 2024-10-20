@@ -1,8 +1,10 @@
 use crate::html::*;
+use crate::hx;
 
 pub struct Button {
     pub text: String,
-    pub href: String,
+    pub hx_get: String,
+    pub hx_target: String,
     pub icon: Elem,
     pub active: bool,
 }
@@ -15,14 +17,16 @@ pub fn view(buttons: &[Button]) -> Elem {
         &buttons
             .iter()
             .map(|btn| {
-                a(
-                    &[
-                        href(&btn.href),
+                a(&[
+                    hx::get(&btn.hx_get),
+                        hx::target(&btn.hx_target),
+                        hx::Swap::InnerHtml.attr(),
+                        hx::push_url(&btn.hx_get),
                         class(
                             "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5",
                         ),
                     ],
-                    &[btn.icon.clone(), text(&btn.text)],
+                &[btn.icon.clone(), text(&btn.text)],
                 )
             })
             .collect::<Vec<Elem>>(),
