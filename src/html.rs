@@ -101,6 +101,10 @@ pub fn class(value: &str) -> Attr {
     attr("class", value)
 }
 
+pub fn class_list(values: &[&str]) -> Attr {
+    attr("class", &values.join(" "))
+}
+
 pub fn id(value: &str) -> Attr {
     attr("id", value)
 }
