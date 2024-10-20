@@ -1,9 +1,10 @@
 use crate::app;
+use crate::ctx;
 use crate::feed::route::Route;
 use crate::html::*;
 use crate::res::Res;
 
-pub fn respond(route: Route) -> Res {
+pub fn respond(route: Route, _ctx: &ctx::Ctx) -> Res {
     match route {
         Route::Index => Res::Html(view_feed().render()),
     }
