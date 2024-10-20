@@ -9,7 +9,7 @@ mod respond;
 mod route;
 mod ui;
 
-fn respond(req: http::Request) -> http::Response {
+async fn respond(req: http::Request) -> http::Response {
     let route = route::decode(req.path);
 
     println!("{} {:?}", req.method, route);
@@ -19,7 +19,7 @@ fn respond(req: http::Request) -> http::Response {
         .iter()
         .any(|(key, _value)| key.to_ascii_lowercase() == "hx-request");
 
-    // print method and route
+    
     for (key, value) in req.headers.iter() {
         println!("{}: {}", key, value);
     }
@@ -45,9 +45,10 @@ fn respond(req: http::Request) -> http::Response {
     return http_response;
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let port = std::env::var("PORT").unwrap_or("8080".to_string());
-    let address = "0.0.0.0:".to_owned() + &port.to_string(); // Use 0.0.0.0 for deployment
+    let address = "0.0.0.0:".to_owned() + &port.to_string(); 
     println!("Listening on http://0.0.0.0:{}", port);
-    http::start_server(&address, respond);
+    http::start_server(&address, respond).await;
 }

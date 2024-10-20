@@ -1,5 +1,5 @@
-use std::io::prelude::*;
-use std::net::{TcpListener, TcpStream};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream};
 
 pub struct Request {
     pub method: String,
@@ -40,18 +40,27 @@ impl Response {
     }
 }
 
-pub fn start_server(address: &str, handle_request: fn(Request) -> Response) {
-    let listener = TcpListener::bind(address).unwrap();
+pub async fn start_server<F, Fut>(address: &str, handle_request: F)
+where
+    F: Fn(Request) -> Fut + Send + Sync + 'static + Clone,
+    Fut: std::future::Future<Output = Response> + Send + 'static,
+{
+    let listener = TcpListener::bind(address).await.unwrap();
 
-    for stream in listener.incoming() {
-        let stream = stream.unwrap();
-        handle_connection(stream, handle_request);
+    loop {
+        let (stream, _) = listener.accept().await.unwrap();
+        let handle_request = handle_request.clone();
+        tokio::spawn(handle_connection(stream, handle_request));
     }
 }
 
-fn handle_connection(mut stream: TcpStream, handle_request: fn(Request) -> Response) {
+async fn handle_connection<F, Fut>(mut stream: TcpStream, handle_request: F)
+where
+    F: Fn(Request) -> Fut + Send + Sync + 'static,
+    Fut: std::future::Future<Output = Response> + Send + 'static,
+{
     let mut buffer = [0; 512];
-    stream.read(&mut buffer).unwrap();
+    stream.read(&mut buffer).await.unwrap();
 
     let request_string = String::from_utf8_lossy(&buffer[..]);
 
@@ -78,9 +87,9 @@ fn handle_connection(mut stream: TcpStream, handle_request: fn(Request) -> Respo
         headers,
     };
 
-    let response = handle_request(request);
+    let response = handle_request(request).await; // Await the async handler
 
     let response_string = response.to_http_string();
-    stream.write_all(response_string.as_bytes()).unwrap();
-    stream.flush().unwrap();
+    stream.write_all(response_string.as_bytes()).await.unwrap();
+    stream.flush().await.unwrap();
 }
