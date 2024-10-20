@@ -16,7 +16,11 @@ pub enum Elem {
 }
 
 impl Elem {
-    pub fn render(&self, indent_level: usize) -> String {
+    pub fn render(&self) -> String {
+        self.render_with_indent(0)
+    }
+
+    pub fn render_with_indent(&self, indent_level: usize) -> String {
         let indent = "\t".repeat(indent_level);
         match self {
             Elem::Element {
@@ -40,11 +44,10 @@ impl Elem {
         }
     }
 }
-
 pub fn render_children(children: &[Elem], indent_level: usize) -> String {
     children
         .iter()
-        .map(|child| child.render(indent_level))
+        .map(|child| child.render_with_indent(indent_level))
         .collect::<Vec<String>>()
         .join("")
 }

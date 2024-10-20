@@ -27,7 +27,7 @@ async fn respond(req: http::Request) -> http::Response {
         return http_response;
     }
 
-    let html = app::root::view_root(&route).render(0);
+    let html = app::root::view_root(&route).render();
 
     let response = res::Res::Html(html);
 
