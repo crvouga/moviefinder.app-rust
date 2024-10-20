@@ -38,7 +38,7 @@ pub fn remove_leading_slash(path: &str) -> String {
     }
 }
 
-pub fn decode(base_64_encoded: String) -> Route {
+pub fn decode(base_64_encoded: &String) -> Route {
     let without_slash = remove_leading_slash(&base_64_encoded);
 
     let seperated: Vec<&str> = without_slash.split(SEPERATOR).collect();
@@ -78,14 +78,14 @@ mod tests {
     fn test_encode_decode_account_route() {
         let account_route = Route::Account(account::route::Route::Index);
         let encoded = encode(account_route.clone());
-        let decoded = decode(encoded);
+        let decoded = decode(&encoded);
         assert_eq!(decoded, account_route);
     }
 
     #[test]
     fn test_decode_unknown_route() {
         let invalid_base64 = "invalid_data".to_string();
-        let decoded = decode(invalid_base64);
+        let decoded = decode(&invalid_base64);
         assert_eq!(decoded, Route::Unknown);
     }
 
@@ -93,7 +93,7 @@ mod tests {
     fn test_encode_then_decode_feed_route() {
         let feed_route = Route::Feed(feed::route::Route::Index);
         let encoded = encode(feed_route.clone());
-        let decoded = decode(encoded);
+        let decoded = decode(&encoded);
         assert_eq!(decoded, feed_route);
     }
 
@@ -102,7 +102,7 @@ mod tests {
         let feed_route = Route::Feed(feed::route::Route::Index);
         let encoded = encode(feed_route.clone());
         let encoded_with_leading_slash = format!("/{}", encoded);
-        let decoded = decode(encoded_with_leading_slash);
+        let decoded = decode(&encoded_with_leading_slash);
         assert_eq!(decoded, feed_route);
     }
 

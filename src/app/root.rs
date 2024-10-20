@@ -1,4 +1,3 @@
-use crate::feed;
 use crate::html::*;
 use crate::hx;
 use crate::route;
@@ -7,7 +6,7 @@ use crate::ui;
 const ROOT_ID: &'static str = "app";
 pub const ROOT_SELECTOR: &'static str = "#app";
 
-pub fn view_root() -> Elem {
+pub fn view_root(route: &route::Route) -> Elem {
     return html(&[
         head(&[
             meta(&[charset("UTF-8")]),
@@ -26,7 +25,7 @@ pub fn view_root() -> Elem {
                     &[
                         id(ROOT_ID),
                         class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden flex flex-col"),
-                        hx::get(&route::Route::Feed(feed::route::Route::Index).encode()),
+                        hx::get(&route.encode()),
                         hx::Trigger::Load.attr(),
                         hx::boost(),
                     ],

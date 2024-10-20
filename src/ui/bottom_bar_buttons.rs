@@ -24,7 +24,7 @@ pub fn view(buttons: &[Button]) -> Elem {
                         hx::push_url(&btn.hx_get),
                         class_list(
                             &[
-                                "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5 cursor-pointer font-bold",
+                                "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5 cursor-pointer",
                                 if btn.active {
                                     "text-blue-500"
                                 } else {
