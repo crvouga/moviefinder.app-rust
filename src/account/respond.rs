@@ -15,7 +15,7 @@ pub fn view_account() -> Elem {
             "w-full flex-1 flex items-center justify-center flex-col",
         )],
         &[
-            div(&[class("flex-1")], &[]),
+            div(&[class("flex-1")], &[text("Account")]),
             app::bottom_nav::view(app::bottom_nav::Active::Account),
         ],
     )

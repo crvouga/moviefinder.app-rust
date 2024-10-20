@@ -15,7 +15,7 @@ pub fn view_feed() -> Elem {
             "w-full flex-1 flex items-center justify-center flex-col",
         )],
         &[
-            div(&[class("flex-1")], &[]),
+            div(&[class("flex-1")], &[text("Feed")]),
             app::bottom_nav::view(app::bottom_nav::Active::Home),
         ],
     )
