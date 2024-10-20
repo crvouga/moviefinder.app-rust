@@ -55,12 +55,14 @@ fn respond(req: http::Request) -> http::Response {
 
     println!("{} {:?}", req.method, route);
 
-    let is_hx_request = req.headers.iter().any(|(key, _value)| key == "HX-Request");
+    let is_hx_request = req.headers.iter().any(|(key, _value)| key == "Hx-Request");
 
     // print method and route
     for (key, value) in req.headers.iter() {
         println!("{}: {}", key, value);
     }
+
+    println!("is_hx_request: {}", is_hx_request);
 
     if is_hx_request {
         let response = respond::respond(route);
