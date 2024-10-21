@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::res::Res;
+use crate::core::res::Res;
 
 pub mod client;
 pub mod server;

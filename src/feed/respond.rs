@@ -1,14 +1,17 @@
 use super::feed_item::FeedItem;
 use crate::{
-    app::{self, root::ROOT_SELECTOR},
-    core::query::{Filter, Query},
+    core::{
+        html::*,
+        hx,
+        query::{Filter, Query},
+        res::Res,
+        ui,
+    },
     ctx,
     feed::route::Route,
-    html::*,
-    hx,
     media::{self, media_id::MediaId},
-    res::Res,
-    route, ui,
+    route,
+    ui::{bottom_nav, root::ROOT_SELECTOR},
 };
 
 pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
@@ -58,7 +61,7 @@ fn view_feed() -> Elem {
                 ],
                 &[view_load_initial()],
             ),
-            app::bottom_nav::view(app::bottom_nav::Active::Home),
+            bottom_nav::view(bottom_nav::Active::Home),
         ],
     )
 }

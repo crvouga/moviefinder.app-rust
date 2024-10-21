@@ -1,4 +1,4 @@
-use crate::{ctx::Ctx, res::Res};
+use crate::{core::res::Res, ctx::Ctx};
 
 use super::{details, route::Route};
 

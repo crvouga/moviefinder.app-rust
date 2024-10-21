@@ -1,4 +1,4 @@
-use crate::html::Elem;
+use crate::core::html::Elem;
 
 #[derive(Debug)]
 pub enum Res {

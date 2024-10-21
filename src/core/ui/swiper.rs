@@ -1,4 +1,4 @@
-use crate::html::*;
+use crate::core::html::*;
 
 pub fn slides_per_view(slides_per_view: &str) -> Attr {
     attr("slides-per-view", slides_per_view)

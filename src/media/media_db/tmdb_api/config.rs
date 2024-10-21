@@ -1,6 +1,6 @@
 // https://developer.themoviedb.org/reference/configuration-details
 use super::{to_base_headers, Config, HOST};
-use crate::{core::image_set::ImageSet, http};
+use crate::{core::http, core::image_set::ImageSet};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

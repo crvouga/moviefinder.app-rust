@@ -1,5 +1,5 @@
 use super::alert;
-use crate::html::*;
+use crate::core::html::*;
 
 pub fn page(label: &str) -> Elem {
     div(

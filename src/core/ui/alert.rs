@@ -1,4 +1,4 @@
-use crate::html::*;
+use crate::core::html::*;
 
 pub fn error(label: &str) -> Elem {
     elem(

@@ -1,5 +1,5 @@
-use crate::html::*;
-use crate::ui;
+use crate::core::html::*;
+use crate::core::ui;
 
 pub fn page(attrs: &[Attr]) -> Elem {
     let base_attrs = &[class("w-full h-full flex items-center justify-center")];

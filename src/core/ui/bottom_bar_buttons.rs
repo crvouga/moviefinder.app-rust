@@ -1,5 +1,4 @@
-use crate::html::*;
-use crate::hx;
+use crate::{core::html::*, core::hx};
 
 pub struct Button {
     pub text: String,

@@ -13,6 +13,7 @@ where
 
     loop {
         let (stream, _) = listener.accept().await.unwrap();
+        println!("Connection established");
         let handle_request = handle_request.clone();
         tokio::spawn(handle_connection(stream, handle_request));
     }

@@ -1,4 +1,4 @@
-use crate::html::*;
+use crate::core::html::*;
 
 const SPINNER_HTML: &'static str = r#"
 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24" ATTRS>

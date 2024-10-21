@@ -1,5 +1,5 @@
 // https://htmx.org/docs/
-use crate::html;
+use crate::core::html;
 
 pub fn get(href: &str) -> html::Attr {
     html::attr("hx-get", href)

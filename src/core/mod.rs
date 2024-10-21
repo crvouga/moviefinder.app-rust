@@ -1,8 +1,13 @@
 pub mod base64;
 pub mod env;
+pub mod html;
+pub mod http;
+pub mod hx;
 pub mod image_set;
 pub mod pagination;
 pub mod query;
 pub mod random;
+pub mod res;
+pub mod ui;
 pub mod url;
 pub mod uuid;

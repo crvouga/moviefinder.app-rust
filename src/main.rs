@@ -1,16 +1,11 @@
 use std::sync::Arc;
 
 mod account;
-mod app;
 mod core;
 mod ctx;
 mod env;
 mod feed;
-mod html;
-mod http;
-mod hx;
 mod media;
-mod res;
 mod respond;
 mod route;
 mod ui;
@@ -25,14 +20,14 @@ async fn main() {
 
     let ctx = Arc::new(ctx::Ctx::new(env.tmdb_api_read_access_token));
 
-    http::server::start(&address, move |req| {
+    core::http::server::start(&address, move |req| {
         let ctx_arc = Arc::clone(&ctx);
         respond(req, ctx_arc)
     })
     .await;
 }
 
-async fn respond(http_req: http::Request, ctx: Arc<ctx::Ctx>) -> http::Response {
+async fn respond(http_req: core::http::Request, ctx: Arc<ctx::Ctx>) -> core::http::Response {
     let route = route::decode(&http_req.path);
 
     println!("{} {:?}", http_req.method, route);
@@ -43,12 +38,12 @@ async fn respond(http_req: http::Request, ctx: Arc<ctx::Ctx>) -> http::Response 
             if is_hx_request(&http_req) {
                 html
             } else {
-                app::root::view_root(&[html])
+                ui::root::view_root(&[html])
             }
         })
         .into()
 }
 
-fn is_hx_request(req: &http::Request) -> bool {
+fn is_hx_request(req: &core::http::Request) -> bool {
     req.headers.get("hx-request").is_some()
 }

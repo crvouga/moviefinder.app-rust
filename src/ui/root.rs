@@ -1,6 +1,6 @@
-use crate::html::*;
-use crate::hx;
-use crate::ui;
+use crate::core::html::*;
+use crate::core::hx;
+use crate::core::ui;
 
 const ROOT_ID: &'static str = "app";
 pub const ROOT_SELECTOR: &'static str = "#app";

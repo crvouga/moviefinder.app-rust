@@ -1,4 +1,4 @@
-use crate::html::*;
+use crate::core::html::*;
 
 const IMAGE_ELEMENT_SCRIPT: &str = r#"
 class ImageElement extends HTMLElement {

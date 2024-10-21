@@ -1,5 +1,5 @@
 use crate::{
-    http,
+    core::http,
     media::{genre::genre_id::GenreId, media::Media, media_id::MediaId, media_type::MediaType},
 };
 
