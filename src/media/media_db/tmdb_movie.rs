@@ -17,6 +17,8 @@ impl TmdbMovie {
 #[async_trait]
 impl MediaDb for TmdbMovie {
     async fn query(&self, query: &Query) -> Result<Paginated<Media>, String> {
+        let config = tmdb_api::config::load(&self.config).await?;
+
         tmdb_api::discover_movie::send(&self.config)
             .await
             .map(|response| {
@@ -24,7 +26,7 @@ impl MediaDb for TmdbMovie {
                     .results
                     .unwrap_or_default()
                     .into_iter()
-                    .map(Into::into)
+                    .map(|result| result.to_media(&config))
                     .collect();
                 Paginated {
                     items,

@@ -5,7 +5,10 @@ use crate::{
 };
 
 // https://developer.themoviedb.org/reference/discover-movie
-use super::{to_base_headers, Config, HOST};
+use super::{
+    config::{to_backdrop_image_set, to_poster_image_set, TmdbConfig},
+    to_base_headers, Config, HOST,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,11 +29,14 @@ pub struct DiscoverMovieResult {
     pub vote_count: Option<f64>,
 }
 
-impl Into<Media> for DiscoverMovieResult {
-    fn into(self) -> Media {
+impl DiscoverMovieResult {
+    pub fn to_media(self, config: &TmdbConfig) -> Media {
         Media {
             media_id: MediaId::new(self.id.unwrap_or(0.0).to_string()),
-            media_backdrop: ImageSet::new(vec![]),
+            media_backdrop: to_backdrop_image_set(
+                config,
+                self.backdrop_path.unwrap_or("".to_string()).as_str(),
+            ),
             media_description: self.overview.unwrap_or("".to_string()),
             media_genre_ids: self
                 .genre_ids
@@ -39,7 +45,10 @@ impl Into<Media> for DiscoverMovieResult {
                 .map(|id| GenreId::new(id.to_string()))
                 .collect(),
             media_popularity: self.popularity.unwrap_or(0.0),
-            media_poster: ImageSet::new(vec![]),
+            media_poster: to_poster_image_set(
+                config,
+                self.poster_path.unwrap_or("".to_string()).as_str(),
+            ),
             media_title: self.title.unwrap_or("".to_string()),
             media_type: MediaType::Movie,
         }
@@ -67,7 +76,8 @@ pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
     match sent {
         Ok(response) => {
             let body = response.body;
-            let parsed = serde_json::from_str(&body);
+            let parsed: Result<DiscoverMovieResponse, serde_json::Error> =
+                serde_json::from_str(&body);
             match parsed {
                 Ok(parsed) => Ok(parsed),
                 Err(e) => Err(format!("Error parsing response: {} {}", e, body)),
