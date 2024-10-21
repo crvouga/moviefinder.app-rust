@@ -9,11 +9,17 @@ pub enum TestEnv {
 
 impl TestEnv {
     pub fn from_str(s: &str) -> TestEnv {
-        match s.to_ascii_lowercase().as_str() {
-            "unit" => TestEnv::Unit,
-            "integration" => TestEnv::Integration,
-            _ => TestEnv::None,
+        let cleaned = s.to_ascii_lowercase();
+
+        if cleaned.contains("unit") {
+            return TestEnv::Unit;
         }
+
+        if cleaned.contains("int") {
+            return TestEnv::Integration;
+        }
+
+        return TestEnv::None;
     }
 }
 
