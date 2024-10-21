@@ -1,4 +1,3 @@
-use dotenv::dotenv;
 use std::sync::Arc;
 
 mod account;
@@ -17,7 +16,7 @@ mod ui;
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
+    core::dotenv::load().unwrap();
 
     let port = std::env::var("PORT").unwrap_or("8080".to_string());
     let address = "0.0.0.0:".to_owned() + &port.to_string();

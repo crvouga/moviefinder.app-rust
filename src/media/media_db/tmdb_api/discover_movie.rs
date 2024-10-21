@@ -12,8 +12,8 @@ use serde::{Deserialize, Serialize};
 pub struct DiscoverMovieResult {
     pub adult: Option<bool>,
     pub backdrop_path: Option<String>,
-    pub genre_ids: Option<Vec<i32>>,
-    pub id: Option<i32>,
+    pub genre_ids: Option<Vec<f64>>,
+    pub id: Option<f64>,
     pub original_language: Option<String>,
     pub original_title: Option<String>,
     pub overview: Option<String>,
@@ -23,13 +23,13 @@ pub struct DiscoverMovieResult {
     pub title: Option<String>,
     pub video: Option<bool>,
     pub vote_average: Option<f64>,
-    pub vote_count: Option<i32>,
+    pub vote_count: Option<f64>,
 }
 
 impl Into<Media> for DiscoverMovieResult {
     fn into(self) -> Media {
         Media {
-            media_id: MediaId::new(self.id.unwrap_or(0).to_string()),
+            media_id: MediaId::new(self.id.unwrap_or(0.0).to_string()),
             media_backdrop: ImageSet::new(vec![]),
             media_description: self.overview.unwrap_or("".to_string()),
             media_genre_ids: self
