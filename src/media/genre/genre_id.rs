@@ -1,3 +1,5 @@
+use crate::core;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct GenreId(String);
 
@@ -11,6 +13,6 @@ impl GenreId {
     }
 
     pub fn gen() -> Self {
-        Self::new("gen".to_string())
+        Self::new(core::uuid::v4().to_string())
     }
 }
