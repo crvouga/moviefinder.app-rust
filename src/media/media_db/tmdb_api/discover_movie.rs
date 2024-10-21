@@ -69,7 +69,7 @@ pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
             let parsed = serde_json::from_str(&body);
             match parsed {
                 Ok(parsed) => Ok(parsed),
-                Err(e) => Err(format!("Error parsing response: {}", e)),
+                Err(e) => Err(format!("Error parsing response: {} {}", e, body)),
             }
         }
         Err(e) => Err(e.to_string()),

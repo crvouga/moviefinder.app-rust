@@ -3,6 +3,14 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+fn remove_quotes(s: &str) -> &str {
+    if s.starts_with('"') && s.ends_with('"') {
+        &s[1..s.len() - 1]
+    } else {
+        s
+    }
+}
+
 pub fn load() -> io::Result<()> {
     let env_path = ".env";
 
@@ -20,18 +28,14 @@ pub fn load() -> io::Result<()> {
         let line = line?;
         let line = line.trim();
 
-        // Skip empty lines or lines starting with '#'
         if line.is_empty() || line.starts_with('#') {
             continue;
         }
 
-        // Split the line into key and value
         let mut parts = line.splitn(2, '=');
         let key = parts.next().unwrap().trim();
         let value = parts.next().unwrap().trim();
-
-        // Set the environment variable
-        env::set_var(key, value);
+        env::set_var(key, remove_quotes(value));
     }
 
     Ok(())
