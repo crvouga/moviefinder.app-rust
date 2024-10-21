@@ -3,6 +3,7 @@ pub struct Pagination {
     pub offset: u32,
 }
 
+#[derive(Debug, Clone)]
 pub struct Paginated<T> {
     pub items: Vec<T>,
     pub total: u32,

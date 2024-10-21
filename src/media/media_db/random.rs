@@ -1,6 +1,7 @@
 use std::vec;
 
 use crate::core::pagination::Paginated;
+use crate::core::random;
 use crate::media::media;
 
 use super::MediaDb;
@@ -31,6 +32,10 @@ impl MediaDb for Random {
             offset: 0,
             total: 3,
         };
+
+        if random::bool() {
+            return Err("Something went wrong".to_string());
+        }
 
         Ok(paginated)
     }

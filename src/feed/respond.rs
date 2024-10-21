@@ -1,6 +1,5 @@
 use super::feed_item::FeedItem;
 use crate::app;
-use crate::core::pagination::Paginated;
 use crate::ctx;
 use crate::feed::route::Route;
 use crate::html::*;
@@ -16,14 +15,20 @@ pub fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
         Route::LoadMore => {
             let queried = ctx.media_db.query();
 
-            let media = queried.unwrap_or(Paginated::empty()).items;
+            match queried {
+                Ok(paginated) => {
+                    let feed_items = paginated
+                        .items
+                        .into_iter()
+                        .enumerate()
+                        .map(|(index, media)| FeedItem::from((media, index as i32)))
+                        .collect::<Vec<FeedItem>>();
 
-            let feed_items = media
-                .into_iter()
-                .map(|media| FeedItem::from((media, 0)))
-                .collect::<Vec<FeedItem>>();
+                    Res::Html(view_feed_items(&feed_items).render())
+                }
 
-            Res::Html(view_feed_items(&feed_items).render())
+                Err(err) => Res::Html(ui::error::page(&err).render()),
+            }
         }
     }
 }

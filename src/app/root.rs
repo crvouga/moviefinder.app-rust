@@ -22,14 +22,14 @@ pub fn view_root(route: &route::Route) -> Elem {
         ]),
         body(
             &[
-                class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh]"),
+                class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden"),
                 hx::ext("preload")
             ],
             &[
                 div(
                     &[
                         id(ROOT_ID),
-                        class("w-full max-w-[500px] h-full max-h-[800px] border rounded overflow-hidden flex flex-col"),
+                        class("w-full max-w-[500px] h-full max-h-[800px] border box-border rounded overflow-hidden flex flex-col"),
                         hx::get(&route.encode()),
                         hx::Trigger::Load.attr(),
                         hx::boost(),
