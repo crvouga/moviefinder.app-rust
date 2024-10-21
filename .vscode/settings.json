@@ -1,10 +1,12 @@
 {
   "cSpell.words": [
     "axohtml",
+    "mousedown",
     "moviefinder",
     "serde",
     "stylesheet",
     "themoviedb",
-    "tmdb"
+    "tmdb",
+    "touchstart"
   ]
 }
