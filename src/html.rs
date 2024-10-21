@@ -16,9 +16,13 @@ pub enum Elem {
     Unsafe(String),
 }
 
+fn append_doc_type(html: &str) -> String {
+    format!("<!DOCTYPE html>\n{}", html)
+}
+
 impl Elem {
     pub fn render(&self) -> String {
-        self.render_with_indent(0)
+        append_doc_type(&self.render_with_indent(0))
     }
 
     pub fn render_with_indent(&self, indent_level: usize) -> String {

@@ -16,7 +16,17 @@ impl Random {
 impl MediaDb for Random {
     fn query(&self) -> Result<Paginated<media::Media>, String> {
         let paginated = Paginated {
-            items: vec![media::random(), media::random(), media::random()],
+            items: vec![
+                media::random(),
+                media::random(),
+                media::random(),
+                media::random(),
+                media::random(),
+                media::random(),
+                media::random(),
+                media::random(),
+                media::random(),
+            ],
             limit: 3,
             offset: 0,
             total: 3,
