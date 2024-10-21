@@ -23,7 +23,8 @@ async fn main() {
     let address = "0.0.0.0:".to_owned() + &port.to_string();
     println!("Listening on http://0.0.0.0:{}", port);
 
-    let tmdb_api_read_access_token = std::env::var("TMDB_API_READ_ACCESS_TOKEN").unwrap();
+    let tmdb_api_read_access_token =
+        std::env::var("TMDB_API_READ_ACCESS_TOKEN").unwrap_or("".to_string());
 
     let ctx = Arc::new(ctx::Ctx::new(tmdb_api_read_access_token));
 

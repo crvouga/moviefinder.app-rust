@@ -42,7 +42,6 @@ pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
     match sent {
         Ok(response) => {
             let body = response.body;
-            println!("{}", body);
             let parsed = serde_json::from_str(&body);
             match parsed {
                 Ok(parsed) => Ok(parsed),

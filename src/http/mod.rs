@@ -10,11 +10,19 @@ pub struct Request {
 
 impl Request {
     pub fn to_http_string(&self) -> String {
-        let headers_string = self
+        let mut headers_string = self
             .headers
             .iter()
             .map(|(key, value)| format!("{}: {}\r\n", key, value))
             .collect::<String>();
+
+        if !self
+            .headers
+            .iter()
+            .any(|(key, _)| key.to_lowercase() == "host")
+        {
+            headers_string.push_str(&format!("Host: {}\r\n", self.host));
+        }
 
         format!(
             "{} {} HTTP/1.1\r\n{}Connection: close\r\n\r\n",
