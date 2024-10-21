@@ -28,7 +28,7 @@ async fn main() {
 }
 
 async fn respond(http_req: core::http::Request, ctx: Arc<ctx::Ctx>) -> core::http::Response {
-    let route = route::decode(&http_req.path);
+    let route = route::Route::decode(&http_req.path);
 
     println!("{} {:?}", http_req.method, route);
 

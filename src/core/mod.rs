@@ -8,6 +8,7 @@ pub mod pagination;
 pub mod query;
 pub mod random;
 pub mod res;
+pub mod route;
 pub mod ui;
 pub mod url;
 pub mod uuid;
