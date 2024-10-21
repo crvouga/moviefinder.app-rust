@@ -15,7 +15,7 @@ impl Trigger {
     pub fn to_str(&self) -> &str {
         match self {
             Trigger::Load => "load",
-            Trigger::MouseDown => "mousedown",
+            Trigger::MouseDown => "mousedown, touchstart",
         }
     }
 
