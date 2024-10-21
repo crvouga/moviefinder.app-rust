@@ -1,4 +1,8 @@
-use crate::http;
+use crate::{
+    core::image_set::ImageSet,
+    http,
+    media::{genre::genre_id::GenreId, media::Media, media_id::MediaId, media_type::MediaType},
+};
 
 // https://developer.themoviedb.org/reference/discover-movie
 use super::{to_base_headers, Config, HOST};
@@ -22,12 +26,32 @@ pub struct DiscoverMovieResult {
     pub vote_count: Option<i32>,
 }
 
+impl Into<Media> for DiscoverMovieResult {
+    fn into(self) -> Media {
+        Media {
+            media_id: MediaId::new(self.id.unwrap_or(0).to_string()),
+            media_backdrop: ImageSet::new(vec![]),
+            media_description: self.overview.unwrap_or("".to_string()),
+            media_genre_ids: self
+                .genre_ids
+                .unwrap_or(vec![])
+                .iter()
+                .map(|id| GenreId::new(id.to_string()))
+                .collect(),
+            media_popularity: self.popularity.unwrap_or(0.0),
+            media_poster: ImageSet::new(vec![]),
+            media_title: self.title.unwrap_or("".to_string()),
+            media_type: MediaType::Movie,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DiscoverMovieResponse {
-    pub page: Option<i32>,
+    pub page: Option<u32>,
     pub results: Option<Vec<DiscoverMovieResult>>,
-    pub total_pages: Option<i32>,
-    pub total_results: Option<i32>,
+    pub total_pages: Option<u32>,
+    pub total_results: Option<u32>,
 }
 
 pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {

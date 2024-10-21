@@ -6,7 +6,7 @@ use crate::core::pagination::Paginated;
 use crate::core::random;
 use crate::media::media;
 
-use super::MediaDb;
+use super::{MediaDb, Query};
 
 pub struct Random {}
 
@@ -18,7 +18,7 @@ impl Random {
 
 #[async_trait]
 impl MediaDb for Random {
-    async fn query(&self) -> Result<Paginated<media::Media>, String> {
+    async fn query(&self, _query: &Query) -> Result<Paginated<media::Media>, String> {
         let paginated = Paginated {
             items: vec![
                 media::random(),

@@ -4,6 +4,7 @@ use crate::ctx;
 use crate::feed::route::Route;
 use crate::html::*;
 use crate::hx;
+use crate::media::media_db::Query;
 use crate::res::Res;
 use crate::route;
 use crate::ui;
@@ -13,7 +14,12 @@ pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
         Route::Index => Res::Html(view_feed().render()),
 
         Route::LoadMore => {
-            let queried = ctx.media_db.query().await;
+            let query = Query {
+                limit: 20,
+                offset: 0,
+            };
+
+            let queried = ctx.media_db.query(&query).await;
 
             match queried {
                 Ok(paginated) => {

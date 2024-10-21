@@ -11,7 +11,7 @@ pub struct Media {
     pub media_genre_ids: Vec<GenreId>,
     pub media_poster: ImageSet,
     pub media_backdrop: ImageSet,
-    pub media_popularity: i32,
+    pub media_popularity: f64,
 }
 
 pub fn random() -> Media {
@@ -23,6 +23,6 @@ pub fn random() -> Media {
         media_genre_ids: vec![GenreId::new("random".to_string())],
         media_poster: ImageSet::empty(),
         media_backdrop: ImageSet::empty(),
-        media_popularity: 0,
+        media_popularity: 0.0,
     }
 }
