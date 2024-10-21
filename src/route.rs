@@ -1,6 +1,6 @@
 use crate::account;
+use crate::core;
 use crate::feed;
-use base64::{decode as base64_decode, encode as base64_encode};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -21,7 +21,7 @@ impl Route {
 pub fn encode(route: Route) -> String {
     let encoded = serde_json::to_string(&route).unwrap_or("".to_owned());
 
-    let base_64_encoded = base64_encode(encoded);
+    let base_64_encoded = core::base64::encode(&encoded);
 
     let human_friendly = to_human_friendly_str(route);
 
@@ -45,11 +45,9 @@ pub fn decode(base_64_encoded: &String) -> Route {
 
     let second = seperated.get(1).unwrap_or(&"");
 
-    let decoded_bytes = base64_decode(second).unwrap_or(vec![]);
+    let decoded_str = core::base64::decode(&second);
 
-    let encoded = String::from_utf8(decoded_bytes).unwrap_or("".to_owned());
-
-    let decoded: Route = serde_json::from_str(&encoded).unwrap_or(Route::Unknown);
+    let decoded: Route = serde_json::from_str(&decoded_str).unwrap_or(Route::Unknown);
 
     decoded
 }

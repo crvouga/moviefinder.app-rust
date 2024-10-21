@@ -1,3 +1,4 @@
+pub mod base64;
 pub mod dotenv;
 pub mod image_set;
 pub mod pagination;
