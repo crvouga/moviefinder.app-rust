@@ -22,10 +22,6 @@ pub struct Clause<F> {
 }
 
 impl<T> Filter<T> {
-    pub fn empty<F>() -> Filter<F> {
-        Filter::And(vec![])
-    }
-
     pub fn clause(field: T, operator: Operator, value: String) -> Filter<T> {
         Filter::Clause(Clause {
             field,
