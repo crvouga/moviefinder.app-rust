@@ -16,7 +16,7 @@ mod ui;
 
 #[tokio::main]
 async fn main() {
-    core::dotenv::load().unwrap();
+    core::dotenv::load();
 
     let port = std::env::var("PORT").unwrap_or("8080".to_string());
     let address = "0.0.0.0:".to_owned() + &port.to_string();
