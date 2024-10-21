@@ -14,7 +14,7 @@ pub async fn send(request: Request) -> tokio::io::Result<Response> {
 
     let response_string: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer);
 
-    let response = Response::from_http_response(&response_string);
+    let response = Response::from_http_string(&response_string);
 
     Ok(response)
 }

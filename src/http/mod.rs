@@ -67,7 +67,7 @@ impl Response {
         )
     }
 
-    fn from_http_response(response: &str) -> Self {
+    fn from_http_string(response: &str) -> Self {
         let mut lines = response.lines();
         let status_line = lines.next().unwrap();
         let status_code = status_line
