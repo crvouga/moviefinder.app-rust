@@ -21,7 +21,7 @@ pub fn view(buttons: &[Button]) -> Elem {
                     hx::target(&btn.hx_target),
                     hx::Swap::InnerHtml.attr(),
                     hx::push_url(&btn.hx_get),
-                    hx::Trigger::MouseDown.attr(),
+                    hx::Trigger::Click.attr(),
                     hx::Preload::MouseDown.attr(),
                     class_list(
                         &[
