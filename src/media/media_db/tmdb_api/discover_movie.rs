@@ -55,13 +55,14 @@ pub struct DiscoverMovieResponse {
 }
 
 pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
-    let sent = http::client::send(http::Request {
+    let req = http::Request {
         headers: to_base_headers(config),
         host: HOST.to_string(),
         method: "GET".to_string(),
         path: "/3/discover/movie".to_string(),
-    })
-    .await;
+    };
+
+    let sent = http::client::send(req).await;
 
     match sent {
         Ok(response) => {
