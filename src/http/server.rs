@@ -41,7 +41,7 @@ where
             break;
         }
         if let Some((key, value)) = line.split_once(": ") {
-            headers.insert(key.to_string(), value.to_string());
+            headers.insert(key.to_string().to_ascii_lowercase(), value.to_string());
         }
     }
 

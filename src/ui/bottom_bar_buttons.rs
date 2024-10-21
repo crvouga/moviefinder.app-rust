@@ -26,7 +26,7 @@ pub fn view(buttons: &[Button]) -> Elem {
                     hx::Preload::MouseDown.attr(),
                     class_list(
                         &[
-                            "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5 cursor-pointer",
+                            "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5 cursor-pointer select-none active:opacity-75 transition-opacity",
                             if btn.active {
                                 "text-blue-500"
                             } else {

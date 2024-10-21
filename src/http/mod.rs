@@ -86,7 +86,7 @@ impl Response {
                 in_headers = false;
             } else if in_headers {
                 if let Some((key, value)) = line.split_once(": ") {
-                    headers.insert(key.to_string(), value.to_string());
+                    headers.insert(key.to_string().to_ascii_lowercase(), value.to_string());
                 }
             } else {
                 body.push_str(line);
@@ -107,7 +107,10 @@ impl From<Res> for Response {
             Res::Html(body) => Response::new(200, body.render(), HashMap::new()),
             Res::Redirect(location) => {
                 let mut headers = HashMap::new();
-                headers.insert("Location".to_string(), ensure_leading_slash(&location));
+                headers.insert(
+                    "Location".to_string().to_ascii_lowercase(),
+                    ensure_leading_slash(&location),
+                );
                 Response::new(302, "".to_owned(), headers)
             }
         }

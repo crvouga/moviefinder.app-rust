@@ -22,10 +22,16 @@ pub const HOST: &str = "api.themoviedb.org";
 
 pub fn to_base_headers(config: &Config) -> HashMap<String, String> {
     let mut headers = HashMap::new();
-    headers.insert("Content-Type".to_string(), "application/json".to_string());
-    headers.insert("Accept".to_string(), "application/json".to_string());
     headers.insert(
-        "Authorization".to_string(),
+        "Content-Type".to_string().to_ascii_lowercase(),
+        "application/json".to_string(),
+    );
+    headers.insert(
+        "Accept".to_string().to_ascii_lowercase(),
+        "application/json".to_string(),
+    );
+    headers.insert(
+        "Authorization".to_string().to_ascii_lowercase(),
         format!("Bearer {}", config.tmdb_api_read_access_token),
     );
     headers

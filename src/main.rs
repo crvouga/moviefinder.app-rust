@@ -36,22 +36,23 @@ async fn main() {
     .await;
 }
 
-fn is_hx_request(req: &http::Request) -> bool {
-    req.headers.get("HX-Request").is_some()
-}
-
 async fn respond(http_req: http::Request, ctx: Arc<ctx::Ctx>) -> http::Response {
     let route = route::decode(&http_req.path);
 
     println!("{} {:?}", http_req.method, route);
 
-    let res = respond::respond(route, &ctx).await.map_html(|html| {
-        if is_hx_request(&http_req) {
-            html
-        } else {
-            app::root::view_root(&[html])
-        }
-    });
+    respond::respond(route, &ctx)
+        .await
+        .map_html(|html| {
+            if is_hx_request(&http_req) {
+                html
+            } else {
+                app::root::view_root(&[html])
+            }
+        })
+        .into()
+}
 
-    return res.into();
+fn is_hx_request(req: &http::Request) -> bool {
+    req.headers.get("hx-request").is_some()
 }
