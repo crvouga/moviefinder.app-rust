@@ -1,8 +1,7 @@
-use super::tmdb_api;
 use crate::core::pagination::Paginated;
 use crate::media::media;
 
-use super::MediaDb;
+use super::{tmdb_api, MediaDb};
 
 pub struct TmdbMovie {
     config: tmdb_api::Config,
