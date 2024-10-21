@@ -1,46 +1,8 @@
+use super::{Request, Response};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
-pub struct Request {
-    pub method: String,
-    pub path: String,
-    pub headers: Vec<(String, String)>,
-}
-
-#[derive(Debug)]
-pub struct Response {
-    pub status_code: u16,
-    pub body: String,
-    pub headers: Vec<(String, String)>,
-}
-
-impl Response {
-    pub fn new(status_code: u16, body: String, headers: Vec<(String, String)>) -> Response {
-        Response {
-            status_code,
-            body,
-            headers,
-        }
-    }
-
-    pub fn to_http_string(&self) -> String {
-        let headers_string = self
-            .headers
-            .iter()
-            .map(|(key, value)| format!("{}: {}\r\n", key, value))
-            .collect::<String>();
-
-        format!(
-            "HTTP/1.1 {} OK\r\n{}Content-Length: {}\r\n\r\n{}",
-            self.status_code,
-            headers_string,
-            self.body.len(),
-            self.body
-        )
-    }
-}
-
-pub async fn start_server<F, Fut>(address: &str, handle_request: F)
+pub async fn start<F, Fut>(address: &str, handle_request: F)
 where
     F: Fn(Request) -> Fut + Send + Sync + 'static + Clone,
     Fut: std::future::Future<Output = Response> + Send + 'static,
@@ -84,6 +46,7 @@ where
     let request = Request {
         method,
         path,
+        host: "".to_string(), // Server does not need the host field
         headers,
     };
 

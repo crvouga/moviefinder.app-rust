@@ -22,7 +22,7 @@ async fn main() {
 
     let ctx = Arc::new(ctx::Ctx::new());
 
-    http::start_server(&address, move |req| {
+    http::server::start(&address, move |req| {
         let ctx_arc = Arc::clone(&ctx);
         respond(req, ctx_arc)
     })
