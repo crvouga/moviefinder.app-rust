@@ -1,6 +1,4 @@
-use crate::html::*;
 use crate::media::media::Media;
-use crate::ui;
 
 pub enum FeedItem {
     Media { media: Media, feed_index: i32 },

@@ -1,6 +1,13 @@
 use super::feed_item::FeedItem;
 use crate::{
-    app, ctx, feed::route::Route, html::*, hx, media::media_db::Query, res::Res, route, ui,
+    app::{self, root::ROOT_SELECTOR},
+    ctx,
+    feed::route::Route,
+    html::*,
+    hx::{self, Trigger},
+    media::{self, media_db::Query, media_id::MediaId},
+    res::Res,
+    route, ui,
 };
 
 pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
@@ -63,19 +70,37 @@ fn view_feed_items(feed_items: &Vec<FeedItem>) -> Elem {
     )
 }
 
+fn to_media_details_route(media_id: &MediaId) -> route::Route {
+    route::Route::Media(media::route::Route::Details(
+        media::details::route::Route::Index {
+            media_id: media_id.clone(),
+        },
+    ))
+}
+
 fn view_feed_item(feed_item: &FeedItem) -> Elem {
     match feed_item {
         FeedItem::Media { media, feed_index } => ui::swiper::slide(
             &[
-                class("w-full h-full flex flex-col items-center justify-center"),
+                class("w-full h-full flex flex-col items-center justify-center cursor-pointer"),
                 attr(&"data-feed-index", &feed_index.to_string()),
             ],
-            &[ui::image::view(&[
-                class("w-full h-full object-cover"),
-                width(&"100%"),
-                height(&"100%"),
-                src(&media.media_poster.to_highest_res()),
-            ])],
+            &[button(
+                &[
+                    class("w-full h-full"),
+                    hx::get(&to_media_details_route(&media.media_id).encode()),
+                    hx::Trigger::Click.attr(),
+                    hx::Preload::MouseDown.attr(),
+                    hx::Swap::InnerHtml.attr(),
+                    hx::target(&ROOT_SELECTOR),
+                ],
+                &[ui::image::view(&[
+                    class("w-full h-full object-cover"),
+                    width(&"100%"),
+                    height(&"100%"),
+                    src(&media.media_poster.to_highest_res()),
+                ])],
+            )],
         ),
     }
 }

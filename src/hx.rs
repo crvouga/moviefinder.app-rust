@@ -9,6 +9,7 @@ pub fn get(href: &str) -> html::Attr {
 pub enum Trigger {
     Load,
     MouseDown,
+    Click,
 }
 
 impl Trigger {
@@ -16,6 +17,7 @@ impl Trigger {
         match self {
             Trigger::Load => "load",
             Trigger::MouseDown => "mousedown, touchstart",
+            Trigger::Click => "click",
         }
     }
 

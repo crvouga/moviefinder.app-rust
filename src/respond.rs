@@ -1,6 +1,7 @@
 use crate::account;
 use crate::ctx;
 use crate::feed;
+use crate::media;
 use crate::res::Res;
 use crate::route;
 use crate::route::Route;
@@ -14,5 +15,7 @@ pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
         Route::Unknown => {
             Res::Redirect(route::encode(Route::Account(account::route::Route::Index)))
         }
+
+        Route::Media(child) => media::respond::respond(child, ctx).await,
     }
 }
