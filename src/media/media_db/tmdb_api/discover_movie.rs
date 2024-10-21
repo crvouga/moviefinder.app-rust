@@ -1,7 +1,7 @@
-// use crate::http;
+use crate::http;
 
 // https://developer.themoviedb.org/reference/discover-movie
-use super::Config;
+use super::{to_base_headers, Config, HOST};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -30,8 +30,25 @@ pub struct DiscoverMovieResponse {
     pub total_results: Option<i32>,
 }
 
-pub fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
-    // http::client::send(request)
-    println!("discover_movie::send: {:?}", config);
-    Err("Not implemented".to_string())
+pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
+    let sent = http::client::send(http::Request {
+        headers: to_base_headers(config),
+        host: HOST.to_string(),
+        method: "GET".to_string(),
+        path: "/3/discover/movie".to_string(),
+    })
+    .await;
+
+    match sent {
+        Ok(response) => {
+            let body = response.body;
+            println!("{}", body);
+            let parsed = serde_json::from_str(&body);
+            match parsed {
+                Ok(parsed) => Ok(parsed),
+                Err(e) => Err(format!("Error parsing response: {}", e)),
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
 }

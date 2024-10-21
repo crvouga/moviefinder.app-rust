@@ -5,8 +5,10 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub fn new() -> Ctx {
-        let media_db = Box::new(media_db::random::Random::new());
+    pub fn new(tmdb_api_read_access_token: String) -> Ctx {
+        let media_db = Box::new(media_db::tmdb_movie::TmdbMovie::new(
+            tmdb_api_read_access_token,
+        ));
         let ctx = Ctx { media_db };
         ctx
     }

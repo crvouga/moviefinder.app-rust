@@ -5,9 +5,9 @@ use crate::res::Res;
 use crate::route;
 use crate::route::Route;
 
-pub fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
+pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
     match route {
-        Route::Feed(child) => feed::respond::respond(child, ctx),
+        Route::Feed(child) => feed::respond::respond(child, ctx).await,
 
         Route::Account(child) => account::respond::respond(child),
 

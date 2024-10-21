@@ -8,12 +8,12 @@ use crate::res::Res;
 use crate::route;
 use crate::ui;
 
-pub fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
+pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
     match route {
         Route::Index => Res::Html(view_feed().render()),
 
         Route::LoadMore => {
-            let queried = ctx.media_db.query();
+            let queried = ctx.media_db.query().await;
 
             match queried {
                 Ok(paginated) => {

@@ -13,9 +13,9 @@ impl Config {
     }
 }
 
-pub const BASE_URL: &str = "https://api.themoviedb.org/3";
+pub const HOST: &str = "api.themoviedb.org";
 
-pub const PAGE_SIZE: u32 = 20;
+// pub const PAGE_SIZE: u32 = 20;
 
 pub fn to_base_headers(config: &Config) -> Vec<(String, String)> {
     vec![

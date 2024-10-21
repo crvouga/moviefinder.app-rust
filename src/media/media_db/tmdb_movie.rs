@@ -1,7 +1,6 @@
-use crate::core::pagination::Paginated;
-use crate::media::media;
-
 use super::{tmdb_api, MediaDb};
+use crate::{core::pagination::Paginated, media::media::Media};
+use async_trait::async_trait;
 
 pub struct TmdbMovie {
     config: tmdb_api::Config,
@@ -15,17 +14,24 @@ impl TmdbMovie {
     }
 }
 
+#[async_trait]
 impl MediaDb for TmdbMovie {
-    fn query(&self) -> Result<Paginated<media::Media>, String> {
-        let sent = tmdb_api::discover_movie::send(&self.config);
+    async fn query(&self) -> Result<Paginated<Media>, String> {
+        let sent: Result<tmdb_api::discover_movie::DiscoverMovieResponse, String> =
+            tmdb_api::discover_movie::send(&self.config).await;
 
-        let paginated = Paginated {
-            items: vec![],
-            limit: 3,
-            offset: 0,
-            total: 3,
-        };
+        match sent {
+            Ok(_response) => {
+                let paginated = Paginated {
+                    items: vec![],
+                    limit: 0,
+                    offset: 0,
+                    total: 0,
+                };
 
-        Ok(paginated)
+                Ok(paginated)
+            }
+            Err(e) => Err(format!("Error fetching from TMDB: {}", e)),
+        }
     }
 }

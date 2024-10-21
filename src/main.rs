@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use std::sync::Arc;
 
 mod account;
@@ -16,11 +17,15 @@ mod ui;
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+
     let port = std::env::var("PORT").unwrap_or("8080".to_string());
     let address = "0.0.0.0:".to_owned() + &port.to_string();
     println!("Listening on http://0.0.0.0:{}", port);
 
-    let ctx = Arc::new(ctx::Ctx::new());
+    let tmdb_api_read_access_token = std::env::var("TMDB_API_READ_ACCESS_TOKEN").unwrap();
+
+    let ctx = Arc::new(ctx::Ctx::new(tmdb_api_read_access_token));
 
     http::server::start(&address, move |req| {
         let ctx_arc = Arc::clone(&ctx);
@@ -40,7 +45,7 @@ async fn respond(req: http::Request, ctx: Arc<ctx::Ctx>) -> http::Response {
         .any(|(key, _value)| key.to_ascii_lowercase() == "hx-request");
 
     if is_hx_request {
-        let response = respond::respond(route, &ctx);
+        let response = respond::respond(route, &ctx).await;
 
         let http_response = res::to_http_response(response);
 
