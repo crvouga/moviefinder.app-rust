@@ -15,10 +15,11 @@ pub fn view_root(route: &route::Route) -> Elem {
                 rel("stylesheet"),
                 href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>")
             ]),
-            script(&[src("https://cdn.tailwindcss.com")], ""),
-            script(&[src("https://unpkg.com/htmx.org@2.0.1")], ""),
-            script(&[src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js")], ""),
-            script(&[src("https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js")], "")
+            script(&[src("https://cdn.tailwindcss.com")],  &[]),
+            script(&[src("https://unpkg.com/htmx.org@2.0.1")],  &[]),
+            script(&[src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js")],  &[]),
+            script(&[src("https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js")], &[]),
+            ui::image::script_image_element(),
         ]),
         body(
             &[

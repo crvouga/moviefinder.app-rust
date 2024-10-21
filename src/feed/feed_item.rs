@@ -14,16 +14,3 @@ impl From<(Media, i32)> for FeedItem {
         }
     }
 }
-
-impl From<&FeedItem> for Elem {
-    fn from(feed_item: &FeedItem) -> Self {
-        match feed_item {
-            FeedItem::Media { media, feed_index } => ui::swiper::slide(
-                &[class(
-                    "w-full h-full flex flex-col items-center justify-center",
-                )],
-                &[text(&format!("{}: {}", feed_index, media.media_title))],
-            ),
-        }
-    }
-}

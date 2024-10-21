@@ -1,5 +1,4 @@
 use crate::{
-    core::image_set::ImageSet,
     http,
     media::{genre::genre_id::GenreId, media::Media, media_id::MediaId, media_type::MediaType},
 };

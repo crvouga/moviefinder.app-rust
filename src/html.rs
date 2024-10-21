@@ -130,6 +130,14 @@ pub fn href(value: &str) -> Attr {
     attr("href", value)
 }
 
+pub fn width(value: &str) -> Attr {
+    attr("width", value)
+}
+
+pub fn height(value: &str) -> Attr {
+    attr("height", value)
+}
+
 pub fn elem(tag_name: &str, attributes: &[Attr], children: &[Elem]) -> Elem {
     Elem::Element {
         tag_name: tag_name.to_string(),
@@ -154,12 +162,8 @@ pub fn link(attrs: &[Attr]) -> Elem {
     void_element("link", attrs)
 }
 
-pub fn script(attrs: &[Attr], _content: &str) -> Elem {
-    Elem::Element {
-        tag_name: "script".to_string(),
-        attributes: attrs.to_vec(),
-        children: vec![],
-    }
+pub fn script(attrs: &[Attr], children: &[Elem]) -> Elem {
+    elem("script", attrs, children)
 }
 
 pub fn div(attrs: &[Attr], children: &[Elem]) -> Elem {

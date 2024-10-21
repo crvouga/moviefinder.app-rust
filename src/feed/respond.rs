@@ -1,13 +1,7 @@
 use super::feed_item::FeedItem;
-use crate::app;
-use crate::ctx;
-use crate::feed::route::Route;
-use crate::html::*;
-use crate::hx;
-use crate::media::media_db::Query;
-use crate::res::Res;
-use crate::route;
-use crate::ui;
+use crate::{
+    app, ctx, feed::route::Route, html::*, hx, media::media_db::Query, res::Res, route, ui,
+};
 
 pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
     match route {
@@ -64,9 +58,26 @@ fn view_feed_items(feed_items: &Vec<FeedItem>) -> Elem {
     fragment(
         &feed_items
             .into_iter()
-            .map(|feed_item| feed_item.into())
+            .map(view_feed_item)
             .collect::<Vec<Elem>>(),
     )
+}
+
+fn view_feed_item(feed_item: &FeedItem) -> Elem {
+    match feed_item {
+        FeedItem::Media { media, feed_index } => ui::swiper::slide(
+            &[
+                class("w-full h-full flex flex-col items-center justify-center"),
+                attr(&"data-feed-index", &feed_index.to_string()),
+            ],
+            &[ui::image::view(&[
+                class("w-full h-full object-cover"),
+                width(&"100%"),
+                height(&"100%"),
+                src(&media.media_poster.to_highest_res()),
+            ])],
+        ),
+    }
 }
 
 fn view_load_initial() -> Elem {
