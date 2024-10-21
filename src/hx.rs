@@ -8,14 +8,14 @@ pub fn get(href: &str) -> html::Attr {
 // https://htmx.org/attributes/hx-trigger/
 pub enum Trigger {
     Load,
-    // MouseDown,
+    MouseDown,
 }
 
 impl Trigger {
     pub fn to_str(&self) -> &str {
         match self {
             Trigger::Load => "load",
-            // Trigger::MouseDown => "mousedown",
+            Trigger::MouseDown => "mousedown",
         }
     }
 
@@ -34,12 +34,14 @@ pub fn target(selector: &str) -> html::Attr {
 
 pub enum Swap {
     InnerHtml,
+    OuterHtml,
 }
 
 impl Swap {
     pub fn to_str(&self) -> &str {
         match self {
             Swap::InnerHtml => "innerHTML",
+            Swap::OuterHtml => "outerHTML",
         }
     }
 
