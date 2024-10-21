@@ -12,7 +12,7 @@ pub enum Route {
     Unknown,
 }
 
-const SEPERATOR: &'static str = "___";
+const SEPARATOR: &'static str = "___";
 
 impl Route {
     pub fn encode(&self) -> String {
@@ -27,7 +27,7 @@ pub fn encode(route: Route) -> String {
 
     let human_friendly = to_human_friendly_str(route);
 
-    let joined = format!("{}{}{}", human_friendly, SEPERATOR, base_64_encoded);
+    let joined = format!("{}{}{}", human_friendly, SEPARATOR, base_64_encoded);
 
     joined
 }
@@ -43,7 +43,7 @@ pub fn remove_leading_slash(path: &str) -> String {
 pub fn decode(base_64_encoded: &String) -> Route {
     let without_slash = remove_leading_slash(&base_64_encoded);
 
-    let seperated: Vec<&str> = without_slash.split(SEPERATOR).collect();
+    let seperated: Vec<&str> = without_slash.split(SEPARATOR).collect();
 
     let second = seperated.get(1).unwrap_or(&"");
 
