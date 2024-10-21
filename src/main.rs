@@ -16,14 +16,16 @@ mod ui;
 
 #[tokio::main]
 async fn main() {
-    core::dotenv::load().unwrap_or_default();
+    core::env::load().unwrap_or_default();
 
-    let port = std::env::var("PORT").unwrap_or("8080".to_string());
-    let address = "0.0.0.0:".to_owned() + &port.to_string();
+    let port = core::env::read("PORT").unwrap_or("8080".to_string());
+
+    let address = format!("0.0.0.0:{}", port);
+
     println!("Listening on http://0.0.0.0:{}", port);
 
     let tmdb_api_read_access_token =
-        std::env::var("TMDB_API_READ_ACCESS_TOKEN").unwrap_or("".to_string());
+        core::env::read("TMDB_API_READ_ACCESS_TOKEN").unwrap_or_default();
 
     let ctx = Arc::new(ctx::Ctx::new(tmdb_api_read_access_token));
 
@@ -34,29 +36,22 @@ async fn main() {
     .await;
 }
 
-async fn respond(req: http::Request, ctx: Arc<ctx::Ctx>) -> http::Response {
-    let route = route::decode(&req.path);
+fn is_hx_request(req: &http::Request) -> bool {
+    req.headers.get("HX-Request").is_some()
+}
 
-    println!("{} {:?}", req.method, route);
+async fn respond(http_req: http::Request, ctx: Arc<ctx::Ctx>) -> http::Response {
+    let route = route::decode(&http_req.path);
 
-    let is_hx_request = req
-        .headers
-        .iter()
-        .any(|(key, _value)| key.to_ascii_lowercase() == "hx-request");
+    println!("{} {:?}", http_req.method, route);
 
-    if is_hx_request {
-        let response = respond::respond(route, &ctx).await;
+    let res = respond::respond(route, &ctx).await.map_html(|html| {
+        if is_hx_request(&http_req) {
+            html
+        } else {
+            app::root::view_root(&[html])
+        }
+    });
 
-        let http_response = res::to_http_response(response);
-
-        return http_response;
-    }
-
-    let html = app::root::view_root(&route).render();
-
-    let response = res::Res::Html(html);
-
-    let http_response = res::to_http_response(response);
-
-    return http_response;
+    return res.into();
 }

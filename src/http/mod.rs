@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+
+use crate::res::Res;
+
 pub mod client;
 pub mod server;
 
@@ -5,7 +9,7 @@ pub struct Request {
     pub method: String,
     pub path: String,
     pub host: String,
-    pub headers: Vec<(String, String)>,
+    pub headers: HashMap<String, String>,
 }
 
 impl Request {
@@ -35,11 +39,11 @@ impl Request {
 pub struct Response {
     pub status_code: u16,
     pub body: String,
-    pub headers: Vec<(String, String)>,
+    pub headers: HashMap<String, String>,
 }
 
 impl Response {
-    pub fn new(status_code: u16, body: String, headers: Vec<(String, String)>) -> Response {
+    pub fn new(status_code: u16, body: String, headers: HashMap<String, String>) -> Response {
         Response {
             status_code,
             body,
@@ -73,7 +77,7 @@ impl Response {
             .parse::<u16>()
             .unwrap_or(500);
 
-        let mut headers = Vec::new();
+        let mut headers = HashMap::new();
         let mut body = String::new();
         let mut in_headers = true;
 
@@ -82,7 +86,7 @@ impl Response {
                 in_headers = false;
             } else if in_headers {
                 if let Some((key, value)) = line.split_once(": ") {
-                    headers.push((key.to_string(), value.to_string()));
+                    headers.insert(key.to_string(), value.to_string());
                 }
             } else {
                 body.push_str(line);
@@ -94,5 +98,26 @@ impl Response {
             body,
             headers,
         }
+    }
+}
+
+impl From<Res> for Response {
+    fn from(res: Res) -> Self {
+        match res {
+            Res::Html(body) => Response::new(200, body.render(), HashMap::new()),
+            Res::Redirect(location) => {
+                let mut headers = HashMap::new();
+                headers.insert("Location".to_string(), ensure_leading_slash(&location));
+                Response::new(302, "".to_owned(), headers)
+            }
+        }
+    }
+}
+
+fn ensure_leading_slash(path: &str) -> String {
+    if path.starts_with('/') {
+        path.to_owned()
+    } else {
+        format!("/{}", path)
     }
 }

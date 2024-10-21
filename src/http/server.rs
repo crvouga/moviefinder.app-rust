@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::{Request, Response};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
@@ -33,13 +35,13 @@ where
     let method = parts.next().unwrap_or("").to_string();
     let path = parts.next().unwrap_or("/").to_string();
 
-    let mut headers = Vec::new();
+    let mut headers = HashMap::new();
     for line in &request_lines[1..] {
         if line.is_empty() {
             break;
         }
         if let Some((key, value)) = line.split_once(": ") {
-            headers.push((key.to_string(), value.to_string()));
+            headers.insert(key.to_string(), value.to_string());
         }
     }
 

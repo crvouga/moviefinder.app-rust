@@ -15,10 +15,6 @@ impl ImageSet {
         }
     }
 
-    pub fn to_lowest_res(&self) -> &str {
-        &self.lowest_to_highest_res[0]
-    }
-
     pub fn to_highest_res(&self) -> &str {
         &self.lowest_to_highest_res[self.lowest_to_highest_res.len() - 1]
     }

@@ -4,7 +4,7 @@ use crate::{
     ctx,
     feed::route::Route,
     html::*,
-    hx::{self, Trigger},
+    hx,
     media::{self, media_db::Query, media_id::MediaId},
     res::Res,
     route, ui,
@@ -12,7 +12,7 @@ use crate::{
 
 pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
     match route {
-        Route::Index => Res::Html(view_feed().render()),
+        Route::Index => Res::Html(view_feed()),
 
         Route::LoadMore => {
             let query = Query {
@@ -31,10 +31,10 @@ pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
                         .map(|(index, media)| FeedItem::from((media, index as i32)))
                         .collect::<Vec<FeedItem>>();
 
-                    Res::Html(view_feed_items(&feed_items).render())
+                    Res::Html(view_feed_items(&feed_items))
                 }
 
-                Err(err) => Res::Html(ui::error::page(&err).render()),
+                Err(err) => Res::Html(ui::error::page(&err)),
             }
         }
     }

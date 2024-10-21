@@ -40,3 +40,7 @@ pub fn load() -> io::Result<()> {
 
     Ok(())
 }
+
+pub fn read(key: &str) -> Option<String> {
+    env::var(key).ok()
+}

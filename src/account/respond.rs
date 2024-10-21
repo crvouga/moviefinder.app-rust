@@ -5,7 +5,7 @@ use crate::res::Res;
 
 pub fn respond(route: Route) -> Res {
     match route {
-        Route::Index => Res::Html(view_account().render()),
+        Route::Index => Res::Html(view_account()),
     }
 }
 

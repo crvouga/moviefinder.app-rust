@@ -3,6 +3,8 @@
     "axohtml",
     "moviefinder",
     "serde",
-    "stylesheet"
+    "stylesheet",
+    "themoviedb",
+    "tmdb"
   ]
 }
