@@ -14,3 +14,9 @@ impl Res {
         }
     }
 }
+
+impl From<Elem> for Res {
+    fn from(elem: Elem) -> Self {
+        Res::Html(elem)
+    }
+}

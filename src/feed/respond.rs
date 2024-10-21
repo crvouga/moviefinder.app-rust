@@ -1,11 +1,12 @@
 use super::feed_item::FeedItem;
 use crate::{
     app::{self, root::ROOT_SELECTOR},
+    core::query::{Filter, Query},
     ctx,
     feed::route::Route,
     html::*,
     hx,
-    media::{self, media_db::Query, media_id::MediaId},
+    media::{self, media_id::MediaId},
     res::Res,
     route, ui,
 };
@@ -16,8 +17,9 @@ pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
 
         Route::LoadMore => {
             let query = Query {
-                limit: 20,
+                limit: 10,
                 offset: 0,
+                filter: Filter::None,
             };
 
             let queried = ctx.media_db.query(&query).await;
@@ -92,6 +94,7 @@ fn view_feed_item(feed_item: &FeedItem) -> Elem {
                     hx::Trigger::Click.attr(),
                     hx::Preload::MouseDown.attr(),
                     hx::Swap::InnerHtml.attr(),
+                    hx::push_url("true"),
                     hx::target(&ROOT_SELECTOR),
                 ],
                 &[ui::image::view(&[

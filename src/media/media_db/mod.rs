@@ -1,18 +1,18 @@
-pub mod random;
+pub mod impl_random;
+pub mod impl_tmdb_movie;
 mod tmdb_api;
-pub mod tmdb_movie;
 
 use async_trait::async_trait;
 
 use crate::core::pagination::Paginated;
+use crate::core::query::Query;
 use crate::media::media::Media;
 
-pub struct Query {
-    pub limit: u32,
-    pub offset: u32,
+pub enum Field {
+    MediaId,
 }
 
 #[async_trait]
 pub trait MediaDb: Send + Sync {
-    async fn query(&self, query: &Query) -> Result<Paginated<Media>, String>;
+    async fn query(&self, query: &Query<Field>) -> Result<Paginated<Media>, String>;
 }

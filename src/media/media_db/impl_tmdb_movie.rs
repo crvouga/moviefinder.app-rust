@@ -1,5 +1,5 @@
-use super::{tmdb_api, MediaDb, Query};
-use crate::{core::pagination::Paginated, media::media::Media};
+use super::{tmdb_api, Field, MediaDb};
+use crate::{core::pagination::Paginated, core::query::Query, media::media::Media};
 use async_trait::async_trait;
 
 pub struct TmdbMovie {
@@ -16,7 +16,7 @@ impl TmdbMovie {
 
 #[async_trait]
 impl MediaDb for TmdbMovie {
-    async fn query(&self, query: &Query) -> Result<Paginated<Media>, String> {
+    async fn query(&self, query: &Query<Field>) -> Result<Paginated<Media>, String> {
         let config = tmdb_api::config::load(&self.config).await?;
 
         tmdb_api::discover_movie::send(&self.config)

@@ -2,23 +2,16 @@ use std::vec;
 
 use async_trait::async_trait;
 
-use crate::core::pagination::Paginated;
-use crate::core::random;
-use crate::media::media;
-
-use super::{MediaDb, Query};
+use super::{Field, MediaDb};
+use crate::{core::pagination::Paginated, core::query::Query, core::random, media::media};
 
 pub struct Random {}
 
-impl Random {
-    pub fn new() -> Random {
-        Random {}
-    }
-}
+impl Random {}
 
 #[async_trait]
 impl MediaDb for Random {
-    async fn query(&self, _query: &Query) -> Result<Paginated<media::Media>, String> {
+    async fn query(&self, _query: &Query<Field>) -> Result<Paginated<media::Media>, String> {
         let paginated = Paginated {
             items: vec![
                 media::random(),
