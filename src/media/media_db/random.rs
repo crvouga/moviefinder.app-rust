@@ -14,10 +14,6 @@ impl Random {
 }
 
 impl MediaDb for Random {
-    fn put(&self, _media: Vec<media::Media>) -> Result<(), String> {
-        Ok(())
-    }
-
     fn query(&self) -> Result<Paginated<media::Media>, String> {
         let paginated = Paginated {
             items: vec![media::random(), media::random(), media::random()],

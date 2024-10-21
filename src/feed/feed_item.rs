@@ -1,5 +1,6 @@
 use crate::html::*;
 use crate::media::media::Media;
+use crate::ui;
 
 pub enum FeedItem {
     Media { media: Media, feed_index: i32 },
@@ -17,7 +18,7 @@ impl From<(Media, i32)> for FeedItem {
 impl From<&FeedItem> for Elem {
     fn from(feed_item: &FeedItem) -> Self {
         match feed_item {
-            FeedItem::Media { media, feed_index } => div(
+            FeedItem::Media { media, feed_index } => ui::swiper::slide(
                 &[class(
                     "w-full h-full flex flex-col items-center justify-center",
                 )],

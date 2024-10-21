@@ -18,7 +18,7 @@ pub fn view_root(route: &route::Route) -> Elem {
             script(&[src("https://cdn.tailwindcss.com")], ""),
             script(&[src("https://unpkg.com/htmx.org@2.0.1")], ""),
             script(&[src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js")], ""),
-
+            script(&[src("https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js")], "")
         ]),
         body(
             &[

@@ -11,6 +11,7 @@ pub enum Elem {
         attributes: Vec<Attr>,
         children: Vec<Elem>,
     },
+    Fragment(Vec<Elem>),
     Safe(String),
     Unsafe(String),
 }
@@ -39,6 +40,7 @@ impl Elem {
                     )
                 }
             }
+            Elem::Fragment(children) => render_children(children, indent_level),
             Elem::Safe(content) => format!("{}{}\n", indent, escape_html(content)),
             Elem::Unsafe(content) => format!("{}{}\n", indent, content),
         }
@@ -71,6 +73,10 @@ fn escape_html(content: &str) -> String {
 
 pub fn unsafe_html(content: &str) -> Elem {
     Elem::Unsafe(content.to_string())
+}
+
+pub fn fragment(children: &[Elem]) -> Elem {
+    Elem::Fragment(children.to_vec())
 }
 
 pub fn attr(name: &str, value: &str) -> Attr {
