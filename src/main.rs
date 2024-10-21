@@ -4,6 +4,7 @@ mod account;
 mod app;
 mod core;
 mod ctx;
+mod env;
 mod feed;
 mod html;
 mod http;
@@ -16,18 +17,13 @@ mod ui;
 
 #[tokio::main]
 async fn main() {
-    core::env::load().unwrap_or_default();
+    let env = env::Env::load();
 
-    let port = core::env::read("PORT").unwrap_or("8080".to_string());
+    let address = format!("0.0.0.0:{}", env.port);
 
-    let address = format!("0.0.0.0:{}", port);
+    println!("Server listening on http://{}", address);
 
-    println!("Listening on http://0.0.0.0:{}", port);
-
-    let tmdb_api_read_access_token =
-        core::env::read("TMDB_API_READ_ACCESS_TOKEN").unwrap_or_default();
-
-    let ctx = Arc::new(ctx::Ctx::new(tmdb_api_read_access_token));
+    let ctx = Arc::new(ctx::Ctx::new(env.tmdb_api_read_access_token));
 
     http::server::start(&address, move |req| {
         let ctx_arc = Arc::clone(&ctx);

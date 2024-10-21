@@ -41,6 +41,10 @@ pub fn load() -> io::Result<()> {
     Ok(())
 }
 
-pub fn read(key: &str) -> Option<String> {
-    env::var(key).ok()
+pub fn read(key: &str) -> String {
+    env::var(key).expect(format!("{} must be set", key).as_str())
+}
+
+pub fn read_or_default(key: &str) -> String {
+    env::var(key).unwrap_or_default()
 }
