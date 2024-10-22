@@ -32,7 +32,7 @@ pub fn view_root(children: &[Elem]) -> Elem {
                 div(
                     &[
                         id(ROOT_ID),
-                        class("w-full max-w-[600px] h-full max-h-[940px] border box-border rounded overflow-hidden flex flex-col"),
+                        class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col"),
                         hx::boost(),
                     ],
                     children
