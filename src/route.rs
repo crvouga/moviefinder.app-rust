@@ -6,6 +6,8 @@ pub enum Route {
     Feed(feed::route::Route),
     Account(account::route::Route),
     Media(media::route::Route),
+    Favicon,
+    RobotsTxt,
     Unknown(String),
 }
 
@@ -15,8 +17,14 @@ impl Route {
     }
 
     pub fn decode(encoded: &String) -> Route {
-        let decoded = core::route::decode(encoded);
+        match encoded.as_str() {
+            "/favicon.ico" => Route::Favicon,
+            "/robots.txt" => Route::RobotsTxt,
+            _ => {
+                let decoded = core::route::decode(encoded);
 
-        decoded.unwrap_or(Route::Unknown(encoded.clone()))
+                decoded.unwrap_or(Route::Unknown(encoded.clone()))
+            }
+        }
     }
 }

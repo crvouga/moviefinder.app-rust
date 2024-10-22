@@ -8,6 +8,7 @@ use super::http;
 pub enum Res {
     Html(Elem),
     Redirect(String),
+    Text(String),
     Empty,
 }
 
@@ -38,6 +39,7 @@ impl From<Res> for http::Response {
                 );
                 http::Response::new(302, "".to_owned(), headers)
             }
+            Res::Text(text) => http::Response::new(200, text, HashMap::new()),
             Res::Empty => http::Response::new(204, "".to_owned(), HashMap::new()),
         }
     }

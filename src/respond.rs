@@ -13,9 +13,10 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
 
         Route::Media(child) => media::respond::respond(child, ctx).await,
 
-        Route::Unknown(route) => match route.as_str() {
-            "/favicon.ico" => Res::Empty,
-            _ => Res::Redirect(Route::Feed(feed::route::Route::Index).encode()),
-        },
+        Route::Favicon => Res::Empty,
+
+        Route::RobotsTxt => Res::Text("User-agent: *\nDisallow: /".to_string()),
+
+        Route::Unknown(_route) => Res::Redirect(Route::Feed(feed::route::Route::Index).encode()),
     }
 }
