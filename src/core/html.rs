@@ -170,6 +170,10 @@ pub fn div(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("div", attrs, children)
 }
 
+pub fn p(attrs: &[Attr], children: &[Elem]) -> Elem {
+    elem("p", attrs, children)
+}
+
 pub fn button(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("button", attrs, children)
 }

@@ -2,8 +2,8 @@ use crate::core::html::*;
 use crate::core::hx;
 use crate::core::ui;
 
-const ROOT_ID: &'static str = "app";
-pub const ROOT_SELECTOR: &'static str = "#app";
+const ROOT_ID: &'static str = "root";
+pub const ROOT_SELECTOR: &'static str = "#root";
 
 pub fn view_root(children: &[Elem]) -> Elem {
     return html(&[

@@ -109,14 +109,14 @@ fn view_details(media: &Media) -> Elem {
 }
 
 fn view_title(media: &Media) -> Elem {
-    div(
+    p(
         &[class("text-3xl font-bold text-center px-6")],
         &[text(&media.media_title)],
     )
 }
 
 fn view_description(media: &Media) -> Elem {
-    div(
+    p(
         &[class("text-base text-opacity font-normal text-center px-6")],
         &[text(&media.media_description)],
     )
