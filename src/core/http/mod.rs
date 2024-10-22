@@ -5,6 +5,7 @@ use crate::core::res::Res;
 pub mod client;
 pub mod server;
 
+#[derive(Debug)]
 pub struct Request {
     pub method: String,
     pub path: String,

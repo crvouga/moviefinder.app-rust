@@ -1,13 +1,16 @@
+#[derive(Debug, Clone)]
 pub struct Query<F> {
     pub limit: u32,
     pub offset: u32,
     pub filter: Filter<F>,
 }
 
-pub enum Operator {
+#[derive(Debug, Clone)]
+pub enum Op {
     Eq,
 }
 
+#[derive(Debug, Clone)]
 pub enum Filter<F> {
     Clause(Clause<F>),
     And(Vec<Filter<F>>),
@@ -15,14 +18,15 @@ pub enum Filter<F> {
     None,
 }
 
+#[derive(Debug, Clone)]
 pub struct Clause<F> {
     pub field: F,
-    pub operator: Operator,
+    pub operator: Op,
     pub value: String,
 }
 
 impl<T> Filter<T> {
-    pub fn clause(field: T, operator: Operator, value: String) -> Filter<T> {
+    pub fn clause(field: T, operator: Op, value: String) -> Filter<T> {
         Filter::Clause(Clause {
             field,
             operator,

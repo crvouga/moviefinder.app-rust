@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        core::query::{Filter, Operator, Query},
+        core::query::{Filter, Op, Query},
         env,
         media::{
-            media_db::{impl_tmdb_movie, Field, MediaDb},
+            media_db::{impl_tmdb, Field, MediaDb},
             media_id::MediaId,
         },
     };
@@ -20,9 +20,7 @@ mod tests {
 
         if env.test_env == env::TestEnv::Integration {
             let tmdb_movie = Fixture {
-                media_db: Box::new(impl_tmdb_movie::TmdbMovie::new(
-                    env.tmdb_api_read_access_token,
-                )),
+                media_db: Box::new(impl_tmdb::Tmdb::new(env.tmdb_api_read_access_token)),
             };
 
             fixtures.push(tmdb_movie);
@@ -34,15 +32,15 @@ mod tests {
     #[tokio::test]
     async fn test_find_by_id() {
         for f in fixtures() {
-            let media_id = MediaId::new("1".to_string());
+            let media_id = MediaId::new("123".to_string());
 
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: Filter::clause(Field::MediaId, Operator::Eq, media_id.as_str().to_string()),
+                filter: Filter::clause(Field::MediaId, Op::Eq, media_id.as_str().to_string()),
             };
 
-            let result = f.media_db.query(&query).await;
+            let result = f.media_db.query(query).await;
 
             let first = result.unwrap().items.into_iter().next().unwrap();
 

@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct ImageSet {
     lowest_to_highest_res: Vec<String>,
 }

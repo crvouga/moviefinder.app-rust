@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
+use crate::core::http;
+
 pub mod config;
 pub mod discover_movie;
+pub mod movie_details;
 
 #[derive(Debug)]
 pub struct Config {
@@ -17,6 +20,19 @@ impl Config {
 }
 
 pub const HOST: &str = "api.themoviedb.org";
+
+pub fn to_request(config: &Config, method: &str, path: &str) -> http::Request {
+    http::Request {
+        headers: to_base_headers(config),
+        host: HOST.to_string(),
+        method: method.to_string(),
+        path: path.to_string(),
+    }
+}
+
+pub fn to_get_request(config: &Config, path: &str) -> http::Request {
+    to_request(config, "GET", path)
+}
 
 // pub const PAGE_SIZE: u32 = 20;
 

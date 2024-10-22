@@ -11,7 +11,7 @@ impl Random {}
 
 #[async_trait]
 impl MediaDb for Random {
-    async fn query(&self, _query: &Query<Field>) -> Result<Paginated<media::Media>, String> {
+    async fn query(&self, _query: Query<Field>) -> Result<Paginated<media::Media>, String> {
         let paginated = Paginated {
             items: vec![
                 media::random(),

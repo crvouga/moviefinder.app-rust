@@ -25,7 +25,7 @@ pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
                 filter: Filter::None,
             };
 
-            let queried = ctx.media_db.query(&query).await;
+            let queried = ctx.media_db.query(query).await;
 
             match queried {
                 Ok(paginated) => {

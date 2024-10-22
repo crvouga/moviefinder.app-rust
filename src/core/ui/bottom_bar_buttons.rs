@@ -11,7 +11,7 @@ pub struct Button {
 pub fn view(buttons: &[Button]) -> Elem {
     div(
         &[class(
-            "flex items-center justify-center w-full border-t divide-x",
+            "flex items-center justify-center w-full border-t divide-x h-16",
         )],
         &buttons
             .iter()
@@ -22,10 +22,10 @@ pub fn view(buttons: &[Button]) -> Elem {
                     hx::Swap::InnerHtml.attr(),
                     hx::push_url(&btn.hx_get),
                     hx::Trigger::Click.attr(),
-                    hx::Preload::MouseDown.attr(),
+                    // hx::Preload::MouseDown.attr(),
                     class_list(
                         &[
-                            "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm py-2.5 cursor-pointer select-none active:opacity-75 transition-opacity",
+                            "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm h-full cursor-pointer select-none active:opacity-75 transition-opacity",
                             if btn.active {
                                 "text-blue-500"
                             } else {

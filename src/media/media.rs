@@ -3,6 +3,7 @@ use super::media_id::MediaId;
 use super::media_type::MediaType;
 use crate::core::image_set::ImageSet;
 
+#[derive(Debug, Clone)]
 pub struct Media {
     pub media_id: MediaId,
     pub media_title: String,
