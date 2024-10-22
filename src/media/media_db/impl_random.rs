@@ -1,9 +1,7 @@
-use std::vec;
-
-use async_trait::async_trait;
-
-use super::{Field, MediaDb};
+use super::interface::{Field, MediaDb};
 use crate::{core::pagination::Paginated, core::query::Query, core::random, media::media};
+use async_trait::async_trait;
+use std::vec;
 
 pub struct Random {}
 

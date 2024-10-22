@@ -1,8 +1,8 @@
 use std::vec;
 
 use super::{
+    interface::{Field, MediaDb},
     tmdb_api::{self, config::TmdbConfig, Config},
-    Field, MediaDb,
 };
 use crate::{
     core::{

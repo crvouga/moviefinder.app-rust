@@ -4,7 +4,10 @@ mod tests {
         core::query::{Filter, Op, Query},
         env,
         media::{
-            media_db::{impl_tmdb, Field, MediaDb},
+            media_db::{
+                impl_tmdb,
+                interface::{Field, MediaDb},
+            },
             media_id::MediaId,
         },
     };

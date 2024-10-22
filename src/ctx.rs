@@ -1,7 +1,7 @@
-use crate::media::media_db;
+use crate::media::media_db::{self, interface::MediaDb};
 
 pub struct Ctx {
-    pub media_db: Box<dyn media_db::MediaDb>,
+    pub media_db: Box<dyn MediaDb>,
 }
 
 impl Ctx {

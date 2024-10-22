@@ -5,6 +5,7 @@ mod core;
 mod ctx;
 mod env;
 mod feed;
+mod key_value_db;
 mod media;
 mod respond;
 mod route;
