@@ -13,8 +13,8 @@ pub enum Op {
 #[derive(Debug, Clone)]
 pub enum Filter<F> {
     Clause(Clause<F>),
-    And(Vec<Filter<F>>),
-    Or(Vec<Filter<F>>),
+    // And(Vec<Filter<F>>),
+    // Or(Vec<Filter<F>>),
     None,
 }
 

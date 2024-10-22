@@ -101,24 +101,12 @@ impl From<(&TmdbConfig, MovieDetails)> for Media {
 }
 
 pub async fn send(config: &Config, movie_id: &str) -> Result<MovieDetails, String> {
-    let req = to_get_request(
-        &config,
-        &"/3/movie/:movie_id".replace(":movie_id", movie_id),
-    );
+    let req = to_get_request(config, &format!("/3/movie/{}", movie_id));
 
-    println!("req: {:?}", req);
+    let response = http::client::send(req).await.map_err(|e| e.to_string())?;
 
-    let sent = http::client::send(req).await;
+    let parsed: MovieDetails = serde_json::from_str(&response.body)
+        .map_err(|e| format!("Error parsing response: {} {}", e, response.body))?;
 
-    let response = match sent {
-        Ok(response) => response,
-        Err(err) => return Err(err.to_string()),
-    };
-
-    let parsed = match serde_json::from_str(&response.body) {
-        Ok(parsed) => Ok(parsed),
-        Err(e) => Err(format!("Error parsing response: {} {}", e, response.body)),
-    };
-
-    parsed
+    Ok(parsed)
 }

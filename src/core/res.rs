@@ -4,6 +4,7 @@ use crate::core::html::Elem;
 pub enum Res {
     Html(Elem),
     Redirect(String),
+    Empty,
 }
 
 impl Res {

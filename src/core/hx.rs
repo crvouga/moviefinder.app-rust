@@ -8,7 +8,6 @@ pub fn get(href: &str) -> html::Attr {
 // https://htmx.org/attributes/hx-trigger/
 pub enum Trigger {
     Load,
-    MouseDown,
     Click,
 }
 
@@ -16,7 +15,6 @@ impl Trigger {
     pub fn to_str(&self) -> &str {
         match self {
             Trigger::Load => "load",
-            Trigger::MouseDown => "mousedown",
             Trigger::Click => "click",
         }
     }

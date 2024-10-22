@@ -26,6 +26,7 @@ impl TestEnv {
 pub struct Env {
     pub tmdb_api_read_access_token: String,
     pub port: String,
+    #[allow(dead_code)]
     pub test_env: TestEnv,
 }
 

@@ -3,7 +3,7 @@ use crate::core::html::*;
 use crate::core::res::Res;
 use crate::ui::bottom_nav;
 
-pub fn respond(route: Route) -> Res {
+pub fn respond(route: &Route) -> Res {
     match route {
         Route::Index => Res::Html(view_account()),
     }

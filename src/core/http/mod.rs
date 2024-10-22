@@ -114,6 +114,7 @@ impl From<Res> for Response {
                 );
                 Response::new(302, "".to_owned(), headers)
             }
+            Res::Empty => Response::new(204, "".to_owned(), HashMap::new()),
         }
     }
 }

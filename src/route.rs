@@ -6,7 +6,7 @@ pub enum Route {
     Feed(feed::route::Route),
     Account(account::route::Route),
     Media(media::route::Route),
-    Unknown,
+    Unknown(String),
 }
 
 impl Route {
@@ -15,6 +15,6 @@ impl Route {
     }
 
     pub fn decode(encoded: &String) -> Route {
-        core::route::decode(encoded).unwrap_or(Route::Unknown)
+        core::route::decode(encoded).unwrap_or(Route::Unknown(encoded.clone()))
     }
 }

@@ -15,7 +15,7 @@ use crate::{
 
 use super::route::Route;
 
-pub async fn respond(route: Route, ctx: &Ctx) -> Res {
+pub async fn respond(route: &Route, ctx: &Ctx) -> Res {
     match route {
         Route::Index { media_id } => Res::Html(view_load(media_id)),
 
@@ -41,7 +41,7 @@ pub async fn respond(route: Route, ctx: &Ctx) -> Res {
                 None => return ui::error::page("Media not found").into(),
             };
 
-            view_details(media).into()
+            view_details(&media).into()
         }
     }
 }
@@ -68,8 +68,11 @@ fn view_layout(media: Option<Media>, attrs: &[Attr], children: &[Elem]) -> Elem 
             div(
                 &[class("flex flex-col gap-6 items-center")],
                 &[div(
-                    &[class("w-full aspect-video overflow-hidden  border-b")],
-                    &[ui::image::view(&[class("w-full h-full"), src(image_src)])],
+                    &[class("w-full aspect-video overflow-hidden border-b")],
+                    &[ui::image::view(&[
+                        class("w-full h-full select-none"),
+                        src(image_src),
+                    ])],
                 )]
                 .iter()
                 .chain(children)
@@ -81,7 +84,7 @@ fn view_layout(media: Option<Media>, attrs: &[Attr], children: &[Elem]) -> Elem 
     )
 }
 
-fn view_load(media_id: MediaId) -> Elem {
+fn view_load(media_id: &MediaId) -> Elem {
     view_layout(
         None,
         &[
@@ -94,27 +97,35 @@ fn view_load(media_id: MediaId) -> Elem {
     )
 }
 
-fn view_details(media: Media) -> Elem {
+fn view_details(media: &Media) -> Elem {
     view_layout(
         Some(media.clone()),
         &[],
-        &[
-            div(
-                &[class("text-3xl font-bold text-center px-6")],
-                &[text(&media.media_title)],
-            ),
-            div(
-                &[class(
-                    "text-base text-opacity-70 font-normal text-center px-6",
-                )],
-                &[text(&media.media_description)],
-            ),
-        ],
+        &[div(
+            &[class("flex flex-col gap-4 items-center")],
+            &[view_title(media), view_description(media)],
+        )],
     )
 }
 
-fn load_route(media_id: MediaId) -> route::Route {
+fn view_title(media: &Media) -> Elem {
+    div(
+        &[class("text-3xl font-bold text-center px-6")],
+        &[text(&media.media_title)],
+    )
+}
+
+fn view_description(media: &Media) -> Elem {
+    div(
+        &[class("text-base text-opacity font-normal text-center px-6")],
+        &[text(&media.media_description)],
+    )
+}
+
+fn load_route(media_id: &MediaId) -> route::Route {
     route::Route::Media(media::route::Route::Details(
-        media::details::route::Route::Load { media_id },
+        media::details::route::Route::Load {
+            media_id: media_id.clone(),
+        },
     ))
 }

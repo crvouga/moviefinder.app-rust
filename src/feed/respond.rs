@@ -14,7 +14,7 @@ use crate::{
     ui::{bottom_nav, root::ROOT_SELECTOR},
 };
 
-pub async fn respond(route: Route, ctx: &ctx::Ctx) -> Res {
+pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
     match route {
         Route::Index => Res::Html(view_feed()),
 

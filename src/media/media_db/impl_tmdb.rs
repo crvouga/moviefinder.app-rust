@@ -89,7 +89,6 @@ pub fn to_query_plan(query: Query<Field>, mut query_plan: QueryPlan) -> QueryPla
                 query_plan
             }
         },
-        _ => query_plan,
     }
 }
 
@@ -122,8 +121,6 @@ impl MediaDb for Tmdb {
         let tmdb_config = tmdb_api::config::load(&self.config).await?;
 
         let query_plan = to_query_plan(query.clone(), vec![]);
-
-        println!("query_plan: {:?}", query_plan);
 
         let result = execute_query_plan(&self.config, &tmdb_config, query, query_plan).await?;
 

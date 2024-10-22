@@ -13,7 +13,6 @@ where
 
     loop {
         let (stream, _) = listener.accept().await.unwrap();
-        println!("Connection established");
         let handle_request = handle_request.clone();
         tokio::spawn(handle_connection(stream, handle_request));
     }
@@ -24,8 +23,20 @@ where
     F: Fn(Request) -> Fut + Send + Sync + 'static,
     Fut: std::future::Future<Output = Response> + Send + 'static,
 {
-    let mut buffer = [0; 512];
-    stream.read(&mut buffer).await.unwrap();
+    let mut buffer = Vec::new();
+    let mut temp_buffer = [0; 1024];
+
+    loop {
+        let bytes_read = stream.read(&mut temp_buffer).await.unwrap();
+        if bytes_read == 0 {
+            break;
+        }
+        buffer.extend_from_slice(&temp_buffer[..bytes_read]);
+
+        if buffer.ends_with(b"\r\n\r\n") {
+            break;
+        }
+    }
 
     let request_string = String::from_utf8_lossy(&buffer[..]);
 
@@ -49,11 +60,11 @@ where
     let request = Request {
         method,
         path,
-        host: "".to_string(), // Server does not need the host field
+        host: "".to_string(),
         headers,
     };
 
-    let response = handle_request(request).await; // Await the async handler
+    let response = handle_request(request).await;
 
     let response_string = response.to_http_string();
     stream.write_all(response_string.as_bytes()).await.unwrap();

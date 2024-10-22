@@ -8,10 +8,13 @@ pub struct Media {
     pub media_id: MediaId,
     pub media_title: String,
     pub media_description: String,
+    #[allow(dead_code)]
     pub media_type: MediaType,
+    #[allow(dead_code)]
     pub media_genre_ids: Vec<GenreId>,
     pub media_poster: ImageSet,
     pub media_backdrop: ImageSet,
+    #[allow(dead_code)]
     pub media_popularity: f64,
 }
 
