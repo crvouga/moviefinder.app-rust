@@ -118,6 +118,10 @@ pub fn class_list(values: &[&str]) -> Attr {
     attr("class", &values.join(" "))
 }
 
+pub fn aria_label(value: &str) -> Attr {
+    attr("aria-label", value)
+}
+
 pub fn id(value: &str) -> Attr {
     attr("id", value)
 }
