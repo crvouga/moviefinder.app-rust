@@ -5,10 +5,19 @@ pub fn get(href: &str) -> html::Attr {
     html::attr("hx-get", href)
 }
 
+pub fn post(href: &str) -> html::Attr {
+    html::attr("hx-post", href)
+}
+
+pub fn vals(values: &str) -> html::Attr {
+    html::attr("hx-vals", values)
+}
+
 // https://htmx.org/attributes/hx-trigger/
 pub enum Trigger {
     Load,
     Click,
+    Custom(String),
 }
 
 impl Trigger {
@@ -16,11 +25,14 @@ impl Trigger {
         match self {
             Trigger::Load => "load",
             Trigger::Click => "click",
+            Trigger::Custom(value) => value,
         }
     }
+}
 
-    pub fn attr(&self) -> html::Attr {
-        html::attr("hx-trigger", self.to_str())
+impl From<Trigger> for html::Attr {
+    fn from(trigger: Trigger) -> Self {
+        html::attr("hx-trigger", trigger.to_str())
     }
 }
 
@@ -35,6 +47,7 @@ pub fn target(selector: &str) -> html::Attr {
 pub enum Swap {
     InnerHtml,
     OuterHtml,
+    None,
 }
 
 impl Swap {
@@ -42,11 +55,14 @@ impl Swap {
         match self {
             Swap::InnerHtml => "innerHTML",
             Swap::OuterHtml => "outerHTML",
+            Swap::None => "none",
         }
     }
+}
 
-    pub fn attr(&self) -> html::Attr {
-        html::attr("hx-swap", self.to_str())
+impl From<Swap> for html::Attr {
+    fn from(swap: Swap) -> Self {
+        html::attr("hx-swap", swap.to_str())
     }
 }
 
@@ -68,7 +84,10 @@ impl Preload {
             Preload::MouseDown => "mousedown",
         }
     }
-    pub fn attr(&self) -> html::Attr {
-        html::attr("preload", self.to_str())
+}
+
+impl From<Preload> for html::Attr {
+    fn from(preload: Preload) -> Self {
+        html::attr("hx-preload", preload.to_str())
     }
 }

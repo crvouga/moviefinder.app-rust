@@ -15,6 +15,8 @@ impl Route {
     }
 
     pub fn decode(encoded: &String) -> Route {
-        core::route::decode(encoded).unwrap_or(Route::Unknown(encoded.clone()))
+        let decoded = core::route::decode(encoded);
+
+        decoded.unwrap_or(Route::Unknown(encoded.clone()))
     }
 }

@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use crate::core::res::Res;
+use std::collections::HashMap;
 
 pub mod client;
 pub mod server;
@@ -11,6 +10,7 @@ pub struct Request {
     pub path: String,
     pub host: String,
     pub headers: HashMap<String, String>,
+    pub body: String,
 }
 
 impl Request {
@@ -59,16 +59,19 @@ impl Response {
             .map(|(key, value)| format!("{}: {}\r\n", key, value))
             .collect::<String>();
 
-        format!(
-            "HTTP/1.1 {} OK\r\n{}Content-Length: {}\r\n\r\n{}",
+        let http_string = format!(
+            "HTTP/1.1 {} {}\r\n{}Content-Length: {}\r\n\r\n{}",
             self.status_code,
+            self.status_text(),
             headers_string,
             self.body.len(),
             self.body
-        )
+        );
+
+        http_string
     }
 
-    fn from_http_string(response: &str) -> Self {
+    pub fn from_http_string(response: &str) -> Self {
         let mut lines = response.lines();
         let status_line = lines.next().unwrap();
         let status_code = status_line
@@ -98,6 +101,16 @@ impl Response {
             status_code,
             body,
             headers,
+        }
+    }
+
+    fn status_text(&self) -> &'static str {
+        match self.status_code {
+            200 => "OK",
+            204 => "No Content",
+            302 => "Found",
+            304 => "Not Modified",
+            _ => "Unknown Status",
         }
     }
 }

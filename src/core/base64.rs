@@ -28,38 +28,52 @@ pub fn encode(data: &str) -> String {
 
     String::from_utf8(encoded).unwrap()
 }
-
-pub fn decode(data: &str) -> String {
+pub fn decode(data: &str) -> Result<String, String> {
     let bytes = data.as_bytes();
     let mut decoded = Vec::new();
     let mut buffer = [0u8; 4];
 
-    let decode_table = |b: u8| -> u8 {
+    let decode_table = |b: u8| -> Option<u8> {
         match b {
-            b'A'..=b'Z' => b - b'A',
-            b'a'..=b'z' => b - b'a' + 26,
-            b'0'..=b'9' => b - b'0' + 52,
-            b'+' => 62,
-            b'/' => 63,
-            _ => 0,
+            b'A'..=b'Z' => Some(b - b'A'),
+            b'a'..=b'z' => Some(b - b'a' + 26),
+            b'0'..=b'9' => Some(b - b'0' + 52),
+            b'+' => Some(62),
+            b'/' => Some(63),
+            b'=' => None, // Padding character should not be decoded
+            _ => None,    // Any other character is invalid
         }
     };
 
     for chunk in bytes.chunks(4) {
-        for (i, &byte) in chunk.iter().enumerate() {
-            buffer[i] = decode_table(byte);
+        if chunk.len() < 4 {
+            return Err("Invalid base64 input: chunk is too small".to_string());
         }
 
+        let mut valid_bytes = 0;
+
+        for (i, &byte) in chunk.iter().enumerate() {
+            if let Some(decoded_byte) = decode_table(byte) {
+                buffer[i] = decoded_byte;
+                valid_bytes += 1;
+            } else if byte != b'=' {
+                return Err(format!("Invalid base64 character: {}", byte));
+            }
+        }
+
+        // Proceed only with valid non-padding characters
         decoded.push((buffer[0] << 2) | (buffer[1] >> 4));
-        if chunk[2] != b'=' {
+
+        if valid_bytes > 2 {
             decoded.push((buffer[1] << 4) | (buffer[2] >> 2));
         }
-        if chunk[3] != b'=' {
+
+        if valid_bytes > 3 {
             decoded.push((buffer[2] << 6) | buffer[3]);
         }
     }
 
-    String::from_utf8(decoded).unwrap()
+    String::from_utf8(decoded).map_err(|e| format!("Invalid UTF-8 sequence: {}", e))
 }
 
 #[cfg(test)]
@@ -71,7 +85,7 @@ mod tests {
         let data = "hello world";
         let encoded = encode(data);
         let decoded = decode(&encoded);
-        assert_eq!(decoded, data);
+        assert_eq!(decoded, Ok(data.to_string()));
     }
 
     #[test]
@@ -79,7 +93,7 @@ mod tests {
         let data = "hello";
         let encoded = encode(data);
         let decoded = decode(&encoded);
-        assert_eq!(decoded, data);
+        assert_eq!(decoded, Ok(data.to_string()));
     }
 
     #[test]
@@ -87,6 +101,6 @@ mod tests {
         let data = "";
         let encoded = encode(data);
         let decoded = decode(&encoded);
-        assert_eq!(decoded, data);
+        assert_eq!(decoded, Ok(data.to_string()));
     }
 }

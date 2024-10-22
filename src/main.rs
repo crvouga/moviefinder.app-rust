@@ -32,7 +32,7 @@ async fn respond(http_req: core::http::Request, ctx: Arc<ctx::Ctx>) -> core::htt
 
     println!("{} {:?}", http_req.method, route);
 
-    respond::respond(&route, &ctx)
+    let http_response = respond::respond(&route, &ctx)
         .await
         .map_html(|html| {
             if is_hx_request(&http_req) {
@@ -41,7 +41,9 @@ async fn respond(http_req: core::http::Request, ctx: Arc<ctx::Ctx>) -> core::htt
                 ui::root::view_root(&[html])
             }
         })
-        .into()
+        .into();
+
+    http_response
 }
 
 fn is_hx_request(req: &core::http::Request) -> bool {

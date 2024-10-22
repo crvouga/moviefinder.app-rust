@@ -19,10 +19,10 @@ pub fn view(buttons: &[Button]) -> Elem {
                 a(&[
                     hx::get(&btn.hx_get),
                     hx::target(&btn.hx_target),
-                    hx::Swap::InnerHtml.attr(),
+                    hx::Swap::InnerHtml.into(),
                     hx::push_url(&btn.hx_get),
-                    hx::Trigger::Click.attr(),
-                    // hx::Preload::MouseDown.attr(),
+                    hx::Trigger::Click.into(),
+                    hx::Preload::MouseDown.into(),
                     class_list(
                         &[
                             "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm h-full cursor-pointer select-none active:opacity-75 transition-opacity",

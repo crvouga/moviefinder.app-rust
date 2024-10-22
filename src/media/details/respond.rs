@@ -88,8 +88,8 @@ fn view_load(media_id: &MediaId) -> Elem {
     view_layout(
         None,
         &[
-            hx::Trigger::Load.attr(),
-            hx::Swap::InnerHtml.attr(),
+            hx::Trigger::Load.into(),
+            hx::Swap::InnerHtml.into(),
             hx::target(&ROOT_SELECTOR),
             hx::get(&load_route(media_id).encode()),
         ],

@@ -15,7 +15,7 @@ pub fn view(back_route: route::Route, title: &str) -> Elem {
                 &[
                     class("size-16"),
                     hx::target(&ROOT_SELECTOR),
-                    hx::Swap::InnerHtml.attr(),
+                    hx::Swap::InnerHtml.into(),
                     hx::get(&back_route.encode()),
                     hx::push_url("true"),
                 ],

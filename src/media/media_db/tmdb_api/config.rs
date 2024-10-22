@@ -1,5 +1,5 @@
 // https://developer.themoviedb.org/reference/configuration-details
-use super::{to_base_headers, Config, HOST};
+use super::{to_get_request, Config};
 use crate::{core::http, core::image_set::ImageSet};
 use serde::{Deserialize, Serialize};
 
@@ -21,12 +21,7 @@ pub struct TmdbConfigImages {
 }
 
 pub async fn load(config: &Config) -> Result<TmdbConfig, String> {
-    let req = http::Request {
-        headers: to_base_headers(config),
-        host: HOST.to_string(),
-        method: "GET".to_string(),
-        path: "/3/configuration".to_string(),
-    };
+    let req = to_get_request(config, "/3/configuration");
 
     let sent = http::client::send(req).await;
 

@@ -42,6 +42,8 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
                 Err(err) => Res::Html(ui::error::page(&err)),
             }
         }
+
+        Route::ChangedSlide => Res::Empty,
     }
 }
 
@@ -58,6 +60,17 @@ fn view_feed() -> Elem {
                     ),
                     ui::swiper::Direction::Vertical.into(),
                     ui::swiper::slides_per_view("1"),
+                    hx::Trigger::Custom("swiperslidechange from:swiper-container".to_string())
+                        .into(),
+                    hx::Swap::None.into(),
+                    hx::post(route::Route::Feed(Route::ChangedSlide).encode().as_str()),
+                    hx::vals(
+                        r#"
+                        js:{
+                            feedIndex: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)
+                        }
+                        "#,
+                    ),
                 ],
                 &[view_load_initial()],
             ),
@@ -94,9 +107,9 @@ fn view_feed_item(feed_item: &FeedItem) -> Elem {
                 &[
                     class("w-full h-full"),
                     hx::get(&to_media_details_route(&media.media_id).encode()),
-                    hx::Trigger::Click.attr(),
-                    hx::Preload::MouseDown.attr(),
-                    hx::Swap::InnerHtml.attr(),
+                    hx::Trigger::Click.into(),
+                    hx::Preload::MouseDown.into(),
+                    hx::Swap::InnerHtml.into(),
                     hx::push_url("true"),
                     hx::target(&ROOT_SELECTOR),
                 ],
@@ -116,8 +129,8 @@ fn view_load_initial() -> Elem {
         &[
             class("flex-1 flex flex-col items-center justify-center"),
             hx::get(&route::Route::Feed(Route::LoadMore).encode()),
-            hx::Trigger::Load.attr(),
-            hx::Swap::OuterHtml.attr(),
+            hx::Trigger::Load.into(),
+            hx::Swap::OuterHtml.into(),
         ],
         &[ui::icon::spinner(&[class("size-16 animate-spin")])],
     )

@@ -13,16 +13,25 @@ pub fn encode<T: Serialize + Clone>(route: T) -> String {
     format!("{}{}{}", human_friendly, SEPARATOR, base_64_encoded)
 }
 
-pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &String) -> Option<T> {
+pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &String) -> Result<T, String> {
     let without_slash = remove_leading_slash(&encoded);
 
-    let separated: Vec<&str> = without_slash.split(SEPARATOR).collect();
+    let without_query_params = remove_query_params(&without_slash);
+
+    let separated: Vec<&str> = without_query_params.split(SEPARATOR).collect();
 
     let second = separated.get(1).unwrap_or(&"");
 
-    let decoded_str = core::base64::decode(second);
+    let decoded_str = core::base64::decode(second)?;
 
-    serde_json::from_str(&decoded_str).ok()
+    let parsed = serde_json::from_str(&decoded_str).map_err(|e| e.to_string());
+
+    parsed
+}
+
+fn remove_query_params(path: &str) -> String {
+    let parts: Vec<&str> = path.split('?').collect();
+    parts.get(0).unwrap_or(&"").to_string()
 }
 
 fn remove_leading_slash(path: &str) -> String {

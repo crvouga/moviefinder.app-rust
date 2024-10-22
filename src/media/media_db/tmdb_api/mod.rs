@@ -27,6 +27,7 @@ pub fn to_request(config: &Config, method: &str, path: &str) -> http::Request {
         host: HOST.to_string(),
         method: method.to_string(),
         path: path.to_string(),
+        body: "".to_string(),
     }
 }
 
