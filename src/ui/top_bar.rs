@@ -18,6 +18,7 @@ pub fn view(back_route: route::Route, title: &str) -> Elem {
                     hx::Swap::InnerHtml.into(),
                     hx::get(&back_route.encode()),
                     hx::push_url("true"),
+                    hx::Preload::MouseDown.into(),
                     aria_label("Go back"),
                 ],
                 &[ui::icon::back_arrow(&[class("size-8")])],

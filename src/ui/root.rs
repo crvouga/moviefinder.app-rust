@@ -16,6 +16,7 @@ pub fn view_root(children: &[Elem]) -> Elem {
                 rel("stylesheet"),
                 href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>")
             ]),
+            link(&[rel("preconnect"),href("https://image.tmdb.org")]),
             script(&[src("https://cdn.tailwindcss.com")],  &[]),
             script(&[src("https://unpkg.com/htmx.org@2.0.1"),defer("true")],  &[]),
             script(&[src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js"),defer("true")],  &[]),
@@ -31,7 +32,7 @@ pub fn view_root(children: &[Elem]) -> Elem {
                 div(
                     &[
                         id(ROOT_ID),
-                        class("w-full max-w-[500px] h-full max-h-[800px] border box-border rounded overflow-hidden flex flex-col"),
+                        class("w-full max-w-[600px] h-full max-h-[940px] border box-border rounded overflow-hidden flex flex-col"),
                         hx::boost(),
                     ],
                     children
