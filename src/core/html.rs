@@ -158,6 +158,10 @@ pub fn meta(attrs: &[Attr]) -> Elem {
     void_element("meta", attrs)
 }
 
+pub fn title(value: &str) -> Elem {
+    elem("title", &[], &[text(value)])
+}
+
 pub fn link(attrs: &[Attr]) -> Elem {
     void_element("link", attrs)
 }
