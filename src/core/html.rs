@@ -114,6 +114,10 @@ pub fn src(value: &str) -> Attr {
     attr("src", value)
 }
 
+pub fn defer(value: &str) -> Attr {
+    attr("defer", value)
+}
+
 pub fn class(value: &str) -> Attr {
     attr("class", value)
 }
