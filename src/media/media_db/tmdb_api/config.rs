@@ -72,5 +72,5 @@ fn to_base_url(config: &TmdbConfig) -> String {
     config
         .images
         .as_ref()
-        .map_or("".to_string(), |images| images.base_url.clone())
+        .map_or("".to_string(), |images| images.secure_base_url.clone())
 }
