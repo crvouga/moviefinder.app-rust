@@ -15,7 +15,7 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
 
         Route::Favicon => Res::Empty,
 
-        Route::RobotsTxt => Res::Text("User-agent: *\nDisallow: /".to_string()),
+        Route::RobotsTxt => Res::Text("User-agent: *\nDisallow:".to_owned()),
 
         Route::Unknown(_route) => Res::Redirect(Route::Feed(feed::route::Route::Index).encode()),
     }

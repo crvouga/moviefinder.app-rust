@@ -6,7 +6,7 @@ const ROOT_ID: &'static str = "root";
 pub const ROOT_SELECTOR: &'static str = "#root";
 
 pub fn view_root(children: &[Elem]) -> Elem {
-    return html(&[
+    return html(&[lang("en")], &[
         head(&[
             meta(&[charset("UTF-8")]),
             meta(&[name("viewport"), content("width=device-width, initial-scale=1")]),

@@ -94,6 +94,10 @@ pub fn charset(value: &str) -> Attr {
     attr("charset", value)
 }
 
+pub fn lang(value: &str) -> Attr {
+    attr("lang", value)
+}
+
 pub fn text(value: &str) -> Elem {
     Elem::Safe(value.to_string())
 }
@@ -186,8 +190,8 @@ pub fn button(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("button", attrs, children)
 }
 
-pub fn html(children: &[Elem]) -> Elem {
-    elem("html", &[], children)
+pub fn html(attrs: &[Attr], children: &[Elem]) -> Elem {
+    elem("html", attrs, children)
 }
 
 pub fn head(children: &[Elem]) -> Elem {
