@@ -1,4 +1,3 @@
-use crate::core::res::Res;
 use std::collections::HashMap;
 
 pub mod client;
@@ -112,30 +111,5 @@ impl Response {
             304 => "Not Modified",
             _ => "Unknown Status",
         }
-    }
-}
-
-impl From<Res> for Response {
-    fn from(res: Res) -> Self {
-        match res {
-            Res::Html(body) => Response::new(200, body.render(), HashMap::new()),
-            Res::Redirect(location) => {
-                let mut headers = HashMap::new();
-                headers.insert(
-                    "Location".to_string().to_ascii_lowercase(),
-                    ensure_leading_slash(&location),
-                );
-                Response::new(302, "".to_owned(), headers)
-            }
-            Res::Empty => Response::new(204, "".to_owned(), HashMap::new()),
-        }
-    }
-}
-
-fn ensure_leading_slash(path: &str) -> String {
-    if path.starts_with('/') {
-        path.to_owned()
-    } else {
-        format!("/{}", path)
     }
 }
