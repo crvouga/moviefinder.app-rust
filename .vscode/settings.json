@@ -4,6 +4,7 @@
     "clippy",
     "mousedown",
     "moviefinder",
+    "nanos",
     "serde",
     "stylesheet",
     "themoviedb",

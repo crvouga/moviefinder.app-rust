@@ -1,13 +1,12 @@
-use rand::Rng;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[allow(dead_code)]
 pub fn v4() -> String {
-    let mut rng = rand::thread_rng();
     let mut bytes = [0u8; 16];
-    rng.fill(&mut bytes);
+    fill_bytes_with_time(&mut bytes);
 
-    bytes[6] = (bytes[6] & 0x0f) | 0x40; // Version 4
-    bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant (RFC 4122)
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
 
     format!(
         "{:08x}-{:04x}-{:04x}-{:04x}-{:04x}{:08x}",
@@ -20,6 +19,15 @@ pub fn v4() -> String {
     )
 }
 
+fn fill_bytes_with_time(bytes: &mut [u8]) {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let nanos = now.as_nanos().to_le_bytes();
+
+    for (i, byte) in bytes.iter_mut().enumerate() {
+        *byte = nanos[i % nanos.len()];
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -27,19 +35,16 @@ mod tests {
     #[test]
     fn test_v4_format() {
         let uuid = v4();
-        // Check length of the generated UUID (should be 36 with hyphens)
+
         assert_eq!(uuid.len(), 36);
 
-        // Check if the hyphens are in the correct positions
         assert_eq!(uuid.chars().nth(8), Some('-'));
         assert_eq!(uuid.chars().nth(13), Some('-'));
         assert_eq!(uuid.chars().nth(18), Some('-'));
         assert_eq!(uuid.chars().nth(23), Some('-'));
 
-        // Check if the version is '4'
         assert_eq!(uuid.chars().nth(14), Some('4'));
 
-        // Check if the variant is correct (most significant bits of byte 8 should be '10')
         let variant_digit = uuid.chars().nth(19).unwrap().to_digit(16).unwrap();
         assert_eq!(variant_digit & 0b1100, 0b1000);
     }

@@ -8,7 +8,3 @@ async-trait = "0.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1", features = ["full"] }
-rand = "0.8"
-
-[package.metadata.clippy]
-flags = ["-D clippy::expect_used", "-D clippy::panic", "-D clippy::unwrap_used"]
