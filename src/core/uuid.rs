@@ -1,6 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[allow(dead_code)]
 pub fn v4() -> String {
     let mut bytes = [0u8; 16];
     fill_bytes_with_time(&mut bytes);
