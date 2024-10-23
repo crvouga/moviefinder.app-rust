@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use super::interface::KeyValueDb;
+use super::interface::{to_namespaced_key, KeyValueDb};
 
 #[derive(Clone)]
 pub struct HashMap {
@@ -17,11 +17,9 @@ impl HashMap {
         }
     }
     fn to_namespaced_key(&self, key: &str) -> String {
-        self.namespace.join(SEPARATOR) + SEPARATOR + key
+        to_namespaced_key(&self.namespace, key)
     }
 }
-
-const SEPARATOR: &str = ":";
 
 #[async_trait]
 impl KeyValueDb for HashMap {
