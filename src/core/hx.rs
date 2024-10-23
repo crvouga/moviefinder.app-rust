@@ -88,6 +88,6 @@ impl Preload {
 
 impl From<Preload> for html::Attr {
     fn from(preload: Preload) -> Self {
-        html::attr("hx-preload", preload.to_str())
+        html::attr("preload", preload.to_str())
     }
 }
