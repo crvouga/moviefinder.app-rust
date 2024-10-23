@@ -13,7 +13,7 @@ pub fn encode<T: Serialize + Clone>(route: T) -> String {
     format!("{}{}{}", human_friendly, SEPARATOR, base_64_encoded)
 }
 
-pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &String) -> Result<T, String> {
+pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &str) -> Result<T, String> {
     let without_slash = remove_leading_slash(encoded);
 
     let without_query_params = remove_query_params(&without_slash);
@@ -24,8 +24,6 @@ pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &String) -> Result<T, Strin
 
     let decoded_str = core::base64::decode(second)?;
 
-    
-
     serde_json::from_str(&decoded_str).map_err(|e| e.to_string())
 }
 
@@ -35,8 +33,8 @@ fn remove_query_params(path: &str) -> String {
 }
 
 fn remove_leading_slash(path: &str) -> String {
-    if path.starts_with('/') {
-        path[1..].to_owned()
+    if let Some(stripped) = path.strip_prefix('/') {
+        stripped.to_owned()
     } else {
         path.to_owned()
     }

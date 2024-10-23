@@ -1,20 +1,13 @@
 #[cfg(test)]
 mod tests {
-    use crate::{
-        env,
-        feed::{feed::Feed, feed_db::interface::FeedDb},
-    };
+    use crate::feed::{core::Feed, feed_db::interface::FeedDb};
 
     struct Fixture {
         pub feed_db: Box<dyn FeedDb>,
     }
 
     fn fixtures() -> Vec<Fixture> {
-        let env = env::Env::load();
-
         let fixtures: Vec<Fixture> = vec![];
-
-        env.test_env == env::TestEnv::Integration;
 
         fixtures
     }

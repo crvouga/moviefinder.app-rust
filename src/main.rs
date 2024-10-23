@@ -13,19 +13,28 @@ mod ui;
 
 #[tokio::main]
 async fn main() {
-    let env = env::Env::load();
+    let env = match env::Env::load() {
+        Some(env) => env,
+        None => {
+            eprintln!("Failed to load environment variables");
+            return;
+        }
+    };
 
     let address = format!("0.0.0.0:{}", env.port);
 
-    println!("Server listening on http://{}", address);
-
     let ctx = Arc::new(ctx::Ctx::new(env.tmdb_api_read_access_token));
 
-    core::http::server::start(&address, move |req| {
+    let started = core::http::server::start(&address, move |req| {
         let ctx_arc = Arc::clone(&ctx);
         respond(req, ctx_arc)
     })
     .await;
+
+    match started {
+        Ok(_) => println!("Server listening on http://{}", address),
+        Err(err) => eprintln!("Errored while starting server: {}", err),
+    }
 }
 
 async fn respond(http_req: core::http::Request, ctx: Arc<ctx::Ctx>) -> core::http::Response {
@@ -33,20 +42,14 @@ async fn respond(http_req: core::http::Request, ctx: Arc<ctx::Ctx>) -> core::htt
 
     println!("{} {:?}", http_req.method, route);
 
-    
-
     respond::respond(&route, &ctx)
         .await
         .map_html(|html| {
-            if is_hx_request(&http_req) {
+            if http_req.headers.contains_key("hx-request") {
                 html
             } else {
                 ui::root::view_root(&[html])
             }
         })
         .into()
-}
-
-fn is_hx_request(req: &core::http::Request) -> bool {
-    req.headers.get("hx-request").is_some()
 }

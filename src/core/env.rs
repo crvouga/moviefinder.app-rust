@@ -33,18 +33,14 @@ pub fn load() -> io::Result<()> {
         }
 
         let mut parts = line.splitn(2, '=');
-        let key = parts.next().unwrap().trim();
-        let value = parts.next().unwrap().trim();
+        let key = parts.next().unwrap_or("").trim();
+        let value = parts.next().unwrap_or("").trim();
         env::set_var(key, remove_quotes(value));
     }
 
     Ok(())
 }
 
-pub fn read(key: &str) -> String {
-    env::var(key).unwrap_or_else(|_| panic!("{} must be set", key))
-}
-
-pub fn read_or_default(key: &str) -> String {
-    env::var(key).unwrap_or_default()
+pub fn read(key: &str) -> Option<String> {
+    env::var(key).ok()
 }

@@ -9,7 +9,7 @@ use crate::{
         pagination::Paginated,
         query::{Filter, Op, Query},
     },
-    media::{media::Media, media_id::MediaId},
+    media::{core::Media, media_id::MediaId},
 };
 use async_trait::async_trait;
 

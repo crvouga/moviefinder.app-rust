@@ -7,6 +7,8 @@ pub struct Feed {
 }
 
 impl Feed {
+    #[allow(dead_code)]
+
     pub fn random() -> Self {
         Self {
             feed_id: FeedId::new("feed_id".to_string()),

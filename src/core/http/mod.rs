@@ -9,16 +9,16 @@ pub struct Request {
     pub path: String,
     pub host: String,
     pub headers: HashMap<String, String>,
+    #[allow(dead_code)]
     pub body: String,
 }
 
 impl Request {
     pub fn to_http_string(&self) -> String {
-        let mut headers_string = self
-            .headers
-            .iter()
-            .map(|(key, value)| format!("{}: {}\r\n", key, value))
-            .collect::<String>();
+        let mut headers_string = String::new();
+        for (key, value) in &self.headers {
+            headers_string.push_str(&format!("{}: {}\r\n", key, value));
+        }
 
         if !self
             .headers
@@ -55,8 +55,9 @@ impl Response {
         let headers_string = self
             .headers
             .iter()
-            .map(|(key, value)| format!("{}: {}\r\n", key, value))
-            .collect::<String>();
+            .fold(String::new(), |acc, (key, value)| {
+                format!("{}{}: {}\r\n", acc, key, value)
+            });
 
         let http_string = format!(
             "HTTP/1.1 {} {}\r\n{}Content-Length: {}\r\n\r\n{}",
@@ -72,11 +73,11 @@ impl Response {
 
     pub fn from_http_string(response: &str) -> Self {
         let mut lines = response.lines();
-        let status_line = lines.next().unwrap();
+        let status_line = lines.next().unwrap_or("");
         let status_code = status_line
             .split_whitespace()
             .nth(1)
-            .unwrap()
+            .unwrap_or("")
             .parse::<u16>()
             .unwrap_or(500);
 

@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 
+#[allow(dead_code)]
 #[async_trait]
 pub trait KeyValueDb: Send + Sync {
     async fn get(&self, key: String) -> Result<Option<String>, String>;

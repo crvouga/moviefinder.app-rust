@@ -79,13 +79,8 @@ fn view_feed() -> Elem {
     )
 }
 
-fn view_feed_items(feed_items: &Vec<FeedItem>) -> Elem {
-    fragment(
-        &feed_items
-            .iter()
-            .map(view_feed_item)
-            .collect::<Vec<Elem>>(),
-    )
+fn view_feed_items(feed_items: &[FeedItem]) -> Elem {
+    fragment(&feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
 }
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::http,
-    media::{genre::genre_id::GenreId, media::Media, media_id::MediaId, media_type::MediaType},
+    media::{core::Media, genre::genre_id::GenreId, media_id::MediaId, media_type::MediaType},
 };
 
 use super::{

@@ -3,15 +3,24 @@ use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
-pub async fn start<F, Fut>(address: &str, handle_request: F)
+pub async fn start<F, Fut>(address: &str, handle_request: F) -> Result<(), std::io::Error>
 where
     F: Fn(Request) -> Fut + Send + Sync + 'static + Clone,
     Fut: std::future::Future<Output = Response> + Send + 'static,
 {
-    let listener = TcpListener::bind(address).await.unwrap();
+    let bind = TcpListener::bind(address).await;
+
+    let listener = match bind {
+        Ok(listener) => listener,
+        Err(err) => return Err(err),
+    };
 
     loop {
-        let (stream, _) = listener.accept().await.unwrap();
+        let accepted = listener.accept().await;
+        let (stream, _) = match accepted {
+            Ok(accepted) => accepted,
+            Err(_) => continue,
+        };
         let handle_request = handle_request.clone();
         tokio::spawn(handle_connection(stream, handle_request));
     }
@@ -28,7 +37,7 @@ where
         return;
     }
 
-    let headers_end = find_headers_end(&buffer).unwrap();
+    let headers_end = find_headers_end(&buffer).unwrap_or(0);
 
     let headers_data = &buffer[..headers_end];
     let request_string = parse_utf8_string(headers_data);

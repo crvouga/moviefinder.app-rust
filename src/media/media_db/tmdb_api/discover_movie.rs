@@ -1,6 +1,6 @@
 use crate::{
     core::http,
-    media::{genre::genre_id::GenreId, media::Media, media_id::MediaId, media_type::MediaType},
+    media::{core::Media, genre::genre_id::GenreId, media_id::MediaId, media_type::MediaType},
 };
 
 // https://developer.themoviedb.org/reference/discover-movie
@@ -71,8 +71,6 @@ pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
         Ok(response) => response,
         Err(err) => return Err(err.to_string()),
     };
-
-    
 
     match serde_json::from_str(&response.body) {
         Ok(parsed) => Ok(parsed),

@@ -1,6 +1,6 @@
 use crate::core::pagination::Paginated;
 use crate::core::query::Query;
-use crate::media::media::Media;
+use crate::media::core::Media;
 use async_trait::async_trait;
 
 #[derive(Debug, Clone)]

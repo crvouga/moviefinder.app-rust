@@ -17,7 +17,10 @@ mod tests {
     }
 
     fn fixtures() -> Vec<Fixture> {
-        let env = env::Env::load();
+        let env = match env::Env::load() {
+            Some(env) => env,
+            None => return vec![],
+        };
 
         let mut fixtures: Vec<Fixture> = vec![];
 

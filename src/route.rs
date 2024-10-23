@@ -16,14 +16,14 @@ impl Route {
         core::route::encode(self.clone())
     }
 
-    pub fn decode(encoded: &String) -> Route {
-        match encoded.as_str() {
+    pub fn decode(encoded: &str) -> Route {
+        match encoded {
             "/favicon.ico" => Route::Favicon,
             "/robots.txt" => Route::RobotsTxt,
             _ => {
                 let decoded = core::route::decode(encoded);
 
-                decoded.unwrap_or(Route::Unknown(encoded.clone()))
+                decoded.unwrap_or(Route::Unknown(encoded.to_string()))
             }
         }
     }

@@ -26,7 +26,7 @@ pub fn encode(data: &str) -> String {
         }
     }
 
-    String::from_utf8(encoded).unwrap()
+    String::from_utf8(encoded).unwrap_or("".to_string())
 }
 pub fn decode(data: &str) -> Result<String, String> {
     let bytes = data.as_bytes();

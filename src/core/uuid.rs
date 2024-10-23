@@ -1,5 +1,6 @@
 use rand::Rng;
 
+#[allow(dead_code)]
 pub fn v4() -> String {
     let mut rng = rand::thread_rng();
     let mut bytes = [0u8; 16];
