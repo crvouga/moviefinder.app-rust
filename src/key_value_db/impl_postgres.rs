@@ -9,7 +9,6 @@ pub struct Postgres<T: DbConnSql> {
 }
 
 impl<T: DbConnSql> Postgres<T> {
-    #[allow(dead_code)]
     pub fn new(db_conn_sql: T) -> Self {
         Self { db_conn_sql }
     }
