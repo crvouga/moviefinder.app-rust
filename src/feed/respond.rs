@@ -82,7 +82,7 @@ fn view_feed() -> Elem {
 fn view_feed_items(feed_items: &Vec<FeedItem>) -> Elem {
     fragment(
         &feed_items
-            .into_iter()
+            .iter()
             .map(view_feed_item)
             .collect::<Vec<Elem>>(),
     )
@@ -101,7 +101,7 @@ fn view_feed_item(feed_item: &FeedItem) -> Elem {
         FeedItem::Media { media, feed_index } => ui::swiper::slide(
             &[
                 class("w-full h-full flex flex-col items-center justify-center cursor-pointer"),
-                attr(&"data-feed-index", &feed_index.to_string()),
+                attr("data-feed-index", &feed_index.to_string()),
             ],
             &[button(
                 &[
@@ -111,13 +111,13 @@ fn view_feed_item(feed_item: &FeedItem) -> Elem {
                     hx::Preload::MouseDown.into(),
                     hx::Swap::InnerHtml.into(),
                     hx::push_url("true"),
-                    hx::target(&ROOT_SELECTOR),
+                    hx::target(ROOT_SELECTOR),
                 ],
                 &[ui::image::view(&[
                     class("w-full h-full object-cover"),
-                    width(&"100%"),
-                    height(&"100%"),
-                    src(&media.media_poster.to_highest_res()),
+                    width("100%"),
+                    height("100%"),
+                    src(media.media_poster.to_highest_res()),
                 ])],
             )],
         ),

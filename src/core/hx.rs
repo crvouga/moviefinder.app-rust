@@ -37,7 +37,7 @@ impl From<Trigger> for html::Attr {
 }
 
 pub fn boost() -> html::Attr {
-    return html::attr("hx-boost", "true");
+    html::attr("hx-boost", "true")
 }
 
 pub fn target(selector: &str) -> html::Attr {

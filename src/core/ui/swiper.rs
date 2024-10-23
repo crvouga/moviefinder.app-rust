@@ -9,9 +9,9 @@ pub enum Direction {
     Vertical,
 }
 
-impl Into<Attr> for Direction {
-    fn into(self) -> Attr {
-        match self {
+impl From<Direction> for Attr {
+    fn from(val: Direction) -> Self {
+        match val {
             // Direction::Horizontal => attr("direction", "horizontal"),
             Direction::Vertical => attr("direction", "vertical"),
         }

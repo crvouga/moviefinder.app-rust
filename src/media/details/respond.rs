@@ -54,7 +54,7 @@ fn view_layout(media: Option<Media>, attrs: &[Attr], children: &[Elem]) -> Elem 
         .map_or(" ", |m| m.media_backdrop.to_highest_res());
 
     div(
-        &[
+        [
             class("flex flex-col"),
             // Additional attributes passed in
         ]
@@ -67,7 +67,7 @@ fn view_layout(media: Option<Media>, attrs: &[Attr], children: &[Elem]) -> Elem 
             top_bar::view(route::Route::Feed(feed::route::Route::Index), top_bar_title),
             div(
                 &[class("flex flex-col gap-6 items-center")],
-                &[div(
+                [div(
                     &[class("w-full aspect-video overflow-hidden border-b")],
                     &[ui::image::view(&[
                         class("w-full h-full select-none"),
@@ -90,7 +90,7 @@ fn view_load(media_id: &MediaId) -> Elem {
         &[
             hx::Trigger::Load.into(),
             hx::Swap::InnerHtml.into(),
-            hx::target(&ROOT_SELECTOR),
+            hx::target(ROOT_SELECTOR),
             hx::get(&load_route(media_id).encode()),
         ],
         &[ui::icon::spinner(&[class("animate-spin size-16")])],

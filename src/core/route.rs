@@ -1,7 +1,7 @@
 use crate::core;
 use serde::{Deserialize, Serialize};
 
-const SEPARATOR: &'static str = "___";
+const SEPARATOR: &str = "___";
 
 pub fn encode<T: Serialize + Clone>(route: T) -> String {
     let encoded = serde_json::to_string(&route).unwrap_or("".to_owned());
@@ -14,7 +14,7 @@ pub fn encode<T: Serialize + Clone>(route: T) -> String {
 }
 
 pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &String) -> Result<T, String> {
-    let without_slash = remove_leading_slash(&encoded);
+    let without_slash = remove_leading_slash(encoded);
 
     let without_query_params = remove_query_params(&without_slash);
 
@@ -24,14 +24,14 @@ pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &String) -> Result<T, Strin
 
     let decoded_str = core::base64::decode(second)?;
 
-    let parsed = serde_json::from_str(&decoded_str).map_err(|e| e.to_string());
+    
 
-    parsed
+    serde_json::from_str(&decoded_str).map_err(|e| e.to_string())
 }
 
 fn remove_query_params(path: &str) -> String {
     let parts: Vec<&str> = path.split('?').collect();
-    parts.get(0).unwrap_or(&"").to_string()
+    parts.first().unwrap_or(&"").to_string()
 }
 
 fn remove_leading_slash(path: &str) -> String {

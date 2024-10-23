@@ -33,7 +33,7 @@ impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
         Media {
             media_id: MediaId::new(result.id.unwrap_or(0.0).to_string()),
             media_backdrop: to_backdrop_image_set(
-                &config,
+                config,
                 result.backdrop_path.unwrap_or("".to_string()).as_str(),
             ),
             media_description: result.overview.unwrap_or("".to_string()),
@@ -45,7 +45,7 @@ impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
                 .collect(),
             media_popularity: result.popularity.unwrap_or(0.0),
             media_poster: to_poster_image_set(
-                &config,
+                config,
                 result.poster_path.unwrap_or("".to_string()).as_str(),
             ),
             media_title: result.title.unwrap_or("".to_string()),
@@ -72,10 +72,10 @@ pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
         Err(err) => return Err(err.to_string()),
     };
 
-    let parsed = match serde_json::from_str(&response.body) {
-        Ok(parsed) => Ok(parsed),
-        Err(e) => return Err(format!("Error parsing response: {} {}", e, response.body)),
-    };
+    
 
-    parsed
+    match serde_json::from_str(&response.body) {
+        Ok(parsed) => Ok(parsed),
+        Err(e) => Err(format!("Error parsing response: {} {}", e, response.body)),
+    }
 }

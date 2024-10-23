@@ -79,7 +79,7 @@ impl From<(&TmdbConfig, MovieDetails)> for Media {
         Media {
             media_id: MediaId::new(result.id.to_string()),
             media_backdrop: to_backdrop_image_set(
-                &config,
+                config,
                 result.backdrop_path.unwrap_or("".to_string()).as_str(),
             ),
             media_description: result.overview.unwrap_or("".to_string()),
@@ -91,7 +91,7 @@ impl From<(&TmdbConfig, MovieDetails)> for Media {
                 .collect(),
             media_popularity: result.popularity.unwrap_or(0.0),
             media_poster: to_poster_image_set(
-                &config,
+                config,
                 result.poster_path.unwrap_or("".to_string()).as_str(),
             ),
             media_title: result.title.unwrap_or("".to_string()),

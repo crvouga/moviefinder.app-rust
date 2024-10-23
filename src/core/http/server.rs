@@ -34,7 +34,7 @@ where
     let request_string = parse_utf8_string(headers_data);
     let request_lines = split_request_lines(&request_string);
 
-    let (method, path) = parse_request_line(&request_lines[0]);
+    let (method, path) = parse_request_line(request_lines[0]);
     let (headers, content_length) = parse_headers(&request_lines[1..]);
 
     let body = parse_body(&buffer, headers_end, content_length, &mut stream).await;
@@ -155,10 +155,5 @@ fn find_subsequence(haystack: &[u8], needle: &[u8]) -> Option<usize> {
         return None;
     }
 
-    for i in 0..=haystack.len() - needle.len() {
-        if haystack[i..i + needle.len()] == needle[..] {
-            return Some(i);
-        }
-    }
-    None
+    (0..=haystack.len() - needle.len()).find(|&i| haystack[i..i + needle.len()] == needle[..])
 }

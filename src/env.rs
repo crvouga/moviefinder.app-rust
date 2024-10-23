@@ -19,7 +19,7 @@ impl TestEnv {
             return TestEnv::Integration;
         }
 
-        return TestEnv::None;
+        TestEnv::None
     }
 }
 

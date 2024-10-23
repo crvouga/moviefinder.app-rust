@@ -14,7 +14,7 @@ mod tests {
 
         let fixtures: Vec<Fixture> = vec![];
 
-        if env.test_env == env::TestEnv::Integration {}
+        env.test_env == env::TestEnv::Integration;
 
         fixtures
     }

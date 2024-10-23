@@ -207,5 +207,5 @@ pub fn body(attrs: &[Attr], children: &[Elem]) -> Elem {
 }
 
 pub fn a(attrs: &[Attr], children: &[Elem]) -> Elem {
-    elem("a", attrs, &children)
+    elem("a", attrs, children)
 }

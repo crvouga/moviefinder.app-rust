@@ -39,11 +39,11 @@ pub async fn load(config: &Config) -> Result<TmdbConfig, String> {
 }
 
 pub fn to_poster_image_set(config: &TmdbConfig, poster_path: &str) -> ImageSet {
-    to_image_set(&config, to_poster_sizes(&config), poster_path)
+    to_image_set(config, to_poster_sizes(config), poster_path)
 }
 
 pub fn to_backdrop_image_set(config: &TmdbConfig, backdrop_path: &str) -> ImageSet {
-    to_image_set(&config, to_backdrop_sizes(&config), backdrop_path)
+    to_image_set(config, to_backdrop_sizes(config), backdrop_path)
 }
 
 fn to_poster_sizes(config: &TmdbConfig) -> Vec<String> {
@@ -59,7 +59,7 @@ fn to_backdrop_sizes(config: &TmdbConfig) -> Vec<String> {
 }
 
 fn to_image_set(config: &TmdbConfig, sizes: Vec<String>, path: &str) -> ImageSet {
-    let base_url = to_base_url(&config);
+    let base_url = to_base_url(config);
 
     let lowest_to_highest = sizes
         .iter()

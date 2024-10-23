@@ -1,10 +1,10 @@
 use crate::core::{html::*, hx, ui};
 
-const ROOT_ID: &'static str = "root";
-pub const ROOT_SELECTOR: &'static str = "#root";
+const ROOT_ID: &str = "root";
+pub const ROOT_SELECTOR: &str = "#root";
 
 pub fn view_root(children: &[Elem]) -> Elem {
-    return html(&[lang("en")], &[
+    html(&[lang("en")], &[
         head(&[
             meta(&[charset("UTF-8")]),
             meta(&[name("viewport"), content("width=device-width, initial-scale=1")]),
@@ -37,5 +37,5 @@ pub fn view_root(children: &[Elem]) -> Elem {
                 ),
             ]
         ),
-    ]);
+    ])
 }

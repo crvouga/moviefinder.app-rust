@@ -40,7 +40,7 @@ impl QueryPlanItem {
         match self {
             QueryPlanItem::MovieDetails(media_id) => {
                 let movie_details_response =
-                    tmdb_api::movie_details::send(&config, media_id.as_str()).await?;
+                    tmdb_api::movie_details::send(config, media_id.as_str()).await?;
 
                 let movie = Media::from((tmdb_config, movie_details_response));
 
@@ -52,7 +52,7 @@ impl QueryPlanItem {
                 })
             }
             QueryPlanItem::DiscoverMovie(query) => {
-                let discover_response = tmdb_api::discover_movie::send(&config).await?;
+                let discover_response = tmdb_api::discover_movie::send(config).await?;
 
                 let items = discover_response
                     .results

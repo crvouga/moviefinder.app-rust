@@ -42,7 +42,7 @@ pub fn load() -> io::Result<()> {
 }
 
 pub fn read(key: &str) -> String {
-    env::var(key).expect(format!("{} must be set", key).as_str())
+    env::var(key).unwrap_or_else(|_| panic!("{} must be set", key))
 }
 
 pub fn read_or_default(key: &str) -> String {
