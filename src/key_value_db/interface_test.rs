@@ -85,4 +85,26 @@ mod tests {
             assert_eq!(after_update, Ok(Some(updated_item_serialized)));
         }
     }
+
+    #[tokio::test]
+    async fn test_zap() {
+        for mut f in fixtures() {
+            let item = Item::random();
+            let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
+
+            let before = f.key_value_db.get(&item.id).await;
+            let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
+            let after = f.key_value_db.get(&item.id).await;
+
+            assert_eq!(before, Ok(None));
+            assert_eq!(put, Ok(()));
+            assert_eq!(after, Ok(Some(item_serialized.clone())));
+
+            let zap = f.key_value_db.zap(&item.id).await;
+            let after_zap = f.key_value_db.get(&item.id).await;
+
+            assert_eq!(zap, Ok(()));
+            assert_eq!(after_zap, Ok(None));
+        }
+    }
 }
