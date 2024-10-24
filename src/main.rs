@@ -1,3 +1,8 @@
+use core::http::{
+    request::HttpRequest,
+    response::HttpResponse,
+    response_cookie::{HttpResponseCookie, SameSite},
+};
 use std::sync::Arc;
 
 mod account;
@@ -29,6 +34,20 @@ async fn main() {
 
     let ctx = Arc::new(ctx::Ctx::new(env.tmdb_api_read_access_token));
 
+    let session_cookie = HttpResponseCookie {
+        domain: None,
+        expires: None,
+        path: None,
+        http_only: true,
+        secure: false,
+        max_age: None,
+        name: "movie_finder_app_session_id".to_string(),
+        value: "".to_string(),
+        same_site: Some(SameSite::Lax),
+    };
+
+    println!("Session cookie: {}", session_cookie);
+
     let started = core::http::server::start(&address, move |req| {
         let ctx_arc = Arc::clone(&ctx);
         respond(req, ctx_arc)
@@ -41,7 +60,7 @@ async fn main() {
     }
 }
 
-async fn respond(http_req: core::http::Request, ctx: Arc<ctx::Ctx>) -> core::http::Response {
+async fn respond(http_req: HttpRequest, ctx: Arc<ctx::Ctx>) -> HttpResponse {
     let route = route::Route::decode(&http_req.path);
 
     println!("{} {:?}", http_req.method, route);

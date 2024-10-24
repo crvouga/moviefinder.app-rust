@@ -1,4 +1,4 @@
-use super::{core::Feed, feed_id::FeedId, feed_item::FeedItem};
+use super::{core::Feed, feed_id::FeedId, feed_item::FeedItem, route::Route};
 use crate::{
     core::{
         html::*,
@@ -8,7 +8,6 @@ use crate::{
         ui,
     },
     ctx,
-    feed::route::Route,
     media::{self, media_id::MediaId},
     route,
     ui::{bottom_nav, root::ROOT_SELECTOR},
@@ -36,18 +35,22 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
                 filter: Filter::None,
             };
 
-            ctx.media_db.query(query).await.map_or_else(
-                |err| ui::error::page(&err).into(),
-                |paginated| {
+            let queried = ctx.media_db.query(query).await;
+
+            match queried {
+                Err(err) => ui::error::page(&err).into(),
+
+                Ok(paginated) => {
                     let feed_items = paginated
                         .items
                         .into_iter()
                         .enumerate()
                         .map(|(index, media)| FeedItem::from((media, index as i32)))
                         .collect::<Vec<FeedItem>>();
+
                     view_feed_items(&feed_items).into()
-                },
-            )
+                }
+            }
         }
 
         Route::ChangedSlide(feed_id) => {
@@ -64,8 +67,6 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
             };
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
-
-            println!("Changed slide: {:?}", feed_new);
 
             Res::Empty
         }

@@ -1,8 +1,10 @@
-use super::{Request, Response};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
-pub async fn send(request: Request) -> tokio::io::Result<Response> {
+use super::request::HttpRequest;
+use super::response::HttpResponse;
+
+pub async fn send(request: HttpRequest) -> tokio::io::Result<HttpResponse> {
     let addr = format!("{}:80", request.host);
     let mut stream = TcpStream::connect(addr).await?;
 
@@ -14,7 +16,7 @@ pub async fn send(request: Request) -> tokio::io::Result<Response> {
 
     let response_string: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer);
 
-    let response = Response::from_http_string(&response_string);
+    let response = HttpResponse::from_http_string(&response_string);
 
     Ok(response)
 }

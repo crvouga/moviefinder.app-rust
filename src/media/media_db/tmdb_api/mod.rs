@@ -1,6 +1,5 @@
+use crate::core::http::request::HttpRequest;
 use std::collections::HashMap;
-
-use crate::core::http;
 
 pub mod config;
 pub mod discover_movie;
@@ -21,17 +20,18 @@ impl Config {
 
 pub const HOST: &str = "api.themoviedb.org";
 
-pub fn to_request(config: &Config, method: &str, path: &str) -> http::Request {
-    http::Request {
+pub fn to_request(config: &Config, method: &str, path: &str) -> HttpRequest {
+    HttpRequest {
         headers: to_base_headers(config),
         host: HOST.to_string(),
         method: method.to_string(),
         path: path.to_string(),
         body: "".to_string(),
+        cookies: HashMap::new(),
     }
 }
 
-pub fn to_get_request(config: &Config, path: &str) -> http::Request {
+pub fn to_get_request(config: &Config, path: &str) -> HttpRequest {
     to_request(config, "GET", path)
 }
 

@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
+use super::http::response::HttpResponse;
 use crate::core::html::Elem;
-
-use super::http;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub enum Res {
@@ -27,20 +25,20 @@ impl From<Elem> for Res {
     }
 }
 
-impl From<Res> for http::Response {
+impl From<Res> for HttpResponse {
     fn from(res: Res) -> Self {
         match res {
-            Res::Html(body) => http::Response::new(200, body.render(), HashMap::new()),
+            Res::Html(body) => HttpResponse::new(200, body.render(), HashMap::new()),
             Res::Redirect(location) => {
                 let mut headers = HashMap::new();
                 headers.insert(
                     "Location".to_string().to_ascii_lowercase(),
                     ensure_leading_slash(&location),
                 );
-                http::Response::new(302, "".to_owned(), headers)
+                HttpResponse::new(302, "".to_owned(), headers)
             }
-            Res::Text(text) => http::Response::new(200, text, HashMap::new()),
-            Res::Empty => http::Response::new(204, "".to_owned(), HashMap::new()),
+            Res::Text(text) => HttpResponse::new(200, text, HashMap::new()),
+            Res::Empty => HttpResponse::new(204, "".to_owned(), HashMap::new()),
         }
     }
 }

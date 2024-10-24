@@ -10,6 +10,7 @@
     "swiperslidechange",
     "themoviedb",
     "tmdb",
-    "touchstart"
+    "touchstart",
+    "vals"
   ]
 }

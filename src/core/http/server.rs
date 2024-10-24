@@ -1,12 +1,14 @@
-use super::{Request, Response};
 use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+use super::request::HttpRequest;
+use super::response::HttpResponse;
+
 pub async fn start<F, Fut>(address: &str, handle_request: F) -> Result<(), std::io::Error>
 where
-    F: Fn(Request) -> Fut + Send + Sync + 'static + Clone,
-    Fut: std::future::Future<Output = Response> + Send + 'static,
+    F: Fn(HttpRequest) -> Fut + Send + Sync + 'static + Clone,
+    Fut: std::future::Future<Output = HttpResponse> + Send + 'static,
 {
     let bind = TcpListener::bind(address).await;
 
@@ -28,8 +30,8 @@ where
 
 async fn handle_connection<F, Fut>(mut stream: TcpStream, handle_request: F)
 where
-    F: Fn(Request) -> Fut + Send + Sync + 'static,
-    Fut: std::future::Future<Output = Response> + Send + 'static,
+    F: Fn(HttpRequest) -> Fut + Send + Sync + 'static,
+    Fut: std::future::Future<Output = HttpResponse> + Send + 'static,
 {
     let buffer = read_http_request(&mut stream).await;
 
@@ -47,8 +49,8 @@ where
     let (headers, content_length) = parse_headers(&request_lines[1..]);
 
     let body = parse_body(&buffer, headers_end, content_length, &mut stream).await;
-
-    let request = new_request(method, path, headers, body);
+    let cookies = parse_cookies(&headers);
+    let request = new_request(method, path, headers, cookies, body);
     let response = handle_request(request).await;
 
     send_response(&mut stream, response).await;
@@ -89,6 +91,20 @@ fn parse_request_line(request_line: &str) -> (String, String) {
     let method = parts.next().unwrap_or("").to_string();
     let path = parts.next().unwrap_or("/").to_string();
     (method, path)
+}
+
+fn parse_cookies(headers: &HashMap<String, String>) -> HashMap<String, String> {
+    let mut cookies = HashMap::new();
+
+    if let Some(cookie_header) = headers.get("cookie") {
+        for cookie in cookie_header.split("; ") {
+            if let Some((key, value)) = cookie.split_once('=') {
+                cookies.insert(key.to_string(), value.to_string());
+            }
+        }
+    }
+
+    cookies
 }
 
 fn parse_headers(header_lines: &[&str]) -> (HashMap<String, String>, usize) {
@@ -138,18 +154,20 @@ fn new_request(
     method: String,
     path: String,
     headers: HashMap<String, String>,
+    cookies: HashMap<String, String>,
     body: String,
-) -> Request {
-    Request {
+) -> HttpRequest {
+    HttpRequest {
         method,
         path,
         host: "".to_string(),
         headers,
+        cookies,
         body,
     }
 }
 
-async fn send_response(stream: &mut TcpStream, response: Response) {
+async fn send_response(stream: &mut TcpStream, response: HttpResponse) {
     let response_string = response.to_http_string();
     if let Ok(()) = stream.write_all(response_string.as_bytes()).await {
         let _ = stream.flush().await;

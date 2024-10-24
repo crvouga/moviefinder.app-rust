@@ -1,17 +1,19 @@
-use serde::{Deserialize, Serialize};
-
 use crate::core::uuid;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct SessionId(String);
 
 impl SessionId {
-    #[allow(dead_code)]
-    pub fn new(id: String) -> Self {
-        Self(id)
+    pub fn new(id: String) -> Option<Self> {
+        let cleaned = id.trim().to_string();
+        if cleaned.is_empty() {
+            None
+        } else {
+            Some(Self(cleaned))
+        }
     }
 
-    #[allow(dead_code)]
     pub fn as_str(&self) -> &str {
         &self.0
     }
@@ -19,6 +21,6 @@ impl SessionId {
 
 impl Default for SessionId {
     fn default() -> Self {
-        SessionId::new(uuid::v4().to_string())
+        SessionId(uuid::v4().to_string())
     }
 }
