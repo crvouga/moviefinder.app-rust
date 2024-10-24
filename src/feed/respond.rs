@@ -30,29 +30,24 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
                 .unwrap_or(None)
                 .unwrap_or_default();
 
-            let queried = ctx
-                .media_db
-                .query(Query {
-                    limit: 10,
-                    offset: feed.active_index as u32,
-                    filter: Filter::None,
-                })
-                .await;
+            let query = Query {
+                limit: 10,
+                offset: feed.active_index as u32,
+                filter: Filter::None,
+            };
 
-            match queried {
-                Ok(paginated) => {
+            ctx.media_db.query(query).await.map_or_else(
+                |err| ui::error::page(&err).into(),
+                |paginated| {
                     let feed_items = paginated
                         .items
                         .into_iter()
                         .enumerate()
                         .map(|(index, media)| FeedItem::from((media, index as i32)))
                         .collect::<Vec<FeedItem>>();
-
-                    Res::Html(view_feed_items(&feed_items))
-                }
-
-                Err(err) => Res::Html(ui::error::page(&err)),
-            }
+                    view_feed_items(&feed_items).into()
+                },
+            )
         }
 
         Route::ChangedSlide(feed_id) => {

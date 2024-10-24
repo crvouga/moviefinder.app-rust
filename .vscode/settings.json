@@ -7,6 +7,7 @@
     "nanos",
     "serde",
     "stylesheet",
+    "swiperslidechange",
     "themoviedb",
     "tmdb",
     "touchstart"
