@@ -1,13 +1,27 @@
 #[cfg(test)]
 mod tests {
-    use crate::feed::{core::Feed, feed_db::interface::FeedDb};
+    use crate::{
+        feed::{
+            core::Feed,
+            feed_db::{impl_key_value_db, interface::FeedDb},
+        },
+        fixture::BaseFixture,
+    };
 
     struct Fixture {
-        pub feed_db: Box<dyn FeedDb>,
+        feed_db: Box<dyn FeedDb>,
     }
 
     fn fixtures() -> Vec<Fixture> {
-        let fixtures: Vec<Fixture> = vec![];
+        let mut fixtures: Vec<Fixture> = vec![];
+
+        let base = BaseFixture::new();
+
+        fixtures.push(Fixture {
+            feed_db: Box::new(impl_key_value_db::ImplKeyValueDb::new(
+                base.ctx.key_value_db,
+            )),
+        });
 
         fixtures
     }

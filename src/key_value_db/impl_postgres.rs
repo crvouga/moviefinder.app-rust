@@ -4,6 +4,7 @@ use crate::core::db_conn_sql::interface::DbConnSql;
 
 use super::interface::KeyValueDb;
 
+#[derive(Clone)]
 pub struct Postgres<T: DbConnSql> {
     db_conn_sql: T,
 }
@@ -20,11 +21,11 @@ impl<T: DbConnSql> KeyValueDb for Postgres<T> {
         unimplemented!()
     }
 
-    async fn put(&mut self, key: &str, value: String) -> Result<(), String> {
+    async fn put(&self, key: &str, value: String) -> Result<(), String> {
         unimplemented!()
     }
 
-    async fn zap(&mut self, key: &str) -> Result<(), String> {
+    async fn zap(&self, key: &str) -> Result<(), String> {
         unimplemented!()
     }
 

@@ -1,4 +1,4 @@
-use super::feed_item::FeedItem;
+use super::{core::Feed, feed_id::FeedId, feed_item::FeedItem};
 use crate::{
     core::{
         html::*,
@@ -16,16 +16,28 @@ use crate::{
 
 pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
     match route {
-        Route::Index => Res::Html(view_feed()),
+        Route::Index => {
+            let feed = Feed::default();
 
-        Route::LoadMore => {
-            let query = Query {
-                limit: 10,
-                offset: 0,
-                filter: Filter::None,
-            };
+            Res::Html(view_feed(feed.feed_id))
+        }
 
-            let queried = ctx.media_db.query(query).await;
+        Route::LoadMore(feed_id) => {
+            let feed = ctx
+                .feed_db
+                .get(feed_id.clone())
+                .await
+                .unwrap_or(None)
+                .unwrap_or_default();
+
+            let queried = ctx
+                .media_db
+                .query(Query {
+                    limit: 10,
+                    offset: feed.active_index as u32,
+                    filter: Filter::None,
+                })
+                .await;
 
             match queried {
                 Ok(paginated) => {
@@ -43,11 +55,29 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
             }
         }
 
-        Route::ChangedSlide => Res::Empty,
+        Route::ChangedSlide(feed_id) => {
+            let feed = ctx
+                .feed_db
+                .get(feed_id.clone())
+                .await
+                .unwrap_or(None)
+                .unwrap_or_default();
+
+            let feed_new = Feed {
+                active_index: feed.active_index + 1,
+                ..feed
+            };
+
+            ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
+
+            println!("Changed slide: {:?}", feed_new);
+
+            Res::Empty
+        }
     }
 }
 
-fn view_feed() -> Elem {
+fn view_feed(feed_id: FeedId) -> Elem {
     div(
         &[class(
             "w-full flex-1 flex items-center justify-center flex-col overflow-hidden",
@@ -63,7 +93,11 @@ fn view_feed() -> Elem {
                     hx::Trigger::Custom("swiperslidechange from:swiper-container".to_string())
                         .into(),
                     hx::Swap::None.into(),
-                    hx::post(route::Route::Feed(Route::ChangedSlide).encode().as_str()),
+                    hx::post(
+                        route::Route::Feed(Route::ChangedSlide(feed_id.clone()))
+                            .encode()
+                            .as_str(),
+                    ),
                     hx::vals(
                         r#"
                         js:{
@@ -72,7 +106,7 @@ fn view_feed() -> Elem {
                         "#,
                     ),
                 ],
-                &[view_load_initial()],
+                &[view_load_initial(feed_id.clone())],
             ),
             bottom_nav::view(bottom_nav::Active::Home),
         ],
@@ -119,11 +153,11 @@ fn view_feed_item(feed_item: &FeedItem) -> Elem {
     }
 }
 
-fn view_load_initial() -> Elem {
+fn view_load_initial(feed_id: FeedId) -> Elem {
     div(
         &[
             class("flex-1 flex flex-col items-center justify-center"),
-            hx::get(&route::Route::Feed(Route::LoadMore).encode()),
+            hx::get(&route::Route::Feed(Route::LoadMore(feed_id)).encode()),
             hx::Trigger::Load.into(),
             hx::Swap::OuterHtml.into(),
         ],

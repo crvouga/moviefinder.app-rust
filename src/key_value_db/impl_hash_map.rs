@@ -1,42 +1,48 @@
 use async_trait::async_trait;
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
 use super::interface::{to_namespaced_key, KeyValueDb};
 
 #[derive(Clone)]
-pub struct HashMap {
+pub struct ImplHashMap {
     namespace: Vec<String>,
-    map: std::collections::HashMap<String, String>,
+    map: Arc<RwLock<HashMap<String, String>>>,
 }
 
-impl HashMap {
+impl ImplHashMap {
     #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             namespace: vec![],
-            map: std::collections::HashMap::new(),
+            map: Arc::new(RwLock::new(HashMap::new())),
         }
     }
+
     fn to_namespaced_key(&self, key: &str) -> String {
         to_namespaced_key(&self.namespace, key)
     }
 }
 
 #[async_trait]
-impl KeyValueDb for HashMap {
+impl KeyValueDb for ImplHashMap {
     async fn get(&self, key: &str) -> Result<Option<String>, String> {
         let namespaced_key = self.to_namespaced_key(key);
-        Ok(self.map.get(&namespaced_key).cloned())
+        let map = self.map.read().unwrap();
+        Ok(map.get(&namespaced_key).cloned())
     }
 
-    async fn put(&mut self, key: &str, value: String) -> Result<(), String> {
+    async fn put(&self, key: &str, value: String) -> Result<(), String> {
         let namespaced_key = self.to_namespaced_key(key);
-        let _ = self.map.insert(namespaced_key.to_string(), value);
+        let mut map = self.map.write().unwrap();
+        let _ = map.insert(namespaced_key, value);
         Ok(())
     }
 
-    async fn zap(&mut self, key: &str) -> Result<(), String> {
+    async fn zap(&self, key: &str) -> Result<(), String> {
         let namespaced_key = self.to_namespaced_key(key);
-        let _ = self.map.remove(&namespaced_key);
+        let mut map = self.map.write().unwrap();
+        let _ = map.remove(&namespaced_key);
         Ok(())
     }
 
@@ -48,9 +54,9 @@ impl KeyValueDb for HashMap {
             .map(|s| s.to_string())
             .collect();
 
-        Box::new(HashMap {
+        Box::new(ImplHashMap {
             namespace: new_namespace,
-            map: self.map.clone(),
+            map: Arc::clone(&self.map),
         })
     }
 }

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 pub mod client;
 pub mod server;
+pub mod wrap_session_id;
 
 #[derive(Debug)]
 pub struct Request {

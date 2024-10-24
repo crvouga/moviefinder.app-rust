@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::core::uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct FeedId(String);
+pub struct SessionId(String);
 
-impl FeedId {
+impl SessionId {
     #[allow(dead_code)]
     pub fn new(id: String) -> Self {
         Self(id)
@@ -17,8 +17,8 @@ impl FeedId {
     }
 }
 
-impl Default for FeedId {
+impl Default for SessionId {
     fn default() -> Self {
-        FeedId::new(uuid::v4().to_string())
+        SessionId::new(uuid::v4().to_string())
     }
 }

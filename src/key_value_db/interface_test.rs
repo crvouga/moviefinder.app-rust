@@ -4,7 +4,7 @@ mod tests {
 
     use crate::{
         core::uuid,
-        key_value_db::{impl_hash_map::HashMap, interface::KeyValueDb},
+        key_value_db::{impl_hash_map::ImplHashMap, interface::KeyValueDb},
     };
 
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -30,7 +30,7 @@ mod tests {
         let mut fixtures: Vec<Fixture> = vec![];
 
         fixtures.push(Fixture {
-            key_value_db: Box::new(HashMap::new()),
+            key_value_db: Box::new(ImplHashMap::new()),
         });
 
         fixtures
@@ -38,7 +38,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_and_put() {
-        for mut f in fixtures() {
+        for f in fixtures() {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
@@ -54,7 +54,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_updating_existing() {
-        for mut f in fixtures() {
+        for f in fixtures() {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
             let updated_item = Item {
@@ -86,7 +86,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_zap() {
-        for mut f in fixtures() {
+        for f in fixtures() {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
@@ -108,7 +108,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_child() {
-        for mut f in fixtures() {
+        for f in fixtures() {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
@@ -120,7 +120,7 @@ mod tests {
             assert_eq!(put, Ok(()));
             assert_eq!(after, Ok(Some(item_serialized.clone())));
 
-            let mut child = f.key_value_db.child(vec!["child".to_string()]);
+            let child = f.key_value_db.child(vec!["child".to_string()]);
             let child_item = Item::random();
             let child_item_serialized =
                 serde_json::to_string(&child_item).unwrap_or("".to_string());

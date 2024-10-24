@@ -5,6 +5,7 @@ pub mod html;
 pub mod http;
 pub mod hx;
 pub mod image_set;
+pub mod logger;
 pub mod pagination;
 pub mod query;
 pub mod random;

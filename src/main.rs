@@ -5,11 +5,13 @@ mod core;
 mod ctx;
 mod env;
 mod feed;
+mod fixture;
 mod key_value_db;
 mod media;
 mod respond;
 mod route;
 mod ui;
+mod user_session;
 
 #[tokio::main]
 async fn main() {
@@ -23,6 +25,8 @@ async fn main() {
 
     let address = format!("0.0.0.0:{}", env.port);
 
+    println!("Starting server on http://{}", address);
+
     let ctx = Arc::new(ctx::Ctx::new(env.tmdb_api_read_access_token));
 
     let started = core::http::server::start(&address, move |req| {
@@ -31,9 +35,9 @@ async fn main() {
     })
     .await;
 
-    match started {
-        Ok(_) => println!("Server listening on http://{}", address),
-        Err(err) => eprintln!("Errored while starting server: {}", err),
+    if let Err(err) = started {
+        eprintln!("Errored while starting server: {}", err);
+        return;
     }
 }
 

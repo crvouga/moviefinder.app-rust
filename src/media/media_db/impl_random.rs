@@ -5,7 +5,11 @@ use std::vec;
 
 pub struct Random {}
 
-impl Random {}
+impl Random {
+    pub fn new() -> Random {
+        Random {}
+    }
+}
 
 #[async_trait]
 impl MediaDb for Random {

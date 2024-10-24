@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use super::feed_id::FeedId;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Feed {
     pub feed_id: FeedId,
     pub active_index: usize,
