@@ -30,9 +30,15 @@ impl HttpRequest {
             headers_string.push_str(&format!("Host: {}\r\n", self.host));
         }
 
+        let path_with_query_params = if self.query_params.is_empty() {
+            self.path.clone()
+        } else {
+            format!("{}?{}", self.path, self.query_params.to_string())
+        };
+
         format!(
             "{} {} HTTP/1.1\r\n{}Connection: close\r\n\r\n",
-            self.method, self.path, headers_string
+            self.method, path_with_query_params, headers_string
         )
     }
 }

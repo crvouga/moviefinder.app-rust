@@ -3,6 +3,20 @@ use std::collections::HashMap;
 #[derive(Debug, Eq, PartialEq)]
 pub struct QueryParams(HashMap<String, String>);
 
+impl QueryParams {
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn to_string(&self) -> String {
+        self.0
+            .iter()
+            .map(|(key, value)| format!("{}={}", key, value))
+            .collect::<Vec<String>>()
+            .join("&")
+    }
+}
+
 impl From<HashMap<String, String>> for QueryParams {
     fn from(query_params: HashMap<String, String>) -> QueryParams {
         QueryParams(query_params)

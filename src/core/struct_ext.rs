@@ -11,6 +11,7 @@ pub fn struct_to_map<T: Serialize>(input: &T) -> HashMap<String, String> {
         for (key, value) in obj {
             match value {
                 Value::String(s) => map.insert(key, s),
+                Value::Null => continue,
                 _ => map.insert(key, value.to_string()),
             };
         }

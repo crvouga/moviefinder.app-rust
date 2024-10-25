@@ -105,7 +105,42 @@ mod tests {
                 .iter()
                 .collect::<std::collections::HashSet<&MediaId>>();
 
-            // println!("media_ids: {:?}", media_ids);
+            println!("media_id_frequencies: {:?}", media_id_frequencies);
+            assert_eq!(duplicate_media_ids.len(), 0);
+            assert_eq!(media_ids.len(), unique_media_ids.len());
+        }
+    }
+
+    #[tokio::test]
+    async fn test_no_duplicates_small_limit_and_offset() {
+        for f in fixtures() {
+            let limit: usize = 4;
+            let queried = f
+                .media_db
+                .query(Query {
+                    limit,
+                    offset: 5,
+                    filter: Filter::None,
+                })
+                .await
+                .unwrap();
+
+            let media_ids = queried
+                .items
+                .iter()
+                .map(|media| media.media_id.clone())
+                .collect::<Vec<MediaId>>();
+            let media_id_frequencies = frequencies(media_ids.clone());
+
+            let duplicate_media_ids = media_ids
+                .iter()
+                .filter(|media_id| media_id_frequencies.get(media_id).unwrap_or(&0) > &1)
+                .collect::<Vec<&MediaId>>();
+
+            let unique_media_ids = media_ids
+                .iter()
+                .collect::<std::collections::HashSet<&MediaId>>();
+
             println!("media_id_frequencies: {:?}", media_id_frequencies);
             assert_eq!(duplicate_media_ids.len(), 0);
             assert_eq!(media_ids.len(), unique_media_ids.len());
