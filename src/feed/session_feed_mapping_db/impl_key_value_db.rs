@@ -14,7 +14,11 @@ pub struct ImplKeyValueDb {
 
 impl ImplKeyValueDb {
     pub fn new(key_value_db: Arc<dyn KeyValueDb>) -> Self {
-        Self { key_value_db }
+        Self {
+            key_value_db: key_value_db
+                .child(vec!["session-feed-mapping".to_string()])
+                .into(),
+        }
     }
 }
 

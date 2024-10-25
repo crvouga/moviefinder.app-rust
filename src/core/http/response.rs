@@ -33,8 +33,6 @@ impl HttpResponse {
             self.body
         );
 
-        println!("{}", headers_string);
-
         http_string
     }
 
