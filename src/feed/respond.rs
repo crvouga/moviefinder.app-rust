@@ -17,9 +17,27 @@ use crate::{
 pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
     match route {
         Route::Index => {
-            let feed = Feed::default();
+            let feed_id = ctx
+                .session_feed_mapping_db
+                .get(req.session_id.clone())
+                .await
+                .unwrap_or(None)
+                .unwrap_or_default();
 
-            Res::Html(view_feed(feed.feed_id))
+            let feed = ctx
+                .feed_db
+                .get(feed_id.clone())
+                .await
+                .unwrap_or(None)
+                .unwrap_or_default();
+
+            ctx.feed_db.put(feed.clone()).await.unwrap_or(());
+            ctx.session_feed_mapping_db
+                .put(req.session_id.clone(), feed.feed_id.clone())
+                .await
+                .unwrap_or(());
+
+            view_feed(feed.feed_id).into()
         }
 
         Route::LoadMore(feed_id) => {
