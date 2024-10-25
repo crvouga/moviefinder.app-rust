@@ -71,7 +71,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
             let query = Query {
                 limit: 10,
-                offset: feed.active_index as u32,
+                offset: feed.active_index,
                 filter: Filter::None,
             };
 

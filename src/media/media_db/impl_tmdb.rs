@@ -6,12 +6,13 @@ use super::{
 };
 use crate::{
     core::{
-        pagination::Paginated,
+        pagination::{PageBased, Paginated, Pagination},
         query::{Filter, Op, Query},
     },
     media::{core::Media, media_id::MediaId},
 };
 use async_trait::async_trait;
+use futures::future::join_all;
 
 pub struct Tmdb {
     config: tmdb_api::Config,
@@ -52,23 +53,57 @@ impl QueryPlanItem {
                 })
             }
             QueryPlanItem::DiscoverMovie(query) => {
-                let discover_response = tmdb_api::discover_movie::send(config).await?;
+                let pagination: Pagination = query.into();
+                let page_based: PageBased = (pagination, 20).into();
 
-                let items = discover_response
-                    .results
-                    .unwrap_or_default()
+                let discover_requests = page_based
+                    .range()
+                    .map(|_| tmdb_api::discover_movie::send(config));
+
+                let discover_responses: Vec<tmdb_api::discover_movie::DiscoverMovieResponse> =
+                    partition_results(join_all(discover_requests).await).unwrap_or_default();
+
+                let items = discover_responses
+                    .clone()
                     .into_iter()
+                    .flat_map(|res| res.results.unwrap_or_default())
+                    .skip(query.offset)
+                    .take(query.limit)
                     .map(|result| Media::from((tmdb_config, result)))
                     .collect();
 
+                let total = discover_responses
+                    .into_iter()
+                    .map(|res| res.total_results.unwrap_or(0))
+                    .max()
+                    .unwrap_or(0);
+
                 Ok(Paginated {
                     items,
+                    total,
                     limit: query.limit,
                     offset: query.limit,
-                    total: discover_response.total_results.unwrap_or(0),
                 })
             }
         }
+    }
+}
+
+fn partition_results<T, E>(results: Vec<Result<T, E>>) -> Result<Vec<T>, Vec<E>> {
+    let mut oks = Vec::new();
+    let mut errs = Vec::new();
+
+    for result in results {
+        match result {
+            Ok(val) => oks.push(val),
+            Err(err) => errs.push(err),
+        }
+    }
+
+    if errs.is_empty() {
+        Ok(oks)
+    } else {
+        Err(errs)
     }
 }
 

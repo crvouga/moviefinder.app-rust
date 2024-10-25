@@ -10,7 +10,7 @@ use super::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DiscoverMovieResult {
     pub adult: Option<bool>,
     pub backdrop_path: Option<String>,
@@ -54,12 +54,17 @@ impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DiscoverMovieResponse {
-    pub page: Option<u32>,
+    pub page: Option<usize>,
     pub results: Option<Vec<DiscoverMovieResult>>,
-    pub total_pages: Option<u32>,
-    pub total_results: Option<u32>,
+    pub total_pages: Option<usize>,
+    pub total_results: Option<usize>,
+}
+
+#[derive(Debug, Default)]
+pub struct DiscoverMovieParams {
+    pub page: Option<usize>,
 }
 
 pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {

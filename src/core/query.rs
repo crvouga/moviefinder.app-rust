@@ -1,8 +1,19 @@
+use super::pagination::Pagination;
+
 #[derive(Debug, Clone)]
 pub struct Query<F> {
-    pub limit: u32,
-    pub offset: u32,
+    pub limit: usize,
+    pub offset: usize,
     pub filter: Filter<F>,
+}
+
+impl<F> From<&Query<F>> for Pagination {
+    fn from(query: &Query<F>) -> Pagination {
+        Pagination {
+            limit: query.limit,
+            offset: query.offset,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

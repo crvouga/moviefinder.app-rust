@@ -1,5 +1,9 @@
+use std::{collections::HashMap, hash::Hash};
+
 #[cfg(test)]
 mod tests {
+    use std::{collections::HashMap, hash::Hash};
+
     use crate::{
         core::query::{Filter, Op, Query},
         env,
@@ -52,5 +56,72 @@ mod tests {
 
             assert_eq!(first.media_id, media_id);
         }
+    }
+
+    #[tokio::test]
+    async fn test_limit_and_offset() {
+        for f in fixtures() {
+            let limit: usize = 40;
+            let query = Query {
+                limit,
+                offset: 0,
+                filter: Filter::None,
+            };
+            let result = f.media_db.query(query).await.unwrap();
+
+            assert_eq!(result.items.len(), limit);
+            assert_eq!(result.limit, limit);
+            assert_eq!(result.offset, 0);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_no_duplicates() {
+        for f in fixtures() {
+            let limit: usize = 50;
+            let queried = f
+                .media_db
+                .query(Query {
+                    limit,
+                    offset: 0,
+                    filter: Filter::None,
+                })
+                .await
+                .unwrap();
+
+            let media_ids = queried
+                .items
+                .iter()
+                .map(|media| media.media_id.clone())
+                .collect::<Vec<MediaId>>();
+            let media_id_frequencies = frequencies(media_ids.clone());
+
+            let duplicate_media_ids = media_ids
+                .iter()
+                .filter(|media_id| media_id_frequencies.get(media_id).unwrap_or(&0) > &1)
+                .collect::<Vec<&MediaId>>();
+
+            let unique_media_ids = media_ids
+                .iter()
+                .collect::<std::collections::HashSet<&MediaId>>();
+
+            println!("media_ids: {:?}", media_ids);
+            println!("media_id_frequencies: {:?}", media_id_frequencies);
+            assert_eq!(duplicate_media_ids.len(), 0);
+            assert_eq!(media_ids.len(), unique_media_ids.len());
+        }
+    }
+
+    fn frequencies<T>(items: Vec<T>) -> HashMap<T, usize>
+    where
+        T: Hash + Eq,
+    {
+        let mut freq = HashMap::new();
+
+        for item in items {
+            *freq.entry(item).or_insert(0) += 1;
+        }
+
+        freq
     }
 }
