@@ -24,3 +24,23 @@ impl Default for SessionId {
         SessionId(uuid::v4().to_string())
     }
 }
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let id = SessionId::new("  ".to_string());
+        assert!(id.is_none());
+
+        let id = SessionId::new("  123  ".to_string()).unwrap();
+        assert_eq!(id.as_str(), "123");
+    }
+
+    #[test]
+    fn test_initial() {
+        let id = "".to_string();
+        let session_id = SessionId::new(id);
+        assert_eq!(session_id, None);
+    }
+}
