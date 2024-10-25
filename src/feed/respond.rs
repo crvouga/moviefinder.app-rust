@@ -12,6 +12,7 @@ use crate::{
     req::Req,
     route,
     ui::{bottom_nav, root::ROOT_SELECTOR},
+    user_session::session_id::SessionId,
 };
 
 pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
@@ -24,6 +25,25 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 .unwrap_or(None)
                 .unwrap_or_default();
 
+            let feed_new = ctx
+                .feed_db
+                .get(feed_id.clone())
+                .await
+                .unwrap_or(None)
+                .unwrap_or_default();
+
+            put_feed(ctx, req.session_id.clone(), &feed_new).await;
+
+            view_feed(feed_new.feed_id).into()
+        }
+
+        Route::ChangedSlide(feed_id) => {
+            let slide_index_new = req
+                .form_data
+                .get("feedIndex")
+                .and_then(|s| s.parse::<usize>().ok())
+                .unwrap_or_default();
+
             let feed = ctx
                 .feed_db
                 .get(feed_id.clone())
@@ -31,13 +51,14 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 .unwrap_or(None)
                 .unwrap_or_default();
 
-            ctx.feed_db.put(feed.clone()).await.unwrap_or(());
-            ctx.session_feed_mapping_db
-                .put(req.session_id.clone(), feed.feed_id.clone())
-                .await
-                .unwrap_or(());
+            let feed_new = Feed {
+                active_index: slide_index_new,
+                ..feed
+            };
 
-            view_feed(feed.feed_id).into()
+            put_feed(ctx, req.session_id.clone(), &feed_new).await;
+
+            Res::Empty
         }
 
         Route::LoadMore(feed_id) => {
@@ -71,29 +92,15 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 }
             }
         }
-
-        Route::ChangedSlide(feed_id) => {
-            let slide_index_new = req.form_data.get("feedIndex").cloned();
-
-            println!("slide_index_new: {:?}", slide_index_new);
-
-            let feed = ctx
-                .feed_db
-                .get(feed_id.clone())
-                .await
-                .unwrap_or(None)
-                .unwrap_or_default();
-
-            let feed_new = Feed {
-                active_index: feed.active_index + 1,
-                ..feed
-            };
-
-            ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
-
-            Res::Empty
-        }
     }
+}
+
+async fn put_feed(ctx: &ctx::Ctx, session_id: SessionId, feed: &Feed) {
+    ctx.feed_db.put(feed.clone()).await.unwrap_or(());
+    ctx.session_feed_mapping_db
+        .put(session_id.clone(), feed.feed_id.clone())
+        .await
+        .unwrap_or(());
 }
 
 fn view_feed(feed_id: FeedId) -> Elem {
