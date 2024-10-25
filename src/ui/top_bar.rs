@@ -8,7 +8,7 @@ use super::root::ROOT_SELECTOR;
 pub fn view(back_route: route::Route, title: &str) -> Elem {
     div(
         &[class(
-            "flex items-center justify-center w-full border-b h-16 px-4 font-bold text-lg",
+            "flex items-center justify-center w-full border-b h-16 px-4 font-bold text-lg text-center",
         )],
         &[
             button(
