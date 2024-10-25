@@ -7,6 +7,7 @@ pub struct HttpRequest {
     pub host: String,
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
+    pub form_data: HashMap<String, String>,
     #[allow(dead_code)]
     pub body: String,
 }

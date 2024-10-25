@@ -50,7 +50,16 @@ where
 
     let body = parse_body(&buffer, headers_end, content_length, &mut stream).await;
     let cookies = parse_cookies(&headers);
-    let request = new_request(method, path, headers, cookies, body);
+    let form_data = parse_form_data(&headers, &body);
+    let request = HttpRequest {
+        method,
+        path,
+        headers,
+        cookies,
+        body,
+        form_data,
+        host: "".to_string(),
+    };
     let response = handle_request(request).await;
 
     send_response(&mut stream, response).await;
@@ -107,6 +116,29 @@ fn parse_cookies(headers: &HashMap<String, String>) -> HashMap<String, String> {
     cookies
 }
 
+fn parse_form_data(headers: &HashMap<String, String>, body: &str) -> HashMap<String, String> {
+    let mut form_data = HashMap::new();
+
+    if !is_form_data_request(headers) {
+        return form_data;
+    }
+
+    for pair in body.split('&') {
+        if let Some((key, value)) = pair.split_once('=') {
+            form_data.insert(key.to_string(), value.to_string());
+        }
+    }
+
+    form_data
+}
+
+fn is_form_data_request(headers: &HashMap<String, String>) -> bool {
+    headers
+        .get("content-type")
+        .map(|content_type| content_type.starts_with("application/x-www-form-urlencoded"))
+        .unwrap_or(false)
+}
+
 fn parse_headers(header_lines: &[&str]) -> (HashMap<String, String>, usize) {
     let mut headers = HashMap::new();
     let mut content_length: usize = 0;
@@ -148,23 +180,6 @@ async fn parse_body(
     }
 
     String::from_utf8_lossy(&body).to_string()
-}
-
-fn new_request(
-    method: String,
-    path: String,
-    headers: HashMap<String, String>,
-    cookies: HashMap<String, String>,
-    body: String,
-) -> HttpRequest {
-    HttpRequest {
-        method,
-        path,
-        host: "".to_string(),
-        headers,
-        cookies,
-        body,
-    }
 }
 
 async fn send_response(stream: &mut TcpStream, response: HttpResponse) {

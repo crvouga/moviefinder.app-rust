@@ -28,6 +28,7 @@ pub fn to_request(config: &Config, method: &str, path: &str) -> HttpRequest {
         path: path.to_string(),
         body: "".to_string(),
         cookies: HashMap::new(),
+        form_data: HashMap::new(),
     }
 }
 

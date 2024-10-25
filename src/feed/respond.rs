@@ -9,11 +9,12 @@ use crate::{
     },
     ctx,
     media::{self, media_id::MediaId},
+    req::Req,
     route,
     ui::{bottom_nav, root::ROOT_SELECTOR},
 };
 
-pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
+pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
     match route {
         Route::Index => {
             let feed = Feed::default();
@@ -54,6 +55,10 @@ pub async fn respond(route: &Route, ctx: &ctx::Ctx) -> Res {
         }
 
         Route::ChangedSlide(feed_id) => {
+            let slide_index_new = req.form_data.get("feedIndex").cloned();
+
+            println!("slide_index_new: {:?}", slide_index_new);
+
             let feed = ctx
                 .feed_db
                 .get(feed_id.clone())

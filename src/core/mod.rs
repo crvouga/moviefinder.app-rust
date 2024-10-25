@@ -9,6 +9,7 @@ pub mod logger;
 pub mod pagination;
 pub mod query;
 pub mod random;
+
 pub mod res;
 pub mod route;
 pub mod ui;
