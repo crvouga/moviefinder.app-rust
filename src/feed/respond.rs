@@ -187,6 +187,9 @@ fn view_load_initial(feed_id: FeedId) -> Elem {
             hx::Trigger::Load.into(),
             hx::Swap::OuterHtml.into(),
         ],
-        &[ui::icon::spinner(&[class("size-16 animate-spin")])],
+        &[ui::image::view(&[
+            src(" "),
+            class("w-full h-full object-cover"),
+        ])],
     )
 }

@@ -24,7 +24,9 @@ pub fn view(back_route: route::Route, title: &str) -> Elem {
                 &[ui::icon::back_arrow(&[class("size-8")])],
             ),
             div(
-                &[class("flex-1 flex items-center justify-center h-full")],
+                &[class(
+                    "flex-1 text-center flex items-center justify-center h-full",
+                )],
                 &[text(title)],
             ),
             div(&[class("size-16")], &[]),
