@@ -85,7 +85,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                         .items
                         .into_iter()
                         .enumerate()
-                        .map(|(index, media)| FeedItem::from((media, index as i32)))
+                        .map(|(index, media)| FeedItem::from((media, index + feed.active_index)))
                         .collect::<Vec<FeedItem>>();
 
                     view_feed_items(&feed_items).into()
