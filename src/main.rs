@@ -1,11 +1,6 @@
-use core::http::{
-    request::HttpRequest,
-    response::HttpResponse,
-    response_cookie::{HttpResponseCookie, SameSite},
-};
-use std::{collections::HashMap, sync::Arc};
+use core::http::{request::HttpRequest, response::HttpResponse, wrap_session_id::wrap_session_id};
+use std::sync::Arc;
 
-use futures::FutureExt;
 use req::Req;
 use user_session::session_id::SessionId;
 
@@ -23,8 +18,6 @@ mod route;
 mod ui;
 mod user_session;
 
-const SESSION_COOKIE_NAME: &str = "session_id";
-
 #[tokio::main]
 async fn main() {
     let env = match env::Env::load() {
@@ -41,40 +34,16 @@ async fn main() {
 
     let ctx = Arc::new(ctx::Ctx::new(env.tmdb_api_read_access_token));
 
-    let started = core::http::server::start(&address, move |http_request| {
-        let ctx_arc = Arc::clone(&ctx);
+    let started = core::http::server::start(
+        &address,
+        wrap_session_id(move |session_id_str, http_request| {
+            let ctx_arc = Arc::clone(&ctx);
 
-        let maybe_session_id = http_request
-            .cookies
-            .get(SESSION_COOKIE_NAME)
-            .cloned()
-            .and_then(SessionId::new)
-            .clone();
+            let session_id = SessionId::new(session_id_str.to_string()).unwrap_or_default();
 
-        let session_id = maybe_session_id.clone().unwrap_or_default();
-
-        respond(http_request, session_id, ctx_arc).map(move |mut http_response| {
-            let session_id = maybe_session_id.clone().unwrap_or_default();
-            if maybe_session_id.is_none() {
-                let session_cookie = HttpResponseCookie {
-                    domain: None,
-                    expires: None,
-                    path: None,
-                    http_only: true,
-                    secure: false,
-                    max_age: None,
-                    name: SESSION_COOKIE_NAME.to_string(),
-                    value: session_id.as_str().to_string(),
-                    same_site: Some(SameSite::Lax),
-                };
-                http_response
-                    .headers
-                    .insert("Set-Cookie".to_string(), session_cookie.to_string());
-            }
-
-            http_response
-        })
-    })
+            respond(http_request, session_id, ctx_arc)
+        }),
+    )
     .await;
 
     if let Err(err) = started {
