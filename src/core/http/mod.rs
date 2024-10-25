@@ -1,4 +1,5 @@
 pub mod client;
+pub mod query_params;
 pub mod request;
 pub mod response;
 pub mod response_cookie;

@@ -1,4 +1,7 @@
-use crate::core::http::request::HttpRequest;
+use crate::core::{
+    http::{query_params::QueryParams, request::HttpRequest},
+    query::Query,
+};
 use std::collections::HashMap;
 
 pub mod config;
@@ -20,7 +23,12 @@ impl Config {
 
 pub const HOST: &str = "api.themoviedb.org";
 
-pub fn to_request(config: &Config, method: &str, path: &str) -> HttpRequest {
+pub fn to_request(
+    config: &Config,
+    method: &str,
+    path: &str,
+    query_params: QueryParams,
+) -> HttpRequest {
     HttpRequest {
         headers: to_base_headers(config),
         host: HOST.to_string(),
@@ -29,11 +37,12 @@ pub fn to_request(config: &Config, method: &str, path: &str) -> HttpRequest {
         body: "".to_string(),
         cookies: HashMap::new(),
         form_data: HashMap::new(),
+        query_params,
     }
 }
 
-pub fn to_get_request(config: &Config, path: &str) -> HttpRequest {
-    to_request(config, "GET", path)
+pub fn to_get_request(config: &Config, path: &str, query_params: QueryParams) -> HttpRequest {
+    to_request(config, "GET", path, query_params)
 }
 
 // pub const PAGE_SIZE: u32 = 20;

@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::http,
+    core::http::{self, query_params::QueryParams},
     media::{core::Media, genre::genre_id::GenreId, media_id::MediaId, media_type::MediaType},
 };
 
@@ -101,7 +101,11 @@ impl From<(&TmdbConfig, MovieDetails)> for Media {
 }
 
 pub async fn send(config: &Config, movie_id: &str) -> Result<MovieDetails, String> {
-    let req = to_get_request(config, &format!("/3/movie/{}", movie_id));
+    let req = to_get_request(
+        config,
+        &format!("/3/movie/{}", movie_id),
+        QueryParams::default(),
+    );
 
     let response = http::client::send(req).await.map_err(|e| e.to_string())?;
 

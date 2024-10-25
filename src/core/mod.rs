@@ -12,6 +12,7 @@ pub mod random;
 
 pub mod res;
 pub mod route;
+pub mod struct_ext;
 pub mod ui;
 pub mod url;
 pub mod uuid;

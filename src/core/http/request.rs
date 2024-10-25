@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use super::query_params::QueryParams;
+
 #[derive(Debug)]
 pub struct HttpRequest {
     pub method: String,
@@ -8,6 +10,7 @@ pub struct HttpRequest {
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
     pub form_data: HashMap<String, String>,
+    pub query_params: QueryParams,
     #[allow(dead_code)]
     pub body: String,
 }

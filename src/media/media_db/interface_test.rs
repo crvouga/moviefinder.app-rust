@@ -105,7 +105,7 @@ mod tests {
                 .iter()
                 .collect::<std::collections::HashSet<&MediaId>>();
 
-            println!("media_ids: {:?}", media_ids);
+            // println!("media_ids: {:?}", media_ids);
             println!("media_id_frequencies: {:?}", media_id_frequencies);
             assert_eq!(duplicate_media_ids.len(), 0);
             assert_eq!(media_ids.len(), unique_media_ids.len());

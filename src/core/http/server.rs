@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+use super::query_params::QueryParams;
 use super::request::HttpRequest;
 use super::response::HttpResponse;
 
@@ -51,12 +52,14 @@ where
     let body = parse_body(&buffer, headers_end, content_length, &mut stream).await;
     let cookies = parse_cookies(&headers);
     let form_data = parse_form_data(&headers, &body);
+    let query_params: QueryParams = path.as_str().into();
     let request = HttpRequest {
         method,
         path,
         headers,
         cookies,
         body,
+        query_params,
         form_data,
         host: "".to_string(),
     };

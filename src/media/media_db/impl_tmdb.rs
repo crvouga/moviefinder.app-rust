@@ -2,7 +2,7 @@ use std::vec;
 
 use super::{
     interface::{Field, MediaDb},
-    tmdb_api::{self, config::TmdbConfig, Config},
+    tmdb_api::{self, config::TmdbConfig, discover_movie::DiscoverMovieParams, Config},
 };
 use crate::{
     core::{
@@ -58,7 +58,7 @@ impl QueryPlanItem {
 
                 let discover_requests = page_based
                     .range()
-                    .map(|_| tmdb_api::discover_movie::send(config));
+                    .map(|page| tmdb_api::discover_movie::send(config, page.into()));
 
                 let discover_responses: Vec<tmdb_api::discover_movie::DiscoverMovieResponse> =
                     partition_results(join_all(discover_requests).await).unwrap_or_default();

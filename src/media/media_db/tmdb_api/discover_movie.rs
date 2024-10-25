@@ -1,9 +1,11 @@
 use crate::{
-    core::http,
+    core::{
+        http::{self, query_params::QueryParams},
+        struct_ext::struct_to_map,
+    },
     media::{core::Media, genre::genre_id::GenreId, media_id::MediaId, media_type::MediaType},
 };
 
-// https://developer.themoviedb.org/reference/discover-movie
 use super::{
     config::{to_backdrop_image_set, to_poster_image_set, TmdbConfig},
     to_get_request, Config,
@@ -62,13 +64,67 @@ pub struct DiscoverMovieResponse {
     pub total_results: Option<usize>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct DiscoverMovieParams {
-    pub page: Option<usize>,
+    pub language: Option<String>,
+    pub region: Option<String>,
+    pub sort_by: Option<String>,
+    pub certification_country: Option<String>,
+    pub certification: Option<String>,
+    pub certification_lte: Option<String>,
+    pub certification_gte: Option<String>,
+    pub include_adult: Option<bool>,
+    pub include_video: Option<bool>,
+    pub page: Option<u32>,
+    pub primary_release_year: Option<u32>,
+    pub primary_release_date_gte: Option<String>,
+    pub primary_release_date_lte: Option<String>,
+    pub release_date_gte: Option<String>,
+    pub release_date_lte: Option<String>,
+    pub with_release_type: Option<u32>,
+    pub year: Option<u32>,
+    pub vote_count_gte: Option<u32>,
+    pub vote_count_lte: Option<u32>,
+    pub vote_average_gte: Option<f32>,
+    pub vote_average_lte: Option<f32>,
+    pub with_cast: Option<String>,
+    pub with_crew: Option<String>,
+    pub with_people: Option<String>,
+    pub with_companies: Option<String>,
+    pub with_genres: Option<String>,
+    pub without_genres: Option<String>,
+    pub with_keywords: Option<String>,
+    pub without_keywords: Option<String>,
+    pub with_runtime_gte: Option<u32>,
+    pub with_runtime_lte: Option<u32>,
+    pub with_original_language: Option<String>,
+    pub with_watch_providers: Option<String>,
+    pub watch_region: Option<String>,
+    pub with_watch_monetization_types: Option<String>,
+    pub without_companies: Option<String>,
 }
 
-pub async fn send(config: &Config) -> Result<DiscoverMovieResponse, String> {
-    let req = to_get_request(config, "/3/discover/movie");
+impl Into<DiscoverMovieParams> for usize {
+    fn into(self) -> DiscoverMovieParams {
+        DiscoverMovieParams {
+            page: Some(self as u32),
+            ..Default::default()
+        }
+    }
+}
+
+impl Into<QueryParams> for DiscoverMovieParams {
+    fn into(self) -> QueryParams {
+        struct_to_map(&self).into()
+    }
+}
+
+pub async fn send(
+    config: &Config,
+    params: DiscoverMovieParams,
+) -> Result<DiscoverMovieResponse, String> {
+    let query_params: QueryParams = params.into();
+    let req = to_get_request(config, "/3/discover/movie", query_params);
 
     let sent = http::client::send(req).await;
 

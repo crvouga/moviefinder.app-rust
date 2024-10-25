@@ -1,6 +1,9 @@
 // https://developer.themoviedb.org/reference/configuration-details
 use super::{to_get_request, Config};
-use crate::{core::http, core::image_set::ImageSet};
+use crate::core::{
+    http::{self, query_params::QueryParams},
+    image_set::ImageSet,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -21,7 +24,7 @@ pub struct TmdbConfigImages {
 }
 
 pub async fn load(config: &Config) -> Result<TmdbConfig, String> {
-    let req = to_get_request(config, "/3/configuration");
+    let req = to_get_request(config, "/3/configuration", QueryParams::default());
 
     let sent = http::client::send(req).await;
 
