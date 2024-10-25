@@ -24,14 +24,14 @@ where
             if maybe_session_id.is_none() {
                 let session_cookie = HttpResponseCookie {
                     domain: None,
-                    expires: None,
-                    path: None,
+                    expires: Some("0".to_string()),
+                    path: Some("/".to_string()),
                     http_only: true,
-                    secure: false,
-                    max_age: None,
+                    secure: true,
+                    max_age: Some(31536000),
                     name: SESSION_COOKIE_NAME.to_string(),
                     value: session_id.as_str().to_string(),
-                    same_site: Some(SameSite::Lax),
+                    same_site: Some(SameSite::Strict),
                 };
 
                 http_response
