@@ -33,9 +33,13 @@ impl DbConnSql for ImplPostgres {
     where
         F: Fn(String) -> Result<T, String> + Send + Sync,
     {
+        let sql_str = sql.to_string();
+
+        println!("sql: {:?}", sql_str);
+
         let rows = self
             .client
-            .query(sql.to_string().as_str(), &[])
+            .query(&sql_str, &[])
             .await
             .map_err(|err| err.to_string())?;
 
