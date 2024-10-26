@@ -6,6 +6,14 @@ use std::process::Command;
 
 const DBMATE_VERSION: &str = "1.14.0";
 
+fn command_exists(command: &str) -> bool {
+    Command::new("which")
+        .arg(command)
+        .status()
+        .map(|status| status.success())
+        .unwrap_or(false)
+}
+
 fn download_dbmate() -> Result<String, Box<dyn std::error::Error>> {
     let filename = format!("dbmate-{}", DBMATE_VERSION);
     let url = format!(
@@ -16,14 +24,21 @@ fn download_dbmate() -> Result<String, Box<dyn std::error::Error>> {
 
     println!("Downloading dbmate version {}...", DBMATE_VERSION);
 
-    let curl_status = Command::new("curl")
-        .arg("-L")
-        .arg("-o")
-        .arg(&filepath)
-        .arg(&url)
-        .status();
+    if command_exists("curl") {
+        let curl_status = Command::new("curl")
+            .arg("-L")
+            .arg("-o")
+            .arg(&filepath)
+            .arg(&url)
+            .status()?;
 
-    if curl_status.is_err() || !curl_status.unwrap().success() {
+        if !curl_status.success() {
+            return Err(Box::new(Error::new(
+                std::io::ErrorKind::Other,
+                "Failed to download dbmate using curl",
+            )));
+        }
+    } else if command_exists("wget") {
         let wget_status = Command::new("wget")
             .arg("-O")
             .arg(&filepath)
@@ -33,9 +48,14 @@ fn download_dbmate() -> Result<String, Box<dyn std::error::Error>> {
         if !wget_status.success() {
             return Err(Box::new(Error::new(
                 std::io::ErrorKind::Other,
-                "Failed to download dbmate",
+                "Failed to download dbmate using wget",
             )));
         }
+    } else {
+        return Err(Box::new(Error::new(
+            std::io::ErrorKind::NotFound,
+            "Neither curl nor wget is installed",
+        )));
     }
 
     let mut perms = fs::metadata(&filepath)?.permissions();
