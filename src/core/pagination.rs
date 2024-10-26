@@ -26,6 +26,7 @@ impl<T> Default for Paginated<T> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct PageBased {
     pub start_page: usize,
     pub end_page: usize,
@@ -35,7 +36,7 @@ pub struct PageBased {
 
 impl PageBased {
     pub fn range(&self) -> std::ops::Range<usize> {
-        self.start_page..(self.end_page + 1)
+        self.start_page..(self.end_page + 2)
     }
 }
 
@@ -44,7 +45,7 @@ impl From<(Pagination, usize)> for PageBased {
         let page_count = (pagination.limit as f64 / page_size as f64).ceil() as usize;
         let start_page = (pagination.offset / page_size) + 1;
         let index = pagination.offset % page_size;
-        let end_page_offset = if index > 0 { 1 } else { 0 };
+        let end_page_offset = if index == 0 { 0 } else { 1 };
         let end_page = start_page + page_count - 1 + end_page_offset;
 
         PageBased {

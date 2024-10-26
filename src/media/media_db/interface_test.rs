@@ -138,9 +138,46 @@ mod tests {
                 .iter()
                 .collect::<std::collections::HashSet<&MediaId>>();
 
-            println!("media_id_frequencies: {:?}", media_id_frequencies);
             assert_eq!(duplicate_media_ids.len(), 0);
             assert_eq!(media_ids.len(), unique_media_ids.len());
+        }
+    }
+
+    #[tokio::test]
+    async fn test_offset() {
+        for f in fixtures() {
+            let limit: usize = 4;
+            let offset: usize = 20;
+            let queried = f
+                .media_db
+                .query(Query {
+                    limit,
+                    offset,
+                    filter: Filter::None,
+                })
+                .await
+                .unwrap();
+
+            assert_eq!(queried.items.len(), limit);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_offset_40() {
+        for f in fixtures() {
+            let limit: usize = 4;
+            let offset: usize = 40;
+            let queried = f
+                .media_db
+                .query(Query {
+                    limit,
+                    offset,
+                    filter: Filter::None,
+                })
+                .await
+                .unwrap();
+
+            assert_eq!(queried.items.len(), limit);
         }
     }
 

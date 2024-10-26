@@ -17,7 +17,7 @@ fn new_session_cookie(session_id: String) -> HttpResponseCookie {
         expires: None,
         path: Some("/".to_string()),
         http_only: true,
-        secure: false,
+        secure: true,
         max_age: Some(31536000),
         name: SESSION_ID_COOKIE_NAME.to_string(),
         value: session_id,

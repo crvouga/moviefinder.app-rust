@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use async_trait::async_trait;
 use serde_json;
 use tokio_postgres::{self, NoTls};
@@ -32,10 +34,9 @@ impl DbConnSql for ImplPostgres {
     async fn query<T, F>(&self, parse_row_json: Box<F>, sql: &Sql) -> Result<Vec<T>, String>
     where
         F: Fn(String) -> Result<T, String> + Send + Sync,
+        T: Debug,
     {
         let sql_str = sql.to_string();
-
-        println!("sql: {:?}", sql_str);
 
         let rows = self
             .client
@@ -50,6 +51,8 @@ impl DbConnSql for ImplPostgres {
             let parsed = parse_row_json(json)?;
             results.push(parsed);
         }
+
+        println!("LOG\n\t{:?}\n\t{:?}", sql, results);
 
         Ok(results)
     }

@@ -18,7 +18,8 @@ impl Config {
     }
 }
 
-pub const HOST: &str = "api.themoviedb.org";
+pub const TMDB_PAGE_SIZE: usize = 20;
+pub const TMDB_HOST: &str = "api.themoviedb.org";
 
 pub fn to_request(
     config: &Config,
@@ -28,7 +29,7 @@ pub fn to_request(
 ) -> HttpRequest {
     HttpRequest {
         headers: to_base_headers(config),
-        host: HOST.to_string(),
+        host: TMDB_HOST.to_string(),
         method: method.to_string(),
         path: path.to_string(),
         body: "".to_string(),

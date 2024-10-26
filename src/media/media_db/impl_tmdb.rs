@@ -2,7 +2,7 @@ use std::vec;
 
 use super::{
     interface::{Field, MediaDb},
-    tmdb_api::{self, config::TmdbConfig, Config},
+    tmdb_api::{self, config::TmdbConfig, Config, TMDB_PAGE_SIZE},
 };
 use crate::{
     core::{
@@ -26,7 +26,24 @@ impl Tmdb {
     }
 }
 
-#[derive(Debug)]
+#[async_trait]
+impl MediaDb for Tmdb {
+    async fn query(&self, query: Query<Field>) -> Result<Paginated<Media>, String> {
+        let tmdb_config = tmdb_api::config::load(&self.config).await?;
+
+        let query_plan = to_query_plan(query.clone(), vec![]);
+
+        let result =
+            execute_query_plan(&self.config, &tmdb_config, query, query_plan.clone()).await?;
+
+        println!("LOG {:?}", &query_plan);
+        println!("LOG {:?}", result.items.len());
+
+        Ok(result)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub enum QueryPlanItem {
     MovieDetails(MediaId),
     DiscoverMovie(Query<Field>),
@@ -54,7 +71,8 @@ impl QueryPlanItem {
             }
             QueryPlanItem::DiscoverMovie(query) => {
                 let pagination: Pagination = query.into();
-                let page_based: PageBased = (pagination, 20).into();
+
+                let page_based: PageBased = (pagination, TMDB_PAGE_SIZE).into();
 
                 let discover_requests = page_based
                     .range()
@@ -67,7 +85,7 @@ impl QueryPlanItem {
                     .clone()
                     .into_iter()
                     .flat_map(|res| res.results.unwrap_or_default())
-                    .skip(query.offset)
+                    .skip(page_based.index + 1)
                     .take(query.limit)
                     .map(|result| Media::from((tmdb_config, result)))
                     .collect();
@@ -148,17 +166,4 @@ pub async fn execute_query_plan(
         offset: query.offset,
         total,
     })
-}
-
-#[async_trait]
-impl MediaDb for Tmdb {
-    async fn query(&self, query: Query<Field>) -> Result<Paginated<Media>, String> {
-        let tmdb_config = tmdb_api::config::load(&self.config).await?;
-
-        let query_plan = to_query_plan(query.clone(), vec![]);
-
-        let result = execute_query_plan(&self.config, &tmdb_config, query, query_plan).await?;
-
-        Ok(result)
-    }
 }

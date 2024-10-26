@@ -135,6 +135,9 @@ pub async fn send(
 
     match serde_json::from_str(&response.body) {
         Ok(parsed) => Ok(parsed),
-        Err(e) => Err(format!("Error parsing response: {} {}", e, response.body)),
+        Err(e) => {
+            let err = format!("Error parsing response: {} {}", e, response.body);
+            Err(err)
+        }
     }
 }

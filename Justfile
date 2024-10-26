@@ -13,8 +13,6 @@ db-up: #
 db-down: #
   npx dbmate -e DATABASE_URL down
 
-test-all: #
+test: #
   TEST_ENV=int cargo test
 
-test: #
-  `cargo test

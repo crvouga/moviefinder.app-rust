@@ -23,7 +23,7 @@ async fn main() {
 
     let address = format!("0.0.0.0:{}", env.port);
 
-    println!("Starting server on http://{}", address);
+    println!("LOG Starting server on http://{}", address);
 
     let ctx = Arc::new(
         ctx::Ctx::new(env.tmdb_api_read_access_token, env.database_url)
@@ -55,7 +55,7 @@ async fn respond(
         session_id: session_id.clone(),
     };
 
-    println!("{} {:?} {:?}", http_request.method, route, req);
+    println!("LOG {} {:?} {:?}", http_request.method, route, req);
 
     respond::respond(&ctx, &req, &route)
         .await
