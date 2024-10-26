@@ -6,7 +6,6 @@ use user_session::{session_id::SessionId, wrap_session_id::wrap_session_id};
 mod account;
 mod core;
 mod ctx;
-mod db_migrations;
 mod env;
 mod feed;
 mod fixture;
@@ -28,7 +27,7 @@ async fn main() {
         }
     };
 
-    db_migrations::up().unwrap();
+    core::db_migrations::up().unwrap();
 
     let address = format!("0.0.0.0:{}", env.port);
 

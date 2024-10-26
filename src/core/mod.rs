@@ -1,5 +1,6 @@
 pub mod base64;
 pub mod db_conn_sql;
+pub mod db_migrations;
 pub mod env;
 pub mod html;
 pub mod http;
@@ -9,7 +10,6 @@ pub mod logger;
 pub mod pagination;
 pub mod query;
 pub mod random;
-
 pub mod res;
 pub mod route;
 pub mod struct_ext;
