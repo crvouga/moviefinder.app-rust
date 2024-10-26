@@ -64,7 +64,14 @@ fn view_layout(media: Option<Media>, attrs: &[Attr], children: &[Elem]) -> Elem 
         .collect::<Vec<_>>()
         .as_slice(),
         &[
-            top_bar::view(route::Route::Feed(feed::route::Route::Index), top_bar_title),
+            top_bar::root(
+                &[],
+                &[
+                    top_bar::back_button(route::Route::Feed(feed::route::Route::Index)),
+                    top_bar::title(top_bar_title),
+                    top_bar::empty(),
+                ],
+            ),
             div(
                 &[class("flex flex-col gap-6 items-center")],
                 [div(

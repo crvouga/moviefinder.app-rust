@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::feed_id::FeedId;
+use super::{controls, feed_id::FeedId};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
@@ -14,5 +14,9 @@ pub enum Route {
     },
     ChangedSlide {
         feed_id: FeedId,
+    },
+    Controls {
+        feed_id: FeedId,
+        child: controls::route::Route,
     },
 }

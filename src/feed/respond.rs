@@ -1,4 +1,4 @@
-use super::{core::Feed, feed_id::FeedId, feed_item::FeedItem, route::Route};
+use super::{controls, core::Feed, feed_id::FeedId, feed_item::FeedItem, route::Route};
 use crate::{
     core::{
         html::*,
@@ -11,7 +11,7 @@ use crate::{
     media::{self, media_id::MediaId},
     req::Req,
     route,
-    ui::{bottom_nav, root::ROOT_SELECTOR},
+    ui::{bottom_bar, root::ROOT_SELECTOR, top_bar},
     user_session::session_id::SessionId,
 };
 
@@ -25,16 +25,11 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 .unwrap_or(None)
                 .unwrap_or_default();
 
-            let feed_new = ctx
-                .feed_db
-                .get(feed_id.clone())
-                .await
-                .unwrap_or(None)
-                .unwrap_or_default();
+            let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
 
-            put_feed(ctx, req.session_id.clone(), &feed_new).await;
+            put_feed(ctx, req.session_id.clone(), &feed).await;
 
-            view_feed(feed_new.feed_id).into()
+            view_feed(&feed.feed_id).into()
         }
 
         Route::ChangedSlide { feed_id } => {
@@ -44,12 +39,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 .and_then(|s| s.parse::<usize>().ok())
                 .unwrap_or_default();
 
-            let feed = ctx
-                .feed_db
-                .get(feed_id.clone())
-                .await
-                .unwrap_or(None)
-                .unwrap_or_default();
+            let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
 
             let feed_new = Feed {
                 active_index: slide_index_new,
@@ -62,12 +52,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
         }
 
         Route::LoadInitial { feed_id } => {
-            let feed = ctx
-                .feed_db
-                .get(feed_id.clone())
-                .await
-                .unwrap_or(None)
-                .unwrap_or_default();
+            let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
 
             let query = Query {
                 limit: 3,
@@ -120,6 +105,10 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 }
             }
         }
+
+        Route::Controls { feed_id, child } => {
+            controls::respond::respond(ctx, req, feed_id, child).await
+        }
     }
 }
 
@@ -131,12 +120,39 @@ async fn put_feed(ctx: &ctx::Ctx, session_id: SessionId, feed: &Feed) {
         .unwrap_or(());
 }
 
-fn view_feed(feed_id: FeedId) -> Elem {
+fn view_top_bar(feed_id: &FeedId) -> Elem {
+    top_bar::root(
+        &[],
+        &[
+            div(&[class("flex-1 flex items-center gap-4")], &[]),
+            button(
+                &[
+                    class("size-16 flex items-center justify-center"),
+                    hx::Swap::InnerHtml.into(),
+                    hx::target(ROOT_SELECTOR),
+                    hx::push_url("true"),
+                    hx::get(
+                        route::Route::Feed(Route::Controls {
+                            feed_id: feed_id.clone(),
+                            child: controls::route::Route::Index,
+                        })
+                        .encode()
+                        .as_str(),
+                    ),
+                ],
+                &[ui::icon::adjustments_vertical(&[class("size-8")])],
+            ),
+        ],
+    )
+}
+
+fn view_feed(feed_id: &FeedId) -> Elem {
     div(
         &[class(
             "w-full flex-1 flex items-center justify-center flex-col overflow-hidden",
         )],
         &[
+            view_top_bar(feed_id),
             ui::swiper::container(
                 &[
                     class(
@@ -164,7 +180,7 @@ fn view_feed(feed_id: FeedId) -> Elem {
                 ],
                 &[view_load_initial(feed_id.clone())],
             ),
-            bottom_nav::view(bottom_nav::Active::Home),
+            bottom_bar::view(bottom_bar::Active::Home),
         ],
     )
 }

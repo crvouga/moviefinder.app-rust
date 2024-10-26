@@ -1,7 +1,7 @@
 use crate::account::route::Route;
 use crate::core::html::*;
 use crate::core::res::Res;
-use crate::ui::bottom_nav;
+use crate::ui::bottom_bar;
 
 pub fn respond(route: &Route) -> Res {
     match route {
@@ -16,7 +16,7 @@ pub fn view_account() -> Elem {
         )],
         &[
             div(&[class("flex-1")], &[text("Account")]),
-            bottom_nav::view(bottom_nav::Active::Account),
+            bottom_bar::view(bottom_bar::Active::Account),
         ],
     )
 }

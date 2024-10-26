@@ -1,3 +1,4 @@
+mod controls;
 pub mod core;
 pub mod feed_db;
 pub mod feed_id;
