@@ -1,6 +1,6 @@
 use crate::core;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 pub enum TestEnv {
     Unit,
     Integration,
@@ -26,6 +26,7 @@ impl TestEnv {
 pub struct Env {
     pub tmdb_api_read_access_token: String,
     pub port: String,
+    pub database_url: String,
 
     #[allow(dead_code)]
     pub test_env: TestEnv,
@@ -38,8 +39,10 @@ impl Env {
         let tmdb_api_read_access_token = core::env::read("TMDB_API_READ_ACCESS_TOKEN")?;
         let port = core::env::read("PORT")?;
         let test_env = TestEnv::from_str(&core::env::read("TEST_ENV").unwrap_or("".to_string()));
+        let database_url = core::env::read("DATABASE_URL")?;
 
         Some(Env {
+            database_url,
             tmdb_api_read_access_token,
             port,
             test_env,

@@ -1,22 +1,41 @@
 use async_trait::async_trait;
 use serde_json;
-use tokio_postgres;
+use tokio_postgres::{self, NoTls};
+
+use crate::core::sql::Sql;
 
 use super::interface::DbConnSql;
 
-pub struct TokioPostgres {
+pub struct ImplPostgres {
     client: tokio_postgres::Client,
 }
 
+impl ImplPostgres {
+    pub async fn new(database_url: &str) -> Result<Self, String> {
+        let (client, connection) = tokio_postgres::connect(database_url, NoTls)
+            .await
+            .map_err(|err| err.to_string())?;
+
+        // Spawn the connection to manage communication with the database
+        tokio::spawn(async move {
+            if let Err(err) = connection.await {
+                eprintln!("Database connection error: {}", err);
+            }
+        });
+
+        Ok(Self { client })
+    }
+}
+
 #[async_trait]
-impl DbConnSql for TokioPostgres {
-    async fn query<T, F>(&self, parse_row_json: F, query: &str) -> Result<Vec<T>, String>
+impl DbConnSql for ImplPostgres {
+    async fn query<T, F>(&self, parse_row_json: Box<F>, sql: &Sql) -> Result<Vec<T>, String>
     where
         F: Fn(String) -> Result<T, String> + Send + Sync,
     {
         let rows = self
             .client
-            .query(query, &[])
+            .query(sql.to_string().as_str(), &[])
             .await
             .map_err(|err| err.to_string())?;
 

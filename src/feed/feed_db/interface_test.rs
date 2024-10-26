@@ -12,10 +12,10 @@ mod tests {
         feed_db: Box<dyn FeedDb>,
     }
 
-    fn fixtures() -> Vec<Fixture> {
+    async fn fixtures() -> Vec<Fixture> {
         let mut fixtures: Vec<Fixture> = vec![];
 
-        let base = BaseFixture::new();
+        let base = BaseFixture::new().await;
 
         fixtures.push(Fixture {
             feed_db: Box::new(impl_key_value_db::ImplKeyValueDb::new(
@@ -28,7 +28,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_and_put() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let feed = Feed::random();
 
             let before = f.feed_db.get(feed.feed_id.clone()).await;

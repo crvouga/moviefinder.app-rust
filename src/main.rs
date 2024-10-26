@@ -19,21 +19,19 @@ mod user_session;
 
 #[tokio::main]
 async fn main() {
-    let env = match env::Env::load() {
-        Some(env) => env,
-        None => {
-            eprintln!("Failed to load environment variables");
-            return;
-        }
-    };
+    let env = env::Env::load().unwrap();
 
     let address = format!("0.0.0.0:{}", env.port);
 
     println!("Starting server on http://{}", address);
 
-    let ctx = Arc::new(ctx::Ctx::new(env.tmdb_api_read_access_token));
+    let ctx = Arc::new(
+        ctx::Ctx::new(env.tmdb_api_read_access_token, env.database_url)
+            .await
+            .unwrap(),
+    );
 
-    let started = core::http::server::start(
+    core::http::server::start(
         &address,
         wrap_session_id(move |session_id, http_request| {
             let ctx_arc = Arc::clone(&ctx);
@@ -41,12 +39,8 @@ async fn main() {
             respond(http_request, session_id, ctx_arc)
         }),
     )
-    .await;
-
-    if let Err(err) = started {
-        eprintln!("Errored while starting server: {}", err);
-        return;
-    }
+    .await
+    .unwrap();
 }
 
 async fn respond(

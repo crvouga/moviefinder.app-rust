@@ -13,10 +13,10 @@ mod tests {
         session_feed_mapping_db: Box<dyn SessionFeedMappingDb>,
     }
 
-    fn fixtures() -> Vec<Fixture> {
+    async fn fixtures() -> Vec<Fixture> {
         let mut fixtures: Vec<Fixture> = vec![];
 
-        let base = BaseFixture::new();
+        let base = BaseFixture::new().await;
 
         fixtures.push(Fixture {
             session_feed_mapping_db: Box::new(impl_key_value_db::ImplKeyValueDb::new(
@@ -29,7 +29,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_and_put() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let feed_id = FeedId::default();
             let session_id = SessionId::default();
 

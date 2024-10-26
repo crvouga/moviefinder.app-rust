@@ -1,10 +1,15 @@
 #[cfg(test)]
 mod tests {
+
     use serde::{Deserialize, Serialize};
 
     use crate::{
         core::uuid,
-        key_value_db::{impl_hash_map::ImplHashMap, interface::KeyValueDb},
+        env::{Env, TestEnv},
+        fixture::BaseFixture,
+        key_value_db::{
+            impl_hash_map::ImplHashMap, impl_postgres::ImplPostgres, interface::KeyValueDb,
+        },
     };
 
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -26,19 +31,29 @@ mod tests {
         pub key_value_db: Box<dyn KeyValueDb>,
     }
 
-    fn fixtures() -> Vec<Fixture> {
+    async fn fixtures() -> Vec<Fixture> {
+        let base_fixture = BaseFixture::new().await;
+
+        let env = Env::load().unwrap();
+
         let mut fixtures: Vec<Fixture> = vec![];
 
         fixtures.push(Fixture {
             key_value_db: Box::new(ImplHashMap::new()),
         });
 
+        if env.test_env == TestEnv::Integration {
+            fixtures.push(Fixture {
+                key_value_db: Box::new(ImplPostgres::new(base_fixture.ctx.db_conn_sql)),
+            });
+        }
+
         fixtures
     }
 
     #[tokio::test]
     async fn test_get_and_put() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
@@ -54,7 +69,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_updating_existing() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
             let updated_item = Item {
@@ -86,7 +101,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_zap() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
@@ -108,7 +123,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_child() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 

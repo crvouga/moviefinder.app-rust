@@ -1,35 +1,110 @@
+use std::{sync::Arc, vec};
+
+use super::interface::{to_namespaced_key, KeyValueDb};
+use crate::core::{
+    db_conn_sql::interface::DbConnSql,
+    sql::{Sql, SqlPrimitive, SqlVarType},
+};
 use async_trait::async_trait;
-
-use crate::core::db_conn_sql::interface::DbConnSql;
-
-use super::interface::KeyValueDb;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone)]
-pub struct Postgres<T: DbConnSql> {
-    db_conn_sql: T,
+pub struct ImplPostgres<T: DbConnSql + 'static> {
+    db_conn_sql: Arc<T>,
+    namespace: Vec<String>,
 }
 
-impl<T: DbConnSql> Postgres<T> {
-    pub fn new(db_conn_sql: T) -> Self {
-        Self { db_conn_sql }
+impl<T: DbConnSql + 'static> ImplPostgres<T> {
+    pub fn new(db_conn_sql: Arc<T>) -> Self {
+        Self {
+            db_conn_sql,
+            namespace: vec![],
+        }
     }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Row {
+    key: Option<String>,
+    value: Option<String>,
+    created_at_posix: Option<i64>,
+    updated_at_posix: Option<i64>,
+}
+
+fn parse_row_json(json_row: String) -> Result<Row, String> {
+    serde_json::from_str(&json_row).map_err(|e| e.to_string())
 }
 
 #[async_trait]
-impl<T: DbConnSql> KeyValueDb for Postgres<T> {
+impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
     async fn get(&self, key: &str) -> Result<Option<String>, String> {
-        unimplemented!()
+        let namespaced_key = to_namespaced_key(&self.namespace, key);
+
+        let mut query = Sql::new("SELECT value FROM key_value WHERE key = :key");
+        query.set(
+            "key",
+            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
+        );
+        let queried = self
+            .db_conn_sql
+            .query(Box::new(parse_row_json), &query)
+            .await?;
+        let value = queried.first().and_then(|row| row.value.clone());
+        Ok(value)
     }
 
     async fn put(&self, key: &str, value: String) -> Result<(), String> {
-        unimplemented!()
+        let namespaced_key = to_namespaced_key(&self.namespace, key);
+
+        let mut query = Sql::new(
+            r#"
+            INSERT INTO key_value (key, value)
+            VALUES (:key, :value)
+            ON CONFLICT (key) DO UPDATE
+            SET value = :value, updated_at_posix = EXTRACT(EPOCH FROM NOW())
+            "#,
+        );
+        query.set(
+            "key",
+            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
+        );
+        query.set(
+            "value",
+            SqlVarType::Primitive(SqlPrimitive::Text(value.to_string())),
+        );
+        self.db_conn_sql
+            .query(Box::new(parse_row_json), &query)
+            .await?;
+        Ok(())
     }
 
     async fn zap(&self, key: &str) -> Result<(), String> {
-        unimplemented!()
+        let namespaced_key = to_namespaced_key(&self.namespace, key);
+
+        let mut query = Sql::new("DELETE FROM key_value WHERE key = :key");
+
+        query.set(
+            "key",
+            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
+        );
+
+        self.db_conn_sql
+            .query(Box::new(parse_row_json), &query)
+            .await?;
+
+        Ok(())
     }
 
     fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
-        unimplemented!()
+        let namespace_new = self
+            .namespace
+            .iter()
+            .chain(namespace.iter())
+            .cloned()
+            .collect();
+        Box::new(ImplPostgres {
+            db_conn_sql: self.db_conn_sql.clone(),
+            namespace: namespace_new,
+        })
     }
 }

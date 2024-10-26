@@ -11,6 +11,7 @@ pub mod query;
 pub mod random;
 pub mod res;
 pub mod route;
+pub mod sql;
 pub mod struct_ext;
 pub mod ui;
 pub mod url;
