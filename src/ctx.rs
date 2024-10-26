@@ -33,7 +33,9 @@ impl Ctx {
             &db_conn_sql,
         )));
 
-        let media_db = Box::new(media_db::impl_tmdb::Tmdb::new(tmdb_api_read_access_token));
+        let media_db = Box::new(media_db::impl_tmdb::ImplTmdb::new(
+            tmdb_api_read_access_token,
+        ));
 
         let feed_db = Box::new(feed_db::impl_key_value_db::ImplKeyValueDb::new(
             key_value_db.clone(),

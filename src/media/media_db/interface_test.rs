@@ -1,5 +1,3 @@
-use std::{collections::HashMap, hash::Hash};
-
 #[cfg(test)]
 mod tests {
     use std::{collections::HashMap, hash::Hash};
@@ -27,7 +25,7 @@ mod tests {
 
         if env.test_env == env::TestEnv::Integration {
             let tmdb_movie = Fixture {
-                media_db: Box::new(impl_tmdb::Tmdb::new(env.tmdb_api_read_access_token)),
+                media_db: Box::new(impl_tmdb::ImplTmdb::new(env.tmdb_api_read_access_token)),
             };
 
             fixtures.push(tmdb_movie);

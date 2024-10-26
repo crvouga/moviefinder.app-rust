@@ -1,33 +1,34 @@
 use std::vec;
 
-use super::{
-    interface::{Field, MediaDb},
-    tmdb_api::{self, config::TmdbConfig, Config, TMDB_PAGE_SIZE},
-};
+use super::interface::{Field, MediaDb};
 use crate::{
     core::{
         pagination::{PageBased, Paginated, Pagination},
         query::{Filter, Op, Query},
     },
-    media::{core::Media, media_id::MediaId},
+    media::{
+        core::Media,
+        media_id::MediaId,
+        tmdb_api::{self, config::TmdbConfig, Config, TMDB_PAGE_SIZE},
+    },
 };
 use async_trait::async_trait;
 use futures::future::join_all;
 
-pub struct Tmdb {
+pub struct ImplTmdb {
     config: tmdb_api::Config,
 }
 
-impl Tmdb {
-    pub fn new(tmdb_api_read_access_token: String) -> Tmdb {
-        Tmdb {
+impl ImplTmdb {
+    pub fn new(tmdb_api_read_access_token: String) -> ImplTmdb {
+        ImplTmdb {
             config: tmdb_api::Config::new(tmdb_api_read_access_token),
         }
     }
 }
 
 #[async_trait]
-impl MediaDb for Tmdb {
+impl MediaDb for ImplTmdb {
     async fn query(&self, query: Query<Field>) -> Result<Paginated<Media>, String> {
         let tmdb_config = tmdb_api::config::load(&self.config).await?;
 
