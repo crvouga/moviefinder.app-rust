@@ -13,8 +13,4 @@ RUN cargo build --release
 
 ARG DATABASE_URL
 
-RUN echo $DATABASE_URL
-
-ENV DATABASE_URL=$DATABASE_URL
-
-CMD dbmate up && ./target/release/moviefinder-app
+CMD dbmate --url $DATABASE_URL up && ./target/release/moviefinder-app
