@@ -1,7 +1,4 @@
-use crate::core::{
-    http::{query_params::QueryParams, request::HttpRequest},
-    query::Query,
-};
+use crate::core::http::{query_params::QueryParams, request::HttpRequest};
 use std::collections::HashMap;
 
 pub mod config;

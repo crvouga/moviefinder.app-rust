@@ -2,7 +2,7 @@ use std::vec;
 
 use super::{
     interface::{Field, MediaDb},
-    tmdb_api::{self, config::TmdbConfig, discover_movie::DiscoverMovieParams, Config},
+    tmdb_api::{self, config::TmdbConfig, Config},
 };
 use crate::{
     core::{

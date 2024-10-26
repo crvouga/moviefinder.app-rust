@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct SessionId(String);
 
 impl SessionId {
-    pub fn new(id: String) -> Option<Self> {
+    pub fn new(id: &str) -> Option<Self> {
         let cleaned = id.trim().to_string();
         if cleaned.is_empty() {
             None
@@ -17,6 +17,10 @@ impl SessionId {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    pub fn as_string(&self) -> String {
+        self.0.clone()
+    }
 }
 
 impl Default for SessionId {
@@ -25,22 +29,23 @@ impl Default for SessionId {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_new() {
-        let id = SessionId::new("  ".to_string());
+        let id = SessionId::new(&"  ");
         assert!(id.is_none());
 
-        let id = SessionId::new("  123  ".to_string()).unwrap();
+        let id = SessionId::new(&"  123  ").unwrap();
         assert_eq!(id.as_str(), "123");
     }
 
     #[test]
     fn test_initial() {
-        let id = "".to_string();
-        let session_id = SessionId::new(id);
+        let id = "";
+        let session_id = SessionId::new(&id);
         assert_eq!(session_id, None);
     }
 }

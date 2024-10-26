@@ -1,11 +1,10 @@
-use std::sync::Arc;
-
 use crate::{
     ctx::Ctx,
     feed::{feed_db, session_feed_mapping_db},
     key_value_db,
     media::media_db,
 };
+use std::sync::Arc;
 
 pub struct BaseFixture {
     pub ctx: Ctx,

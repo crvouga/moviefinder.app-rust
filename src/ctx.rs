@@ -11,6 +11,7 @@ use crate::{
 };
 
 pub struct Ctx {
+    #[allow(dead_code)]
     pub key_value_db: Arc<dyn key_value_db::interface::KeyValueDb>,
     pub media_db: Box<dyn MediaDb>,
     pub feed_db: Box<dyn FeedDb>,

@@ -1,8 +1,7 @@
-use core::http::{request::HttpRequest, response::HttpResponse, wrap_session_id::wrap_session_id};
-use std::sync::Arc;
-
+use core::http::{request::HttpRequest, response::HttpResponse};
 use req::Req;
-use user_session::session_id::SessionId;
+use std::sync::Arc;
+use user_session::{session_id::SessionId, wrap_session_id::wrap_session_id};
 
 mod account;
 mod core;
@@ -36,10 +35,8 @@ async fn main() {
 
     let started = core::http::server::start(
         &address,
-        wrap_session_id(move |session_id_str, http_request| {
+        wrap_session_id(move |session_id, http_request| {
             let ctx_arc = Arc::clone(&ctx);
-
-            let session_id = SessionId::new(session_id_str.to_string()).unwrap_or_default();
 
             respond(http_request, session_id, ctx_arc)
         }),
@@ -61,7 +58,7 @@ async fn respond(
 
     let req = Req {
         form_data: http_request.form_data,
-        session_id,
+        session_id: session_id.clone(),
     };
 
     println!("{} {:?} {:?}", http_request.method, route, req);
