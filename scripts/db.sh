@@ -1,1 +1,2 @@
-npx dbmate -e DATABASE_URL up
+#!/bin/bash
+npx dbmate -e DATABASE_URL "$@"

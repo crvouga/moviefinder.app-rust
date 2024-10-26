@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: moviefinder-app
       POSTGRES_DB: moviefinder-app
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
       - moviefinder-app-postgres-data:/var/lib/postgresql/data
 
