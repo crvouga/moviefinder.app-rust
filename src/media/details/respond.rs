@@ -17,7 +17,7 @@ use super::route::Route;
 
 pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
     match route {
-        Route::Index { media_id } => Res::Html(view_load(media_id)),
+        Route::Index { media_id } => view_load(media_id).into(),
 
         Route::Load { media_id } => {
             // sleep

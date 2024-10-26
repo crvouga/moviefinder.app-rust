@@ -86,7 +86,7 @@ pub fn fragment(children: &[Elem]) -> Elem {
 pub fn attr(name: &str, value: &str) -> Attr {
     Attr {
         name: name.to_string(),
-        value: value.to_string(),
+        value: escape_html(value),
     }
 }
 

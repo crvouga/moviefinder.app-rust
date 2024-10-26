@@ -5,7 +5,7 @@ use crate::ui::bottom_nav;
 
 pub fn respond(route: &Route) -> Res {
     match route {
-        Route::Index => Res::Html(view_account()),
+        Route::Index => view_account().into(),
     }
 }
 

@@ -15,6 +15,7 @@ pub fn view_root(children: &[Elem]) -> Elem {
                 attr("type", "image/svg+xml"),
                 href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>")
             ]),
+            meta(&[name("htmx-config"), content(r#"{"historyCacheSize": 0, "refreshOnHistoryMiss": true}"#)]),
             link(&[rel("preconnect"),href("https://image.tmdb.org")]),
             script(&[src("https://cdn.tailwindcss.com")],  &[]),
             script(&[src("https://unpkg.com/htmx.org@2.0.1"),defer("true")],  &[]),

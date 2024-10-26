@@ -37,7 +37,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
             view_feed(feed_new.feed_id).into()
         }
 
-        Route::ChangedSlide(feed_id) => {
+        Route::ChangedSlide { feed_id } => {
             let slide_index_new = req
                 .form_data
                 .get("feedIndex")
@@ -58,10 +58,10 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
             put_feed(ctx, req.session_id.clone(), &feed_new).await;
 
-            Res::Empty
+            Res::empty()
         }
 
-        Route::LoadMore(feed_id) => {
+        Route::LoadInitial { feed_id } => {
             let feed = ctx
                 .feed_db
                 .get(feed_id.clone())
@@ -70,7 +70,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 .unwrap_or_default();
 
             let query = Query {
-                limit: 10,
+                limit: 3,
                 offset: feed.active_index,
                 filter: Filter::None,
             };
@@ -88,7 +88,35 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                         .map(|(index, media)| FeedItem::from((media, index + feed.active_index)))
                         .collect::<Vec<FeedItem>>();
 
-                    view_feed_items(&feed_items).into()
+                    view_feed_items(feed_id, &feed_items).into()
+                }
+            }
+        }
+
+        Route::LoadMore {
+            feed_id,
+            start_feed_index,
+        } => {
+            let query = Query {
+                limit: 3,
+                offset: start_feed_index.clone(),
+                filter: Filter::None,
+            };
+
+            let queried = ctx.media_db.query(query).await;
+
+            match queried {
+                Err(err) => ui::error::page(&err).into(),
+
+                Ok(paginated) => {
+                    let feed_items = paginated
+                        .items
+                        .into_iter()
+                        .enumerate()
+                        .map(|(index, media)| FeedItem::from((media, index + start_feed_index)))
+                        .collect::<Vec<FeedItem>>();
+
+                    view_feed_items(feed_id, &feed_items).into()
                 }
             }
         }
@@ -120,9 +148,11 @@ fn view_feed(feed_id: FeedId) -> Elem {
                         .into(),
                     hx::Swap::None.into(),
                     hx::post(
-                        route::Route::Feed(Route::ChangedSlide(feed_id.clone()))
-                            .encode()
-                            .as_str(),
+                        route::Route::Feed(Route::ChangedSlide {
+                            feed_id: feed_id.clone(),
+                        })
+                        .encode()
+                        .as_str(),
                     ),
                     hx::vals(
                         r#"
@@ -139,8 +169,38 @@ fn view_feed(feed_id: FeedId) -> Elem {
     )
 }
 
-fn view_feed_items(feed_items: &[FeedItem]) -> Elem {
-    fragment(&feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
+fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
+    let load_more = feed_items
+        .iter()
+        .last()
+        .map(|feed_item| view_load_more(feed_id, feed_item.to_feed_index() + 1))
+        .unwrap_or(fragment(&[]));
+
+    fragment(&[
+        fragment(&feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>()),
+        load_more,
+    ])
+}
+
+fn view_load_more(feed_id: &FeedId, start_feed_index: usize) -> Elem {
+    ui::swiper::slide(
+        &[
+            class("flex-1 flex flex-col items-center justify-center"),
+            hx::get(
+                &route::Route::Feed(Route::LoadMore {
+                    feed_id: feed_id.clone(),
+                    start_feed_index,
+                })
+                .encode(),
+            ),
+            hx::Trigger::Intersect.into(),
+            hx::Swap::OuterHtml.into(),
+        ],
+        &[ui::image::view(&[
+            src(" "),
+            class("w-full h-full object-cover"),
+        ])],
+    )
 }
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {
@@ -152,29 +212,38 @@ fn to_media_details_route(media_id: &MediaId) -> route::Route {
 }
 
 fn view_feed_item(feed_item: &FeedItem) -> Elem {
+    ui::swiper::slide(
+        &[
+            class(
+                "w-full h-full flex flex-col items-center justify-center cursor-pointer relative",
+            ),
+            attr("data-feed-index", &feed_item.to_feed_index().to_string()),
+        ],
+        &[view_feed_item_content(feed_item)],
+    )
+}
+
+fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
     match feed_item {
-        FeedItem::Media { media, feed_index } => ui::swiper::slide(
+        FeedItem::Media {
+            media,
+            feed_index: _,
+        } => button(
             &[
-                class("w-full h-full flex flex-col items-center justify-center cursor-pointer"),
-                attr("data-feed-index", &feed_index.to_string()),
+                class("w-full h-full"),
+                hx::get(&to_media_details_route(&media.media_id).encode()),
+                hx::Trigger::Click.into(),
+                hx::Preload::MouseDown.into(),
+                hx::Swap::InnerHtml.into(),
+                hx::push_url("true"),
+                hx::target(ROOT_SELECTOR),
             ],
-            &[button(
-                &[
-                    class("w-full h-full"),
-                    hx::get(&to_media_details_route(&media.media_id).encode()),
-                    hx::Trigger::Click.into(),
-                    hx::Preload::MouseDown.into(),
-                    hx::Swap::InnerHtml.into(),
-                    hx::push_url("true"),
-                    hx::target(ROOT_SELECTOR),
-                ],
-                &[ui::image::view(&[
-                    class("w-full h-full object-cover"),
-                    width("100%"),
-                    height("100%"),
-                    src(media.media_poster.to_highest_res()),
-                ])],
-            )],
+            &[ui::image::view(&[
+                class("w-full h-full object-cover"),
+                width("100%"),
+                height("100%"),
+                src(media.media_poster.to_highest_res()),
+            ])],
         ),
     }
 }
@@ -183,7 +252,7 @@ fn view_load_initial(feed_id: FeedId) -> Elem {
     div(
         &[
             class("flex-1 flex flex-col items-center justify-center"),
-            hx::get(&route::Route::Feed(Route::LoadMore(feed_id)).encode()),
+            hx::get(&route::Route::Feed(Route::LoadInitial { feed_id }).encode()),
             hx::Trigger::Load.into(),
             hx::Swap::OuterHtml.into(),
         ],

@@ -14,10 +14,10 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
         Route::Media(route) => media::respond::respond(ctx, route).await,
 
-        Route::Favicon => Res::Empty,
+        Route::Favicon => Res::empty(),
 
-        Route::RobotsTxt => Res::Text("User-agent: *\nDisallow:".to_owned()),
+        Route::RobotsTxt => Res::text("User-agent: *\nDisallow:"),
 
-        Route::Unknown(_route) => Res::Redirect(Route::Feed(feed::route::Route::Index).encode()),
+        Route::Unknown(_route) => Res::redirect(Route::Feed(feed::route::Route::Index).encode()),
     }
 }

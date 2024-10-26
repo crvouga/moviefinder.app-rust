@@ -17,12 +17,14 @@ pub fn vals(values: &str) -> html::Attr {
 pub enum Trigger {
     Load,
     Click,
+    Intersect,
     Custom(String),
 }
 
 impl Trigger {
     pub fn to_str(&self) -> &str {
         match self {
+            Trigger::Intersect => "intersect",
             Trigger::Load => "load",
             Trigger::Click => "click",
             Trigger::Custom(value) => value,

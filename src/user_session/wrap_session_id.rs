@@ -14,7 +14,7 @@ const SESSION_ID_COOKIE_NAME: &str = "session_id";
 fn new_session_cookie(session_id: String) -> HttpResponseCookie {
     HttpResponseCookie {
         domain: None,
-        expires: Some("0".to_string()),
+        expires: None,
         path: Some("/".to_string()),
         http_only: true,
         secure: false,
