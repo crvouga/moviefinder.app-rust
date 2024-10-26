@@ -6,4 +6,4 @@ pub mod media_id;
 pub mod media_type;
 pub mod respond;
 pub mod route;
-mod tmdb_api;
+pub mod tmdb_api;

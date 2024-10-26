@@ -1,5 +1,5 @@
 // https://developer.themoviedb.org/reference/configuration-details
-use super::{to_get_request, Config};
+use super::TmdbApi;
 use crate::core::{
     http::{self, query_params::QueryParams},
     image_set::ImageSet,
@@ -23,57 +23,60 @@ pub struct TmdbConfigImages {
     pub still_sizes: Option<Vec<String>>,
 }
 
-pub async fn load(config: &Config) -> Result<TmdbConfig, String> {
-    let req = to_get_request(config, "/3/configuration", QueryParams::default());
+impl TmdbApi {
+    pub async fn config(self: &TmdbApi) -> Result<TmdbConfig, String> {
+        let req = self.to_get_request("/3/configuration", QueryParams::default());
 
-    let sent = http::client::send(req).await;
+        let sent = http::client::send(req).await;
 
-    match sent {
-        Ok(response) => {
-            let body = response.body;
-            let parsed = serde_json::from_str(&body);
-            match parsed {
-                Ok(parsed) => Ok(parsed),
-                Err(e) => Err(format!("Error parsing response: {} {}", e, body)),
+        match sent {
+            Ok(response) => {
+                let body = response.body;
+                let parsed = serde_json::from_str(&body);
+                match parsed {
+                    Ok(parsed) => Ok(parsed),
+                    Err(e) => Err(format!("Error parsing response: {} {}", e, body)),
+                }
             }
+            Err(e) => Err(e.to_string()),
         }
-        Err(e) => Err(e.to_string()),
     }
 }
 
-pub fn to_poster_image_set(config: &TmdbConfig, poster_path: &str) -> ImageSet {
-    to_image_set(config, to_poster_sizes(config), poster_path)
-}
+impl TmdbConfig {
+    pub fn to_poster_image_set(self: &TmdbConfig, poster_path: &str) -> ImageSet {
+        self.to_image_set(self.to_poster_sizes(), poster_path)
+    }
 
-pub fn to_backdrop_image_set(config: &TmdbConfig, backdrop_path: &str) -> ImageSet {
-    to_image_set(config, to_backdrop_sizes(config), backdrop_path)
-}
+    pub fn to_backdrop_image_set(self: &TmdbConfig, backdrop_path: &str) -> ImageSet {
+        self.to_image_set(self.to_backdrop_sizes(), backdrop_path)
+    }
 
-fn to_poster_sizes(config: &TmdbConfig) -> Vec<String> {
-    config.images.as_ref().map_or(vec![], |images| {
-        images.poster_sizes.as_ref().unwrap_or(&vec![]).clone()
-    })
-}
+    fn to_poster_sizes(self: &TmdbConfig) -> Vec<String> {
+        self.images.as_ref().map_or(vec![], |images| {
+            images.poster_sizes.as_ref().unwrap_or(&vec![]).clone()
+        })
+    }
 
-fn to_backdrop_sizes(config: &TmdbConfig) -> Vec<String> {
-    config.images.as_ref().map_or(vec![], |images| {
-        images.backdrop_sizes.as_ref().unwrap_or(&vec![]).clone()
-    })
-}
+    fn to_backdrop_sizes(self: &TmdbConfig) -> Vec<String> {
+        self.images.as_ref().map_or(vec![], |images| {
+            images.backdrop_sizes.as_ref().unwrap_or(&vec![]).clone()
+        })
+    }
 
-fn to_image_set(config: &TmdbConfig, sizes: Vec<String>, path: &str) -> ImageSet {
-    let base_url = to_base_url(config);
+    fn to_image_set(self: &TmdbConfig, sizes: Vec<String>, path: &str) -> ImageSet {
+        let base_url = self.to_base_url();
 
-    let lowest_to_highest = sizes
-        .iter()
-        .map(|size| format!("{}/{}{}", base_url, size, path));
+        let lowest_to_highest = sizes
+            .iter()
+            .map(|size| format!("{}/{}{}", base_url, size, path));
 
-    ImageSet::new(lowest_to_highest.collect())
-}
+        ImageSet::new(lowest_to_highest.collect())
+    }
 
-fn to_base_url(config: &TmdbConfig) -> String {
-    config
-        .images
-        .as_ref()
-        .map_or("".to_string(), |images| images.secure_base_url.clone())
+    fn to_base_url(self: &TmdbConfig) -> String {
+        self.images
+            .as_ref()
+            .map_or("".to_string(), |images| images.secure_base_url.clone())
+    }
 }

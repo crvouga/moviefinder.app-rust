@@ -6,10 +6,7 @@ use crate::{
     media::{core::Media, genre::genre_id::GenreId, media_id::MediaId, media_type::MediaType},
 };
 
-use super::{
-    config::{to_backdrop_image_set, to_poster_image_set, TmdbConfig},
-    to_get_request, Config,
-};
+use super::{config::TmdbConfig, TmdbApi};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BelongsToCollection {
@@ -78,10 +75,8 @@ impl From<(&TmdbConfig, MovieDetails)> for Media {
     fn from((config, result): (&TmdbConfig, MovieDetails)) -> Self {
         Media {
             media_id: MediaId::new(result.id.to_string()),
-            media_backdrop: to_backdrop_image_set(
-                config,
-                result.backdrop_path.unwrap_or("".to_string()).as_str(),
-            ),
+            media_backdrop: config
+                .to_backdrop_image_set(result.backdrop_path.unwrap_or("".to_string()).as_str()),
             media_description: result.overview.unwrap_or("".to_string()),
             media_genre_ids: result
                 .genres
@@ -90,27 +85,23 @@ impl From<(&TmdbConfig, MovieDetails)> for Media {
                 .map(|genre| GenreId::new(genre.id.to_string()))
                 .collect(),
             media_popularity: result.popularity.unwrap_or(0.0),
-            media_poster: to_poster_image_set(
-                config,
-                result.poster_path.unwrap_or("".to_string()).as_str(),
-            ),
+            media_poster: config
+                .to_poster_image_set(result.poster_path.unwrap_or("".to_string()).as_str()),
             media_title: result.title.unwrap_or("".to_string()),
             media_type: MediaType::Movie,
         }
     }
 }
 
-pub async fn send(config: &Config, movie_id: &str) -> Result<MovieDetails, String> {
-    let req = to_get_request(
-        config,
-        &format!("/3/movie/{}", movie_id),
-        QueryParams::default(),
-    );
+impl TmdbApi {
+    pub async fn movie_details(self: &TmdbApi, movie_id: &str) -> Result<MovieDetails, String> {
+        let req = self.to_get_request(&format!("/3/movie/{}", movie_id), QueryParams::default());
 
-    let response = http::client::send(req).await.map_err(|e| e.to_string())?;
+        let response = http::client::send(req).await.map_err(|e| e.to_string())?;
 
-    let parsed: MovieDetails = serde_json::from_str(&response.body)
-        .map_err(|e| format!("Error parsing response: {} {}", e, response.body))?;
+        let parsed: MovieDetails = serde_json::from_str(&response.body)
+            .map_err(|e| format!("Error parsing response: {} {}", e, response.body))?;
 
-    Ok(parsed)
+        Ok(parsed)
+    }
 }

@@ -5,6 +5,7 @@ mod tests {
     use crate::{
         core::query::{Filter, Op, Query},
         env,
+        fixture::BaseFixture,
         media::{
             media_db::{
                 impl_tmdb,
@@ -18,14 +19,14 @@ mod tests {
         pub media_db: Box<dyn MediaDb>,
     }
 
-    fn fixtures() -> Vec<Fixture> {
-        let env = env::Env::load().unwrap();
+    async fn fixtures() -> Vec<Fixture> {
+        let base_fixture = BaseFixture::new().await;
 
         let mut fixtures: Vec<Fixture> = vec![];
 
-        if env.test_env == env::TestEnv::Integration {
+        if base_fixture.env.test_env == env::TestEnv::Integration {
             let tmdb_movie = Fixture {
-                media_db: Box::new(impl_tmdb::ImplTmdb::new(env.tmdb_api_read_access_token)),
+                media_db: Box::new(impl_tmdb::ImplTmdb::new(base_fixture.ctx.tmdb_api.clone())),
             };
 
             fixtures.push(tmdb_movie);
@@ -36,7 +37,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_find_by_id() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let media_id = MediaId::new("123".to_string());
 
             let query = Query {
@@ -55,7 +56,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_limit_and_offset() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let limit: usize = 40;
             let query = Query {
                 limit,
@@ -72,7 +73,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_no_duplicates() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let limit: usize = 50;
             let queried = f
                 .media_db
@@ -108,7 +109,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_no_duplicates_small_limit_and_offset() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let limit: usize = 4;
             let queried = f
                 .media_db
@@ -143,7 +144,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_offset() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let limit: usize = 4;
             let offset: usize = 20;
             let queried = f
@@ -162,7 +163,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_offset_40() {
-        for f in fixtures() {
+        for f in fixtures().await {
             let limit: usize = 4;
             let offset: usize = 40;
             let queried = f

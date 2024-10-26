@@ -8,7 +8,10 @@ use crate::{
         session_feed_mapping_db::interface::SessionFeedMappingDb,
     },
     key_value_db::{self, interface::KeyValueDb},
-    media::media_db::{self, interface::MediaDb},
+    media::{
+        media_db::{self, interface::MediaDb},
+        tmdb_api,
+    },
 };
 
 pub struct Ctx {
@@ -19,6 +22,7 @@ pub struct Ctx {
     pub media_db: Box<dyn MediaDb>,
     pub feed_db: Box<dyn FeedDb>,
     pub session_feed_mapping_db: Box<dyn SessionFeedMappingDb>,
+    pub tmdb_api: Arc<tmdb_api::TmdbApi>,
 }
 
 impl Ctx {
@@ -33,9 +37,9 @@ impl Ctx {
             &db_conn_sql,
         )));
 
-        let media_db = Box::new(media_db::impl_tmdb::ImplTmdb::new(
-            tmdb_api_read_access_token,
-        ));
+        let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(tmdb_api_read_access_token.clone()));
+
+        let media_db = Box::new(media_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
 
         let feed_db = Box::new(feed_db::impl_key_value_db::ImplKeyValueDb::new(
             key_value_db.clone(),
@@ -49,6 +53,7 @@ impl Ctx {
 
         Ok(Ctx {
             db_conn_sql,
+            tmdb_api,
             media_db,
             session_feed_mapping_db,
             feed_db,

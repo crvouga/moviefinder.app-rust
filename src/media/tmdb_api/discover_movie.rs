@@ -6,10 +6,7 @@ use crate::{
     media::{core::Media, genre::genre_id::GenreId, media_id::MediaId, media_type::MediaType},
 };
 
-use super::{
-    config::{to_backdrop_image_set, to_poster_image_set, TmdbConfig},
-    to_get_request, Config,
-};
+use super::{config::TmdbConfig, TmdbApi};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -34,10 +31,8 @@ impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
     fn from((config, result): (&TmdbConfig, DiscoverMovieResult)) -> Self {
         Media {
             media_id: MediaId::new(result.id.unwrap_or(0.0).to_string()),
-            media_backdrop: to_backdrop_image_set(
-                config,
-                result.backdrop_path.unwrap_or("".to_string()).as_str(),
-            ),
+            media_backdrop: config
+                .to_backdrop_image_set(result.backdrop_path.unwrap_or("".to_string()).as_str()),
             media_description: result.overview.unwrap_or("".to_string()),
             media_genre_ids: result
                 .genre_ids
@@ -46,10 +41,8 @@ impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
                 .map(|id| GenreId::new(id.to_string()))
                 .collect(),
             media_popularity: result.popularity.unwrap_or(0.0),
-            media_poster: to_poster_image_set(
-                config,
-                result.poster_path.unwrap_or("".to_string()).as_str(),
-            ),
+            media_poster: config
+                .to_poster_image_set(result.poster_path.unwrap_or("".to_string()).as_str()),
             media_title: result.title.unwrap_or("".to_string()),
             media_type: MediaType::Movie,
         }
@@ -119,25 +112,27 @@ impl Into<QueryParams> for DiscoverMovieParams {
     }
 }
 
-pub async fn send(
-    config: &Config,
-    params: DiscoverMovieParams,
-) -> Result<DiscoverMovieResponse, String> {
-    let query_params: QueryParams = params.into();
-    let req = to_get_request(config, "/3/discover/movie", query_params);
+impl TmdbApi {
+    pub async fn discover_movie(
+        self: &TmdbApi,
+        params: DiscoverMovieParams,
+    ) -> Result<DiscoverMovieResponse, String> {
+        let query_params: QueryParams = params.into();
+        let req = self.to_get_request("/3/discover/movie", query_params);
 
-    let sent = http::client::send(req).await;
+        let sent = http::client::send(req).await;
 
-    let response = match sent {
-        Ok(response) => response,
-        Err(err) => return Err(err.to_string()),
-    };
+        let response = match sent {
+            Ok(response) => response,
+            Err(err) => return Err(err.to_string()),
+        };
 
-    match serde_json::from_str(&response.body) {
-        Ok(parsed) => Ok(parsed),
-        Err(e) => {
-            let err = format!("Error parsing response: {} {}", e, response.body);
-            Err(err)
+        match serde_json::from_str(&response.body) {
+            Ok(parsed) => Ok(parsed),
+            Err(e) => {
+                let err = format!("Error parsing response: {} {}", e, response.body);
+                Err(err)
+            }
         }
     }
 }

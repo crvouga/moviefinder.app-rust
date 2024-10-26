@@ -4,7 +4,7 @@ use crate::{
     env::Env,
     feed::{feed_db, session_feed_mapping_db},
     key_value_db,
-    media::media_db,
+    media::{media_db, tmdb_api},
 };
 use std::sync::Arc;
 
@@ -23,9 +23,13 @@ impl BaseFixture {
                 .unwrap(),
         );
 
-        let media_db = Box::new(media_db::impl_random::Random::new());
-
         let key_value_db = Arc::new(key_value_db::impl_hash_map::ImplHashMap::new());
+
+        let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
+            env.tmdb_api_read_access_token.clone(),
+        ));
+
+        let media_db = Box::new(media_db::impl_random::Random::new());
 
         let feed_db: Box<feed_db::impl_key_value_db::ImplKeyValueDb> = Box::new(
             feed_db::impl_key_value_db::ImplKeyValueDb::new(key_value_db.clone()),
@@ -36,6 +40,7 @@ impl BaseFixture {
         );
 
         let ctx = Ctx {
+            tmdb_api,
             db_conn_sql,
             key_value_db,
             media_db,

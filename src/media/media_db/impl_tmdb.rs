@@ -1,4 +1,4 @@
-use std::vec;
+use std::{sync::Arc, vec};
 
 use super::interface::{Field, MediaDb};
 use crate::{
@@ -9,33 +9,31 @@ use crate::{
     media::{
         core::Media,
         media_id::MediaId,
-        tmdb_api::{self, config::TmdbConfig, Config, TMDB_PAGE_SIZE},
+        tmdb_api::{self, config::TmdbConfig, TmdbApi, TMDB_PAGE_SIZE},
     },
 };
 use async_trait::async_trait;
 use futures::future::join_all;
 
 pub struct ImplTmdb {
-    config: tmdb_api::Config,
+    tmdb_api: Arc<tmdb_api::TmdbApi>,
 }
 
 impl ImplTmdb {
-    pub fn new(tmdb_api_read_access_token: String) -> ImplTmdb {
-        ImplTmdb {
-            config: tmdb_api::Config::new(tmdb_api_read_access_token),
-        }
+    pub fn new(tmdb_api: Arc<tmdb_api::TmdbApi>) -> ImplTmdb {
+        ImplTmdb { tmdb_api }
     }
 }
 
 #[async_trait]
 impl MediaDb for ImplTmdb {
     async fn query(&self, query: Query<Field>) -> Result<Paginated<Media>, String> {
-        let tmdb_config = tmdb_api::config::load(&self.config).await?;
+        let tmdb_config = self.tmdb_api.config().await?;
 
         let query_plan = to_query_plan(query.clone(), vec![]);
 
         let result =
-            execute_query_plan(&self.config, &tmdb_config, query, query_plan.clone()).await?;
+            execute_query_plan(&self.tmdb_api, &tmdb_config, query, query_plan.clone()).await?;
 
         println!("LOG {:?}", &query_plan);
         println!("LOG {:?}", result.items.len());
@@ -53,13 +51,12 @@ pub enum QueryPlanItem {
 impl QueryPlanItem {
     pub async fn execute(
         &self,
-        config: &Config,
+        tmdb_api: &TmdbApi,
         tmdb_config: &TmdbConfig,
     ) -> Result<Paginated<Media>, String> {
         match self {
             QueryPlanItem::MovieDetails(media_id) => {
-                let movie_details_response =
-                    tmdb_api::movie_details::send(config, media_id.as_str()).await?;
+                let movie_details_response = tmdb_api.movie_details(media_id.as_str()).await?;
 
                 let movie = Media::from((tmdb_config, movie_details_response));
 
@@ -77,7 +74,7 @@ impl QueryPlanItem {
 
                 let discover_requests = page_based
                     .range()
-                    .map(|page| tmdb_api::discover_movie::send(config, page.into()));
+                    .map(|page| tmdb_api.discover_movie(page.into()));
 
                 let discover_responses: Vec<tmdb_api::discover_movie::DiscoverMovieResponse> =
                     partition_results(join_all(discover_requests).await).unwrap_or_default();
@@ -147,7 +144,7 @@ pub fn to_query_plan(query: Query<Field>, mut query_plan: QueryPlan) -> QueryPla
 }
 
 pub async fn execute_query_plan(
-    config: &Config,
+    config: &TmdbApi,
     tmdb_config: &TmdbConfig,
     query: Query<Field>,
     query_plan: QueryPlan,
