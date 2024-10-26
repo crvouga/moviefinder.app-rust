@@ -11,7 +11,8 @@ pub fn view_root(children: &[Elem]) -> Elem {
             title("moviefinder.app"),
             meta(&[name("description"), content("Find movies and TV shows to watch")]),
             link(&[
-                rel("stylesheet"),
+                rel("icon"),
+                attr("type", "image/svg+xml"),
                 href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>")
             ]),
             link(&[rel("preconnect"),href("https://image.tmdb.org")]),
