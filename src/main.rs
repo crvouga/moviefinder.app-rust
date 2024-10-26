@@ -27,8 +27,6 @@ async fn main() {
         }
     };
 
-    core::db_migrations::up().unwrap();
-
     let address = format!("0.0.0.0:{}", env.port);
 
     println!("Starting server on http://{}", address);
