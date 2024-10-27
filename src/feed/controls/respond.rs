@@ -63,7 +63,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 fn view_controls(view_model: &ViewModel) -> Elem {
     form(
         &[
-            class("w-full h-full flex flex-col overflow-hidden"),
+            class("w-full h-full flex flex-col overflow-hidden relative"),
             hx::post(
                 &route::Route::Feed(feed::route::Route::Controls {
                     feed_id: view_model.feed.feed_id.clone(),

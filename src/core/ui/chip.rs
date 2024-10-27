@@ -42,12 +42,12 @@ pub fn view(props: Props, attrs: &[Attr]) -> Elem {
             label(
                 &[
                     class_list(&[
-                        "flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-sm text-white cursor-pointer select-none",
+                        "flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none",
                         "peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80",
                         match props.size {
-                            Size::Small => "text-sm px-2 py-1",
-                            Size::Medium => "text-base px-3 py-2",
-                            Size::Large => "text-lg px-3 py-2",
+                            Size::Small => "text-xs px-2 py-1",
+                            Size::Medium => "text-sm px-3 py-2",
+                            Size::Large => "text-base px-3 py-2",
                         },
                     ]),
                     for_(&props.id),
