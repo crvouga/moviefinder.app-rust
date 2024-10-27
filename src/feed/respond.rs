@@ -144,7 +144,31 @@ impl ViewModel {
 fn view_top_bar(model: &ViewModel) -> Elem {
     top_bar::root(
         &[],
-        &[view_chips(&model), view_open_controls_button(&model)],
+        &[div(
+            &[class(
+                "w-full h-full flex items-center justify-center relative pl-2",
+            )],
+            &[
+                view_chips(&model),
+                div(
+                    &[class(
+                        "absolute top-0 right-0 h-full flex items-center justify-center",
+                    )],
+                    &[
+                        div(
+                            &[class(
+                                "w-16 h-full from-transparent to-black bg-gradient-to-r",
+                            )],
+                            &[],
+                        ),
+                        div(
+                            &[class("h-full bg-black")],
+                            &[view_open_controls_button(&model)],
+                        ),
+                    ],
+                ),
+            ],
+        )],
     )
 }
 
