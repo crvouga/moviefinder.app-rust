@@ -58,7 +58,7 @@ pub struct DiscoverMovieResponse {
     pub total_results: Option<usize>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct DiscoverMovieParams {
     pub language: Option<String>,
     pub region: Option<String>,

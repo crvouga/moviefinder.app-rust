@@ -23,25 +23,14 @@ pub enum Op {
 
 #[derive(Debug, Clone)]
 pub enum Filter<F> {
-    Clause(Clause<F>),
-    // And(Vec<Filter<F>>),
-    // Or(Vec<Filter<F>>),
+    Clause(F, Op, String),
+    And(Vec<Filter<F>>),
+    Or(Vec<Filter<F>>),
     None,
-}
-
-#[derive(Debug, Clone)]
-pub struct Clause<F> {
-    pub field: F,
-    pub operator: Op,
-    pub value: String,
 }
 
 impl<T> Filter<T> {
     pub fn clause(field: T, operator: Op, value: String) -> Filter<T> {
-        Filter::Clause(Clause {
-            field,
-            operator,
-            value,
-        })
+        Filter::Clause(field, operator, value)
     }
 }

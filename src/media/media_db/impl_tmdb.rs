@@ -126,20 +126,26 @@ fn partition_results<T, E>(results: Vec<Result<T, E>>) -> Result<Vec<T>, Vec<E>>
 pub type QueryPlan = Vec<QueryPlanItem>;
 
 pub fn to_query_plan(query: Query<MediaField>, mut query_plan: QueryPlan) -> QueryPlan {
-    match query.filter {
+    match query.clone().filter {
         Filter::None => {
             let item = QueryPlanItem::DiscoverMovie(query);
             query_plan.push(item);
             query_plan
         }
-        Filter::Clause(clause) => match (clause.field, clause.operator, clause.value) {
+        Filter::Clause(field, operator, value) => match (field, operator, value) {
             (MediaField::MediaId, Op::Eq, value) => {
                 let media_id = MediaId::new(value);
                 let item = QueryPlanItem::MovieDetails(media_id);
                 query_plan.push(item);
                 query_plan
             }
+            _ => {
+                query_plan.push(QueryPlanItem::DiscoverMovie(query.clone()));
+                query_plan
+            }
         },
+        Filter::And(_filters) => query_plan,
+        Filter::Or(_filters) => query_plan,
     }
 }
 

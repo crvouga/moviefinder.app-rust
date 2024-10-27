@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::query::{Filter, Query},
+    core::query::{Filter, Op, Query},
     media::{genre::genre_id::GenreId, media_db::interface::MediaField},
 };
 
@@ -26,11 +26,17 @@ impl Feed {
     }
 }
 
-impl Into<Query<MediaField>> for FeedId {
+impl Into<Query<MediaField>> for Feed {
     fn into(self) -> Query<MediaField> {
+        let genre_id_clauses = self
+            .genre_ids
+            .iter()
+            .map(|genre_id| Filter::Clause(MediaField::GenreId, Op::Eq, genre_id.to_string()))
+            .collect();
+
         Query {
-            filter: Filter::None,
-            limit: 10,
+            filter: Filter::And(genre_id_clauses),
+            limit: 3,
             offset: 0,
         }
     }
