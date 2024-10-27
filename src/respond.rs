@@ -5,6 +5,7 @@ use crate::feed;
 use crate::media;
 use crate::req::Req;
 use crate::route::Route;
+use crate::ui::root::ROOT_SELECTOR;
 
 pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
     match route {
@@ -18,6 +19,9 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
         Route::RobotsTxt => Res::text("User-agent: *\nDisallow:"),
 
-        Route::Unknown(_route) => Res::redirect(Route::Feed(feed::route::Route::Index).encode()),
+        Route::Unknown(_route) => Res::redirect(
+            Route::Feed(feed::route::Route::Index).encode(),
+            ROOT_SELECTOR.to_string(),
+        ),
     }
 }

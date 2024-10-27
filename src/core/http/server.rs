@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+use super::form_data::FormData;
 use super::query_params::QueryParams;
 use super::request::HttpRequest;
 use super::response::HttpResponse;
@@ -119,8 +120,8 @@ fn parse_cookies(headers: &HashMap<String, String>) -> HashMap<String, String> {
     cookies
 }
 
-fn parse_form_data(headers: &HashMap<String, String>, body: &str) -> HashMap<String, String> {
-    let mut form_data = HashMap::new();
+fn parse_form_data(headers: &HashMap<String, String>, body: &str) -> FormData {
+    let mut form_data = FormData::empty();
 
     if !is_form_data_request(headers) {
         return form_data;

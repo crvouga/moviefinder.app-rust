@@ -1,4 +1,4 @@
-use super::http::response::HttpResponse;
+use super::{http::response::HttpResponse, hx::HxLocation};
 use crate::core::html::Elem;
 use std::collections::HashMap;
 
@@ -16,7 +16,7 @@ pub enum ResAction {
 #[derive(Debug)]
 pub enum ResVariant {
     Html(Elem),
-    Redirect(String),
+    Redirect { location: String, target: String },
     Text(String),
     Empty,
 }
@@ -43,9 +43,12 @@ impl Res {
         }
     }
 
-    pub fn redirect(location: String) -> Self {
+    pub fn redirect(location: String, target: String) -> Self {
         Res {
-            variant: ResVariant::Redirect(location),
+            variant: ResVariant::Redirect {
+                location: location.to_string(),
+                target: target.to_string(),
+            },
             ..Res::default()
         }
     }
@@ -91,9 +94,12 @@ impl From<Res> for HttpResponse {
         for action in res.actions {
             match action {
                 ResAction::PushUrl(url) => {
+                    http_response
+                        .headers
+                        .insert("HX-Push-Url".to_string(), ensure_leading_slash(&url));
                     http_response.headers.insert(
-                        "X-Push-Url".to_string().to_ascii_lowercase(),
-                        ensure_leading_slash(&url),
+                        "Access-Control-Expose-Headers".to_string(),
+                        "HX-Push-Url".to_string(),
                     );
                 }
             }
@@ -107,11 +113,16 @@ impl From<ResVariant> for HttpResponse {
     fn from(res_variant: ResVariant) -> Self {
         match res_variant {
             ResVariant::Html(body) => HttpResponse::new(200, body.render(), HashMap::new()),
-            ResVariant::Redirect(location) => {
+            ResVariant::Redirect { location, target } => {
                 let mut headers = HashMap::new();
                 headers.insert(
-                    "Location".to_string().to_ascii_lowercase(),
-                    ensure_leading_slash(&location),
+                    "HX-Location".to_string(),
+                    serde_json::to_string(&HxLocation::new(location.clone(), target.clone()))
+                        .unwrap_or(location.clone()),
+                );
+                headers.insert(
+                    "Access-Control-Expose-Headers".to_string(),
+                    "HX-Location".to_string(),
                 );
                 HttpResponse::new(302, "".to_owned(), headers)
             }

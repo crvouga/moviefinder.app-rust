@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 // https://htmx.org/docs/
 use crate::core::html;
 
@@ -91,5 +93,19 @@ impl Preload {
 impl From<Preload> for html::Attr {
     fn from(preload: Preload) -> Self {
         html::attr("preload", preload.to_str())
+    }
+}
+
+// https://htmx.org/headers/hx-location/
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct HxLocation {
+    path: String,
+    target: String,
+}
+
+impl HxLocation {
+    pub fn new(path: String, target: String) -> Self {
+        Self { path, target }
     }
 }

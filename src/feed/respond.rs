@@ -35,7 +35,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
         Route::ChangedSlide { feed_id } => {
             let slide_index_new = req
                 .form_data
-                .get("feedIndex")
+                .get_first("feedIndex")
                 .and_then(|s| s.parse::<usize>().ok())
                 .unwrap_or_default();
 

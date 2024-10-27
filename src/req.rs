@@ -1,8 +1,7 @@
-use crate::user_session::session_id::SessionId;
-use std::collections::HashMap;
+use crate::{core::http::form_data::FormData, user_session::session_id::SessionId};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Req {
     pub session_id: SessionId,
-    pub form_data: HashMap<String, String>,
+    pub form_data: FormData,
 }

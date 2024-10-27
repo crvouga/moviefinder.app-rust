@@ -1,20 +1,29 @@
 use super::route::Route;
 use crate::{
-    core::{html::*, res::Res, ui},
+    core::{
+        html::*,
+        hx,
+        res::Res,
+        ui::{self, chip::ChipProps},
+    },
     ctx::Ctx,
     feed::{self, core::Feed, feed_id::FeedId},
-    media::genre::genre::Genre,
+    media::genre::{genre::Genre, genre_id::GenreId},
     req::Req,
     route,
-    ui::top_bar,
+    ui::{root::ROOT_SELECTOR, top_bar},
 };
 
+#[derive(Debug)]
 struct ViewModel {
     feed: Feed,
     genres: Vec<Genre>,
 }
 
-pub async fn respond(ctx: &Ctx, _req: &Req, feed_id: &FeedId, route: &Route) -> Res {
+const BACK_ROUTE: route::Route = route::Route::Feed(feed::route::Route::Index);
+const GENRE_ID_KEY: &str = "genre_id";
+
+pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
         Route::Index => {
             let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
@@ -25,13 +34,51 @@ pub async fn respond(ctx: &Ctx, _req: &Req, feed_id: &FeedId, route: &Route) -> 
 
             view_controls(&view_model).into()
         }
+
+        Route::ClickedSave => {
+            let genre_ids_new: Vec<GenreId> = req
+                .form_data
+                .get_all(GENRE_ID_KEY)
+                .cloned()
+                .unwrap_or(vec![])
+                .into_iter()
+                .map(GenreId::new)
+                .collect();
+
+            let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
+
+            let feed_new = Feed {
+                genre_ids: genre_ids_new,
+                active_index: 0,
+                ..feed
+            };
+
+            ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
+
+            Res::redirect(
+                route::Route::Feed(feed::route::Route::Index)
+                    .encode()
+                    .to_string(),
+                ROOT_SELECTOR.to_string(),
+            )
+        }
     }
 }
 
 fn view_controls(view_model: &ViewModel) -> Elem {
-    div(
-        &[class("w-full h-full flex flex-col overflow-hidden")],
-        &[view_top_bar(), view_form(view_model)],
+    form(
+        &[
+            class("w-full h-full flex flex-col overflow-hidden"),
+            hx::post(
+                &route::Route::Feed(feed::route::Route::Controls {
+                    feed_id: view_model.feed.feed_id.clone(),
+                    child: Route::ClickedSave,
+                })
+                .encode(),
+            ),
+            hx::Swap::None.into(),
+        ],
+        &[view_top_bar(), view_form(view_model), view_bottom_bar()],
     )
 }
 
@@ -41,13 +88,36 @@ fn view_top_bar() -> Elem {
         &[
             top_bar::empty(),
             top_bar::title("Controls"),
-            top_bar::cancel_button(route::Route::Feed(feed::route::Route::Index)),
+            top_bar::cancel_button(BACK_ROUTE),
+        ],
+    )
+}
+
+fn view_bottom_bar() -> Elem {
+    div(
+        &[class(
+            "flex-none flex flex-row items-center justify-center p-4 border-t gap-4",
+        )],
+        &[
+            ui::button::view(
+                "Cancel",
+                vec![
+                    type_("button"),
+                    class("flex-1"),
+                    hx::get(&BACK_ROUTE.encode()),
+                    hx::push_url("true"),
+                    hx::Preload::MouseDown.into(),
+                    hx::Swap::InnerHtml.into(),
+                    hx::target(ROOT_SELECTOR),
+                ],
+            ),
+            ui::button::view("Save", vec![type_("submit"), class("flex-1")]),
         ],
     )
 }
 
 fn view_form(view_model: &ViewModel) -> Elem {
-    form(
+    div(
         &[class("flex-1 flex flex-col py-4 px-6 overflow-y-auto")],
         &[
             //
@@ -77,11 +147,25 @@ fn view_genre_chips(view_model: &ViewModel) -> Elem {
         &view_model
             .genres
             .iter()
-            .map(|genre| view_genre_chip(genre))
+            .map(|genre| view_genre_chip(view_model, genre))
             .collect::<Vec<Elem>>(),
     )
 }
 
-fn view_genre_chip(genre: &Genre) -> Elem {
-    ui::chip::view(genre.id.as_str(), genre.name.as_str())
+fn view_genre_chip(view_model: &ViewModel, genre: &Genre) -> Elem {
+    let initial_state = view_model
+        .feed
+        .genre_ids
+        .iter()
+        .any(|genre_id| genre_id.clone() == genre.id);
+
+    ui::chip::view(
+        ChipProps {
+            id: genre.id.to_string(),
+            label: genre.name.clone(),
+            name: GENRE_ID_KEY.to_string(),
+            initial_state,
+        },
+        &[],
+    )
 }

@@ -1,4 +1,4 @@
-use crate::core::http::{query_params::QueryParams, request::HttpRequest};
+use crate::core::http::{form_data::FormData, query_params::QueryParams, request::HttpRequest};
 use std::collections::HashMap;
 
 pub mod config;
@@ -40,7 +40,7 @@ impl TmdbApi {
             path: path.to_string(),
             body: "".to_string(),
             cookies: HashMap::new(),
-            form_data: HashMap::new(),
+            form_data: FormData::empty(),
             query_params,
         }
     }

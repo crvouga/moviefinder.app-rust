@@ -1,7 +1,7 @@
 #[derive(Clone, Debug)]
 pub struct Attr {
-    name: String,
-    value: String,
+    pub name: String,
+    pub value: String,
 }
 
 #[derive(Clone, Debug)]
@@ -61,7 +61,14 @@ pub fn render_children(children: &[Elem], indent_level: usize) -> String {
 pub fn render_attrs(attrs: &[Attr]) -> String {
     attrs
         .iter()
-        .map(|attr| format!(" {}=\"{}\"", attr.name, attr.value))
+        .filter_map(|attr| {
+            let name_cleaned = attr.name.trim();
+            if name_cleaned.is_empty() {
+                None
+            } else {
+                Some(format!(" {}=\"{}\"", name_cleaned, attr.value))
+            }
+        })
         .collect::<Vec<String>>()
         .join("")
 }
@@ -104,6 +111,10 @@ pub fn text(value: &str) -> Elem {
 
 pub fn name(value: &str) -> Attr {
     attr("name", value)
+}
+
+pub fn value(value: &str) -> Attr {
+    attr("value", value)
 }
 
 pub fn content(value: &str) -> Attr {
@@ -152,6 +163,14 @@ pub fn height(value: &str) -> Attr {
 
 pub fn type_(value: &str) -> Attr {
     attr("type", value)
+}
+
+pub fn checked(value: bool) -> Attr {
+    if value {
+        attr("checked", "true")
+    } else {
+        attr("", "")
+    }
 }
 
 pub fn for_(value: &str) -> Attr {

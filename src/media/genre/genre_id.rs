@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct GenreId(String);
 
 impl GenreId {
@@ -8,5 +10,9 @@ impl GenreId {
 
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+
+    pub fn to_string(&self) -> String {
+        self.0.clone()
     }
 }

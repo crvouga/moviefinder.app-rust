@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::query_params::QueryParams;
+use super::{form_data::FormData, query_params::QueryParams};
 
 #[derive(Debug)]
 pub struct HttpRequest {
@@ -9,7 +9,7 @@ pub struct HttpRequest {
     pub host: String,
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
-    pub form_data: HashMap<String, String>,
+    pub form_data: FormData,
     pub query_params: QueryParams,
     #[allow(dead_code)]
     pub body: String,

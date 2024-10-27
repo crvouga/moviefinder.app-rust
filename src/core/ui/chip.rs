@@ -1,23 +1,33 @@
 use crate::core::html::*;
 
-pub fn view(id_str: &str, label_str: &str) -> Elem {
+pub struct ChipProps {
+    pub id: String,
+    pub label: String,
+    pub name: String,
+    pub initial_state: bool,
+}
+
+pub fn view(props: ChipProps, attrs: &[Attr]) -> Elem {
     div(
-        &[],
+        attrs,
         &[
             input(
                 &[
                     class("hidden peer"), 
                     type_("checkbox"), 
-                    id(&id_str)
+                    id(&props.id),
+                    name(&props.name),
+                    value(&props.id),
+                    checked(props.initial_state),
                 ],
                 &[],
             ),
             label(
                 &[
-                    class("flex items-center justify-center rounded-full w-fit border border-neutral-600 bg-neutral-800 px-4 py-2 text-white peer-checked:bg-white font-bold peer-checked:font-bold peer-checked:text-black active:opacity-80"),
-                    for_(&id_str),
+                    class("flex items-center justify-center rounded-full w-fit border border-neutral-600 bg-neutral-800 px-4 py-2 text-white peer-checked:bg-white font-bold peer-checked:font-bold peer-checked:text-black active:opacity-80 cursor-pointer select-none"),
+                    for_(&props.id),
                 ],
-                &[text(label_str)],
+                &[text(&props.label)],
             ),
         ],
     )
