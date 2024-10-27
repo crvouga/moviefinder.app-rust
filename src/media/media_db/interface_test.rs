@@ -1,6 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, hash::Hash};
+    use std::{
+        collections::{HashMap, HashSet},
+        hash::Hash,
+    };
 
     use crate::{
         core::query::{Filter, Op, Query},
@@ -85,23 +88,22 @@ mod tests {
                 .await
                 .unwrap();
 
-            let media_ids = queried
+            let media_ids: Vec<MediaId> = queried
                 .items
                 .iter()
                 .map(|media| media.media_id.clone())
-                .collect::<Vec<MediaId>>();
+                .collect();
+
             let media_id_frequencies = frequencies(media_ids.clone());
 
-            let duplicate_media_ids = media_ids
-                .iter()
+            let duplicate_media_ids: Vec<MediaId> = media_ids
+                .clone()
+                .into_iter()
                 .filter(|media_id| media_id_frequencies.get(media_id).unwrap_or(&0) > &1)
-                .collect::<Vec<&MediaId>>();
+                .collect();
 
-            let unique_media_ids = media_ids
-                .iter()
-                .collect::<std::collections::HashSet<&MediaId>>();
+            let unique_media_ids: HashSet<MediaId> = media_ids.clone().into_iter().collect();
 
-            println!("media_id_frequencies: {:?}", media_id_frequencies);
             assert_eq!(duplicate_media_ids.len(), 0);
             assert_eq!(media_ids.len(), unique_media_ids.len());
         }

@@ -21,7 +21,9 @@ impl Default for Color {
 }
 
 pub fn view(props: Props, additional_attrs: Vec<Attr>) -> Elem {
-    let mut base_classes = "group relative flex items-center justify-center gap-2 rounded px-4 py-3 text-lg font-bold text-white hover:opacity-80 active:opacity-60".to_string();
+    let mut base_classes = "group relative flex items-center justify-center gap-2 rounded px-4 py-3 text-lg font-bold text-white".to_string();
+
+    base_classes.push_str(" enabled:hover:opacity-80 enabled:active:opacity-60");
 
     match props.color {
         Color::Gray => {
