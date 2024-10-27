@@ -232,37 +232,38 @@ fn view_feed(model: &ViewModel) -> Elem {
         &[class(
             "w-full flex-1 flex items-center justify-center flex-col overflow-hidden",
         )],
+        &[view_top_bar(&model), view_swiper(&model), view_bottom_bar()],
+    )
+}
+
+fn view_bottom_bar() -> Elem {
+    bottom_bar::view(bottom_bar::Active::Home)
+}
+
+fn view_swiper(model: &ViewModel) -> Elem {
+    ui::swiper::container(
         &[
-            view_top_bar(model),
-            ui::swiper::container(
-                &[
-                    class(
-                        "flex-1 flex flex-col w-full items-center justify-center overflow-hidden",
-                    ),
-                    ui::swiper::Direction::Vertical.into(),
-                    ui::swiper::slides_per_view("1"),
-                    hx::Trigger::Custom("swiperslidechange from:swiper-container".to_string())
-                        .into(),
-                    hx::Swap::None.into(),
-                    hx::post(
-                        route::Route::Feed(Route::ChangedSlide {
-                            feed_id: model.feed.feed_id.clone(),
-                        })
-                        .encode()
-                        .as_str(),
-                    ),
-                    hx::vals(
-                        r#"
+            class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden"),
+            ui::swiper::Direction::Vertical.into(),
+            ui::swiper::slides_per_view("1"),
+            hx::Trigger::Custom("swiperslidechange from:swiper-container".to_string()).into(),
+            hx::Swap::None.into(),
+            hx::post(
+                route::Route::Feed(Route::ChangedSlide {
+                    feed_id: model.feed.feed_id.clone(),
+                })
+                .encode()
+                .as_str(),
+            ),
+            hx::vals(
+                r#"
                         js:{
                             feedIndex: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)
                         }
                         "#,
-                    ),
-                ],
-                &[view_load_initial(model)],
             ),
-            bottom_bar::view(bottom_bar::Active::Home),
         ],
+        &[view_load_initial(model)],
     )
 }
 
