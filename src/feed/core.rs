@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::media::genre::genre_id::GenreId;
+use crate::{
+    core::query::{Filter, Query},
+    media::{genre::genre_id::GenreId, media_db::interface::MediaField},
+};
 
 use super::feed_id::FeedId;
 
@@ -19,6 +22,16 @@ impl Feed {
             feed_id: FeedId::new("feed_id".to_string()),
             active_index: 0,
             genre_ids: vec![],
+        }
+    }
+}
+
+impl Into<Query<MediaField>> for FeedId {
+    fn into(self) -> Query<MediaField> {
+        Query {
+            filter: Filter::None,
+            limit: 10,
+            offset: 0,
         }
     }
 }

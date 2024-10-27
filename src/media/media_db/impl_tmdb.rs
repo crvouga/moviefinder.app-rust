@@ -1,6 +1,6 @@
 use std::{sync::Arc, vec};
 
-use super::interface::{Field, MediaDb};
+use super::interface::{MediaDb, MediaField};
 use crate::{
     core::{
         pagination::{PageBased, Paginated, Pagination},
@@ -27,7 +27,7 @@ impl ImplTmdb {
 
 #[async_trait]
 impl MediaDb for ImplTmdb {
-    async fn query(&self, query: Query<Field>) -> Result<Paginated<Media>, String> {
+    async fn query(&self, query: Query<MediaField>) -> Result<Paginated<Media>, String> {
         let tmdb_config = self.tmdb_api.config().await?;
 
         let query_plan = to_query_plan(query.clone(), vec![]);
@@ -45,7 +45,7 @@ impl MediaDb for ImplTmdb {
 #[derive(Debug, Clone)]
 pub enum QueryPlanItem {
     MovieDetails(MediaId),
-    DiscoverMovie(Query<Field>),
+    DiscoverMovie(Query<MediaField>),
 }
 
 impl QueryPlanItem {
@@ -125,7 +125,7 @@ fn partition_results<T, E>(results: Vec<Result<T, E>>) -> Result<Vec<T>, Vec<E>>
 
 pub type QueryPlan = Vec<QueryPlanItem>;
 
-pub fn to_query_plan(query: Query<Field>, mut query_plan: QueryPlan) -> QueryPlan {
+pub fn to_query_plan(query: Query<MediaField>, mut query_plan: QueryPlan) -> QueryPlan {
     match query.filter {
         Filter::None => {
             let item = QueryPlanItem::DiscoverMovie(query);
@@ -133,7 +133,7 @@ pub fn to_query_plan(query: Query<Field>, mut query_plan: QueryPlan) -> QueryPla
             query_plan
         }
         Filter::Clause(clause) => match (clause.field, clause.operator, clause.value) {
-            (Field::MediaId, Op::Eq, value) => {
+            (MediaField::MediaId, Op::Eq, value) => {
                 let media_id = MediaId::new(value);
                 let item = QueryPlanItem::MovieDetails(media_id);
                 query_plan.push(item);
@@ -146,7 +146,7 @@ pub fn to_query_plan(query: Query<Field>, mut query_plan: QueryPlan) -> QueryPla
 pub async fn execute_query_plan(
     config: &TmdbApi,
     tmdb_config: &TmdbConfig,
-    query: Query<Field>,
+    query: Query<MediaField>,
     query_plan: QueryPlan,
 ) -> Result<Paginated<Media>, String> {
     let mut all_items: Vec<Media> = vec![];

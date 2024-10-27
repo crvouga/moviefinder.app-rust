@@ -161,6 +161,7 @@ fn view_genre_chip(view_model: &ViewModel, genre: &Genre) -> Elem {
             name: GENRE_ID_KEY.to_string(),
             checked: initial_state,
             disabled: false,
+            size: ui::chip::Size::Large,
         },
         &[],
     )

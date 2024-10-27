@@ -1,11 +1,26 @@
 use crate::core::html::*;
 
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Props {
     pub id: String,
     pub label: String,
     pub name: String,
     pub checked: bool,
     pub disabled: bool,
+    pub size: Size,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Size {
+    Small,
+    Medium,
+    Large,
+}
+
+impl Default for Size {
+    fn default() -> Self {
+        Size::Medium
+    }
 }
 
 pub fn view(props: Props, attrs: &[Attr]) -> Elem {
@@ -26,7 +41,15 @@ pub fn view(props: Props, attrs: &[Attr]) -> Elem {
             ),
             label(
                 &[
-                    class("flex items-center justify-center rounded-full w-fit border border-neutral-600 bg-neutral-800 px-2 py-1 text-sm text-white peer-checked:bg-white font-bold peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80 cursor-pointer select-none"),
+                    class_list(&[
+                        "flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-sm text-white cursor-pointer select-none",
+                        "peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80",
+                        match props.size {
+                            Size::Small => "text-sm px-2 py-1",
+                            Size::Medium => "text-base px-3 py-2",
+                            Size::Large => "text-lg px-3 py-2",
+                        },
+                    ]),
                     for_(&props.id),
                 ],
                 &[text(&props.label)],

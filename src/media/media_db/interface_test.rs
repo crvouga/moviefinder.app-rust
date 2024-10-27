@@ -9,7 +9,7 @@ mod tests {
         media::{
             media_db::{
                 impl_tmdb,
-                interface::{Field, MediaDb},
+                interface::{MediaDb, MediaField},
             },
             media_id::MediaId,
         },
@@ -43,7 +43,7 @@ mod tests {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: Filter::clause(Field::MediaId, Op::Eq, media_id.as_str().to_string()),
+                filter: Filter::clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
             };
 
             let result = f.media_db.query(query).await;

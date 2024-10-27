@@ -8,7 +8,7 @@ use crate::{
     },
     ctx::Ctx,
     feed,
-    media::{self, core::Media, media_db::interface::Field, media_id::MediaId},
+    media::{self, core::Media, media_db::interface::MediaField, media_id::MediaId},
     route,
     ui::{root::ROOT_SELECTOR, top_bar},
 };
@@ -26,7 +26,7 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: Filter::clause(Field::MediaId, Op::Eq, media_id.as_str().to_string()),
+                filter: Filter::clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
             };
 
             let queried = ctx.media_db.query(query).await;
