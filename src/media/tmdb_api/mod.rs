@@ -4,6 +4,7 @@ use std::collections::HashMap;
 pub mod config;
 pub mod discover_movie;
 pub mod movie_details;
+pub mod movie_genre;
 
 #[derive(Debug)]
 pub struct TmdbApi {

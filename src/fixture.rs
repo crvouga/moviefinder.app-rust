@@ -4,7 +4,7 @@ use crate::{
     env::Env,
     feed::{feed_db, session_feed_mapping_db},
     key_value_db,
-    media::{media_db, tmdb_api},
+    media::{genre::genre_db, media_db, tmdb_api},
 };
 use std::sync::Arc;
 
@@ -39,7 +39,10 @@ impl BaseFixture {
             session_feed_mapping_db::impl_key_value_db::ImplKeyValueDb::new(key_value_db.clone()),
         );
 
+        let genre_db = Box::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
+
         let ctx = Ctx {
+            genre_db,
             tmdb_api,
             db_conn_sql,
             key_value_db,

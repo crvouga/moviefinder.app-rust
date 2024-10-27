@@ -150,6 +150,14 @@ pub fn height(value: &str) -> Attr {
     attr("height", value)
 }
 
+pub fn type_(value: &str) -> Attr {
+    attr("type", value)
+}
+
+pub fn for_(value: &str) -> Attr {
+    attr("for", value)
+}
+
 pub fn elem(tag_name: &str, attributes: &[Attr], children: &[Elem]) -> Elem {
     Elem::Element {
         tag_name: tag_name.to_string(),
@@ -186,6 +194,10 @@ pub fn div(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("div", attrs, children)
 }
 
+pub fn form(attrs: &[Attr], children: &[Elem]) -> Elem {
+    elem("form", attrs, children)
+}
+
 pub fn p(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("p", attrs, children)
 }
@@ -208,4 +220,12 @@ pub fn body(attrs: &[Attr], children: &[Elem]) -> Elem {
 
 pub fn a(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("a", attrs, children)
+}
+
+pub fn input(attrs: &[Attr], children: &[Elem]) -> Elem {
+    elem("input", attrs, children)
+}
+
+pub fn label(attrs: &[Attr], children: &[Elem]) -> Elem {
+    elem("label", attrs, children)
 }

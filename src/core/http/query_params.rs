@@ -8,6 +8,10 @@ impl QueryParams {
         self.0.is_empty()
     }
 
+    pub fn empty() -> QueryParams {
+        QueryParams(HashMap::new())
+    }
+
     pub fn to_string(&self) -> String {
         self.0
             .iter()

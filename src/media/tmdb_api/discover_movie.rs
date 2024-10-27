@@ -1,3 +1,4 @@
+// https://developer.themoviedb.org/reference/discover-movie
 use crate::{
     core::{
         http::{self, query_params::QueryParams},

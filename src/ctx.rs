@@ -9,8 +9,9 @@ use crate::{
     },
     key_value_db::{self, interface::KeyValueDb},
     media::{
+        genre::genre_db::{self, interface::GenreDb},
         media_db::{self, interface::MediaDb},
-        tmdb_api,
+        tmdb_api::{self, TmdbApi},
     },
 };
 
@@ -22,7 +23,8 @@ pub struct Ctx {
     pub media_db: Box<dyn MediaDb>,
     pub feed_db: Box<dyn FeedDb>,
     pub session_feed_mapping_db: Box<dyn SessionFeedMappingDb>,
-    pub tmdb_api: Arc<tmdb_api::TmdbApi>,
+    pub tmdb_api: Arc<TmdbApi>,
+    pub genre_db: Box<dyn GenreDb>,
 }
 
 impl Ctx {
@@ -51,7 +53,10 @@ impl Ctx {
             ),
         );
 
+        let genre_db = Box::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
+
         Ok(Ctx {
+            genre_db,
             db_conn_sql,
             tmdb_api,
             media_db,

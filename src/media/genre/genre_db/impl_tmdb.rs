@@ -1,21 +1,38 @@
-use crate::media::{genre::genre::Genre, tmdb_api};
+use std::sync::Arc;
+
+use async_trait::async_trait;
+
+use crate::media::{genre::genre::Genre, tmdb_api::TmdbApi};
 
 use super::interface::GenreDb;
 
 pub struct ImplTmdb {
-    config: tmdb_api::TmdbApi,
+    tmdb_api: Arc<TmdbApi>,
 }
 
 impl ImplTmdb {
-    pub fn new(tmdb_api_read_access_token: String) -> ImplTmdb {
-        ImplTmdb {
-            config: tmdb_api::TmdbApi::new(tmdb_api_read_access_token),
-        }
+    pub fn new(tmdb_api: Arc<TmdbApi>) -> ImplTmdb {
+        ImplTmdb { tmdb_api }
     }
 }
 
+#[async_trait]
 impl GenreDb for ImplTmdb {
-    fn get_all(&self) -> Result<Vec<Genre>, String> {
-        Ok(Vec::new())
+    async fn get_all(&self) -> Result<Vec<Genre>, String> {
+        let movie_genres = self
+            .tmdb_api
+            .movie_genre()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        let genres: Vec<Genre> = movie_genres
+            .genres
+            .unwrap_or(vec![])
+            .into_iter()
+            .filter_map(|genre| genre)
+            .map(|genre| genre.into())
+            .collect();
+
+        Ok(genres)
     }
 }
