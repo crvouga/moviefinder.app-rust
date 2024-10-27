@@ -44,8 +44,8 @@ impl MediaDb for ImplTmdb {
 
 #[derive(Debug, Clone)]
 pub enum QueryPlanItem {
-    MovieDetails(MediaId),
-    DiscoverMovie(Query<MediaField>),
+    GetMovieDetails(MediaId),
+    GetDiscoverMovie(Query<MediaField>),
 }
 
 impl QueryPlanItem {
@@ -55,7 +55,7 @@ impl QueryPlanItem {
         tmdb_config: &TmdbConfig,
     ) -> Result<Paginated<Media>, String> {
         match self {
-            QueryPlanItem::MovieDetails(media_id) => {
+            QueryPlanItem::GetMovieDetails(media_id) => {
                 let movie_details_response = tmdb_api.movie_details(media_id.as_str()).await?;
 
                 let movie = Media::from((tmdb_config, movie_details_response));
@@ -67,7 +67,7 @@ impl QueryPlanItem {
                     total: 1,
                 })
             }
-            QueryPlanItem::DiscoverMovie(query) => {
+            QueryPlanItem::GetDiscoverMovie(query) => {
                 let pagination: Pagination = query.into();
 
                 let page_based: PageBased = (pagination, TMDB_PAGE_SIZE).into();
@@ -128,19 +128,19 @@ pub type QueryPlan = Vec<QueryPlanItem>;
 pub fn to_query_plan(query: Query<MediaField>, mut query_plan: QueryPlan) -> QueryPlan {
     match query.clone().filter {
         Filter::None => {
-            let item = QueryPlanItem::DiscoverMovie(query);
+            let item = QueryPlanItem::GetDiscoverMovie(query);
             query_plan.push(item);
             query_plan
         }
         Filter::Clause(field, operator, value) => match (field, operator, value) {
             (MediaField::MediaId, Op::Eq, value) => {
                 let media_id = MediaId::new(value);
-                let item = QueryPlanItem::MovieDetails(media_id);
+                let item = QueryPlanItem::GetMovieDetails(media_id);
                 query_plan.push(item);
                 query_plan
             }
             _ => {
-                query_plan.push(QueryPlanItem::DiscoverMovie(query.clone()));
+                query_plan.push(QueryPlanItem::GetDiscoverMovie(query.clone()));
                 query_plan
             }
         },
