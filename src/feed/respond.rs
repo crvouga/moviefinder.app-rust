@@ -144,51 +144,43 @@ impl ViewModel {
 fn view_top_bar(model: &ViewModel) -> Elem {
     top_bar::root(
         &[],
-        &[div(
-            &[class(
-                "w-full h-full flex items-center justify-center relative pl-2",
-            )],
+        &[button(
             &[
-                view_chips(&model),
-                div(
-                    &[class(
-                        "absolute top-0 right-0 h-full flex items-center justify-center",
-                    )],
-                    &[
-                        div(
-                            &[class(
-                                "w-16 h-full from-transparent to-black bg-gradient-to-r",
-                            )],
-                            &[],
-                        ),
-                        div(
-                            &[class("h-full bg-black")],
-                            &[view_open_controls_button(&model)],
-                        ),
-                    ],
+                class("w-full h-full flex items-center justify-center relative pl-2"),
+                hx::Swap::InnerHtml.into(),
+                hx::target(ROOT_SELECTOR),
+                hx::push_url("true"),
+                hx::get(
+                    route::Route::Feed(Route::Controls {
+                        feed_id: model.feed.feed_id.clone(),
+                        child: controls::route::Route::Index,
+                    })
+                    .encode()
+                    .as_str(),
                 ),
             ],
+            &[view_chips(&model), view_open_controls_button(&model)],
         )],
     )
 }
 
-fn view_open_controls_button(model: &ViewModel) -> Elem {
-    button(
+fn view_open_controls_button(_model: &ViewModel) -> Elem {
+    div(
+        &[class(
+            "absolute top-0 right-0 h-full flex items-center justify-center",
+        )],
         &[
-            class("size-16 flex items-center justify-center"),
-            hx::Swap::InnerHtml.into(),
-            hx::target(ROOT_SELECTOR),
-            hx::push_url("true"),
-            hx::get(
-                route::Route::Feed(Route::Controls {
-                    feed_id: model.feed.feed_id.clone(),
-                    child: controls::route::Route::Index,
-                })
-                .encode()
-                .as_str(),
+            div(
+                &[class(
+                    "w-16 h-full from-transparent to-black bg-gradient-to-r",
+                )],
+                &[],
+            ),
+            div(
+                &[class("size-16 bg-black flex items-center justify-center")],
+                &[ui::icon::adjustments_vertical(&[class("size-8")])],
             ),
         ],
-        &[ui::icon::adjustments_vertical(&[class("size-8")])],
     )
 }
 
