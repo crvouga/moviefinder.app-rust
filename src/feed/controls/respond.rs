@@ -91,7 +91,10 @@ fn view_bottom_bar() -> Elem {
         )],
         &[
             ui::button::view(
-                "Cancel",
+                ui::button::Props {
+                    label: "Cancel".to_string(),
+                    color: ui::button::Color::Gray,
+                },
                 vec![
                     type_("button"),
                     class("flex-1"),
@@ -102,7 +105,13 @@ fn view_bottom_bar() -> Elem {
                     hx::target(ROOT_SELECTOR),
                 ],
             ),
-            ui::button::view("Save", vec![type_("submit"), class("flex-1")]),
+            ui::button::view(
+                ui::button::Props {
+                    label: "Save".to_string(),
+                    color: ui::button::Color::Primary,
+                },
+                vec![type_("submit"), class("flex-1")],
+            ),
         ],
     )
 }

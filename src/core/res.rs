@@ -17,6 +17,7 @@ pub enum ResAction {
 pub enum ResVariant {
     Html(Elem),
     Redirect { location: String, target: String },
+    RedirectWindow(String),
     Text(String),
     Empty,
 }
@@ -49,6 +50,13 @@ impl Res {
                 location: location.to_string(),
                 target: target.to_string(),
             },
+            ..Res::default()
+        }
+    }
+
+    pub fn redirect_window(location: String) -> Self {
+        Res {
+            variant: ResVariant::RedirectWindow(location),
             ..Res::default()
         }
     }
@@ -124,6 +132,11 @@ impl From<ResVariant> for HttpResponse {
                     "Access-Control-Expose-Headers".to_string(),
                     "HX-Location".to_string(),
                 );
+                HttpResponse::new(302, "".to_owned(), headers)
+            }
+            ResVariant::RedirectWindow(location) => {
+                let mut headers = HashMap::new();
+                headers.insert("Location".to_string(), location.clone());
                 HttpResponse::new(302, "".to_owned(), headers)
             }
             ResVariant::Text(text) => HttpResponse::new(200, text, HashMap::new()),
