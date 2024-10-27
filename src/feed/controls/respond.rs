@@ -78,13 +78,9 @@ fn view_controls(view_model: &ViewModel) -> Elem {
 }
 
 fn view_top_bar() -> Elem {
-    top_bar::root(
-        &[],
-        &[
-            top_bar::empty(),
-            top_bar::title("Controls"),
-            top_bar::cancel_button(BACK_ROUTE),
-        ],
+    div(
+        &[class("absolute right-0 top-0")],
+        &[top_bar::cancel_button(BACK_ROUTE)],
     )
 }
 
@@ -113,7 +109,7 @@ fn view_bottom_bar() -> Elem {
 
 fn view_form(view_model: &ViewModel) -> Elem {
     div(
-        &[class("flex-1 flex flex-col py-4 px-6 overflow-y-auto")],
+        &[class("flex-1 flex flex-col py-8 px-6 overflow-y-auto")],
         &[
             //
             view_section("Genres", vec![view_genre_chips(&view_model)]),
@@ -133,7 +129,7 @@ fn view_section(title: &str, children: Vec<Elem>) -> Elem {
 }
 
 fn view_section_title(title: &str) -> Elem {
-    div(&[class("text-2xl font-bold")], &[text(title)])
+    div(&[class("text-4xl font-bold")], &[text(title)])
 }
 
 fn view_genre_chips(view_model: &ViewModel) -> Elem {

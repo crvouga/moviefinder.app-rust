@@ -212,7 +212,7 @@ fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
                 name: "".to_string(),
                 checked: true,
                 disabled: true,
-                size: ui::chip::Size::Small,
+                size: ui::chip::Size::Medium,
             },
             &[],
         ),

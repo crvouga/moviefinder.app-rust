@@ -46,7 +46,7 @@ pub fn view(props: Props, attrs: &[Attr]) -> Elem {
                         "peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80",
                         match props.size {
                             Size::Small => "text-xs px-2 py-1",
-                            Size::Medium => "text-sm px-3 py-2",
+                            Size::Medium => "text-sm px-2.5 py-1.5",
                             Size::Large => "text-base px-3 py-2",
                         },
                     ]),

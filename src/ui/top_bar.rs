@@ -6,8 +6,21 @@ use crate::{
 use super::root::ROOT_SELECTOR;
 
 pub fn root(attrs: &[Attr], children: &[Elem]) -> Elem {
+    let class_str = attrs
+        .iter()
+        .fold("flex items-center justify-center w-full border-b h-16 font-bold text-lg text-center truncate".to_string(), |acc, attr| {
+            if attr.name == "class" {
+                format!("{} {}", acc, attr.value)
+            } else {
+                acc
+            }
+        });
     div(
-        [class("flex items-center justify-center w-full border-b h-16 font-bold text-lg text-center truncate")].into_iter().chain(attrs.iter().cloned()).collect::<Vec<Attr>>().as_ref(),
+        [class(&class_str)]
+            .into_iter()
+            .chain(attrs.iter().cloned())
+            .collect::<Vec<Attr>>()
+            .as_ref(),
         children,
     )
 }
