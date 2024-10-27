@@ -7,8 +7,12 @@ use crate::{
         res::Res,
         ui,
     },
-    ctx,
-    media::{self, media_id::MediaId},
+    ctx::{self, Ctx},
+    media::{
+        self,
+        genre::{genre::Genre, genre_id::GenreId},
+        media_id::MediaId,
+    },
     req::Req,
     route,
     ui::{bottom_bar, root::ROOT_SELECTOR, top_bar},
@@ -29,7 +33,9 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
             put_feed(ctx, req.session_id.clone(), &feed).await;
 
-            view_feed(&feed.feed_id).into()
+            let model = ViewModel::load(ctx, &feed_id).await;
+
+            view_feed(&model).into()
         }
 
         Route::ChangedSlide { feed_id } => {
@@ -120,39 +126,90 @@ async fn put_feed(ctx: &ctx::Ctx, session_id: SessionId, feed: &Feed) {
         .unwrap_or(());
 }
 
-fn view_top_bar(feed_id: &FeedId) -> Elem {
+struct ViewModel {
+    feed: Feed,
+    genres: Vec<Genre>,
+}
+
+impl ViewModel {
+    async fn load(ctx: &Ctx, feed_id: &FeedId) -> Self {
+        let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
+
+        let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
+
+        Self { feed, genres }
+    }
+}
+
+fn view_top_bar(model: &ViewModel) -> Elem {
     top_bar::root(
         &[],
-        &[
-            div(&[class("flex-1 flex items-center gap-4")], &[]),
-            button(
-                &[
-                    class("size-16 flex items-center justify-center"),
-                    hx::Swap::InnerHtml.into(),
-                    hx::target(ROOT_SELECTOR),
-                    hx::push_url("true"),
-                    hx::get(
-                        route::Route::Feed(Route::Controls {
-                            feed_id: feed_id.clone(),
-                            child: controls::route::Route::Index,
-                        })
-                        .encode()
-                        .as_str(),
-                    ),
-                ],
-                &[ui::icon::adjustments_vertical(&[class("size-8")])],
-            ),
-        ],
+        &[view_chips(&model), view_open_controls_button(&model)],
     )
 }
 
-fn view_feed(feed_id: &FeedId) -> Elem {
+fn view_open_controls_button(model: &ViewModel) -> Elem {
+    button(
+        &[
+            class("size-16 flex items-center justify-center"),
+            hx::Swap::InnerHtml.into(),
+            hx::target(ROOT_SELECTOR),
+            hx::push_url("true"),
+            hx::get(
+                route::Route::Feed(Route::Controls {
+                    feed_id: model.feed.feed_id.clone(),
+                    child: controls::route::Route::Index,
+                })
+                .encode()
+                .as_str(),
+            ),
+        ],
+        &[ui::icon::adjustments_vertical(&[class("size-8")])],
+    )
+}
+
+fn view_chips(model: &ViewModel) -> Elem {
+    div(
+        &[class("flex flex-row gap-2 p-2 flex-1 overflow-hidden")],
+        model
+            .feed
+            .genre_ids
+            .iter()
+            .map(|genre_id| view_genre_chip(model, genre_id))
+            .collect::<Vec<Elem>>()
+            .as_ref(),
+    )
+}
+
+fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
+    let maybe_genre = model
+        .genres
+        .clone()
+        .into_iter()
+        .find(|g| g.id.clone() == genre_id.clone());
+
+    match maybe_genre {
+        Some(genre) => ui::chip::view(
+            ui::chip::Props {
+                id: genre.id.to_string(),
+                label: genre.name.clone(),
+                name: "".to_string(),
+                checked: true,
+                disabled: true,
+            },
+            &[],
+        ),
+        None => fragment(&[]),
+    }
+}
+
+fn view_feed(model: &ViewModel) -> Elem {
     div(
         &[class(
             "w-full flex-1 flex items-center justify-center flex-col overflow-hidden",
         )],
         &[
-            view_top_bar(feed_id),
+            view_top_bar(model),
             ui::swiper::container(
                 &[
                     class(
@@ -165,7 +222,7 @@ fn view_feed(feed_id: &FeedId) -> Elem {
                     hx::Swap::None.into(),
                     hx::post(
                         route::Route::Feed(Route::ChangedSlide {
-                            feed_id: feed_id.clone(),
+                            feed_id: model.feed.feed_id.clone(),
                         })
                         .encode()
                         .as_str(),
@@ -178,7 +235,7 @@ fn view_feed(feed_id: &FeedId) -> Elem {
                         "#,
                     ),
                 ],
-                &[view_load_initial(feed_id.clone())],
+                &[view_load_initial(model)],
             ),
             bottom_bar::view(bottom_bar::Active::Home),
         ],
@@ -264,11 +321,16 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
     }
 }
 
-fn view_load_initial(feed_id: FeedId) -> Elem {
+fn view_load_initial(model: &ViewModel) -> Elem {
     div(
         &[
             class("flex-1 flex flex-col items-center justify-center"),
-            hx::get(&route::Route::Feed(Route::LoadInitial { feed_id }).encode()),
+            hx::get(
+                &route::Route::Feed(Route::LoadInitial {
+                    feed_id: model.feed.feed_id.clone(),
+                })
+                .encode(),
+            ),
             hx::Trigger::Load.into(),
             hx::Swap::OuterHtml.into(),
         ],

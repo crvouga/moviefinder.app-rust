@@ -1,11 +1,6 @@
 use super::route::Route;
 use crate::{
-    core::{
-        html::*,
-        hx,
-        res::Res,
-        ui::{self, chip::ChipProps},
-    },
+    core::{html::*, hx, res::Res, ui},
     ctx::Ctx,
     feed::{self, core::Feed, feed_id::FeedId},
     media::genre::{genre::Genre, genre_id::GenreId},
@@ -160,11 +155,12 @@ fn view_genre_chip(view_model: &ViewModel, genre: &Genre) -> Elem {
         .any(|genre_id| genre_id.clone() == genre.id);
 
     ui::chip::view(
-        ChipProps {
+        ui::chip::Props {
             id: genre.id.to_string(),
             label: genre.name.clone(),
             name: GENRE_ID_KEY.to_string(),
-            initial_state,
+            checked: initial_state,
+            disabled: false,
         },
         &[],
     )

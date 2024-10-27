@@ -173,6 +173,14 @@ pub fn checked(value: bool) -> Attr {
     }
 }
 
+pub fn disabled(value: bool) -> Attr {
+    if value {
+        attr("disabled", "true")
+    } else {
+        attr("", "")
+    }
+}
+
 pub fn for_(value: &str) -> Attr {
     attr("for", value)
 }
