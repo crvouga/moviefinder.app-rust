@@ -18,7 +18,6 @@ impl ImplPostgres {
             .await
             .map_err(|err| err.to_string())?;
 
-        // Spawn the connection to manage communication with the database
         tokio::spawn(async move {
             if let Err(err) = connection.await {
                 eprintln!("Database connection error: {}", err);
@@ -52,7 +51,9 @@ impl DbConnSql for ImplPostgres {
             results.push(parsed);
         }
 
-        println!("LOG\n\t{:?}\n\t{:?}", sql, results);
+        if false {
+            println!("LOG\n\t{:?}\n\t{:?}", sql, results);
+        }
 
         Ok(results)
     }
