@@ -102,30 +102,34 @@ impl Elem {
         }
     }
 
-    pub fn disabled(&self, disabled: bool) -> Elem {
-        if disabled {
+    pub fn disabled(&self, value: bool) -> Elem {
+        if value {
             self.attr("disabled", "true")
         } else {
             self.clone()
         }
     }
-    pub fn aria_label(self, label: &str) -> Elem {
-        self.attr("aria-label", label)
+    pub fn aria_label(self, value: &str) -> Elem {
+        self.attr("aria-label", value)
     }
 
-    pub fn width(&self, width: &str) -> Elem {
-        self.attr("width", width)
+    pub fn width(&self, value: &str) -> Elem {
+        self.attr("width", value)
     }
 
-    pub fn height(&self, height: &str) -> Elem {
-        self.attr("height", height)
+    pub fn height(&self, value: &str) -> Elem {
+        self.attr("height", value)
     }
 
-    pub fn src(&self, src: &str) -> Elem {
-        self.attr("src", src)
+    pub fn src(&self, value: &str) -> Elem {
+        self.attr("src", value)
     }
 
     pub fn defer(&self) -> Elem {
         self.attr("defer", "true")
+    }
+
+    pub fn for_(self, value: &str) -> Elem {
+        self.attr("for", value)
     }
 }

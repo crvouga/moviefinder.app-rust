@@ -47,7 +47,6 @@ impl Chip {
 
     pub fn view(self) -> Elem {
         div()
-        .class("group")
         .child(
             input()
             .class("hidden peer")
@@ -60,11 +59,10 @@ impl Chip {
         )
         .child(
             label()
-            .class_list(&[
-                "flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none",
-                "peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80",
-                &self.size.to_class(),
-            ])
+            .for_(&self.id)
+            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none")
+            .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
+            .class(&self.size.to_class())
             .child_text(&self.label)
         )
     }
