@@ -73,6 +73,42 @@ impl Elem {
         self.attr("class", class_name)
     }
 
+    pub fn class_list(&self, class_names: &[&str]) -> Elem {
+        self.attr("class", &class_names.join(" "))
+    }
+
+    pub fn type_(&self, type_: &str) -> Elem {
+        self.attr("type", type_)
+    }
+
+    pub fn id(&self, id: &str) -> Elem {
+        self.attr("id", id)
+    }
+
+    pub fn name(&self, name: &str) -> Elem {
+        self.attr("name", name)
+    }
+
+    pub fn value(&self, value: &str) -> Elem {
+        self.attr("value", value)
+    }
+
+    pub fn checked(&self, checked: bool) -> Elem {
+        if checked {
+            self.attr("checked", "true")
+        } else {
+            self.clone()
+        }
+    }
+
+    pub fn disabled(&self, disabled: bool) -> Elem {
+        if disabled {
+            self.attr("disabled", "true")
+        } else {
+            self.clone()
+        }
+    }
+
     pub fn width(&self, width: &str) -> Elem {
         self.attr("width", width)
     }
@@ -102,6 +138,10 @@ impl Elem {
             }
             _ => self.clone(),
         }
+    }
+
+    pub fn child_text(&self, text_str: &str) -> Elem {
+        self.child(text(text_str))
     }
 
     pub fn child(&self, child: Elem) -> Elem {
@@ -338,6 +378,14 @@ pub fn input(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("input", attrs, children)
 }
 
+pub fn input_() -> Elem {
+    input(&[], &[])
+}
+
 pub fn label(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("label", attrs, children)
+}
+
+pub fn label_() -> Elem {
+    label(&[], &[])
 }

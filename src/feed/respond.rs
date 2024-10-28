@@ -192,17 +192,13 @@ fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
         .find(|g| g.id.clone() == genre_id.clone());
 
     match maybe_genre {
-        Some(genre) => ui::chip::view(
-            ui::chip::Props {
-                id: genre.id.to_string(),
-                label: genre.name.clone(),
-                name: "".to_string(),
-                checked: true,
-                disabled: true,
-                size: ui::chip::Size::Medium,
-            },
-            &[],
-        ),
+        Some(genre) => ui::chip::Chip::new()
+            .id(&genre.id.to_string())
+            .label(&genre.name)
+            .checked(true)
+            .disabled(true)
+            .size(ui::chip::Size::Medium)
+            .view(),
         None => fragment_(),
     }
 }
