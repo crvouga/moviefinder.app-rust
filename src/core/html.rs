@@ -50,7 +50,7 @@ impl Elem {
         }
     }
 
-    pub fn attr(&self, name: &str, value: &str) -> Elem {
+    pub fn attr(&self, name: &str, value: &str) -> Self {
         match self {
             Elem::Element {
                 tag_name,
