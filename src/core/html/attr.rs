@@ -8,7 +8,12 @@ impl Elem {
                 attributes,
                 children,
             } => {
-                let mut new_attrs = attributes.clone();
+                let mut new_attrs = attributes
+                    .clone()
+                    .into_iter()
+                    .filter(|attr| attr.name != name)
+                    .collect::<Vec<Attr>>();
+
                 new_attrs.push(Attr {
                     name: name.to_string(),
                     value: value.to_string(),
@@ -23,7 +28,7 @@ impl Elem {
         }
     }
 
-    fn list_attrs(&self) -> Vec<Attr> {
+    fn attrs(&self) -> Vec<Attr> {
         match self {
             Elem::Element {
                 tag_name: _,
@@ -36,19 +41,17 @@ impl Elem {
 
     pub fn class(&self, value: &str) -> Elem {
         let existing_classes = self
-            .list_attrs()
+            .attrs()
             .iter()
-            .find(|attr| attr.name == "class")
+            .find(|attr| {
+                attr.name.to_ascii_lowercase().trim() == "class".to_ascii_lowercase().trim()
+            })
             .map(|attr| attr.value.clone())
             .unwrap_or("".to_string());
 
-        let updated_classes = if existing_classes.is_empty() {
-            value.to_string()
-        } else {
-            format!("{} {}", existing_classes, value)
-        };
+        let class_new = format!("{} {}", existing_classes, value);
 
-        self.clone().attr("class", &updated_classes)
+        self.attr("class", class_new.trim())
     }
 
     pub fn class_list(&self, class_names: &[&str]) -> Elem {

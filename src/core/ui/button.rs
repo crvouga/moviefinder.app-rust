@@ -1,4 +1,4 @@
-use super::icon::spinner;
+use super::icon;
 use crate::core::html::*;
 
 #[derive(Debug, Default)]
@@ -32,7 +32,7 @@ impl Button {
         .child(
             div()
                 .class("absolute inset-0 flex items-center justify-center opacity-0 group-aria-busy:opacity-100")
-                .child(spinner("size-8 animate-spin"))
+                .child(icon::spinner("size-8 animate-spin"))
         )
         .child(
             div()
