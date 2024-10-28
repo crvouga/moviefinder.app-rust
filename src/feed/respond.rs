@@ -145,6 +145,7 @@ fn view_top_bar(model: &ViewModel) -> Elem {
         .class("w-full h-16 border-b flex items-center justify-center relative pl-2")
         .hx_swap_inner_html()
         .hx_push_url()
+        .hx_target(ROOT_SELECTOR)
         .hx_get(
             route::Route::Feed(Route::Controls {
                 feed_id: model.feed.feed_id.clone(),
