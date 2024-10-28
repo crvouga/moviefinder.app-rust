@@ -93,6 +93,6 @@ pub fn script_image_element() -> Elem {
     script(&[], &[unsafe_html(IMAGE_ELEMENT_SCRIPT)])
 }
 
-pub fn view(attrs: &[Attr]) -> Elem {
-    elem("image-element", attrs, &[])
+pub fn view() -> Elem {
+    elem("image-element", &[], &[])
 }

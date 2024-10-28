@@ -49,6 +49,79 @@ impl Elem {
             Elem::Unsafe(content) => format!("{}{}\n", indent, content),
         }
     }
+
+    pub fn attr(&self, name: &str, value: &str) -> Elem {
+        match self {
+            Elem::Element {
+                tag_name,
+                attributes,
+                children,
+            } => {
+                let mut new_attrs = attributes.clone();
+                new_attrs.push(attr(name, value));
+                Elem::Element {
+                    tag_name: tag_name.clone(),
+                    attributes: new_attrs,
+                    children: children.clone(),
+                }
+            }
+            _ => self.clone(),
+        }
+    }
+
+    pub fn class(&self, class_name: &str) -> Elem {
+        self.attr("class", class_name)
+    }
+
+    pub fn width(&self, width: &str) -> Elem {
+        self.attr("width", width)
+    }
+
+    pub fn height(&self, height: &str) -> Elem {
+        self.attr("height", height)
+    }
+
+    pub fn src(&self, src: &str) -> Elem {
+        self.attr("src", src)
+    }
+
+    pub fn children(&self, children: &[Elem]) -> Elem {
+        match self {
+            Elem::Element {
+                tag_name,
+                attributes,
+                children: _,
+            } => {
+                let mut new_children = children.to_vec();
+                new_children.extend_from_slice(children);
+                Elem::Element {
+                    tag_name: tag_name.clone(),
+                    attributes: attributes.clone(),
+                    children: new_children,
+                }
+            }
+            _ => self.clone(),
+        }
+    }
+
+    pub fn child(&self, child: Elem) -> Elem {
+        match self {
+            Elem::Element {
+                tag_name,
+                attributes,
+                children,
+            } => {
+                let mut new_children = children.clone();
+                new_children.push(child);
+                Elem::Element {
+                    tag_name: tag_name.clone(),
+                    attributes: attributes.clone(),
+                    children: new_children,
+                }
+            }
+            _ => self.clone(),
+        }
+    }
 }
 pub fn render_children(children: &[Elem], indent_level: usize) -> String {
     children
@@ -84,6 +157,10 @@ fn escape_html(content: &str) -> String {
 
 pub fn unsafe_html(content: &str) -> Elem {
     Elem::Unsafe(content.to_string())
+}
+
+pub fn fragment_() -> Elem {
+    fragment(&[])
 }
 
 pub fn fragment(children: &[Elem]) -> Elem {
@@ -217,6 +294,10 @@ pub fn script(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("script", attrs, children)
 }
 
+pub fn div_() -> Elem {
+    div(&[], &[])
+}
+
 pub fn div(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("div", attrs, children)
 }
@@ -227,6 +308,10 @@ pub fn form(attrs: &[Attr], children: &[Elem]) -> Elem {
 
 pub fn p(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("p", attrs, children)
+}
+
+pub fn button_() -> Elem {
+    button(&[], &[])
 }
 
 pub fn button(attrs: &[Attr], children: &[Elem]) -> Elem {

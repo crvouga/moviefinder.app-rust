@@ -2,7 +2,6 @@ use super::{controls, core::Feed, feed_id::FeedId, feed_item::FeedItem, route::R
 use crate::{
     core::{
         html::*,
-        hx,
         query::{Filter, Query},
         res::Res,
         ui,
@@ -142,59 +141,47 @@ impl ViewModel {
 }
 
 fn view_top_bar(model: &ViewModel) -> Elem {
-    top_bar::root(
-        &[],
-        &[button(
-            &[
-                class("w-full h-full flex items-center justify-center relative pl-2"),
-                hx::Swap::InnerHtml.into(),
-                hx::target(ROOT_SELECTOR),
-                hx::push_url("true"),
-                hx::get(
-                    route::Route::Feed(Route::Controls {
-                        feed_id: model.feed.feed_id.clone(),
-                        child: controls::route::Route::Index,
-                    })
-                    .encode()
-                    .as_str(),
-                ),
-            ],
-            &[view_chips(&model), view_open_controls_button(&model)],
-        )],
+    top_bar::root(&[], &[]).child(
+        button_()
+            .class("w-full h-full flex items-center justify-center relative pl-2")
+            .hx_swap_inner_html()
+            .hx_push_url()
+            .hx_get(
+                route::Route::Feed(Route::Controls {
+                    feed_id: model.feed.feed_id.clone(),
+                    child: controls::route::Route::Index,
+                })
+                .encode()
+                .as_str(),
+            )
+            .child(view_chips(&model))
+            .child(view_open_controls_button()),
     )
 }
 
-fn view_open_controls_button(_model: &ViewModel) -> Elem {
-    div(
-        &[class(
-            "absolute top-0 right-0 h-full flex items-center justify-center",
-        )],
-        &[
-            div(
-                &[class(
-                    "w-16 h-full from-transparent to-black bg-gradient-to-r",
-                )],
-                &[],
-            ),
-            div(
-                &[class("size-16 bg-black flex items-center justify-center")],
-                &[ui::icon::adjustments_vertical(&[class("size-8")])],
-            ),
-        ],
-    )
+fn view_open_controls_button() -> Elem {
+    div_()
+        .class("absolute top-0 right-0 h-full flex items-center justify-center")
+        .child(div_().class("w-16 h-full from-transparent to-black bg-gradient-to-r"))
+        .child(
+            div_()
+                .class("size-16 bg-black flex items-center justify-center")
+                .child(ui::icon::adjustments_vertical(&[class("size-8")])),
+        )
 }
 
 fn view_chips(model: &ViewModel) -> Elem {
-    div(
-        &[class("flex flex-row gap-2 p-2 flex-1 overflow-hidden")],
-        model
-            .feed
-            .genre_ids
-            .iter()
-            .map(|genre_id| view_genre_chip(model, genre_id))
-            .collect::<Vec<Elem>>()
-            .as_ref(),
-    )
+    div_()
+        .class("flex flex-row gap-2 p-2 flex-1 overflow-hidden")
+        .children(
+            model
+                .feed
+                .genre_ids
+                .iter()
+                .map(|genre_id| view_genre_chip(model, genre_id))
+                .collect::<Vec<Elem>>()
+                .as_ref(),
+        )
 }
 
 fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
@@ -216,82 +203,78 @@ fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
             },
             &[],
         ),
-        None => fragment(&[]),
+        None => fragment_(),
     }
 }
 
+fn view_feed_root() -> Elem {
+    div_().class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
+}
+
 fn view_feed(model: &ViewModel) -> Elem {
-    div(
-        &[class(
-            "w-full flex-1 flex items-center justify-center flex-col overflow-hidden",
-        )],
-        &[view_top_bar(&model), view_swiper(&model), view_bottom_bar()],
-    )
+    view_feed_root()
+        .child(view_top_bar(&model))
+        .child(view_swiper(&model.feed.feed_id))
+        .child(view_bottom_bar())
 }
 
 fn view_bottom_bar() -> Elem {
     bottom_bar::view(bottom_bar::Active::Home)
 }
 
-fn view_swiper(model: &ViewModel) -> Elem {
-    ui::swiper::container(
-        &[
-            class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden"),
-            ui::swiper::Direction::Vertical.into(),
-            ui::swiper::slides_per_view("1"),
-            hx::Trigger::Custom("swiperslidechange from:swiper-container".to_string()).into(),
-            hx::Swap::None.into(),
-            hx::post(
-                route::Route::Feed(Route::ChangedSlide {
-                    feed_id: model.feed.feed_id.clone(),
-                })
-                .encode()
-                .as_str(),
-            ),
-            hx::vals(
-                r#"
-                        js:{
-                            feedIndex: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)
-                        }
-                        "#,
-            ),
-        ],
-        &[view_load_initial(model)],
+fn view_swiper(feed_id: &FeedId) -> Elem {
+    ui::swiper::container()
+    .swiper_direction_vertical()
+    .swiper_slides_per_view("1")
+    .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
+    .hx_trigger_custom("swiperslidechange from:swiper-container")
+    .hx_swap_none()
+    .hx_post(
+        route::Route::Feed(Route::ChangedSlide {
+            feed_id: feed_id.clone(),
+        })
+        .encode()
+        .as_str(),
     )
+    .hx_vals(
+        r#"
+        js:{
+            feedIndex: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)
+        }
+        "#
+    )
+    .child(view_load_initial(feed_id))
 }
 
 fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
-    let load_more = feed_items
-        .iter()
-        .last()
-        .map(|feed_item| view_load_more(feed_id, feed_item.to_feed_index() + 1))
-        .unwrap_or(fragment(&[]));
-
-    fragment(&[
-        fragment(&feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>()),
-        load_more,
-    ])
+    fragment_()
+        .children(&feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
+        .child(
+            feed_items
+                .iter()
+                .last()
+                .map(|feed_item| view_load_more(feed_id, feed_item.to_feed_index() + 1))
+                .unwrap_or(fragment_()),
+        )
 }
 
 fn view_load_more(feed_id: &FeedId, start_feed_index: usize) -> Elem {
-    ui::swiper::slide(
-        &[
-            class("flex-1 flex flex-col items-center justify-center"),
-            hx::get(
-                &route::Route::Feed(Route::LoadMore {
-                    feed_id: feed_id.clone(),
-                    start_feed_index,
-                })
-                .encode(),
-            ),
-            hx::Trigger::Intersect.into(),
-            hx::Swap::OuterHtml.into(),
-        ],
-        &[ui::image::view(&[
-            src(" "),
-            class("w-full h-full object-cover"),
-        ])],
-    )
+    ui::swiper::slide()
+        .class("flex-1 flex flex-col items-center justify-center")
+        .hx_get(
+            &route::Route::Feed(Route::LoadMore {
+                feed_id: feed_id.clone(),
+                start_feed_index,
+            })
+            .encode(),
+        )
+        .hx_trigger_intersect()
+        .hx_swap_outer_html()
+        .child(
+            ui::image::view()
+                .src(" ")
+                .class("w-full h-full object-cover"),
+        )
 }
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {
@@ -303,15 +286,10 @@ fn to_media_details_route(media_id: &MediaId) -> route::Route {
 }
 
 fn view_feed_item(feed_item: &FeedItem) -> Elem {
-    ui::swiper::slide(
-        &[
-            class(
-                "w-full h-full flex flex-col items-center justify-center cursor-pointer relative",
-            ),
-            attr("data-feed-index", &feed_item.to_feed_index().to_string()),
-        ],
-        &[view_feed_item_content(feed_item)],
-    )
+    ui::swiper::slide()
+        .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative")
+        .attr("data-feed-index", &feed_item.to_feed_index().to_string())
+        .child(view_feed_item_content(feed_item))
 }
 
 fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
@@ -319,42 +297,38 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
         FeedItem::Media {
             media,
             feed_index: _,
-        } => button(
-            &[
-                class("w-full h-full"),
-                hx::get(&to_media_details_route(&media.media_id).encode()),
-                hx::Trigger::Click.into(),
-                hx::Preload::MouseDown.into(),
-                hx::Swap::InnerHtml.into(),
-                hx::push_url("true"),
-                hx::target(ROOT_SELECTOR),
-            ],
-            &[ui::image::view(&[
-                class("w-full h-full object-cover"),
-                width("100%"),
-                height("100%"),
-                src(media.media_poster.to_highest_res()),
-            ])],
-        ),
+        } => button_()
+            .class("w-full h-full")
+            .hx_get(&to_media_details_route(&media.media_id).encode())
+            .hx_trigger_click()
+            .hx_swap_inner_html()
+            .hx_preload_mouse_down()
+            .hx_push_url()
+            .hx_target(ROOT_SELECTOR)
+            .child(
+                ui::image::view()
+                    .class("w-full h-full object-cover")
+                    .width("100%")
+                    .height("100%")
+                    .src(media.media_poster.to_highest_res()),
+            ),
     }
 }
 
-fn view_load_initial(model: &ViewModel) -> Elem {
-    div(
-        &[
-            class("flex-1 flex flex-col items-center justify-center"),
-            hx::get(
-                &route::Route::Feed(Route::LoadInitial {
-                    feed_id: model.feed.feed_id.clone(),
-                })
-                .encode(),
-            ),
-            hx::Trigger::Load.into(),
-            hx::Swap::OuterHtml.into(),
-        ],
-        &[ui::image::view(&[
-            src(" "),
-            class("w-full h-full object-cover"),
-        ])],
-    )
+fn view_load_initial(feed_id: &FeedId) -> Elem {
+    div_()
+        .class("flex-1 flex flex-col items-center justify-center")
+        .hx_get(
+            &route::Route::Feed(Route::LoadInitial {
+                feed_id: feed_id.clone(),
+            })
+            .encode(),
+        )
+        .hx_trigger_load()
+        .hx_swap_outer_html()
+        .child(
+            ui::image::view()
+                .src(" ")
+                .class("w-full h-full object-cover"),
+        )
 }

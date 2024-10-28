@@ -1,27 +1,36 @@
 use crate::core::html::*;
 
-pub fn slides_per_view(slides_per_view: &str) -> Attr {
-    attr("slides-per-view", slides_per_view)
+impl Elem {
+    pub fn swiper_slides_per_view(self, slides_per_view: &str) -> Self {
+        self.attr("slides-per-view", slides_per_view)
+    }
+
+    pub fn swiper_direction(self, direction: Direction) -> Self {
+        self.attr("direction", direction.as_str())
+    }
+
+    pub fn swiper_direction_vertical(self) -> Self {
+        self.swiper_direction(Direction::Vertical)
+    }
 }
 
+#[derive(Debug, Clone)]
 pub enum Direction {
-    // Horizontal,
     Vertical,
 }
 
-impl From<Direction> for Attr {
-    fn from(val: Direction) -> Self {
-        match val {
-            // Direction::Horizontal => attr("direction", "horizontal"),
-            Direction::Vertical => attr("direction", "vertical"),
+impl Direction {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Direction::Vertical => "vertical",
         }
     }
 }
 
-pub fn container(attrs: &[Attr], children: &[Elem]) -> Elem {
-    elem("swiper-container", attrs, children)
+pub fn container() -> Elem {
+    elem("swiper-container", &[], &[])
 }
 
-pub fn slide(attrs: &[Attr], children: &[Elem]) -> Elem {
-    elem("swiper-slide", attrs, children)
+pub fn slide() -> Elem {
+    elem("swiper-slide", &[], &[])
 }
