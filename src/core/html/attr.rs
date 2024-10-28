@@ -23,7 +23,7 @@ impl Elem {
         }
     }
 
-    fn get_attrs(&self) -> Vec<Attr> {
+    fn list_attrs(&self) -> Vec<Attr> {
         match self {
             Elem::Element {
                 tag_name: _,
@@ -35,18 +35,20 @@ impl Elem {
     }
 
     pub fn class(&self, value: &str) -> Elem {
-        let class_str = self
-            .get_attrs()
+        let existing_classes = self
+            .list_attrs()
             .iter()
-            .fold(value.to_string(), |acc, attr| {
-                if attr.name == "class" {
-                    format!("{} {}", value, acc)
-                } else {
-                    acc
-                }
-            });
+            .find(|attr| attr.name == "class")
+            .map(|attr| attr.value.clone())
+            .unwrap_or("".to_string());
 
-        self.attr("class", &class_str)
+        let updated_classes = if existing_classes.is_empty() {
+            value.to_string()
+        } else {
+            format!("{} {}", existing_classes, value)
+        };
+
+        self.clone().attr("class", &updated_classes)
     }
 
     pub fn class_list(&self, class_names: &[&str]) -> Elem {

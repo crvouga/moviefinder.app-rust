@@ -1,18 +1,10 @@
-use crate::core::html::*;
-
 use super::icon::spinner;
+use crate::core::html::*;
 
 #[derive(Debug, Default)]
 pub struct Button {
     label: String,
     color: Color,
-}
-
-#[derive(Debug, Default)]
-pub enum Color {
-    #[default]
-    Primary,
-    Gray,
 }
 
 impl Button {
@@ -31,38 +23,37 @@ impl Button {
     }
 
     pub fn view(self) -> Elem {
-        let mut base_classes = "group relative flex items-center justify-center gap-2 rounded px-4 py-3 text-lg font-bold text-white".to_string();
-
-        base_classes.push_str(" enabled:hover:opacity-80 enabled:active:opacity-60");
-
-        match self.color {
-            Color::Gray => {
-                base_classes.push_str(" bg-neutral-800");
-            }
-            Color::Primary => {
-                base_classes.push_str(" bg-blue-600");
-            }
-        }
-
         button()
         .class("group relative flex items-center justify-center gap-2 rounded px-4 py-3 text-lg font-bold text-white")
         .class("enabled:hover:opacity-80 enabled:active:opacity-60")
-        .class(
-            match self.color {
-                Color::Gray => "bg-neutral-800",                
-                Color::Primary => "bg-blue-600"
-            }
-        )
-        .attr("data-loading-aria-busy", "")
-        .attr("data-loading-disable", "")
+        .class(&self.color.to_class())
+        .hx_loading_aria_busy()
+        .hx_loading_disabled()
         .child(
-            div().class("absolute inset-0 flex items-center justify-center opacity-0 group-aria-busy:opacity-100")
-    .child(spinner("size-8 animate-spin"))
+            div()
+                .class("absolute inset-0 flex items-center justify-center opacity-0 group-aria-busy:opacity-100")
+                .child(spinner("size-8 animate-spin"))
         )
         .child(
             div()
-        .class("group-aria-busy:invisible")
-        .child_text(&self.label)
+                .class("group-aria-busy:invisible")
+                .child_text(&self.label)
         )
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+pub enum Color {
+    #[default]
+    Primary,
+    Gray,
+}
+
+impl Color {
+    pub fn to_class(self) -> String {
+        match self {
+            Color::Gray => "bg-neutral-800".to_string(),
+            Color::Primary => "bg-blue-600".to_string(),
+        }
     }
 }

@@ -11,6 +11,7 @@ impl Root {
     pub fn new() -> Self {
         Self { children: vec![] }
     }
+
     pub fn children(mut self, children: Vec<Elem>) -> Self {
         self.children = children;
         self

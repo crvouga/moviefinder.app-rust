@@ -74,6 +74,14 @@ impl html::Elem {
     pub fn hx_boost(self) -> Self {
         self.attr("hx-boost", "true")
     }
+
+    pub fn hx_loading_aria_busy(self) -> Self {
+        self.attr("data-loading-aria-busy", "")
+    }
+
+    pub fn hx_loading_disabled(self) -> Self {
+        self.attr("data-loading-disable", "")
+    }
 }
 
 // https://htmx.org/attributes/hx-trigger/

@@ -17,7 +17,9 @@ impl Elem {
                 children: existing_children,
             } => {
                 let mut new_children = existing_children.clone();
-                new_children.extend_from_slice(children);
+                for child_new in children {
+                    new_children.push(child_new.clone())
+                }
                 Elem::Element {
                     tag_name: tag_name.clone(),
                     attributes: attributes.clone(),

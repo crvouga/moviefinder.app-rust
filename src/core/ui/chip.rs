@@ -47,6 +47,7 @@ impl Chip {
 
     pub fn view(self) -> Elem {
         div()
+        .class("group")
         .child(
             input()
             .class("hidden peer")
@@ -62,11 +63,7 @@ impl Chip {
             .class_list(&[
                 "flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none",
                 "peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80",
-                match self.size {
-                    Size::Small => "text-xs px-2 py-1",
-                    Size::Medium => "text-sm px-2.5 py-1.5",
-                    Size::Large => "text-base px-3 py-2",
-                },
+                &self.size.to_class(),
             ])
             .child_text(&self.label)
         )
@@ -78,6 +75,16 @@ pub enum Size {
     Small,
     Medium,
     Large,
+}
+
+impl Size {
+    fn to_class(self) -> String {
+        match self {
+            Size::Small => "text-xs px-2 py-1".to_string(),
+            Size::Medium => "text-sm px-2.5 py-1.5".to_string(),
+            Size::Large => "text-base px-3 py-2".to_string(),
+        }
+    }
 }
 
 impl Default for Size {
