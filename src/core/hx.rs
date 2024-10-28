@@ -3,7 +3,7 @@ use crate::core::html;
 use serde::{Deserialize, Serialize};
 
 impl html::Elem {
-    pub fn hx_trigger(mut self, trigger: Trigger) -> Self {
+    pub fn hx_trigger(self, trigger: Trigger) -> Self {
         self.attr("hx-trigger", trigger.as_str())
     }
 

@@ -374,6 +374,10 @@ pub fn a(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("a", attrs, children)
 }
 
+pub fn a_() -> Elem {
+    a(&[], &[])
+}
+
 pub fn input(attrs: &[Attr], children: &[Elem]) -> Elem {
     elem("input", attrs, children)
 }
