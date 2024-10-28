@@ -4,7 +4,7 @@ use crate::{
         html::*,
         query::{Filter, Query},
         res::Res,
-        ui,
+        ui::{self, image::Image},
     },
     ctx::{self, Ctx},
     media::{
@@ -14,7 +14,7 @@ use crate::{
     },
     req::Req,
     route,
-    ui::{bottom_bar, root::ROOT_SELECTOR, top_bar},
+    ui::{bottom_bar, root::ROOT_SELECTOR},
     user_session::session_id::SessionId,
 };
 
@@ -141,37 +141,35 @@ impl ViewModel {
 }
 
 fn view_top_bar(model: &ViewModel) -> Elem {
-    top_bar::root(&[], &[]).child(
-        button_()
-            .class("w-full h-full flex items-center justify-center relative pl-2")
-            .hx_swap_inner_html()
-            .hx_push_url()
-            .hx_get(
-                route::Route::Feed(Route::Controls {
-                    feed_id: model.feed.feed_id.clone(),
-                    child: controls::route::Route::Index,
-                })
-                .encode()
-                .as_str(),
-            )
-            .child(view_chips(&model))
-            .child(view_open_controls_button()),
-    )
+    button()
+        .class("w-full h-16 border-b flex items-center justify-center relative pl-2")
+        .hx_swap_inner_html()
+        .hx_push_url()
+        .hx_get(
+            route::Route::Feed(Route::Controls {
+                feed_id: model.feed.feed_id.clone(),
+                child: controls::route::Route::Index,
+            })
+            .encode()
+            .as_str(),
+        )
+        .child(view_chips(&model))
+        .child(view_open_controls_button())
 }
 
 fn view_open_controls_button() -> Elem {
-    div_()
+    div()
         .class("absolute top-0 right-0 h-full flex items-center justify-center")
-        .child(div_().class("w-16 h-full from-transparent to-black bg-gradient-to-r"))
+        .child(div().class("w-16 h-full from-transparent to-black bg-gradient-to-r"))
         .child(
-            div_()
+            div()
                 .class("size-16 bg-black flex items-center justify-center")
-                .child(ui::icon::adjustments_vertical(&[class("size-8")])),
+                .child(ui::icon::adjustments_vertical("size-8")),
         )
 }
 
 fn view_chips(model: &ViewModel) -> Elem {
-    div_()
+    div()
         .class("flex flex-row gap-2 p-2 flex-1 overflow-hidden")
         .children(
             model
@@ -199,12 +197,12 @@ fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
             .disabled(true)
             .size(ui::chip::Size::Medium)
             .view(),
-        None => fragment_(),
+        None => frag(),
     }
 }
 
 fn view_feed_root() -> Elem {
-    div_().class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
+    div().class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
 }
 
 fn view_feed(model: &ViewModel) -> Elem {
@@ -243,14 +241,14 @@ fn view_swiper(feed_id: &FeedId) -> Elem {
 }
 
 fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
-    fragment_()
+    frag()
         .children(&feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
         .child(
             feed_items
                 .iter()
                 .last()
                 .map(|feed_item| view_load_more(feed_id, feed_item.to_feed_index() + 1))
-                .unwrap_or(fragment_()),
+                .unwrap_or(frag()),
         )
 }
 
@@ -266,11 +264,7 @@ fn view_load_more(feed_id: &FeedId, start_feed_index: usize) -> Elem {
         )
         .hx_trigger_intersect()
         .hx_swap_outer_html()
-        .child(
-            ui::image::view()
-                .src(" ")
-                .class("w-full h-full object-cover"),
-        )
+        .child(Image::view().src(" ").class("w-full h-full object-cover"))
 }
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {
@@ -293,7 +287,7 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
         FeedItem::Media {
             media,
             feed_index: _,
-        } => button_()
+        } => button()
             .class("w-full h-full")
             .hx_get(&to_media_details_route(&media.media_id).encode())
             .hx_trigger_click()
@@ -302,7 +296,7 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
             .hx_push_url()
             .hx_target(ROOT_SELECTOR)
             .child(
-                ui::image::view()
+                Image::view()
                     .class("w-full h-full object-cover")
                     .width("100%")
                     .height("100%")
@@ -312,7 +306,7 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
 }
 
 fn view_load_initial(feed_id: &FeedId) -> Elem {
-    div_()
+    div()
         .class("flex-1 flex flex-col items-center justify-center")
         .hx_get(
             &route::Route::Feed(Route::LoadInitial {
@@ -322,9 +316,5 @@ fn view_load_initial(feed_id: &FeedId) -> Elem {
         )
         .hx_trigger_load()
         .hx_swap_outer_html()
-        .child(
-            ui::image::view()
-                .src(" ")
-                .class("w-full h-full object-cover"),
-        )
+        .child(Image::view().src(" ").class("w-full h-full object-cover"))
 }

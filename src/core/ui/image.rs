@@ -89,10 +89,14 @@ class ImageElement extends HTMLElement {
 customElements.define("image-element", ImageElement);
 "#;
 
-pub fn script_image_element() -> Elem {
-    script(&[], &[unsafe_html(IMAGE_ELEMENT_SCRIPT)])
-}
+pub struct Image {}
 
-pub fn view() -> Elem {
-    elem("image-element", &[], &[])
+impl Image {
+    pub fn script() -> Elem {
+        script().child(unsafe_html(IMAGE_ELEMENT_SCRIPT))
+    }
+
+    pub fn view() -> Elem {
+        elem("image-element")
+    }
 }

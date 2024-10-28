@@ -66,18 +66,14 @@ impl html::Elem {
     pub fn hx_vals(self, values: &str) -> Self {
         self.attr("hx-vals", values).clone()
     }
-}
 
-pub fn get(href: &str) -> html::Attr {
-    html::attr("hx-get", href)
-}
+    pub fn hx_ext(self, extensions: &str) -> Self {
+        self.attr("hx-ext", extensions)
+    }
 
-pub fn post(href: &str) -> html::Attr {
-    html::attr("hx-post", href)
-}
-
-pub fn vals(values: &str) -> html::Attr {
-    html::attr("hx-vals", values)
+    pub fn hx_boost(self) -> Self {
+        self.attr("hx-boost", "true")
+    }
 }
 
 // https://htmx.org/attributes/hx-trigger/
@@ -99,20 +95,6 @@ impl Trigger {
     }
 }
 
-impl From<Trigger> for html::Attr {
-    fn from(trigger: Trigger) -> Self {
-        html::attr("hx-trigger", trigger.as_str())
-    }
-}
-
-pub fn boost() -> html::Attr {
-    html::attr("hx-boost", "true")
-}
-
-pub fn target(selector: &str) -> html::Attr {
-    html::attr("hx-target", selector)
-}
-
 pub enum Swap {
     InnerHtml,
     OuterHtml,
@@ -129,20 +111,6 @@ impl Swap {
     }
 }
 
-impl From<Swap> for html::Attr {
-    fn from(swap: Swap) -> Self {
-        html::attr("hx-swap", swap.as_str())
-    }
-}
-
-pub fn push_url(value: &str) -> html::Attr {
-    html::attr("hx-push-url", value)
-}
-
-pub fn ext(value: &str) -> html::Attr {
-    html::attr("hx-ext", value)
-}
-
 pub enum Preload {
     MouseDown,
 }
@@ -152,12 +120,6 @@ impl Preload {
         match self {
             Preload::MouseDown => "mousedown",
         }
-    }
-}
-
-impl From<Preload> for html::Attr {
-    fn from(preload: Preload) -> Self {
-        html::attr("preload", preload.as_str())
     }
 }
 

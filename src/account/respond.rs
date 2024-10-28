@@ -10,8 +10,8 @@ pub fn respond(route: &Route) -> Res {
 }
 
 pub fn view_account() -> Elem {
-    div_()
+    div()
         .class("w-full flex-1 flex items-center justify-center flex-col")
-        .child(div(&[class("flex-1")], &[text("Account")]))
+        .child(div().class("flex-1").child_text("Account"))
         .child(bottom_bar::view(bottom_bar::Active::Account))
 }

@@ -28,9 +28,9 @@ impl Direction {
 }
 
 pub fn container() -> Elem {
-    elem("swiper-container", &[], &[])
+    elem("swiper-container")
 }
 
 pub fn slide() -> Elem {
-    elem("swiper-slide", &[], &[])
+    elem("swiper-slide")
 }

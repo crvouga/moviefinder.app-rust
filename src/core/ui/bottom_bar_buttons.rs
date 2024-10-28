@@ -16,7 +16,7 @@ impl BottomButtons {
     }
 
     pub fn view(self) -> Elem {
-        div_()
+        div()
             .class("flex items-center justify-center w-full border-t divide-x h-16")
             .children(
                 &self
@@ -68,7 +68,7 @@ impl BottomButton {
     }
 
     pub fn view(&self) -> Elem {
-        a_()
+        a()
         .hx_get(&self.hx_get)
         .hx_target(&self.hx_target)
         .hx_swap_inner_html()
@@ -85,7 +85,7 @@ impl BottomButton {
                     },
                 ]
         ).child(
-            self.icon.clone().unwrap_or_else(|| fragment_())
+            self.icon.clone().unwrap_or_else(|| frag())
         ).child_text(
             &self.text,
         )

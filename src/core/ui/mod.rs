@@ -6,5 +6,4 @@ pub mod error;
 pub mod form;
 pub mod icon;
 pub mod image;
-pub mod loading;
 pub mod swiper;

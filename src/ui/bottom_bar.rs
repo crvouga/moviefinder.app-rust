@@ -15,14 +15,14 @@ pub enum Active {
 }
 
 pub fn view(active: Active) -> Elem {
-    div_().class("w-full").child(
+    div().class("w-full").child(
         BottomButtons::new()
             .add(
                 BottomButton::new()
                     .text("Home")
                     .hx_get(&route::Route::Feed(feed::route::Route::Index).encode())
                     .hx_target(ROOT_SELECTOR)
-                    .icon(ui::icon::home(&[class("size-8")]))
+                    .icon(ui::icon::home("size-8"))
                     .active(active == Active::Home),
             )
             .add(
@@ -30,7 +30,7 @@ pub fn view(active: Active) -> Elem {
                     .text("Account")
                     .hx_get(&route::Route::Account(account::route::Route::Index).encode())
                     .hx_target(ROOT_SELECTOR)
-                    .icon(ui::icon::user_circle(&[class("size-8")]))
+                    .icon(ui::icon::user_circle("size-8"))
                     .active(active == Active::Account),
             )
             .view(),

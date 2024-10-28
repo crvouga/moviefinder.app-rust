@@ -1,69 +1,94 @@
 use crate::{
-    core::{html::*, hx, ui},
-    route::{self},
+    core::{html::*, ui::icon},
+    route::Route,
 };
 
 use super::root::ROOT_SELECTOR;
 
-pub fn root(attrs: &[Attr], children: &[Elem]) -> Elem {
-    let class_str = attrs
-        .iter()
-        .fold("flex items-center justify-center w-full border-b h-16 font-bold text-lg text-center truncate".to_string(), |acc, attr| {
-            if attr.name == "class" {
-                format!("{} {}", acc, attr.value)
-            } else {
-                acc
-            }
-        });
-    div(
-        [class(&class_str)]
-            .into_iter()
-            .chain(attrs.iter().cloned())
-            .collect::<Vec<Attr>>()
-            .as_ref(),
-        children,
-    )
+#[derive(Default)]
+pub struct TopBar {
+    back_route: Option<Route>,
+    title: Option<String>,
+    cancel_route: Option<Route>,
 }
 
-pub fn back_button(back_route: route::Route) -> Elem {
-    button(
-        &[
-            class("size-16 flex items-center justify-center"),
-            hx::target(ROOT_SELECTOR),
-            hx::Swap::InnerHtml.into(),
-            hx::get(&back_route.encode()),
-            hx::push_url("true"),
-            hx::Preload::MouseDown.into(),
-            aria_label("Go back"),
-        ],
-        &[ui::icon::back_arrow(&[class("size-8")])],
-    )
+impl TopBar {
+    pub fn new() -> Self {
+        TopBar::default()
+    }
+
+    pub fn back_button(mut self, back_route: Route) -> Self {
+        self.back_route = Some(back_route);
+        self
+    }
+
+    pub fn title(mut self, title: &str) -> Self {
+        self.title = Some(title.to_string());
+        self
+    }
+
+    pub fn view(self) -> Elem {
+        let back_button_elem = self.back_route.map_or(Empty::view(), BackButton::view);
+
+        let title_elem = self
+            .title
+            .map_or(div().class("flex-1"), |s| Title::view(&s));
+
+        let cancel_button_elem = self.cancel_route.map_or(Empty::view(), CancelButton::view);
+
+        div()
+        .class("flex items-center justify-center w-full border-b h-16 font-bold text-lg text-center truncate")
+        .child(back_button_elem)
+        .child(title_elem)
+        .child(cancel_button_elem)
+    }
 }
 
-pub fn cancel_button(back_route: route::Route) -> Elem {
-    button(
-        &[
-            class("size-16 flex items-center justify-center"),
-            hx::target(ROOT_SELECTOR),
-            hx::Swap::InnerHtml.into(),
-            hx::get(&back_route.encode()),
-            hx::push_url("true"),
-            hx::Preload::MouseDown.into(),
-            aria_label("Cancel"),
-        ],
-        &[ui::icon::x_mark(&[class("size-8")])],
-    )
+pub struct BackButton {}
+
+impl BackButton {
+    pub fn view(back_route: Route) -> Elem {
+        button()
+            .class("size-16 flex items-center justify-center")
+            .hx_target(ROOT_SELECTOR)
+            .hx_swap_inner_html()
+            .hx_get(&back_route.encode())
+            .hx_push_url()
+            .hx_preload_mouse_down()
+            .aria_label("go back")
+            .child(icon::back_arrow("size-8"))
+    }
 }
 
-pub fn title(title: &str) -> Elem {
-    div(
-        &[class(
-            "flex-1 text-center flex items-center justify-center h-full truncate",
-        )],
-        &[text(title)],
-    )
+pub struct CancelButton {}
+
+impl CancelButton {
+    pub fn view(cancel_route: Route) -> Elem {
+        button()
+            .class("size-16 flex items-center justify-center")
+            .hx_target(ROOT_SELECTOR)
+            .hx_swap_inner_html()
+            .hx_get(&cancel_route.encode())
+            .hx_preload_mouse_down()
+            .aria_label("cancel")
+            .child(icon::x_mark("size-8"))
+    }
 }
 
-pub fn empty() -> Elem {
-    div(&[class("size-16")], &[])
+struct Title {}
+
+impl Title {
+    fn view(title: &str) -> Elem {
+        div()
+            .class("flex-1 text-center flex items-center justify-center h-full truncate")
+            .child_text(title)
+    }
+}
+
+struct Empty {}
+
+impl Empty {
+    fn view() -> Elem {
+        div().class("size-16")
+    }
 }

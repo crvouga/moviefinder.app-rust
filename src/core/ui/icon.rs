@@ -1,5 +1,10 @@
 use crate::core::html::*;
 
+fn add_class(html: &str, class: &str) -> Elem {
+    let replaced: String = html.replace("ATTRS", &format!("class=\"{}\"", class));
+    unsafe_html(&replaced)
+}
+
 const SPINNER_HTML: &str = r#"
 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24" ATTRS>
     <path
@@ -12,9 +17,8 @@ const SPINNER_HTML: &str = r#"
 </svg>
 "#;
 
-pub fn spinner(attrs: &[Attr]) -> Elem {
-    let replaced: String = SPINNER_HTML.replace("ATTRS", &render_attrs(attrs));
-    unsafe_html(&replaced)
+pub fn spinner(class: &str) -> Elem {
+    add_class(SPINNER_HTML, class)
 }
 
 const HOME_HTML: &str = r#"
@@ -24,9 +28,8 @@ const HOME_HTML: &str = r#"
 </svg>
 "#;
 
-pub fn home(attrs: &[Attr]) -> Elem {
-    let replaced: String = HOME_HTML.replace("ATTRS", &render_attrs(attrs));
-    unsafe_html(&replaced)
+pub fn home(class: &str) -> Elem {
+    add_class(HOME_HTML, class)
 }
 
 const USER_CIRCLE_HTML: &str = r#"
@@ -35,8 +38,8 @@ const USER_CIRCLE_HTML: &str = r#"
 </svg>
 "#;
 
-pub fn user_circle(_attrs: &[Attr]) -> Elem {
-    unsafe_html(USER_CIRCLE_HTML)
+pub fn user_circle(class: &str) -> Elem {
+    add_class(HOME_HTML, class)
 }
 
 const ARROW_LEFT_HTML: &str = r#"
@@ -45,9 +48,8 @@ const ARROW_LEFT_HTML: &str = r#"
 </svg>
 "#;
 
-pub fn back_arrow(attrs: &[Attr]) -> Elem {
-    let replaced: String = ARROW_LEFT_HTML.replace("ATTRS", &render_attrs(attrs));
-    unsafe_html(&replaced)
+pub fn back_arrow(class: &str) -> Elem {
+    add_class(ARROW_LEFT_HTML, class)
 }
 
 const ADJUSTMENTS_VERTICAL_HTML: &str = r#"
@@ -56,9 +58,8 @@ const ADJUSTMENTS_VERTICAL_HTML: &str = r#"
 </svg>
 "#;
 
-pub fn adjustments_vertical(attrs: &[Attr]) -> Elem {
-    let replaced: String = ADJUSTMENTS_VERTICAL_HTML.replace("ATTRS", &render_attrs(attrs));
-    unsafe_html(&replaced)
+pub fn adjustments_vertical(class: &str) -> Elem {
+    add_class(ADJUSTMENTS_VERTICAL_HTML, class)
 }
 
 const X_MARK_HTML: &str = r#"
@@ -67,7 +68,6 @@ const X_MARK_HTML: &str = r#"
 </svg>
 "#;
 
-pub fn x_mark(attrs: &[Attr]) -> Elem {
-    let replaced: String = X_MARK_HTML.replace("ATTRS", &render_attrs(attrs));
-    unsafe_html(&replaced)
+pub fn x_mark(class: &str) -> Elem {
+    add_class(X_MARK_HTML, class)
 }

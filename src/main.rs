@@ -1,6 +1,7 @@
 use core::http::{request::HttpRequest, response::HttpResponse};
 use req::Req;
 use std::sync::Arc;
+use ui::root::Root;
 use user_session::{session_id::SessionId, wrap_session_id::wrap_session_id};
 
 mod account;
@@ -63,7 +64,7 @@ async fn respond(
             if http_request.headers.contains_key("hx-request") {
                 html
             } else {
-                ui::root::view_root(&[html])
+                Root::new().children(vec![html]).view()
             }
         })
         .into()

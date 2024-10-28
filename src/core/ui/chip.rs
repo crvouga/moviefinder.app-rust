@@ -46,9 +46,9 @@ impl Chip {
     }
 
     pub fn view(self) -> Elem {
-        div_()
+        div()
         .child(
-            input_()
+            input()
             .class("hidden peer")
             .type_("checkbox")
             .id(&self.id)
@@ -58,7 +58,7 @@ impl Chip {
             .disabled(self.disabled)
         )
         .child(
-            label_()
+            label()
             .class_list(&[
                 "flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none",
                 "peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80",

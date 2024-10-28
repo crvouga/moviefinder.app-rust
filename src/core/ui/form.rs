@@ -45,5 +45,5 @@ function hasFormChanged(beforeFormData, afterFormData) {
 "#;
 
 pub fn script_disable_submit_when_unchanged() -> Elem {
-    script(&[], &[unsafe_html(SCRIPT_DISABLE_SUBMIT_WHEN_UNCHANGED)])
+    script().child(unsafe_html(SCRIPT_DISABLE_SUBMIT_WHEN_UNCHANGED))
 }
