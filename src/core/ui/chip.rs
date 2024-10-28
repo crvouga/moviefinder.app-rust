@@ -7,14 +7,10 @@ pub struct Chip {
     pub name: String,
     pub checked: bool,
     pub disabled: bool,
-    pub size: Size,
+    pub size: ChipSize,
 }
 
 impl Chip {
-    pub fn new() -> Self {
-        Chip::default()
-    }
-
     pub fn id(mut self, id: &str) -> Self {
         self.id = id.to_string();
         self
@@ -40,7 +36,7 @@ impl Chip {
         self
     }
 
-    pub fn size(mut self, size: Size) -> Self {
+    pub fn size(mut self, size: ChipSize) -> Self {
         self.size = size;
         self
     }
@@ -69,24 +65,24 @@ impl Chip {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Size {
+pub enum ChipSize {
     Small,
     Medium,
     Large,
 }
 
-impl Size {
+impl ChipSize {
     fn to_class(self) -> String {
         match self {
-            Size::Small => "text-xs px-2 py-1".to_string(),
-            Size::Medium => "text-sm px-2.5 py-1.5".to_string(),
-            Size::Large => "text-base px-3 py-2".to_string(),
+            ChipSize::Small => "text-xs px-2 py-1".to_string(),
+            ChipSize::Medium => "text-sm px-2.5 py-1.5".to_string(),
+            ChipSize::Large => "text-base px-3 py-2".to_string(),
         }
     }
 }
 
-impl Default for Size {
+impl Default for ChipSize {
     fn default() -> Self {
-        Size::Medium
+        ChipSize::Medium
     }
 }

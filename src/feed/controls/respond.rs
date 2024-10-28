@@ -146,12 +146,12 @@ fn view_genre_chips(view_model: &ViewModel) -> Elem {
 }
 
 fn view_genre_chip(view_model: &ViewModel, genre: &Genre) -> Elem {
-    Chip::new()
+    Chip::default()
         .id(genre.id.as_str())
         .label(&genre.name)
         .name(GENRE_ID_KEY)
         .checked(is_genre_checked(view_model, genre))
-        .size(ui::chip::Size::Large)
+        .size(ui::chip::ChipSize::Large)
         .view()
 }
 

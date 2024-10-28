@@ -13,10 +13,6 @@ pub struct TopBar {
 }
 
 impl TopBar {
-    pub fn new() -> Self {
-        TopBar::default()
-    }
-
     pub fn back_button(mut self, back_route: Route) -> Self {
         self.back_route = Some(back_route);
         self

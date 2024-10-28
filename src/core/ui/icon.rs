@@ -39,7 +39,7 @@ const USER_CIRCLE_HTML: &str = r#"
 "#;
 
 pub fn user_circle(class: &str) -> Elem {
-    add_class(HOME_HTML, class)
+    add_class(USER_CIRCLE_HTML, class)
 }
 
 const ARROW_LEFT_HTML: &str = r#"

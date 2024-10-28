@@ -6,10 +6,6 @@ pub struct BottomButtons {
 }
 
 impl BottomButtons {
-    pub fn new() -> Self {
-        BottomButtons::default()
-    }
-
     pub fn add(mut self, bottom_button: BottomButton) -> Self {
         self.bottom_buttons.push(bottom_button);
         self
@@ -38,10 +34,6 @@ pub struct BottomButton {
 }
 
 impl BottomButton {
-    pub fn new() -> Self {
-        BottomButton::default()
-    }
-
     pub fn text(mut self, text: &str) -> Self {
         self.text = text.to_string();
         self

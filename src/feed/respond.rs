@@ -4,7 +4,11 @@ use crate::{
         html::*,
         query::{Filter, Query},
         res::Res,
-        ui::{self, image::Image},
+        ui::{
+            self,
+            chip::{Chip, ChipSize},
+            image::Image,
+        },
     },
     ctx::{self, Ctx},
     media::{
@@ -191,12 +195,12 @@ fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
         .find(|g| g.id.clone() == genre_id.clone());
 
     match maybe_genre {
-        Some(genre) => ui::chip::Chip::new()
+        Some(genre) => Chip::default()
             .id(&genre.id.to_string())
             .label(&genre.name)
             .checked(true)
             .disabled(true)
-            .size(ui::chip::Size::Medium)
+            .size(ChipSize::Medium)
             .view(),
         None => frag(),
     }

@@ -16,9 +16,9 @@ pub enum Active {
 
 pub fn view(active: Active) -> Elem {
     div().class("w-full").child(
-        BottomButtons::new()
+        BottomButtons::default()
             .add(
-                BottomButton::new()
+                BottomButton::default()
                     .text("Home")
                     .hx_get(&route::Route::Feed(feed::route::Route::Index).encode())
                     .hx_target(ROOT_SELECTOR)
@@ -26,7 +26,7 @@ pub fn view(active: Active) -> Elem {
                     .active(active == Active::Home),
             )
             .add(
-                BottomButton::new()
+                BottomButton::default()
                     .text("Account")
                     .hx_get(&route::Route::Account(account::route::Route::Index).encode())
                     .hx_target(ROOT_SELECTOR)
