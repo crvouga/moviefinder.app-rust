@@ -1,32 +1,22 @@
 use super::Elem;
 
 impl Elem {
-    pub fn child_text(&self, value: &str) -> Elem {
+    pub fn child_text(self, value: &str) -> Self {
         self.child(Elem::Safe(value.to_string()))
     }
 
-    pub fn child(&self, child: Elem) -> Elem {
+    pub fn child(self, child: Elem) -> Self {
         self.children(&[child])
     }
 
-    pub fn children(&self, children: &[Elem]) -> Elem {
-        match self {
-            Elem::Element {
-                tag_name,
-                attributes,
-                children: existing_children,
-            } => {
-                let mut new_children = existing_children.clone();
-                for child_new in children {
-                    new_children.push(child_new.clone())
-                }
-                Elem::Element {
-                    tag_name: tag_name.clone(),
-                    attributes: attributes.clone(),
-                    children: new_children,
-                }
-            }
-            _ => self.clone(),
+    pub fn children(mut self, children_new: &[Elem]) -> Self {
+        if let Elem::Element {
+            ref mut children, ..
+        } = self
+        {
+            children.extend_from_slice(children_new);
         }
+
+        self
     }
 }
