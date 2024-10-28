@@ -14,14 +14,14 @@ impl Elem {
             Elem::Element {
                 tag_name,
                 attributes,
-                children: _,
+                children: existing_children,
             } => {
-                let mut new_children = children.to_vec();
+                let mut new_children = existing_children.clone();
                 new_children.extend_from_slice(children);
                 Elem::Element {
                     tag_name: tag_name.clone(),
                     attributes: attributes.clone(),
-                    children: new_children.clone(),
+                    children: new_children,
                 }
             }
             _ => self.clone(),

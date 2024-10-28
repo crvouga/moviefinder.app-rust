@@ -68,7 +68,7 @@ impl BottomButton {
     }
 
     pub fn view(&self) -> Elem {
-        a()
+        let elem = a()
         .hx_get(&self.hx_get)
         .hx_target(&self.hx_target)
         .hx_swap_inner_html()
@@ -88,6 +88,10 @@ impl BottomButton {
             self.icon.clone().unwrap_or_else(|| frag())
         ).child_text(
             &self.text,
-        )
+        );
+
+        println!("{:?}", elem);
+
+        elem
     }
 }
