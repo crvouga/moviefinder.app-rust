@@ -22,7 +22,7 @@ pub fn view(active: Active) -> Elem {
                     .icon(ui::icon::home("size-8"))
                     .active(active == Active::Home)
                     .view()
-                    .push_screen(route::Route::Feed(feed::route::Route::Index)),
+                    .hx_push_screen(route::Route::Feed(feed::route::Route::Index)),
             )
             .child(
                 BottomButton::default()
@@ -30,7 +30,7 @@ pub fn view(active: Active) -> Elem {
                     .icon(ui::icon::user_circle("size-8"))
                     .active(active == Active::Account)
                     .view()
-                    .push_screen(route::Route::Account(account::route::Route::Index)),
+                    .hx_push_screen(route::Route::Account(account::route::Route::Index)),
             ),
     )
 }

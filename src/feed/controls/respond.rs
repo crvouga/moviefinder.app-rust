@@ -58,7 +58,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            Res::redirect_screen(route::Route::Feed(feed::route::Route::Index))
+            Res::hx_redirect_screen(route::Route::Feed(feed::route::Route::Index))
         }
     }
 }
@@ -93,7 +93,7 @@ fn view_bottom_bar() -> Elem {
                 .label("Cancel")
                 .color(Color::Gray)
                 .view()
-                .push_screen(BACK_ROUTE)
+                .hx_push_screen(BACK_ROUTE)
                 .type_("button")
                 .class("flex-1"),
         )

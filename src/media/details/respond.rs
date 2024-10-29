@@ -102,7 +102,7 @@ fn view_load(media_id: &MediaId) -> Elem {
     Layout::new()
         .child(ui::icon::spinner("animate-spin size-16"))
         .view()
-        .push_screen(load_route(media_id))
+        .hx_replace_screen(load_route(media_id))
         .hx_trigger_load()
 }
 
