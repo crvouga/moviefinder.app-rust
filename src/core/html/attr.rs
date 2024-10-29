@@ -11,20 +11,24 @@ impl Elem {
         self
     }
 
-    pub fn class(self, value: &str) -> Self {
-        let mut class_new = value.trim().to_string();
+    pub fn class(mut self, value: &str) -> Self {
+        if let Elem::Element {
+            ref mut attributes, ..
+        } = self
+        {
+            let class_existing = attributes.get("class").map_or("", |attr| attr.as_str());
 
-        if let Elem::Element { ref attributes, .. } = self {
-            let class_existing = attributes.get("class").cloned().unwrap_or("".to_string());
+            let class_new = if class_existing.is_empty() {
+                value.trim().to_string()
+            } else {
+                format!("{} {}", class_existing, value).trim().to_string()
+            };
 
-            class_new = format!("{} {}", class_existing, class_new)
-                .trim()
-                .to_string();
+            attributes.insert("class".to_string(), class_new);
         }
 
-        self.attr("class", &class_new)
+        self
     }
-
     pub fn class_list(self, class_names: &[&str]) -> Self {
         self.class(&class_names.join(" "))
     }
