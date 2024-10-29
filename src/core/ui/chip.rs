@@ -1,5 +1,3 @@
-use std::default;
-
 use crate::core::html::*;
 
 #[derive(Debug, Clone, PartialEq, Default)]
