@@ -149,7 +149,7 @@ fn view_top_bar(model: &ViewModel) -> Elem {
         .class(
             "w-full h-16 border-b flex items-center justify-center relative pl-2 overflow-hidden",
         )
-        .root_push(route::Route::Feed(Route::Controls {
+        .push_screen(route::Route::Feed(Route::Controls {
             feed_id: model.feed.feed_id.clone(),
             child: controls::route::Route::Index,
         }))
@@ -288,7 +288,7 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
             feed_index: _,
         } => button()
             .class("w-full h-full")
-            .root_push(to_media_details_route(&media.media_id))
+            .push_screen(to_media_details_route(&media.media_id))
             .child(
                 Image::view()
                     .class("w-full h-full object-cover")

@@ -7,7 +7,7 @@ const ROOT_ID: &str = "root";
 const ROOT_SELECTOR: &str = "#root";
 
 impl Elem {
-    pub fn root_push(self, route: Route) -> Self {
+    pub fn push_screen(self, route: Route) -> Self {
         self.hx_target(ROOT_SELECTOR)
             .hx_swap_inner_html()
             .hx_get(&route.encode())
@@ -17,7 +17,7 @@ impl Elem {
 }
 
 impl Res {
-    pub fn root_redirect(route: Route) -> Self {
+    pub fn redirect_screen(route: Route) -> Self {
         Res::redirect(route.encode().to_string(), ROOT_SELECTOR.to_string())
     }
 }
