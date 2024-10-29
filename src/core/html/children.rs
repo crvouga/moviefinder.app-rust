@@ -5,16 +5,25 @@ impl Elem {
         self.child(Elem::Safe(value.to_string()))
     }
 
-    pub fn child(self, child: Elem) -> Self {
-        self.children(&[child])
-    }
-
-    pub fn children(mut self, children_new: &[Elem]) -> Self {
+    pub fn child(mut self, child: Elem) -> Self {
         if let Elem::Element {
             ref mut children, ..
         } = self
         {
-            children.extend_from_slice(children_new);
+            children.push(child);
+        }
+
+        self
+    }
+
+    pub fn children(mut self, children_new: Vec<Elem>) -> Self {
+        if let Elem::Element {
+            ref mut children, ..
+        } = self
+        {
+            for child_new in children_new {
+                children.push(child_new);
+            }
         }
 
         self

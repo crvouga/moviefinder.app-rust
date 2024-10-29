@@ -90,7 +90,7 @@ impl Layout {
                                 .class("w-full h-full select-none")
                                 .src(image_src),
                         )
-                        .children(&self.children),
+                        .children(self.children),
                 ),
             )
     }

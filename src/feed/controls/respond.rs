@@ -117,7 +117,7 @@ fn view_section(title: &str, children: Vec<Elem>) -> Elem {
     div()
         .class("flex flex-col gap-4")
         .child(view_section_title(title))
-        .children(&children)
+        .children(children)
 }
 
 fn view_section_title(title: &str) -> Elem {
@@ -128,7 +128,7 @@ fn view_genre_chips(view_model: &ViewModel) -> Elem {
     div()
         .class("flex-1 flex flex-row items-center flex-wrap gap-2")
         .children(
-            &view_model
+            view_model
                 .genres
                 .iter()
                 .map(|genre| view_genre_chip(view_model, genre))

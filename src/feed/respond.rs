@@ -177,8 +177,7 @@ fn view_chips(model: &ViewModel) -> Elem {
                 .genre_ids
                 .iter()
                 .map(|genre_id| view_genre_chip(model, genre_id))
-                .collect::<Vec<Elem>>()
-                .as_ref(),
+                .collect::<Vec<Elem>>(),
         )
 }
 
@@ -242,7 +241,7 @@ fn view_swiper(feed_id: &FeedId) -> Elem {
 
 fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
     frag()
-        .children(&feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
+        .children(feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
         .child(
             feed_items
                 .iter()

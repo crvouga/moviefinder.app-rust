@@ -40,7 +40,7 @@ impl Root {
         html()
         .lang("en")
         .child(
-            head().children(&[
+            head().children(vec![
                 meta().charset("UTF-8"),
                 meta().name("viewport").content("width=device-width, initial-scale=1"),
                 title().child_text("moviefinder.app"),
@@ -65,7 +65,7 @@ impl Root {
                     div()
                     .id(ROOT_ID)
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col")
-                    .children(&self.children)
+                    .children(self.children)
                 )
         )
     }
