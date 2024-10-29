@@ -44,7 +44,7 @@ impl DbConnSql for ImplPostgres {
         F: Fn(String) -> Result<T, String> + Send + Sync,
         T: Debug,
     {
-        if (self.simulate_latency) {
+        if self.simulate_latency {
             tokio::time::sleep(std::time::Duration::from_secs(100)).await;
         }
 

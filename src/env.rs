@@ -1,4 +1,4 @@
-use crate::core;
+use crate::core::{self, env_stage::EnvSage};
 
 #[derive(PartialEq, Eq, Clone)]
 pub enum TestEnv {
@@ -28,7 +28,6 @@ pub struct Env {
     pub port: String,
     pub database_url: String,
     pub simulate_latency: bool,
-    pub is_prod: bool,
 
     #[allow(dead_code)]
     pub test_env: TestEnv,
@@ -36,18 +35,20 @@ pub struct Env {
 
 impl Env {
     pub fn load() -> Option<Env> {
-        core::env::load().unwrap_or_default();
+        let env = core::env::load(".env").unwrap();
+        let env_stage = EnvSage::from_str(std::env::var("STAGE").unwrap().as_str());
+        let tmdb_api_read_access_token = env.get("TMDB_API_READ_ACCESS_TOKEN").cloned()?;
+        let port = env.get("PORT").cloned()?;
+        let test_env = TestEnv::from_str(&env.get("TEST_ENV").cloned()?);
+        let database_url = env.get("DATABASE_URL").cloned()?;
 
-        let tmdb_api_read_access_token = core::env::read("TMDB_API_READ_ACCESS_TOKEN")?;
-        let port = core::env::read("PORT")?;
-        let test_env = TestEnv::from_str(&core::env::read("TEST_ENV").unwrap_or("".to_string()));
-        let database_url = core::env::read("DATABASE_URL")?;
-        let is_prod = core::env::read("RUST_ENV").unwrap_or("".to_string()) == "production";
+        let simulate_latency = env_stage.is_dev();
 
-        let simulate_latency = !is_prod;
+        if simulate_latency {
+            println!("LOG Simulating latency");
+        }
 
         Some(Env {
-            is_prod,
             simulate_latency,
             database_url,
             tmdb_api_read_access_token,
