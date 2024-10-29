@@ -3,8 +3,6 @@ use crate::{
     route::Route,
 };
 
-use super::root::ROOT_SELECTOR;
-
 #[derive(Default)]
 pub struct TopBar {
     back_route: Option<Route>,
@@ -46,12 +44,8 @@ impl BackButton {
     pub fn view(back_route: Route) -> Elem {
         button()
             .class("size-16 flex items-center justify-center")
-            .hx_target(ROOT_SELECTOR)
-            .hx_swap_inner_html()
-            .hx_get(&back_route.encode())
-            .hx_push_url()
-            .hx_preload_mouse_down()
             .aria_label("go back")
+            .root_push(back_route)
             .child(icon::back_arrow("size-8"))
     }
 }
@@ -62,10 +56,7 @@ impl CancelButton {
     pub fn view(cancel_route: Route) -> Elem {
         button()
             .class("size-16 flex items-center justify-center")
-            .hx_target(ROOT_SELECTOR)
-            .hx_swap_inner_html()
-            .hx_get(&cancel_route.encode())
-            .hx_preload_mouse_down()
+            .root_push(cancel_route)
             .aria_label("cancel")
             .child(icon::x_mark("size-8"))
     }

@@ -14,7 +14,7 @@ use crate::{
     media::genre::{genre::Genre, genre_id::GenreId},
     req::Req,
     route,
-    ui::{root::ROOT_SELECTOR, top_bar},
+    ui::top_bar,
 };
 
 #[derive(Debug)]
@@ -58,12 +58,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            Res::redirect(
-                route::Route::Feed(feed::route::Route::Index)
-                    .encode()
-                    .to_string(),
-                ROOT_SELECTOR.to_string(),
-            )
+            Res::root_redirect(route::Route::Feed(feed::route::Route::Index))
         }
     }
 }
@@ -98,11 +93,7 @@ fn view_bottom_bar() -> Elem {
                 .label("Cancel")
                 .color(Color::Gray)
                 .view()
-                .hx_get(&BACK_ROUTE.encode())
-                .hx_push_url()
-                .hx_preload_mouse_down()
-                .hx_swap_inner_html()
-                .hx_target(ROOT_SELECTOR)
+                .root_push(BACK_ROUTE)
                 .type_("button")
                 .class("flex-1"),
         )

@@ -18,7 +18,7 @@ use crate::{
     },
     req::Req,
     route,
-    ui::{bottom_bar, root::ROOT_SELECTOR},
+    ui::bottom_bar,
     user_session::session_id::SessionId,
 };
 
@@ -149,17 +149,10 @@ fn view_top_bar(model: &ViewModel) -> Elem {
         .class(
             "w-full h-16 border-b flex items-center justify-center relative pl-2 overflow-hidden",
         )
-        .hx_swap_inner_html()
-        .hx_push_url()
-        .hx_target(ROOT_SELECTOR)
-        .hx_get(
-            route::Route::Feed(Route::Controls {
-                feed_id: model.feed.feed_id.clone(),
-                child: controls::route::Route::Index,
-            })
-            .encode()
-            .as_str(),
-        )
+        .root_push(route::Route::Feed(Route::Controls {
+            feed_id: model.feed.feed_id.clone(),
+            child: controls::route::Route::Index,
+        }))
         .child(view_chips(&model))
         .child(view_open_controls_button())
 }
@@ -296,12 +289,7 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
             feed_index: _,
         } => button()
             .class("w-full h-full")
-            .hx_get(&to_media_details_route(&media.media_id).encode())
-            .hx_trigger_click()
-            .hx_swap_inner_html()
-            .hx_preload_mouse_down()
-            .hx_push_url()
-            .hx_target(ROOT_SELECTOR)
+            .root_push(to_media_details_route(&media.media_id))
             .child(
                 Image::view()
                     .class("w-full h-full object-cover")

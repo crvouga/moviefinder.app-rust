@@ -1,7 +1,26 @@
-use crate::core::{html::*, ui::image::Image};
+use crate::{
+    core::{html::*, res::Res, ui::image::Image},
+    route::Route,
+};
 
 const ROOT_ID: &str = "root";
-pub const ROOT_SELECTOR: &str = "#root";
+const ROOT_SELECTOR: &str = "#root";
+
+impl Elem {
+    pub fn root_push(self, route: Route) -> Self {
+        self.hx_target(ROOT_SELECTOR)
+            .hx_swap_inner_html()
+            .hx_get(&route.encode())
+            .hx_preload_mouse_down()
+            .hx_push_url()
+    }
+}
+
+impl Res {
+    pub fn root_redirect(route: Route) -> Self {
+        Res::redirect(route.encode().to_string(), ROOT_SELECTOR.to_string())
+    }
+}
 
 pub struct Root {
     children: Vec<Elem>,

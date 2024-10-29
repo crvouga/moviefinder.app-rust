@@ -9,7 +9,7 @@ use crate::{
     feed,
     media::{self, core::Media, media_db::interface::MediaField, media_id::MediaId},
     route,
-    ui::{root::ROOT_SELECTOR, top_bar::TopBar},
+    ui::top_bar::TopBar,
 };
 
 use super::route::Route;
@@ -100,10 +100,7 @@ fn view_load(media_id: &MediaId) -> Elem {
     Layout::new()
         .child(ui::icon::spinner("animate-spin size-16"))
         .view()
-        .hx_trigger_load()
-        .hx_swap_inner_html()
-        .hx_target(ROOT_SELECTOR)
-        .hx_get(&load_route(media_id).encode())
+        .root_push(load_route(media_id))
 }
 
 fn view_details(media: &Media) -> Elem {

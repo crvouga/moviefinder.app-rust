@@ -6,8 +6,6 @@ use crate::core::ui::bottom_bar_buttons::BottomButtons;
 use crate::feed;
 use crate::route;
 
-use super::root::ROOT_SELECTOR;
-
 #[derive(PartialEq, Eq)]
 pub enum Active {
     Home,
@@ -17,22 +15,22 @@ pub enum Active {
 pub fn view(active: Active) -> Elem {
     div().class("w-full").child(
         BottomButtons::default()
-            .add(
+            .view()
+            .child(
                 BottomButton::default()
                     .text("Home")
-                    .hx_get(&route::Route::Feed(feed::route::Route::Index).encode())
-                    .hx_target(ROOT_SELECTOR)
                     .icon(ui::icon::home("size-8"))
-                    .active(active == Active::Home),
+                    .active(active == Active::Home)
+                    .view()
+                    .root_push(route::Route::Feed(feed::route::Route::Index)),
             )
-            .add(
+            .child(
                 BottomButton::default()
                     .text("Account")
-                    .hx_get(&route::Route::Account(account::route::Route::Index).encode())
-                    .hx_target(ROOT_SELECTOR)
                     .icon(ui::icon::user_circle("size-8"))
-                    .active(active == Active::Account),
-            )
-            .view(),
+                    .active(active == Active::Account)
+                    .view()
+                    .root_push(route::Route::Account(account::route::Route::Index)),
+            ),
     )
 }
