@@ -44,10 +44,6 @@ impl DbConnSql for ImplPostgres {
         F: Fn(String) -> Result<T, String> + Send + Sync,
         T: Debug,
     {
-        if self.simulate_latency {
-            tokio::time::sleep(std::time::Duration::from_secs(100)).await;
-        }
-
         let sql_str = sql.to_string();
 
         let rows = self
@@ -67,6 +63,10 @@ impl DbConnSql for ImplPostgres {
         if false {
             println!("LOG\n\t{:?}\n\t{:?}", sql, results);
         }
+
+        // if self.simulate_latency {
+        //     tokio::time::sleep(std::time::Duration::from_secs(100)).await;
+        // }
 
         Ok(results)
     }

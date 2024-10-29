@@ -36,10 +36,14 @@ pub struct Env {
 impl Env {
     pub fn load() -> Option<Env> {
         let env = core::env::load(".env").unwrap();
-        let env_stage = EnvSage::from_str(std::env::var("STAGE").unwrap().as_str());
-        let tmdb_api_read_access_token = env.get("TMDB_API_READ_ACCESS_TOKEN").cloned()?;
-        let port = env.get("PORT").cloned()?;
-        let test_env = TestEnv::from_str(&env.get("TEST_ENV").cloned()?);
+        println!("LOG env {:?}", env);
+        let env_stage = EnvSage::from_str(env.get("STAGE").unwrap_or(&"".to_string()));
+        let tmdb_api_read_access_token = env
+            .get("TMDB_API_READ_ACCESS_TOKEN")
+            .cloned()
+            .unwrap_or("".to_string());
+        let port = env.get("PORT").cloned().unwrap_or("".to_string());
+        let test_env = TestEnv::from_str(&env.get("TEST_ENV").cloned().unwrap_or("".to_string()));
         let database_url = env.get("DATABASE_URL").cloned()?;
 
         let simulate_latency = env_stage.is_dev();
