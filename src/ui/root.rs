@@ -11,7 +11,7 @@ impl Elem {
         self.hx_target(ROOT_SELECTOR)
             .hx_swap_inner_html()
             .hx_get(&route.encode())
-            .hx_preload_mouse_down()
+            // .hx_preload_mouse_down()
             .hx_push_url()
     }
 
@@ -19,7 +19,7 @@ impl Elem {
         self.hx_target(ROOT_SELECTOR)
             .hx_swap_inner_html()
             .hx_get(&route.encode())
-            .hx_preload_mouse_down()
+            // .hx_preload_mouse_down()
             .hx_replace_url()
     }
 }
@@ -67,7 +67,7 @@ impl Root {
         .child(
             body()
                 .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
-                .hx_ext("preload")
+                .hx_ext(vec!["preload", "loading-states"])
                 .hx_boost()
                 .child(
                     div()
