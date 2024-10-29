@@ -48,8 +48,8 @@ async fn respond(
     let route = route::Route::decode(&http_request.path);
 
     let req = Req {
+        session_id,
         form_data: http_request.form_data,
-        session_id: session_id.clone(),
     };
 
     let res = respond::respond(&ctx, &req, &route).await.map_html(|html| {
