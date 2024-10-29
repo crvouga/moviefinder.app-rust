@@ -82,16 +82,18 @@ impl Layout {
                     .view(),
             )
             .child(
-                div().class("flex flex-col gap-6 items-center").child(
-                    div()
-                        .class("w-full aspect-video overflow-hidden border-b")
-                        .child(
-                            Image::view()
-                                .class("w-full h-full select-none")
-                                .src(image_src),
-                        )
-                        .children(self.children),
-                ),
+                div()
+                    .class("flex flex-col gap-6 items-center")
+                    .child(
+                        div()
+                            .class("w-full aspect-video overflow-hidden border-b")
+                            .child(
+                                Image::view()
+                                    .class("w-full h-full select-none")
+                                    .src(image_src),
+                            ),
+                    )
+                    .children(self.children),
             )
     }
 }
@@ -101,6 +103,7 @@ fn view_load(media_id: &MediaId) -> Elem {
         .child(ui::icon::spinner("animate-spin size-16"))
         .view()
         .push_screen(load_route(media_id))
+        .hx_trigger_load()
 }
 
 fn view_details(media: &Media) -> Elem {

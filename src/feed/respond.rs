@@ -222,7 +222,6 @@ fn view_swiper(feed_id: &FeedId) -> Elem {
 }
 
 fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
-    println!("feed_items={:?}", feed_items);
     frag()
         .children(feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
         .child(

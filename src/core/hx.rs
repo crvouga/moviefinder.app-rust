@@ -59,6 +59,10 @@ impl html::Elem {
         self.attr("hx-push-url", "true").clone()
     }
 
+    pub fn hx_replace_url(self) -> Self {
+        self.attr("hx-replace-url", "true").clone()
+    }
+
     pub fn hx_target(self, selector: &str) -> Self {
         self.attr("hx-target", selector).clone()
     }

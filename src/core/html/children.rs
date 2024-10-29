@@ -5,37 +5,37 @@ impl Elem {
         self.child(Elem::Safe(value.to_string()))
     }
 
-    pub fn child(mut self, child_new: Elem) -> Self {
+    pub fn child(mut self, child: Elem) -> Self {
         match self {
             Elem::Element {
                 tag_name: _,
                 attributes: _,
                 ref mut children,
             } => {
-                children.push(child_new);
+                children.push(child);
             }
             Elem::Fragment(ref mut children) => {
-                children.push(child_new);
+                children.push(child);
             }
             Elem::Safe(_) | Elem::Unsafe(_) => (),
         }
         self
     }
 
-    pub fn children(mut self, children_new: Vec<Elem>) -> Self {
+    pub fn children(mut self, children: Vec<Elem>) -> Self {
         match self {
             Elem::Element {
                 tag_name: _,
                 attributes: _,
-                ref mut children,
+                children: ref mut children_prev,
             } => {
-                for child_new in children_new {
-                    children.push(child_new);
+                for child_new in children {
+                    children_prev.push(child_new);
                 }
             }
-            Elem::Fragment(ref mut children) => {
-                for child_new in children_new {
-                    children.push(child_new);
+            Elem::Fragment(ref mut children_prev) => {
+                for child_new in children {
+                    children_prev.push(child_new);
                 }
             }
             Elem::Safe(_) | Elem::Unsafe(_) => (),

@@ -14,6 +14,14 @@ impl Elem {
             .hx_preload_mouse_down()
             .hx_push_url()
     }
+
+    pub fn replace_screen(self, route: Route) -> Self {
+        self.hx_target(ROOT_SELECTOR)
+            .hx_swap_inner_html()
+            .hx_get(&route.encode())
+            .hx_preload_mouse_down()
+            .hx_replace_url()
+    }
 }
 
 impl Res {
@@ -46,7 +54,7 @@ impl Root {
                 title().child_text("moviefinder.app"),
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
-                meta().name("htmx-config").content(r#"{"historyCacheSize": 0, "refreshOnHistoryMiss": true}"#),
+                meta().name("htmx-config").content("{&quot;historyCacheSize&quot;: 0, &quot;refreshOnHistoryMiss&quot;: true}"),
                 link().rel("preconnect").href("https://image.tmdb.org"),
                 script().src("https://cdn.tailwindcss.com"),
                 script().src("https://unpkg.com/htmx.org@2.0.1").defer(),
