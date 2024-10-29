@@ -1,3 +1,5 @@
+use std::default;
+
 use crate::core::html::*;
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -64,9 +66,10 @@ impl Chip {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum ChipSize {
     Small,
+    #[default]
     Medium,
     Large,
 }
@@ -78,11 +81,5 @@ impl ChipSize {
             ChipSize::Medium => "text-sm px-2.5 py-1.5".to_string(),
             ChipSize::Large => "text-base px-3 py-2".to_string(),
         }
-    }
-}
-
-impl Default for ChipSize {
-    fn default() -> Self {
-        ChipSize::Medium
     }
 }
