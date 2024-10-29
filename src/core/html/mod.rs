@@ -1,18 +1,14 @@
+use std::collections::HashMap;
+
 pub mod attr;
 pub mod children;
 pub mod render;
 
 #[derive(Clone, Debug)]
-pub struct Attr {
-    pub name: String,
-    pub value: String,
-}
-
-#[derive(Clone, Debug)]
 pub enum Elem {
     Element {
         tag_name: String,
-        attributes: Vec<Attr>,
+        attributes: HashMap<String, String>,
         children: Vec<Elem>,
     },
     Fragment(Vec<Elem>),
@@ -31,7 +27,7 @@ pub fn frag() -> Elem {
 pub fn elem(tag_name: &str) -> Elem {
     Elem::Element {
         tag_name: tag_name.to_string(),
-        attributes: vec![],
+        attributes: HashMap::new(),
         children: vec![],
     }
 }

@@ -1,4 +1,6 @@
-use super::{Attr, Elem};
+use std::collections::HashMap;
+
+use super::Elem;
 
 impl Elem {
     pub fn render(&self) -> String {
@@ -39,15 +41,15 @@ fn render_children(children: &[Elem], indent_level: usize) -> String {
         .join("")
 }
 
-fn render_attrs(attrs: &[Attr]) -> String {
+fn render_attrs(attrs: &HashMap<String, String>) -> String {
     attrs
         .iter()
-        .filter_map(|attr| {
-            let name_cleaned = attr.name.trim();
+        .filter_map(|(name, value)| {
+            let name_cleaned = name.trim();
             if name_cleaned.is_empty() {
                 None
             } else {
-                Some(format!(" {}=\"{}\"", name_cleaned, attr.value))
+                Some(format!(" {}=\"{}\"", name_cleaned, value))
             }
         })
         .collect::<Vec<String>>()

@@ -1,4 +1,4 @@
-use super::{Attr, Elem};
+use super::Elem;
 
 impl Elem {
     pub fn attr(mut self, name: &str, value: &str) -> Self {
@@ -6,31 +6,21 @@ impl Elem {
             ref mut attributes, ..
         } = self
         {
-            attributes.retain(|attr| attr.name != name);
-            attributes.push(Attr {
-                name: name.to_string(),
-                value: value.to_string(),
-            });
+            attributes.insert(name.to_string(), value.to_string());
         }
         self
     }
 
-    fn attrs(&self) -> Vec<Attr> {
-        match self {
-            Elem::Element { attributes, .. } => attributes.clone(),
-            _ => vec![],
-        }
-    }
-
     pub fn class(self, value: &str) -> Self {
-        let existing_classes = self
-            .attrs()
-            .iter()
-            .find(|attr| attr.name.eq_ignore_ascii_case("class"))
-            .map(|attr| attr.value.clone())
-            .unwrap_or_else(String::new);
+        let mut class_new = value.trim().to_string();
 
-        let class_new = format!("{} {}", existing_classes, value).trim().to_string();
+        if let Elem::Element { ref attributes, .. } = self {
+            let class_existing = attributes.get("class").cloned().unwrap_or("".to_string());
+
+            class_new = format!("{} {}", class_existing, class_new)
+                .trim()
+                .to_string();
+        }
 
         self.attr("class", &class_new)
     }
