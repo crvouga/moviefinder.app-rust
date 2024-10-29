@@ -146,7 +146,9 @@ impl ViewModel {
 
 fn view_top_bar(model: &ViewModel) -> Elem {
     button()
-        .class("w-full h-16 border-b flex items-center justify-center relative pl-2")
+        .class(
+            "w-full h-16 border-b flex items-center justify-center relative pl-2 overflow-hidden",
+        )
         .hx_swap_inner_html()
         .hx_push_url()
         .hx_target(ROOT_SELECTOR)

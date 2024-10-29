@@ -56,7 +56,7 @@ impl Chip {
         .child(
             label()
             .for_(&self.id)
-            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none")
+            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none tuncate whitespace-nowrap")
             .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
             .class(&self.size.to_class())
             .child_text(&self.label)
