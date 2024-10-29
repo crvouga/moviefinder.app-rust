@@ -56,16 +56,14 @@ async fn respond(
         session_id: session_id.clone(),
     };
 
-    println!("LOG {} {:?} {:?}", http_request.method, route, req);
+    let res = respond::respond(&ctx, &req, &route).await.map_html(|html| {
+        if http_request.headers.contains_key("hx-request") {
+            html
+        } else {
+            Root::new().children(vec![html]).view()
+        }
+    });
 
-    respond::respond(&ctx, &req, &route)
-        .await
-        .map_html(|html| {
-            if http_request.headers.contains_key("hx-request") {
-                html
-            } else {
-                Root::new().children(vec![html]).view()
-            }
-        })
-        .into()
+    println!("LOG REQUEST {} {:?} {:?}", http_request.method, route, req);
+    res.into()
 }

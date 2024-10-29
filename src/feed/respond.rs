@@ -62,61 +62,43 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
         Route::LoadInitial { feed_id } => {
             let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
-
-            let query = Query {
-                limit: 3,
-                offset: feed.active_index,
-                filter: Filter::None,
-            };
-
-            let queried = ctx.media_db.query(query).await;
-
-            match queried {
-                Err(err) => ui::error::page(&err).into(),
-
-                Ok(paginated) => {
-                    let feed_items = paginated
-                        .items
-                        .into_iter()
-                        .enumerate()
-                        .map(|(index, media)| FeedItem::from((media, index + feed.active_index)))
-                        .collect::<Vec<FeedItem>>();
-
-                    view_feed_items(feed_id, &feed_items).into()
-                }
-            }
+            respond_feed_items(ctx, feed_id, &feed.active_index).await
         }
 
         Route::LoadMore {
             feed_id,
             start_feed_index,
-        } => {
-            let query = Query {
-                limit: 3,
-                offset: start_feed_index.clone(),
-                filter: Filter::None,
-            };
-
-            let queried = ctx.media_db.query(query).await;
-
-            match queried {
-                Err(err) => ui::error::page(&err).into(),
-
-                Ok(paginated) => {
-                    let feed_items = paginated
-                        .items
-                        .into_iter()
-                        .enumerate()
-                        .map(|(index, media)| FeedItem::from((media, index + start_feed_index)))
-                        .collect::<Vec<FeedItem>>();
-
-                    view_feed_items(feed_id, &feed_items).into()
-                }
-            }
-        }
+        } => respond_feed_items(ctx, feed_id, start_feed_index).await,
 
         Route::Controls { feed_id, child } => {
             controls::respond::respond(ctx, req, feed_id, child).await
+        }
+    }
+}
+
+async fn respond_feed_items(ctx: &Ctx, feed_id: &FeedId, start_feed_index: &usize) -> Res {
+    let query = Query {
+        limit: 3,
+        offset: start_feed_index.clone(),
+        filter: Filter::None,
+    };
+
+    let queried = ctx.media_db.query(query).await;
+
+    match queried {
+        Err(err) => ui::error::page(&err).into(),
+
+        Ok(paginated) => {
+            let feed_items = paginated
+                .items
+                .into_iter()
+                .enumerate()
+                .map(|(index, media)| FeedItem::from((media, index + start_feed_index)))
+                .collect::<Vec<FeedItem>>();
+
+            let res = view_feed_items(feed_id, &feed_items).into();
+
+            res
         }
     }
 }
@@ -217,29 +199,30 @@ fn view_bottom_bar() -> Elem {
 
 fn view_swiper(feed_id: &FeedId) -> Elem {
     ui::swiper::container()
-    .swiper_direction_vertical()
-    .swiper_slides_per_view("1")
-    .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
-    .hx_trigger_custom("swiperslidechange from:swiper-container")
-    .hx_swap_none()
-    .hx_post(
-        route::Route::Feed(Route::ChangedSlide {
-            feed_id: feed_id.clone(),
-        })
-        .encode()
-        .as_str(),
-    )
-    .hx_vals(
-        r#"
-        js:{
-            feedIndex: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)
-        }
-        "#
-    )
-    .child(view_load_initial(feed_id))
+        .swiper_direction_vertical()
+        .swiper_slides_per_view("1")
+        .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
+        .hx_trigger_custom("swiperslidechange from:swiper-container")
+        .hx_swap_none()
+        .hx_post(
+            route::Route::Feed(Route::ChangedSlide {
+                feed_id: feed_id.clone(),
+            })
+            .encode()
+            .as_str(),
+        )
+        .hx_vals(
+            r#"
+            js:{
+                feedIndex: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)
+            }
+            "#
+        )
+        .child(view_load_initial(feed_id))
 }
 
 fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
+    println!("feed_items={:?}", feed_items);
     frag()
         .children(feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
         .child(

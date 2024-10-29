@@ -1,5 +1,6 @@
 use crate::media::core::Media;
 
+#[derive(Debug, Clone)]
 pub enum FeedItem {
     Media { media: Media, feed_index: usize },
 }
