@@ -10,6 +10,7 @@ use super::interface::DbConnSql;
 
 pub struct ImplPostgres {
     client: tokio_postgres::Client,
+    simulate_latency: bool,
 }
 
 impl ImplPostgres {
@@ -24,7 +25,15 @@ impl ImplPostgres {
             }
         });
 
-        Ok(Self { client })
+        Ok(Self {
+            client,
+            simulate_latency: false,
+        })
+    }
+
+    pub fn simulate_latency(mut self, simulate_latency: bool) -> Self {
+        self.simulate_latency = simulate_latency;
+        self
     }
 }
 
@@ -35,6 +44,10 @@ impl DbConnSql for ImplPostgres {
         F: Fn(String) -> Result<T, String> + Send + Sync,
         T: Debug,
     {
+        if (self.simulate_latency) {
+            tokio::time::sleep(std::time::Duration::from_secs(100)).await;
+        }
+
         let sql_str = sql.to_string();
 
         let rows = self

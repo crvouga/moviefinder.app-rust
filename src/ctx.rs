@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     core::db_conn_sql::{self, impl_postgres::ImplPostgres},
+    env::Env,
     feed::{
         self,
         feed_db::{self, interface::FeedDb},
@@ -28,18 +29,20 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub async fn new(
-        tmdb_api_read_access_token: String,
-        database_url: String,
-    ) -> Result<Ctx, String> {
-        let db_conn_sql =
-            Arc::new(db_conn_sql::impl_postgres::ImplPostgres::new(&database_url).await?);
+    pub async fn new(env: Env) -> Result<Ctx, String> {
+        let db_conn_sql = Arc::new(
+            db_conn_sql::impl_postgres::ImplPostgres::new(&env.database_url)
+                .await?
+                .simulate_latency(env.simulate_latency),
+        );
 
         let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(Arc::clone(
             &db_conn_sql,
         )));
 
-        let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(tmdb_api_read_access_token.clone()));
+        let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
+            env.tmdb_api_read_access_token.clone(),
+        ));
 
         let media_db = Box::new(media_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
 

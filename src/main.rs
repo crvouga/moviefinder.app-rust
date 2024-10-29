@@ -26,11 +26,7 @@ async fn main() {
 
     println!("LOG Starting server on http://{}", address);
 
-    let ctx = Arc::new(
-        ctx::Ctx::new(env.tmdb_api_read_access_token, env.database_url)
-            .await
-            .unwrap(),
-    );
+    let ctx = Arc::new(ctx::Ctx::new(env).await.unwrap());
 
     core::http::server::start(
         &address,
