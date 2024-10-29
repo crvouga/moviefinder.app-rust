@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-pub fn load(file_path: &str) -> io::Result<HashMap<String, String>> {
+pub fn load(file_path: &str) -> io::Result<()> {
     let path = Path::new(file_path);
 
     if !path.exists() {
@@ -15,7 +15,6 @@ pub fn load(file_path: &str) -> io::Result<HashMap<String, String>> {
 
     let file = File::open(path)?;
     let reader = io::BufReader::new(file);
-    let mut env_vars = HashMap::new();
 
     for line in reader.lines() {
         let line = line?;
@@ -29,10 +28,10 @@ pub fn load(file_path: &str) -> io::Result<HashMap<String, String>> {
         let key = parts.next().unwrap_or("").trim().to_string();
         let value = remove_quotes(parts.next().unwrap_or("").trim()).to_string();
 
-        env_vars.insert(key, value);
+        env::set_var(key, value);
     }
 
-    Ok(env_vars)
+    Ok(())
 }
 
 fn remove_quotes(s: &str) -> &str {
