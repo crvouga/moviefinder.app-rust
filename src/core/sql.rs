@@ -56,8 +56,8 @@ pub fn pagination(limit: Option<u32>, offset: Option<u32>) -> PaginationResult {
 
 #[derive(Debug, Clone)]
 pub struct Sql {
-    query: String,
-    vars: Vars,
+    pub query: String,
+    pub vars: Vars,
 }
 
 impl Sql {

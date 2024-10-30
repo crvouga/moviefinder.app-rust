@@ -56,12 +56,14 @@ impl Env {
             println!("LOG Simulating latency");
         }
 
-        Some(Env {
+        let env = Env {
             simulate_latency,
             database_url,
             tmdb_api_read_access_token,
             port,
             test_env,
-        })
+        };
+
+        Some(env)
     }
 }

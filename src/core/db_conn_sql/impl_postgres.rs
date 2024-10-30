@@ -44,6 +44,13 @@ impl DbConnSql for ImplPostgres {
         F: Fn(String) -> Result<T, String> + Send + Sync,
         T: Debug,
     {
+        if self.simulate_latency {
+            let dur = std::time::Duration::from_millis(100);
+            tokio::time::sleep(dur).await;
+        }
+
+        let start = std::time::Instant::now();
+
         let sql_str = sql.to_string();
 
         let rows = self
@@ -60,13 +67,11 @@ impl DbConnSql for ImplPostgres {
             results.push(parsed);
         }
 
-        if false {
-            println!("LOG\n\t{:?}\n\t{:?}", sql, results);
-        }
+        let dur = start.elapsed();
 
-        // if self.simulate_latency {
-        //     tokio::time::sleep(std::time::Duration::from_secs(100)).await;
-        // }
+        if true {
+            println!("LOG\n\tsql={}\n\tduration={:?}", sql.query, dur);
+        }
 
         Ok(results)
     }
