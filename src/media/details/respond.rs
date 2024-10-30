@@ -19,8 +19,6 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
         Route::Index { media_id } => view_load(media_id).into(),
 
         Route::Load { media_id } => {
-            // tokio::time::sleep(std::time::Duration::from_secs(3)).await;
-
             let query = Query {
                 limit: 1,
                 offset: 0,
