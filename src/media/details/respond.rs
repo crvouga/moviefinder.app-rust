@@ -22,7 +22,7 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: Filter::clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
+                filter: Filter::Clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
             };
 
             let queried = ctx.media_db.query(query).await;

@@ -1,7 +1,10 @@
 use super::feed_id::FeedId;
 use crate::{
     core::query::Query,
-    media::{genre::genre_id::GenreId, media_db::interface::MediaField},
+    media::{
+        genre::genre_id::GenreId,
+        media_db::interface::{MediaField, MediaQuery},
+    },
 };
 use serde::{Deserialize, Serialize};
 
@@ -9,6 +12,6 @@ use serde::{Deserialize, Serialize};
 pub struct Feed {
     pub feed_id: FeedId,
     pub active_index: usize,
-    pub query: Query<MediaField>,
+    pub query: MediaQuery,
     pub genre_ids: Vec<GenreId>,
 }

@@ -1,5 +1,5 @@
-use super::interface::{MediaDb, MediaField};
-use crate::{core::pagination::Paginated, core::query::Query, core::random, media::core};
+use super::interface::{MediaDb, MediaQuery};
+use crate::{core::pagination::Paginated, core::random, media::core};
 use async_trait::async_trait;
 use std::vec;
 
@@ -13,7 +13,7 @@ impl Random {
 
 #[async_trait]
 impl MediaDb for Random {
-    async fn query(&self, _query: Query<MediaField>) -> Result<Paginated<core::Media>, String> {
+    async fn query(&self, _query: MediaQuery) -> Result<Paginated<core::Media>, String> {
         let paginated = Paginated {
             items: vec![
                 core::random(),

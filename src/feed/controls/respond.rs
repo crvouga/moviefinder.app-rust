@@ -63,7 +63,8 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
                         })
                         .collect(),
                 ),
-                ..feed.query
+                limit: 3,
+                offset: 0,
             };
 
             let feed_new = Feed {

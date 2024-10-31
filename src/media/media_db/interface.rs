@@ -11,7 +11,9 @@ pub enum MediaField {
     GenreId,
 }
 
+pub type MediaQuery = Query<MediaField>;
+
 #[async_trait]
 pub trait MediaDb: Send + Sync {
-    async fn query(&self, query: Query<MediaField>) -> Result<Paginated<Media>, String>;
+    async fn query(&self, query: MediaQuery) -> Result<Paginated<Media>, String>;
 }

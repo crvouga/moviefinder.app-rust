@@ -77,13 +77,9 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 }
 
 async fn respond_feed_items(ctx: &Ctx, feed_id: &FeedId, start_feed_index: &usize) -> Res {
-    let query = Query {
-        limit: 3,
-        offset: start_feed_index.clone(),
-        filter: Filter::None,
-    };
+    let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
 
-    let queried = ctx.media_db.query(query).await;
+    let queried = ctx.media_db.query(feed.query).await;
 
     match queried {
         Err(err) => ui::error::page(&err).into(),

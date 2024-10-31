@@ -69,16 +69,16 @@ pub struct DiscoverMovieParams {
     pub certification_gte: Option<String>,
     pub include_adult: Option<bool>,
     pub include_video: Option<bool>,
-    pub page: Option<u32>,
-    pub primary_release_year: Option<u32>,
+    pub page: Option<usize>,
+    pub primary_release_year: Option<usize>,
     pub primary_release_date_gte: Option<String>,
     pub primary_release_date_lte: Option<String>,
     pub release_date_gte: Option<String>,
     pub release_date_lte: Option<String>,
-    pub with_release_type: Option<u32>,
-    pub year: Option<u32>,
-    pub vote_count_gte: Option<u32>,
-    pub vote_count_lte: Option<u32>,
+    pub with_release_type: Option<usize>,
+    pub year: Option<usize>,
+    pub vote_count_gte: Option<usize>,
+    pub vote_count_lte: Option<usize>,
     pub vote_average_gte: Option<f32>,
     pub vote_average_lte: Option<f32>,
     pub with_cast: Option<String>,
@@ -89,8 +89,8 @@ pub struct DiscoverMovieParams {
     pub without_genres: Option<String>,
     pub with_keywords: Option<String>,
     pub without_keywords: Option<String>,
-    pub with_runtime_gte: Option<u32>,
-    pub with_runtime_lte: Option<u32>,
+    pub with_runtime_gte: Option<usize>,
+    pub with_runtime_lte: Option<usize>,
     pub with_original_language: Option<String>,
     pub with_watch_providers: Option<String>,
     pub watch_region: Option<String>,
@@ -101,7 +101,7 @@ pub struct DiscoverMovieParams {
 impl Into<DiscoverMovieParams> for usize {
     fn into(self) -> DiscoverMovieParams {
         DiscoverMovieParams {
-            page: Some(self as u32),
+            page: Some(self as usize),
             ..Default::default()
         }
     }
