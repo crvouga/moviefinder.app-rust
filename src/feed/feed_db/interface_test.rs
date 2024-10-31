@@ -29,7 +29,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_and_put() {
         for f in fixtures().await {
-            let feed = Feed::random();
+            let feed = Feed::default();
 
             let before = f.feed_db.get(feed.feed_id.clone()).await;
             let put = f.feed_db.put(feed.clone()).await;

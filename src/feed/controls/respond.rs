@@ -2,6 +2,7 @@ use super::route::Route;
 use crate::{
     core::{
         html::*,
+        query::{Filter, Op, Query},
         res::Res,
         ui::{
             self,
@@ -11,7 +12,10 @@ use crate::{
     },
     ctx::Ctx,
     feed::{self, core::Feed, feed_id::FeedId},
-    media::genre::{genre::Genre, genre_id::GenreId},
+    media::{
+        genre::{genre::Genre, genre_id::GenreId},
+        media_db::interface::MediaField,
+    },
     req::Req,
     route,
     ui::top_bar,
@@ -50,9 +54,22 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
 
+            let query_new = Query {
+                filter: Filter::And(
+                    genre_ids_new
+                        .iter()
+                        .map(|genre_id| {
+                            Filter::Clause(MediaField::GenreId, Op::Eq, genre_id.to_string())
+                        })
+                        .collect(),
+                ),
+                ..feed.query
+            };
+
             let feed_new = Feed {
-                genre_ids: genre_ids_new,
                 active_index: 0,
+                query: query_new,
+                genre_ids: genre_ids_new,
                 ..feed
             };
 
