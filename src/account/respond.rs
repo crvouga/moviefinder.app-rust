@@ -13,5 +13,5 @@ pub fn view_account() -> Elem {
     div()
         .class("w-full flex-1 flex items-center justify-center flex-col")
         .child(div().class("flex-1").child_text("Account"))
-        .child(bottom_bar::view(bottom_bar::Active::Account))
+        .child(bottom_bar::view(bottom_bar::Active::Account, &""))
 }

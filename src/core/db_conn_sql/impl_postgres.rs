@@ -1,4 +1,4 @@
-use std::{fmt::Debug, sync::Arc};
+use std::{fmt::Debug, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use serde_json;
@@ -13,7 +13,7 @@ use super::interface::DbConnSql;
 
 pub struct ImplPostgres {
     client: tokio_postgres::Client,
-    simulate_latency: bool,
+    simulate_latency: Option<Duration>,
     logger: Arc<dyn Logger>,
 }
 
@@ -34,11 +34,11 @@ impl ImplPostgres {
         Ok(Self {
             client,
             logger: logger_parent.child("postgres"),
-            simulate_latency: false,
+            simulate_latency: None,
         })
     }
 
-    pub fn simulate_latency(mut self, simulate_latency: bool) -> Self {
+    pub fn simulate_latency(mut self, simulate_latency: Option<Duration>) -> Self {
         self.simulate_latency = simulate_latency;
         self
     }
@@ -51,12 +51,11 @@ impl DbConnSql for ImplPostgres {
         F: Fn(String) -> Result<T, String> + Send + Sync,
         T: Debug,
     {
-        if self.simulate_latency {
-            let dur = std::time::Duration::from_millis(150);
+        let start = std::time::Instant::now();
+
+        if let Some(dur) = self.simulate_latency {
             tokio::time::sleep(dur).await;
         }
-
-        let start = std::time::Instant::now();
 
         let sql_str = sql.to_string();
 

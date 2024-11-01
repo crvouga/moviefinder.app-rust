@@ -44,7 +44,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
             let model = ViewModel {
                 feed: feed.clone(),
                 genres: ctx.genre_db.get_all().await.unwrap_or(vec![]),
-                initial_feed_items: get_feed_items(ctx, &feed).await.unwrap_or_default(),
+                initial_feed_items: get_feed_items(ctx, &feed, &feed.active_index)
+                    .await
+                    .unwrap_or_default(),
             };
 
             view_feed(&model).into()
@@ -76,11 +78,11 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
 
         Route::LoadMore {
             feed_id,
-            start_feed_index: _,
+            start_feed_index,
         } => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let got = get_feed_items(ctx, &feed).await;
+            let got = get_feed_items(ctx, &feed, start_feed_index).await;
 
             match got {
                 Err(err) => ui::error::page(&err).into(),
@@ -109,7 +111,11 @@ fn respond_index(feed_id: &FeedId) -> Res {
     res.hx_push_url(&index_route.encode())
 }
 
-async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
+async fn get_feed_items(
+    ctx: &Ctx,
+    feed: &Feed,
+    start_feed_index: &usize,
+) -> Result<Vec<FeedItem>, String> {
     let queried = ctx.media_db.query(feed.clone().into()).await;
 
     match queried {
@@ -120,7 +126,7 @@ async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String>
                 .items
                 .into_iter()
                 .enumerate()
-                .map(|(index, media)| FeedItem::from((media, index + feed.active_index)))
+                .map(|(index, media)| FeedItem::from((media, index + start_feed_index)))
                 .collect::<Vec<FeedItem>>();
 
             Ok(feed_items)
@@ -143,6 +149,7 @@ struct ViewModel {
 }
 
 const FEED_ID: &str = "feed";
+const FEED_SELECTOR: &str = "#feed";
 
 fn view_top_bar_root(feed_id: &FeedId) -> Elem {
     button().class(
@@ -152,7 +159,7 @@ fn view_top_bar_root(feed_id: &FeedId) -> Elem {
             feed_id: feed_id.clone(),
             child: controls::route::Route::Index,
         }))
-    .hx_abort(format!("#{}",FEED_ID).as_str())
+    .hx_abort(FEED_SELECTOR)
 }
 
 fn view_feed_root() -> Elem {
@@ -229,7 +236,7 @@ fn view_feed(model: &ViewModel) -> Elem {
 }
 
 fn view_bottom_bar() -> Elem {
-    bottom_bar::view(bottom_bar::Active::Home)
+    bottom_bar::view(bottom_bar::Active::Home, FEED_SELECTOR)
 }
 
 fn view_swiper(model: &ViewModel) -> Elem {

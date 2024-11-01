@@ -74,6 +74,9 @@ impl From<FormData> for Vec<GenreId> {
     }
 }
 
+const FEED_CONTROLS_ID: &str = "feed-controls";
+const FEED_CONTROLS_SELECTOR: &str = "#feed-controls";
+
 fn view_load_controls(feed_id: &FeedId) -> Elem {
     div()
         .class("w-full h-full flex flex-col overflow-hidden relative")
@@ -82,6 +85,7 @@ fn view_load_controls(feed_id: &FeedId) -> Elem {
             child: Route::Load,
         }))
         .hx_trigger_load()
+        .id(FEED_CONTROLS_ID)
         .child(view_top_bar(&feed_id))
         .child(
             div()
@@ -108,9 +112,10 @@ fn view_controls(view_model: &ViewModel) -> Elem {
 }
 
 fn view_top_bar(feed_id: &FeedId) -> Elem {
-    div()
-        .class("absolute right-0 top-0")
-        .child(top_bar::CancelButton::view(to_back_route(feed_id.clone())))
+    div().class("absolute right-0 top-0").child(
+        top_bar::CancelButton::view(to_back_route(feed_id.clone()))
+            .hx_abort(FEED_CONTROLS_SELECTOR),
+    )
 }
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
@@ -123,7 +128,8 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .view()
                 .hx_push_screen(to_back_route(feed_id.clone()))
                 .type_("button")
-                .class("flex-1"),
+                .class("flex-1")
+                .hx_abort(FEED_CONTROLS_SELECTOR),
         )
         .child(
             Button::new()

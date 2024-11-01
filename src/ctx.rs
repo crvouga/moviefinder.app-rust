@@ -3,6 +3,7 @@ use std::sync::Arc;
 use crate::{
     core::{
         db_conn_sql::{self, impl_postgres::ImplPostgres},
+        http::client::HttpClient,
         logger::{impl_console::ConsoleLogger, interface::Logger},
     },
     env::Env,
@@ -38,6 +39,9 @@ impl Ctx {
     pub async fn new(env: Env) -> Result<Ctx, String> {
         let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
 
+        let http_client =
+            Arc::new(HttpClient::new(logger.clone()).simulate_latency(env.simulate_latency));
+
         let db_conn_sql = Arc::new(
             db_conn_sql::impl_postgres::ImplPostgres::new(logger.clone(), &env.database_url)
                 .await?
@@ -50,6 +54,7 @@ impl Ctx {
         ));
 
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
+            http_client.clone(),
             env.tmdb_api_read_access_token.clone(),
         ));
 

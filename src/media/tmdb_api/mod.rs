@@ -1,19 +1,23 @@
-use crate::core::http::{form_data::FormData, query_params::QueryParams, request::HttpRequest};
-use std::collections::HashMap;
+use crate::core::http::{
+    client::HttpClient, form_data::FormData, query_params::QueryParams, request::HttpRequest,
+};
+use std::{collections::HashMap, sync::Arc};
 
 pub mod config;
 pub mod discover_movie;
 pub mod movie_details;
 pub mod movie_genre;
 
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct TmdbApi {
     tmdb_api_read_access_token: String,
+    http_client: Arc<HttpClient>,
 }
 
 impl TmdbApi {
-    pub fn new(tmdb_api_read_access_token: String) -> TmdbApi {
+    pub fn new(http_client: Arc<HttpClient>, tmdb_api_read_access_token: String) -> TmdbApi {
         TmdbApi {
+            http_client,
             tmdb_api_read_access_token,
         }
     }

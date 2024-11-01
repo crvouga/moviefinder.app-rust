@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, time::Duration};
 
 use crate::core::{self, env_stage::EnvSage};
 
@@ -29,7 +29,7 @@ pub struct Env {
     pub tmdb_api_read_access_token: String,
     pub port: String,
     pub database_url: String,
-    pub simulate_latency: bool,
+    pub simulate_latency: Option<Duration>,
 
     #[allow(dead_code)]
     pub test_env: TestEnv,
@@ -50,7 +50,13 @@ impl Env {
         let test_env = TestEnv::from_str(&env::var("TEST_ENV").unwrap_or("".to_string()));
         let database_url = env::var("DATABASE_URL").unwrap_or("".to_string());
 
-        let simulate_latency = env_stage.is_dev();
+        let simulate_latency_duration = Duration::from_millis(200);
+
+        let simulate_latency = if env_stage.is_dev() {
+            Some(simulate_latency_duration)
+        } else {
+            None
+        };
 
         let env = Env {
             simulate_latency,

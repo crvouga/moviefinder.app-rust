@@ -115,13 +115,13 @@ impl Into<QueryParams> for DiscoverMovieParams {
 
 impl TmdbApi {
     pub async fn discover_movie(
-        self: &TmdbApi,
+        &self,
         params: DiscoverMovieParams,
     ) -> Result<DiscoverMovieResponse, String> {
         let query_params: QueryParams = params.into();
         let req = self.to_get_request("/3/discover/movie", query_params);
 
-        let sent = http::client::send(req).await;
+        let sent = self.http_client.send(req).await;
 
         let response = match sent {
             Ok(response) => response,
