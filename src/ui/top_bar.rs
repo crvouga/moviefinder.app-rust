@@ -45,7 +45,7 @@ impl BackButton {
         button()
             .class("size-16 flex items-center justify-center")
             .aria_label("go back")
-            .hx_push_screen(back_route)
+            .root_push_screen(back_route)
             .child(icon::back_arrow("size-8"))
     }
 }
@@ -56,7 +56,7 @@ impl CancelButton {
     pub fn view(cancel_route: Route) -> Elem {
         button()
             .class("size-16 flex items-center justify-center")
-            .hx_push_screen(cancel_route)
+            .root_push_screen(cancel_route)
             .aria_label("cancel")
             .child(icon::x_mark("size-8"))
     }

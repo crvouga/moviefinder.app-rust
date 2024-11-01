@@ -7,23 +7,23 @@ const ROOT_ID: &str = "root";
 const ROOT_SELECTOR: &str = "#root";
 
 impl Elem {
-    pub fn hx_swap_screen(self, route: Route) -> Self {
+    pub fn root_swap_screen(self, route: Route) -> Self {
         self.hx_target(ROOT_SELECTOR)
             .hx_swap_inner_html()
             .hx_get(&route.encode())
     }
 
-    pub fn hx_push_screen(self, route: Route) -> Self {
-        self.hx_swap_screen(route).hx_push_url()
+    pub fn root_push_screen(self, route: Route) -> Self {
+        self.root_swap_screen(route).hx_push_url()
     }
 
-    pub fn hx_replace_screen(self, route: Route) -> Self {
-        self.hx_swap_screen(route).hx_replace_url()
+    pub fn root_replace_screen(self, route: Route) -> Self {
+        self.root_swap_screen(route).hx_replace_url()
     }
 }
 
 impl Res {
-    pub fn hx_redirect_screen(route: Route) -> Self {
+    pub fn root_redirect_screen(route: Route) -> Self {
         Res::redirect(route.encode().to_string(), ROOT_SELECTOR.to_string())
     }
 }

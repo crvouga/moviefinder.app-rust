@@ -155,7 +155,7 @@ fn view_top_bar_root(feed_id: &FeedId) -> Elem {
     button().class(
         "w-full h-16 shrink-0 border-b flex items-center justify-center relative pl-2 overflow-hidden",
     )
-    .hx_push_screen(route::Route::Feed(Route::Controls {
+    .root_push_screen(route::Route::Feed(Route::Controls {
             feed_id: feed_id.clone(),
             child: controls::route::Route::Index,
         }))
@@ -176,7 +176,7 @@ fn view_top_bar(model: &ViewModel) -> Elem {
 
 fn view_swap_feed(feed_id: &FeedId) -> Elem {
     view_feed_root()
-        .hx_swap_screen(route::Route::Feed(Route::Load {
+        .root_swap_screen(route::Route::Feed(Route::Load {
             feed_id: feed_id.clone(),
         }))
         .hx_trigger_load()
@@ -308,7 +308,7 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
             feed_index: _,
         } => button()
             .class("w-full h-full")
-            .hx_push_screen(to_media_details_route(&media.media_id))
+            .root_push_screen(to_media_details_route(&media.media_id))
             .child(
                 Image::view()
                     .class("w-full h-full object-cover")

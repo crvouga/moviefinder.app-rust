@@ -53,7 +53,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            Res::hx_redirect_screen(to_back_route(feed_new.feed_id))
+            Res::root_redirect_screen(to_back_route(feed_new.feed_id))
         }
     }
 }
@@ -80,7 +80,7 @@ const FEED_CONTROLS_SELECTOR: &str = "#feed-controls";
 fn view_load_controls(feed_id: &FeedId) -> Elem {
     div()
         .class("w-full h-full flex flex-col overflow-hidden relative")
-        .hx_swap_screen(route::Route::Feed(feed::route::Route::Controls {
+        .root_swap_screen(route::Route::Feed(feed::route::Route::Controls {
             feed_id: feed_id.clone(),
             child: Route::Load,
         }))
@@ -126,7 +126,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .label("Cancel")
                 .color(Color::Gray)
                 .view()
-                .hx_push_screen(to_back_route(feed_id.clone()))
+                .root_push_screen(to_back_route(feed_id.clone()))
                 .type_("button")
                 .class("flex-1")
                 .hx_abort(FEED_CONTROLS_SELECTOR),
