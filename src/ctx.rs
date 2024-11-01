@@ -44,9 +44,10 @@ impl Ctx {
                 .simulate_latency(env.simulate_latency),
         );
 
-        let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(Arc::clone(
-            &db_conn_sql,
-        )));
+        let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(
+            logger.clone(),
+            db_conn_sql.clone(),
+        ));
 
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
             env.tmdb_api_read_access_token.clone(),

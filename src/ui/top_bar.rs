@@ -26,7 +26,7 @@ impl TopBar {
 
         let title_elem = self
             .title
-            .map_or(div().class("flex-1"), |s| Title::view(&s));
+            .map_or(div().class("flex-1 truncate"), |s| Title::view(&s));
 
         let cancel_button_elem = self.cancel_route.map_or(Empty::view(), CancelButton::view);
 
@@ -67,8 +67,8 @@ struct Title {}
 impl Title {
     fn view(title: &str) -> Elem {
         div()
-            .class("flex-1 text-center flex items-center justify-center h-full truncate")
-            .child_text(title)
+            .class("flex-1 text-center flex items-center justify-center h-full truncate max-w-full")
+            .child(div().class("w-full truncate").child_text(title))
     }
 }
 

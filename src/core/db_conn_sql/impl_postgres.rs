@@ -52,7 +52,7 @@ impl DbConnSql for ImplPostgres {
         T: Debug,
     {
         if self.simulate_latency {
-            let dur = std::time::Duration::from_millis(100);
+            let dur = std::time::Duration::from_millis(150);
             tokio::time::sleep(dur).await;
         }
 

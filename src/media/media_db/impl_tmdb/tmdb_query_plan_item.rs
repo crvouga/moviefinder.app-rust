@@ -56,7 +56,7 @@ impl TmdbQueryPlanItem {
                 let discover_responses: Vec<tmdb_api::discover_movie::DiscoverMovieResponse> =
                     partition_results(join_all(discover_requests).await).unwrap_or_default();
 
-                let offset = page_based.index + 1;
+                let offset = page_based.index;
 
                 let items = discover_responses
                     .clone()

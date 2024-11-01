@@ -86,6 +86,13 @@ impl html::Elem {
     pub fn hx_loading_disabled(self) -> Self {
         self.attr("data-loading-disable", "")
     }
+
+    pub fn hx_abort(self, selector: &str) -> Self {
+        self.attr(
+            "onclick",
+            format!("htmx.trigger('{}', 'htmx:abort')", selector).as_str(),
+        )
+    }
 }
 
 // https://htmx.org/attributes/hx-trigger/

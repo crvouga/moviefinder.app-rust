@@ -37,7 +37,12 @@ impl MediaDb for ImplTmdb {
             .execute(&self.tmdb_api, &tmdb_config, &query)
             .await?;
 
-        log_info!(self.logger, "query_plan={:?}", query_plan);
+        log_info!(
+            self.logger,
+            "\n\tquery={:?}\n\tquery_plan={:?}",
+            query,
+            query_plan
+        );
 
         Ok(result)
     }

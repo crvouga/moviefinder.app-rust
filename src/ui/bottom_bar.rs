@@ -22,7 +22,7 @@ pub fn view(active: Active) -> Elem {
                     .icon(ui::icon::home("size-8"))
                     .active(active == Active::Home)
                     .view()
-                    .hx_push_screen(route::Route::Feed(feed::route::Route::Index)),
+                    .hx_push_screen(route::Route::Feed(feed::route::Route::Default)),
             )
             .child(
                 BottomButton::default()

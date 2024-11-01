@@ -75,7 +75,7 @@ impl Layout {
             .class("flex flex-col")
             .child(
                 TopBar::default()
-                    .back_button(route::Route::Feed(feed::route::Route::Index))
+                    .back_button(route::Route::Feed(feed::route::Route::Default))
                     .title(top_bar_title)
                     .view(),
             )
