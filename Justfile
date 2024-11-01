@@ -1,5 +1,5 @@
 run: #
-  cargo fmt && cargo clippy && cargo run
+  cargo watch -x run
 
 db-start: #
   sudo docker-compose -f ./docker-compose.dev.yml up -d

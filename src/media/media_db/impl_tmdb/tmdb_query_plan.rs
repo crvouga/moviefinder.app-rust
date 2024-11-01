@@ -43,13 +43,13 @@ impl TmdbQueryPlan {
     }
 }
 
-impl Into<TmdbQueryPlan> for MediaQuery {
-    fn into(self) -> TmdbQueryPlan {
+impl From<MediaQuery> for TmdbQueryPlan {
+    fn from(media_query: MediaQuery) -> TmdbQueryPlan {
         let mut query_plan = TmdbQueryPlan::default();
 
-        match self.filter.clone() {
+        match media_query.filter.clone() {
             Filter::None => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie(self.clone().into());
+                let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
                 query_plan.items.push(item);
                 query_plan
             }
@@ -61,18 +61,18 @@ impl Into<TmdbQueryPlan> for MediaQuery {
                     query_plan
                 }
                 _ => {
-                    let item = TmdbQueryPlanItem::GetDiscoverMovie(self.clone().into());
+                    let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
                     query_plan.items.push(item);
                     query_plan
                 }
             },
             Filter::And(_filters) => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie(self.clone().into());
+                let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
                 query_plan.items.push(item);
                 query_plan
             }
             Filter::Or(_filters) => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie(self.clone().into());
+                let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
                 query_plan.items.push(item);
                 query_plan
             }

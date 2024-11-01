@@ -52,10 +52,6 @@ impl Env {
 
         let simulate_latency = env_stage.is_dev();
 
-        if simulate_latency {
-            println!("LOG Simulating latency");
-        }
-
         let env = Env {
             simulate_latency,
             database_url,

@@ -1,6 +1,7 @@
 use super::interface::{MediaDb, MediaQuery};
 use crate::{
-    core::pagination::Paginated,
+    core::{logger::interface::Logger, pagination::Paginated},
+    log_info,
     media::{core::Media, tmdb_api},
 };
 use async_trait::async_trait;
@@ -11,11 +12,16 @@ pub mod tmdb_query_plan;
 pub mod tmdb_query_plan_item;
 pub struct ImplTmdb {
     tmdb_api: Arc<tmdb_api::TmdbApi>,
+    logger: Arc<dyn Logger>,
 }
 
 impl ImplTmdb {
-    pub fn new(tmdb_api: Arc<tmdb_api::TmdbApi>) -> ImplTmdb {
-        ImplTmdb { tmdb_api }
+    pub fn new(logger: Arc<dyn Logger>, tmdb_api: Arc<tmdb_api::TmdbApi>) -> ImplTmdb {
+        let logger_new = logger.child("impl_tmdb");
+        ImplTmdb {
+            tmdb_api,
+            logger: logger_new,
+        }
     }
 }
 
@@ -31,9 +37,7 @@ impl MediaDb for ImplTmdb {
             .execute(&self.tmdb_api, &tmdb_config, &query)
             .await?;
 
-        println!("LOG query={:?}", &query);
-        // println!("LOG query_plan={:?}", &query_plan);
-        // println!("LOG result.items={:?}", result.items.len());
+        log_info!(self.logger, "query_plan={:?}", query_plan);
 
         Ok(result)
     }

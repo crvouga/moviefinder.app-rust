@@ -2,7 +2,6 @@ use super::{controls, core::Feed, feed_id::FeedId, feed_item::FeedItem, route::R
 use crate::{
     core::{
         html::*,
-        query::{Filter, Query},
         res::Res,
         ui::{
             self,
@@ -10,7 +9,7 @@ use crate::{
             image::Image,
         },
     },
-    ctx::{self, Ctx},
+    ctx::Ctx,
     media::{
         self,
         genre::{genre::Genre, genre_id::GenreId},
@@ -22,7 +21,7 @@ use crate::{
     user_session::session_id::SessionId,
 };
 
-pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
+pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     match route {
         Route::Index => {
             let feed_id = ctx
@@ -34,7 +33,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
             let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
 
-            put_feed(ctx, req.session_id.clone(), &feed).await;
+            put_feed(ctx, &req.session_id, &feed).await;
 
             let model = ViewModel::load(ctx, &feed_id).await;
 
@@ -55,7 +54,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
                 ..feed
             };
 
-            put_feed(ctx, req.session_id.clone(), &feed_new).await;
+            put_feed(ctx, &req.session_id, &feed_new).await;
 
             Res::empty()
         }
@@ -79,7 +78,7 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 async fn respond_feed_items(ctx: &Ctx, feed_id: &FeedId, start_feed_index: &usize) -> Res {
     let feed = ctx.feed_db.get_with_fallback(feed_id.clone()).await;
 
-    let queried = ctx.media_db.query(feed.query).await;
+    let queried = ctx.media_db.query(feed.into()).await;
 
     match queried {
         Err(err) => ui::error::page(&err).into(),
@@ -99,7 +98,7 @@ async fn respond_feed_items(ctx: &Ctx, feed_id: &FeedId, start_feed_index: &usiz
     }
 }
 
-async fn put_feed(ctx: &ctx::Ctx, session_id: SessionId, feed: &Feed) {
+async fn put_feed(ctx: &Ctx, session_id: &SessionId, feed: &Feed) {
     ctx.feed_db.put(feed.clone()).await.unwrap_or(());
     ctx.session_feed_mapping_db
         .put(session_id.clone(), feed.feed_id.clone())

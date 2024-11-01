@@ -24,9 +24,9 @@ async fn main() {
 
     let address = format!("0.0.0.0:{}", env.port);
 
-    println!("LOG Starting server on http://{}", address);
-
     let ctx = Arc::new(ctx::Ctx::new(env).await.unwrap());
+
+    log_info!(ctx.logger, "Starting server on http://{}", address);
 
     core::http::server::start(
         &address,
@@ -60,6 +60,13 @@ async fn respond(
         }
     });
 
-    println!("LOG REQUEST {} {:?} {:?}", http_request.method, route, req);
+    log_info!(
+        ctx.logger,
+        "REQUEST {} {:?} {:?}",
+        http_request.method,
+        route,
+        req
+    );
+
     res.into()
 }

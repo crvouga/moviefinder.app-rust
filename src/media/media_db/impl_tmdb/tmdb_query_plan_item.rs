@@ -84,11 +84,11 @@ impl TmdbQueryPlanItem {
     }
 }
 
-impl Into<GetDiscoverMovieParams> for MediaQuery {
-    fn into(self) -> GetDiscoverMovieParams {
+impl From<MediaQuery> for GetDiscoverMovieParams {
+    fn from(media_query: MediaQuery) -> GetDiscoverMovieParams {
         let mut params = vec![];
 
-        let page_based: PageBased = (&self, TMDB_PAGE_SIZE).into();
+        let page_based: PageBased = (&media_query, TMDB_PAGE_SIZE).into();
 
         for page in page_based.range() {
             let param = DiscoverMovieParams {
@@ -100,7 +100,7 @@ impl Into<GetDiscoverMovieParams> for MediaQuery {
         }
 
         GetDiscoverMovieParams {
-            limit: self.limit,
+            limit: media_query.limit,
             params,
             page_based,
         }

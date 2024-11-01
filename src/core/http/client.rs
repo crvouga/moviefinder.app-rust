@@ -18,18 +18,5 @@ pub async fn send(request: HttpRequest) -> tokio::io::Result<HttpResponse> {
 
     let response = HttpResponse::from_http_string(&response_string);
 
-    if false {
-        println!(
-            "LOG Http Request:\n\t{:?}\n\t{:?}",
-            request.path, request.query_params,
-        );
-
-        println!(
-            "LOG Http Response:\n\t{:?}\n\t{:?}",
-            response.status_code,
-            response.body.chars().take(1000).collect::<String>(),
-        );
-    }
-
     Ok(response)
 }

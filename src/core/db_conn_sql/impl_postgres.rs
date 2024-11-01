@@ -1,32 +1,39 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, sync::Arc};
 
 use async_trait::async_trait;
 use serde_json;
 use tokio_postgres::{self, NoTls};
 
-use crate::core::sql::Sql;
+use crate::{
+    core::{logger::interface::Logger, sql::Sql},
+    log_debug, log_error,
+};
 
 use super::interface::DbConnSql;
 
 pub struct ImplPostgres {
     client: tokio_postgres::Client,
     simulate_latency: bool,
+    logger: Arc<dyn Logger>,
 }
 
 impl ImplPostgres {
-    pub async fn new(database_url: &str) -> Result<Self, String> {
+    pub async fn new(logger_parent: Arc<dyn Logger>, database_url: &str) -> Result<Self, String> {
         let (client, connection) = tokio_postgres::connect(database_url, NoTls)
             .await
             .map_err(|err| err.to_string())?;
 
+        let logger = logger_parent.child("postgres");
+
         tokio::spawn(async move {
             if let Err(err) = connection.await {
-                eprintln!("Database connection error: {}", err);
+                log_error!(logger, "Database connection error: {}", err);
             }
         });
 
         Ok(Self {
             client,
+            logger: logger_parent.child("postgres"),
             simulate_latency: false,
         })
     }
@@ -69,9 +76,7 @@ impl DbConnSql for ImplPostgres {
 
         let dur = start.elapsed();
 
-        if true {
-            println!("LOG\n\tsql={}\n\tduration={:?}", sql.query, dur);
-        }
+        log_debug!(self.logger, "\n\tsql={}\n\tduration={:?}", sql.query, dur);
 
         Ok(results)
     }

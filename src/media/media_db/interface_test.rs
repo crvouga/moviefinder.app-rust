@@ -10,7 +10,6 @@ mod tests {
         env,
         fixture::BaseFixture,
         media::{
-            genre::genre_id::GenreId,
             media_db::{
                 impl_tmdb,
                 interface::{MediaDb, MediaField},
@@ -30,7 +29,10 @@ mod tests {
 
         if base_fixture.env.test_env == env::TestEnv::Integration {
             let tmdb_movie = Fixture {
-                media_db: Box::new(impl_tmdb::ImplTmdb::new(base_fixture.ctx.tmdb_api.clone())),
+                media_db: Box::new(impl_tmdb::ImplTmdb::new(
+                    base_fixture.ctx.logger.clone(),
+                    base_fixture.ctx.tmdb_api.clone(),
+                )),
             };
 
             fixtures.push(tmdb_movie);
