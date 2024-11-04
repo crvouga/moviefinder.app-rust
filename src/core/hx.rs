@@ -86,6 +86,10 @@ impl html::Elem {
     pub fn hx_loading_disabled(self) -> Self {
         self.attr("data-loading-disable", "")
     }
+
+    pub fn hx_on(self, event: &str, javascript: &str) -> Self {
+        self.attr(&format!("hx-on:{}", event), javascript)
+    }
 }
 
 // https://htmx.org/attributes/hx-trigger/
