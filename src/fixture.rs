@@ -1,3 +1,4 @@
+use crate::core::http::client::HttpClient;
 #[cfg(test)]
 use crate::{
     core::{db_conn_sql, logger::impl_console::ConsoleLogger},
@@ -31,7 +32,10 @@ impl BaseFixture {
 
         let key_value_db = Arc::new(key_value_db::impl_hash_map::ImplHashMap::new());
 
+        let http_client = Arc::new(HttpClient::new(logger.clone()));
+
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
+            http_client.clone(),
             env.tmdb_api_read_access_token.clone(),
         ));
 

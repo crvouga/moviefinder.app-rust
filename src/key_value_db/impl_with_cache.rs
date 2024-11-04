@@ -1,13 +1,14 @@
 use super::interface::KeyValueDb;
 use async_trait::async_trait;
+use std::sync::Arc;
 
 pub struct ImplWithCache {
-    source: Box<dyn KeyValueDb>,
-    cache: Box<dyn KeyValueDb>,
+    source: Arc<dyn KeyValueDb>,
+    cache: Arc<dyn KeyValueDb>,
 }
 
 impl ImplWithCache {
-    pub fn new(source: Box<dyn KeyValueDb>, cache: Box<dyn KeyValueDb>) -> Self {
+    pub fn new(source: Arc<dyn KeyValueDb>, cache: Arc<dyn KeyValueDb>) -> Self {
         Self { source, cache }
     }
 }
@@ -39,8 +40,8 @@ impl KeyValueDb for ImplWithCache {
 
     fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
         Box::new(Self {
-            source: self.source.child(namespace.clone()),
-            cache: self.cache.child(namespace),
+            source: self.source.child(namespace.clone()).into(),
+            cache: self.cache.child(namespace).into(),
         })
     }
 }
