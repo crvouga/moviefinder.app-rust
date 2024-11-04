@@ -28,7 +28,11 @@ const GENRE_ID_KEY: &str = "genre_id";
 
 pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
-        Route::Index => view_load_controls(&feed_id).into(),
+        Route::Index => {
+            let res: Res = view_load_controls(&feed_id).into();
+
+            res.cache()
+        }
 
         Route::Load => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
