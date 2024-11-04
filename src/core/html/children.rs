@@ -5,6 +5,10 @@ impl Elem {
         self.child(Elem::Safe(value.to_string()))
     }
 
+    pub fn child_unsafe_text(self, value: &str) -> Self {
+        self.child(Elem::Unsafe(value.to_string()))
+    }
+
     pub fn child(mut self, child: Elem) -> Self {
         match self {
             Elem::Element {

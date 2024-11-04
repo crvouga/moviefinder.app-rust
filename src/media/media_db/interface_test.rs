@@ -29,7 +29,10 @@ mod tests {
 
         if base_fixture.env.test_env == env::TestEnv::Integration {
             let tmdb_movie = Fixture {
-                media_db: Box::new(impl_tmdb::ImplTmdb::new(base_fixture.ctx.tmdb_api.clone())),
+                media_db: Box::new(impl_tmdb::ImplTmdb::new(
+                    base_fixture.ctx.logger.clone(),
+                    base_fixture.ctx.tmdb_api.clone(),
+                )),
             };
 
             fixtures.push(tmdb_movie);
@@ -46,7 +49,7 @@ mod tests {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: Filter::clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
+                filter: Filter::Clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
             };
 
             let result = f.media_db.query(query).await;
@@ -162,6 +165,33 @@ mod tests {
             assert_eq!(queried.items.len(), limit);
         }
     }
+
+    // #[tokio::test]
+    // async fn test_filter_by_genre_id() {
+    //     for f in fixtures().await {
+    //         let genre_id = GenreId::new("9648".to_string());
+
+    //         let queried = f
+    //             .media_db
+    //             .query(Query {
+    //                 limit: 10,
+    //                 offset: 0,
+    //                 filter: Filter::And(vec![Filter::Clause(
+    //                     MediaField::GenreId,
+    //                     Op::Eq,
+    //                     genre_id.to_string(),
+    //                 )]),
+    //             })
+    //             .await
+    //             .unwrap();
+
+    //         assert!(queried
+    //             .items
+    //             .into_iter()
+    //             .flat_map(|item| item.media_genre_ids)
+    //             .any(|id| id == genre_id));
+    //     }
+    // }
 
     #[tokio::test]
     async fn test_offset_40() {

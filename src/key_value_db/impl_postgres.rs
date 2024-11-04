@@ -1,9 +1,13 @@
 use std::{sync::Arc, vec};
 
 use super::interface::{to_namespaced_key, KeyValueDb};
-use crate::core::{
-    db_conn_sql::interface::DbConnSql,
-    sql::{Sql, SqlPrimitive, SqlVarType},
+use crate::{
+    core::{
+        db_conn_sql::interface::DbConnSql,
+        logger::interface::Logger,
+        sql::{Sql, SqlPrimitive, SqlVarType},
+    },
+    log_debug,
 };
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -12,11 +16,13 @@ use serde::{Deserialize, Serialize};
 pub struct ImplPostgres<T: DbConnSql + 'static> {
     db_conn_sql: Arc<T>,
     namespace: Vec<String>,
+    logger: Arc<dyn Logger>,
 }
 
 impl<T: DbConnSql + 'static> ImplPostgres<T> {
-    pub fn new(db_conn_sql: Arc<T>) -> Self {
+    pub fn new(logger: Arc<dyn Logger>, db_conn_sql: Arc<T>) -> Self {
         Self {
+            logger: logger.child("key_value_db_postgres"),
             db_conn_sql,
             namespace: vec![],
         }
@@ -50,6 +56,9 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
             .query(Box::new(parse_row_json), &query)
             .await?;
         let value = queried.first().and_then(|row| row.value.clone());
+
+        log_debug!(self.logger, "get key={}", key);
+
         Ok(value)
     }
 
@@ -72,6 +81,9 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
             "value",
             SqlVarType::Primitive(SqlPrimitive::Text(value.to_string())),
         );
+
+        log_debug!(self.logger, "put key={}", key);
+
         self.db_conn_sql
             .query(Box::new(parse_row_json), &query)
             .await?;
@@ -92,6 +104,8 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
             .query(Box::new(parse_row_json), &query)
             .await?;
 
+        log_debug!(self.logger, "zap key={}", key);
+
         Ok(())
     }
 
@@ -105,6 +119,7 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
         Box::new(ImplPostgres {
             db_conn_sql: self.db_conn_sql.clone(),
             namespace: namespace_new,
+            logger: self.logger.clone(),
         })
     }
 }

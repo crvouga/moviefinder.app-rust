@@ -44,7 +44,10 @@ mod tests {
 
         if env.test_env == TestEnv::Integration {
             fixtures.push(Fixture {
-                key_value_db: Box::new(ImplPostgres::new(base_fixture.ctx.db_conn_sql)),
+                key_value_db: Box::new(ImplPostgres::new(
+                    base_fixture.ctx.logger,
+                    base_fixture.ctx.db_conn_sql,
+                )),
             });
         }
 

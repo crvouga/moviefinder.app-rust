@@ -17,6 +17,6 @@ impl FeedId {
 
 impl Default for FeedId {
     fn default() -> Self {
-        FeedId::new(uuid::v4().to_string())
+        FeedId::new(format!("feed:{}", uuid::v4()))
     }
 }

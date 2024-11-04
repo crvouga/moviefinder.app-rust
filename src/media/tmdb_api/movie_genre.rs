@@ -1,6 +1,6 @@
 // https://developer.themoviedb.org/reference/discover-movie
 use crate::{
-    core::http::{self, query_params::QueryParams},
+    core::http::query_params::QueryParams,
     media::genre::{genre::Genre, genre_id::GenreId},
 };
 
@@ -31,7 +31,7 @@ impl TmdbApi {
     pub async fn movie_genre(self: &TmdbApi) -> Result<MovieGenreResponse, String> {
         let req = self.to_get_request("/3/genre/movie/list", QueryParams::empty());
 
-        let sent = http::client::send(req).await;
+        let sent = self.http_client.send(req).await;
 
         let response = sent.map_err(|err| err.to_string())?;
 

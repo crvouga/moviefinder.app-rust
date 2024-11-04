@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::http::{self, query_params::QueryParams},
+    core::http::query_params::QueryParams,
     media::{core::Media, genre::genre_id::GenreId, media_id::MediaId, media_type::MediaType},
 };
 
@@ -97,7 +97,11 @@ impl TmdbApi {
     pub async fn movie_details(self: &TmdbApi, movie_id: &str) -> Result<MovieDetails, String> {
         let req = self.to_get_request(&format!("/3/movie/{}", movie_id), QueryParams::default());
 
-        let response = http::client::send(req).await.map_err(|e| e.to_string())?;
+        let response = self
+            .http_client
+            .send(req)
+            .await
+            .map_err(|e| e.to_string())?;
 
         let parsed: MovieDetails = serde_json::from_str(&response.body)
             .map_err(|e| format!("Error parsing response: {} {}", e, response.body))?;

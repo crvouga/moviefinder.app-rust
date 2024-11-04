@@ -1,7 +1,11 @@
 use std::sync::Arc;
 
 use crate::{
-    core::db_conn_sql::{self, impl_postgres::ImplPostgres},
+    core::{
+        db_conn_sql::{self, impl_postgres::ImplPostgres},
+        http::client::HttpClient,
+        logger::{impl_console::ConsoleLogger, interface::Logger},
+    },
     env::Env,
     feed::{
         self,
@@ -24,27 +28,40 @@ pub struct Ctx {
     pub media_db: Box<dyn MediaDb>,
     pub feed_db: Box<dyn FeedDb>,
     pub session_feed_mapping_db: Box<dyn SessionFeedMappingDb>,
+    #[allow(dead_code)]
     pub tmdb_api: Arc<TmdbApi>,
     pub genre_db: Box<dyn GenreDb>,
+    #[allow(dead_code)]
+    pub logger: Arc<dyn Logger>,
 }
 
 impl Ctx {
     pub async fn new(env: Env) -> Result<Ctx, String> {
+        let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
+
+        let http_client =
+            Arc::new(HttpClient::new(logger.clone()).simulate_latency(env.simulate_latency));
+
         let db_conn_sql = Arc::new(
-            db_conn_sql::impl_postgres::ImplPostgres::new(&env.database_url)
+            db_conn_sql::impl_postgres::ImplPostgres::new(logger.clone(), &env.database_url)
                 .await?
                 .simulate_latency(env.simulate_latency),
         );
 
-        let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(Arc::clone(
-            &db_conn_sql,
-        )));
+        let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(
+            logger.clone(),
+            db_conn_sql.clone(),
+        ));
 
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
+            http_client.clone(),
             env.tmdb_api_read_access_token.clone(),
         ));
 
-        let media_db = Box::new(media_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
+        let media_db = Box::new(media_db::impl_tmdb::ImplTmdb::new(
+            logger.clone(),
+            tmdb_api.clone(),
+        ));
 
         let feed_db = Box::new(feed_db::impl_key_value_db::ImplKeyValueDb::new(
             key_value_db.clone(),
@@ -59,6 +76,7 @@ impl Ctx {
         let genre_db = Box::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
 
         Ok(Ctx {
+            logger,
             genre_db,
             db_conn_sql,
             tmdb_api,

@@ -1,6 +1,7 @@
-use super::pagination::Pagination;
+use super::pagination::{PageBased, Pagination};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct Query<F> {
     pub limit: usize,
     pub offset: usize,
@@ -16,21 +17,24 @@ impl<F> From<&Query<F>> for Pagination {
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum Op {
-    Eq,
+impl<F> From<(&Query<F>, usize)> for PageBased {
+    fn from((query, page_size): (&Query<F>, usize)) -> PageBased {
+        let pagination: Pagination = query.into();
+        let page_based = PageBased::from((pagination, page_size));
+        page_based
+    }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub enum Filter<F> {
     Clause(F, Op, String),
     And(Vec<Filter<F>>),
     Or(Vec<Filter<F>>),
+    #[default]
     None,
 }
 
-impl<T> Filter<T> {
-    pub fn clause(field: T, operator: Op, value: String) -> Filter<T> {
-        Filter::Clause(field, operator, value)
-    }
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum Op {
+    Eq,
 }

@@ -4,13 +4,14 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Res {
-    variant: ResVariant,
-    actions: Vec<ResAction>,
+    pub variant: ResVariant,
+    pub actions: Vec<ResAction>,
 }
 
 #[derive(Debug)]
 pub enum ResAction {
-    PushUrl(String),
+    HxPushUrl(String),
+    HxReplaceUrl(String),
 }
 
 #[derive(Debug)]
@@ -24,28 +25,28 @@ pub enum ResVariant {
 
 impl Res {
     pub fn html(body: Elem) -> Self {
-        Res {
+        Self {
             variant: ResVariant::Html(body),
             ..Res::default()
         }
     }
 
     pub fn empty() -> Self {
-        Res {
+        Self {
             variant: ResVariant::Empty,
             ..Res::default()
         }
     }
 
     pub fn text(text: &str) -> Self {
-        Res {
+        Self {
             variant: ResVariant::Text(text.to_owned()),
             ..Res::default()
         }
     }
 
     pub fn redirect(location: String, target: String) -> Self {
-        Res {
+        Self {
             variant: ResVariant::Redirect {
                 location: location.to_string(),
                 target: target.to_string(),
@@ -55,28 +56,29 @@ impl Res {
     }
 
     pub fn redirect_window(location: String) -> Self {
-        Res {
+        Self {
             variant: ResVariant::RedirectWindow(location),
             ..Res::default()
         }
     }
 
-    pub fn map_html(self, f: impl FnOnce(Elem) -> Elem) -> Res {
-        match self.variant {
-            ResVariant::Html(body) => Res::html(f(body)),
-            _ => self,
-        }
+    pub fn map_html(mut self, f: impl FnOnce(Elem) -> Elem) -> Self {
+        self.variant = match self.variant {
+            ResVariant::Html(body) => ResVariant::Html(f(body)),
+            other => other,
+        };
+        self
     }
 
-    pub fn push_url(self, _url: &str) -> Self {
-        Self {
-            actions: self
-                .actions
-                .into_iter()
-                .chain(vec![ResAction::PushUrl(_url.to_owned())])
-                .collect(),
-            ..self
-        }
+    pub fn hx_push_url(mut self, url: &str) -> Self {
+        self.actions.push(ResAction::HxPushUrl(url.to_owned()));
+        self
+    }
+
+    pub fn hx_replace_url(mut self, url: &str) -> Self {
+        self.actions.push(ResAction::HxReplaceUrl(url.to_owned()));
+
+        self
     }
 }
 
@@ -101,13 +103,23 @@ impl From<Res> for HttpResponse {
 
         for action in res.actions {
             match action {
-                ResAction::PushUrl(url) => {
+                ResAction::HxPushUrl(url) => {
                     http_response
                         .headers
                         .insert("HX-Push-Url".to_string(), ensure_leading_slash(&url));
                     http_response.headers.insert(
                         "Access-Control-Expose-Headers".to_string(),
                         "HX-Push-Url".to_string(),
+                    );
+                }
+
+                ResAction::HxReplaceUrl(url) => {
+                    http_response
+                        .headers
+                        .insert("HX-Replace-Url".to_string(), ensure_leading_slash(&url));
+                    http_response.headers.insert(
+                        "Access-Control-Expose-Headers".to_string(),
+                        "HX-Replace-Url".to_string(),
                     );
                 }
             }

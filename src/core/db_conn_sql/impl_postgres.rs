@@ -1,37 +1,44 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use serde_json;
 use tokio_postgres::{self, NoTls};
 
-use crate::core::sql::Sql;
+use crate::{
+    core::{logger::interface::Logger, sql::Sql},
+    log_debug, log_error,
+};
 
 use super::interface::DbConnSql;
 
 pub struct ImplPostgres {
     client: tokio_postgres::Client,
-    simulate_latency: bool,
+    simulate_latency: Option<Duration>,
+    logger: Arc<dyn Logger>,
 }
 
 impl ImplPostgres {
-    pub async fn new(database_url: &str) -> Result<Self, String> {
+    pub async fn new(logger_parent: Arc<dyn Logger>, database_url: &str) -> Result<Self, String> {
         let (client, connection) = tokio_postgres::connect(database_url, NoTls)
             .await
             .map_err(|err| err.to_string())?;
 
+        let logger = logger_parent.child("postgres");
+
         tokio::spawn(async move {
             if let Err(err) = connection.await {
-                eprintln!("Database connection error: {}", err);
+                log_error!(logger, "Database connection error: {}", err);
             }
         });
 
         Ok(Self {
             client,
-            simulate_latency: false,
+            logger: logger_parent.child("postgres"),
+            simulate_latency: None,
         })
     }
 
-    pub fn simulate_latency(mut self, simulate_latency: bool) -> Self {
+    pub fn simulate_latency(mut self, simulate_latency: Option<Duration>) -> Self {
         self.simulate_latency = simulate_latency;
         self
     }
@@ -44,12 +51,11 @@ impl DbConnSql for ImplPostgres {
         F: Fn(String) -> Result<T, String> + Send + Sync,
         T: Debug,
     {
-        if self.simulate_latency {
-            let dur = std::time::Duration::from_millis(100);
+        let start = std::time::Instant::now();
+
+        if let Some(dur) = self.simulate_latency {
             tokio::time::sleep(dur).await;
         }
-
-        let start = std::time::Instant::now();
 
         let sql_str = sql.to_string();
 
@@ -69,9 +75,7 @@ impl DbConnSql for ImplPostgres {
 
         let dur = start.elapsed();
 
-        if true {
-            println!("LOG\n\tsql={}\n\tduration={:?}", sql.query, dur);
-        }
+        log_debug!(self.logger, "\n\tsql={}\n\tduration={:?}", sql.query, dur);
 
         Ok(results)
     }

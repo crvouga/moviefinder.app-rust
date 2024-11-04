@@ -25,7 +25,7 @@ impl SessionId {
 
 impl Default for SessionId {
     fn default() -> Self {
-        SessionId(uuid::v4().to_string())
+        SessionId(format!("session:{}", uuid::v4().to_string()))
     }
 }
 

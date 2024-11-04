@@ -1,43 +1,37 @@
+use super::feed_id::FeedId;
+use crate::{
+    core::query::{Filter, Op},
+    media::{
+        genre::genre_id::GenreId,
+        media_db::interface::{MediaField, MediaQuery},
+    },
+};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    core::query::{Filter, Op, Query},
-    media::{genre::genre_id::GenreId, media_db::interface::MediaField},
-};
-
-use super::feed_id::FeedId;
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct Feed {
     pub feed_id: FeedId,
     pub active_index: usize,
     pub genre_ids: Vec<GenreId>,
 }
 
-impl Feed {
-    #[allow(dead_code)]
+const LIMIT: usize = 3;
 
-    pub fn random() -> Self {
-        Self {
-            feed_id: FeedId::new("feed_id".to_string()),
-            active_index: 0,
-            genre_ids: vec![],
-        }
-    }
-}
+impl From<Feed> for MediaQuery {
+    fn from(feed: Feed) -> MediaQuery {
+        // let genre_clauses = feed
+        //     .genre_ids
+        //     .iter()
+        //     .map(|genre_id| Filter::Clause(MediaField::GenreId, Op::Eq, genre_id.to_string()))
+        //     .collect();
 
-impl Into<Query<MediaField>> for Feed {
-    fn into(self) -> Query<MediaField> {
-        let genre_id_clauses = self
-            .genre_ids
-            .iter()
-            .map(|genre_id| Filter::Clause(MediaField::GenreId, Op::Eq, genre_id.to_string()))
-            .collect();
+        // println!("genre_clauses={}", genre_clauses);
 
-        Query {
-            filter: Filter::And(genre_id_clauses),
-            limit: 3,
-            offset: 0,
+        MediaQuery {
+            limit: LIMIT,
+            offset: feed.active_index,
+            filter: Filter::None,
+            // filter: Filter::And(genre_clauses),
         }
     }
 }

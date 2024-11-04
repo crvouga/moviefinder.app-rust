@@ -1,9 +1,6 @@
 // https://developer.themoviedb.org/reference/configuration-details
 use super::TmdbApi;
-use crate::core::{
-    http::{self, query_params::QueryParams},
-    image_set::ImageSet,
-};
+use crate::core::{http::query_params::QueryParams, image_set::ImageSet};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,7 +24,7 @@ impl TmdbApi {
     pub async fn config(self: &TmdbApi) -> Result<TmdbConfig, String> {
         let req = self.to_get_request("/3/configuration", QueryParams::default());
 
-        let sent = http::client::send(req).await;
+        let sent = self.http_client.send(req).await;
 
         match sent {
             Ok(response) => {

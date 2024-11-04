@@ -90,6 +90,13 @@ impl html::Elem {
     pub fn hx_on(self, event: &str, javascript: &str) -> Self {
         self.attr(&format!("hx-on:{}", event), javascript)
     }
+
+    pub fn hx_abort(self, selector: &str) -> Self {
+        self.attr(
+            "onclick",
+            format!("htmx.trigger('{}', 'htmx:abort')", selector).as_str(),
+        )
+    }
 }
 
 // https://htmx.org/attributes/hx-trigger/

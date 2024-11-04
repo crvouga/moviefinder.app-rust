@@ -24,9 +24,9 @@ async fn main() {
 
     let address = format!("0.0.0.0:{}", env.port);
 
-    println!("LOG Starting server on http://{}", address);
-
     let ctx = Arc::new(ctx::Ctx::new(env).await.unwrap());
+
+    log_info!(ctx.logger, "Starting server on http://{}", address);
 
     core::http::server::start(
         &address,
@@ -52,7 +52,11 @@ async fn respond(
         form_data: http_request.form_data,
     };
 
-    let res = respond::respond(&ctx, &req, &route).await.map_html(|html| {
+    log_info!(ctx.logger, "{:?} {:?}", route, req);
+
+    let res = respond::respond(&ctx, &req, &route).await;
+
+    let res_mapped = res.map_html(|html| {
         if http_request.headers.contains_key("hx-request") {
             html
         } else {
@@ -60,6 +64,7 @@ async fn respond(
         }
     });
 
-    println!("LOG REQUEST {} {:?} {:?}", http_request.method, route, req);
-    res.into()
+    let http_response: HttpResponse = res_mapped.into();
+
+    http_response
 }

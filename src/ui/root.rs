@@ -7,25 +7,23 @@ const ROOT_ID: &str = "root";
 const ROOT_SELECTOR: &str = "#root";
 
 impl Elem {
-    pub fn hx_push_screen(self, route: Route) -> Self {
+    pub fn root_swap_screen(self, route: Route) -> Self {
         self.hx_target(ROOT_SELECTOR)
             .hx_swap_inner_html()
             .hx_get(&route.encode())
-            // .hx_preload_mouse_down()
-            .hx_push_url()
     }
 
-    pub fn hx_replace_screen(self, route: Route) -> Self {
-        self.hx_target(ROOT_SELECTOR)
-            .hx_swap_inner_html()
-            .hx_get(&route.encode())
-            // .hx_preload_mouse_down()
-            .hx_replace_url()
+    pub fn root_push_screen(self, route: Route) -> Self {
+        self.root_swap_screen(route).hx_push_url()
+    }
+
+    pub fn root_replace_screen(self, route: Route) -> Self {
+        self.root_swap_screen(route).hx_replace_url()
     }
 }
 
 impl Res {
-    pub fn hx_redirect_screen(route: Route) -> Self {
+    pub fn root_redirect_screen(route: Route) -> Self {
         Res::redirect(route.encode().to_string(), ROOT_SELECTOR.to_string())
     }
 }
@@ -54,9 +52,20 @@ impl Root {
                 title().child_text("moviefinder.app"),
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
-                meta().name("htmx-config").content("{&quot;historyCacheSize&quot;: 0, &quot;refreshOnHistoryMiss&quot;: true}"),
+                // meta().name("htmx-config").content("{&quot;historyCacheSize&quot;: 0, &quot;refreshOnHistoryMiss&quot;: true}"),
                 link().rel("preconnect").href("https://image.tmdb.org"),
                 script().src("https://cdn.tailwindcss.com"),
+                script().child_unsafe_text(r#"
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            borderColor: {
+                                DEFAULT: '#3f3f46',
+                            },
+                        },
+                    },
+                }
+                "#),
                 script().src("https://unpkg.com/htmx.org@2.0.1").defer(),
                 script().src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js").defer(),
                 script().src("https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js").defer(),

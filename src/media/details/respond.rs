@@ -22,7 +22,7 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: Filter::clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
+                filter: Filter::Clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
             };
 
             let queried = ctx.media_db.query(query).await;
@@ -75,7 +75,7 @@ impl Layout {
             .class("flex flex-col")
             .child(
                 TopBar::default()
-                    .back_button(route::Route::Feed(feed::route::Route::Index))
+                    .back_button(route::Route::Feed(feed::route::Route::Default))
                     .title(top_bar_title)
                     .view(),
             )
@@ -100,7 +100,7 @@ fn view_load(media_id: &MediaId) -> Elem {
     Layout::new()
         .child(ui::icon::spinner("animate-spin size-16"))
         .view()
-        .hx_replace_screen(load_route(media_id))
+        .root_swap_screen(load_route(media_id))
         .hx_trigger_load()
 }
 
