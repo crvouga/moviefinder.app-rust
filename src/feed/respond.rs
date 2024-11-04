@@ -108,7 +108,7 @@ fn respond_index(feed_id: &FeedId) -> Res {
 
     let res: Res = view_swap_feed(&feed_id).into();
 
-    res.hx_push_url(&index_route.encode())
+    res.hx_push_url(&index_route.encode()).cache()
 }
 
 async fn get_feed_items(

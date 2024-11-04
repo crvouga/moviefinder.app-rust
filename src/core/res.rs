@@ -12,6 +12,7 @@ pub struct Res {
 pub enum ResAction {
     HxPushUrl(String),
     HxReplaceUrl(String),
+    Cache,
 }
 
 #[derive(Debug)]
@@ -80,6 +81,11 @@ impl Res {
 
         self
     }
+
+    pub fn cache(mut self) -> Self {
+        self.actions.push(ResAction::Cache);
+        self
+    }
 }
 
 impl Default for Res {
@@ -120,6 +126,17 @@ impl From<Res> for HttpResponse {
                     http_response.headers.insert(
                         "Access-Control-Expose-Headers".to_string(),
                         "HX-Replace-Url".to_string(),
+                    );
+                }
+
+                ResAction::Cache => {
+                    http_response.headers.insert(
+                        "Cache-Control".to_string(),
+                        "public, max-age=31536000, immutable".to_string(),
+                    );
+                    http_response.headers.insert(
+                        "Access-Control-Expose-Headers".to_string(),
+                        "Cache-Control".to_string(),
                     );
                 }
             }

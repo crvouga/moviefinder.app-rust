@@ -5,7 +5,10 @@ use crate::ui::bottom_bar;
 
 pub fn respond(route: &Route) -> Res {
     match route {
-        Route::Index => view_account().into(),
+        Route::Index => {
+            let res: Res = view_account().into();
+            res.cache()
+        }
     }
 }
 

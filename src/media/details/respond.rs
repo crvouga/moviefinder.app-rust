@@ -16,7 +16,10 @@ use super::route::Route;
 
 pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
     match route {
-        Route::Index { media_id } => view_load(media_id).into(),
+        Route::Index { media_id } => {
+            let res: Res = view_load(media_id).into();
+            res.cache()
+        }
 
         Route::Load { media_id } => {
             let query = Query {
