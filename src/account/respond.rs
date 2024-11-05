@@ -1,18 +1,19 @@
-use crate::account::route::Route;
-use crate::core::html::*;
-use crate::core::res::Res;
-use crate::ui::bottom_bar;
+use super::route::Route;
+use crate::{
+    core::{html::*, res::Res},
+    ui::bottom_bar,
+};
 
 pub fn respond(route: &Route) -> Res {
     match route {
         Route::Index => {
-            let res: Res = view_account().into();
+            let res: Res = view_login_cta().into();
             res.cache()
         }
     }
 }
 
-pub fn view_account() -> Elem {
+pub fn view_login_cta() -> Elem {
     div()
         .class("w-full flex-1 flex items-center justify-center flex-col")
         .child(div().class("flex-1").child_text("Account"))
