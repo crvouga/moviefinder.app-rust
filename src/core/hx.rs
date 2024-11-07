@@ -87,6 +87,10 @@ impl html::Elem {
         self.attr("data-loading-disable", "")
     }
 
+    pub fn hx_on(self, event: &str, javascript: &str) -> Self {
+        self.attr(&format!("hx-on:{}", event), javascript)
+    }
+
     pub fn hx_abort(self, selector: &str) -> Self {
         self.attr(
             "onclick",

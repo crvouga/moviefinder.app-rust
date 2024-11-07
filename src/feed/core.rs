@@ -1,10 +1,7 @@
 use super::feed_id::FeedId;
 use crate::{
-    core::query::{Filter, Op},
-    media::{
-        genre::genre_id::GenreId,
-        media_db::interface::{MediaField, MediaQuery},
-    },
+    core::query::Filter,
+    media::{genre::genre_id::GenreId, media_db::interface::MediaQuery},
 };
 use serde::{Deserialize, Serialize};
 

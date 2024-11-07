@@ -7,6 +7,8 @@
     "mousedown",
     "moviefinder",
     "nanos",
+    "onclick",
+    "posix",
     "serde",
     "stylesheet",
     "swiperslidechange",

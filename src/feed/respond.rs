@@ -108,7 +108,7 @@ fn respond_index(feed_id: &FeedId) -> Res {
 
     let res: Res = view_swap_feed(&feed_id).into();
 
-    res.hx_push_url(&index_route.encode())
+    res.hx_push_url(&index_route.encode()).cache()
 }
 
 async fn get_feed_items(
@@ -245,6 +245,7 @@ fn view_swiper(model: &ViewModel) -> Elem {
         .swiper_slides_per_view("1")
         .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
         .hx_trigger_custom("swiperslidechange from:swiper-container")
+        // .x_on("swiperslidechange", "feedIndex = parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
         .hx_swap_none()
         .hx_post(
             route::Route::Feed(Route::ChangedSlide {

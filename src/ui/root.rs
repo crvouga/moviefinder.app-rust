@@ -52,7 +52,7 @@ impl Root {
                 title().child_text("moviefinder.app"),
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
-                // meta().name("htmx-config").content("{&quot;historyCacheSize&quot;: 0, &quot;refreshOnHistoryMiss&quot;: true}"),
+                meta().name("htmx-config").content("{&quot;historyCacheSize&quot;: 0, &quot;refreshOnHistoryMiss&quot;: true}"),
                 link().rel("preconnect").href("https://image.tmdb.org"),
                 script().src("https://cdn.tailwindcss.com"),
                 script().child_unsafe_text(r#"

@@ -48,7 +48,7 @@ impl Ctx {
                 .simulate_latency(env.simulate_latency),
         );
 
-        let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(
+        let key_value_db = Arc::new(key_value_db::impl_cached_postgres::ImplCachedPostgres::new(
             logger.clone(),
             db_conn_sql.clone(),
         ));

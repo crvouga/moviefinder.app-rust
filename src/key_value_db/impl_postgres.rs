@@ -12,7 +12,6 @@ use crate::{
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
 pub struct ImplPostgres<T: DbConnSql + 'static> {
     db_conn_sql: Arc<T>,
     namespace: Vec<String>,

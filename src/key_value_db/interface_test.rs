@@ -8,7 +8,8 @@ mod tests {
         env::{Env, TestEnv},
         fixture::BaseFixture,
         key_value_db::{
-            impl_hash_map::ImplHashMap, impl_postgres::ImplPostgres, interface::KeyValueDb,
+            impl_cached_postgres::ImplCachedPostgres, impl_hash_map::ImplHashMap,
+            impl_postgres::ImplPostgres, interface::KeyValueDb,
         },
     };
 
@@ -45,11 +46,17 @@ mod tests {
         if env.test_env == TestEnv::Integration {
             fixtures.push(Fixture {
                 key_value_db: Box::new(ImplPostgres::new(
-                    base_fixture.ctx.logger,
-                    base_fixture.ctx.db_conn_sql,
+                    base_fixture.ctx.logger.clone(),
+                    base_fixture.ctx.db_conn_sql.clone(),
                 )),
             });
         }
+        fixtures.push(Fixture {
+            key_value_db: Box::new(ImplCachedPostgres::new(
+                base_fixture.ctx.logger.clone(),
+                base_fixture.ctx.db_conn_sql.clone(),
+            )),
+        });
 
         fixtures
     }
