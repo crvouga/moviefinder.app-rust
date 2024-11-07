@@ -1,3 +1,4 @@
+use crate::core::http::client::HttpClient;
 #[cfg(test)]
 use crate::{
     core::{db_conn_sql, logger::impl_console::ConsoleLogger},
@@ -21,6 +22,8 @@ impl BaseFixture {
     pub async fn new() -> Self {
         let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
 
+        let http_client = Arc::new(HttpClient::new(logger.clone()));
+
         let env = Env::load().unwrap();
 
         let db_conn_sql = Arc::new(
@@ -32,6 +35,7 @@ impl BaseFixture {
         let key_value_db = Arc::new(key_value_db::impl_hash_map::ImplHashMap::new());
 
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
+            http_client.clone(),
             env.tmdb_api_read_access_token.clone(),
         ));
 

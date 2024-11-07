@@ -69,6 +69,7 @@ impl Root {
                 script().src("https://unpkg.com/htmx.org@2.0.1").defer(),
                 script().src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js").defer(),
                 script().src("https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js").defer(),
+                script().src("https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js").defer(),
                 script().src("https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js").defer(),
                 Image::script(),
             ])
@@ -78,6 +79,7 @@ impl Root {
                 .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
                 .hx_ext(vec!["preload", "loading-states"])
                 .hx_boost()
+                .x_data(r#"{ 'feedActiveIndex': 0 }"#)
                 .child(
                     div()
                     .id(ROOT_ID)
