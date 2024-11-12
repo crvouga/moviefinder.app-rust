@@ -22,6 +22,8 @@ impl BaseFixture {
     pub async fn new() -> Self {
         let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
 
+        let http_client = Arc::new(HttpClient::new(logger.clone()));
+
         let env = Env::load().unwrap();
 
         let db_conn_sql = Arc::new(
