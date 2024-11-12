@@ -13,6 +13,7 @@ use crate::{
     media::{
         self,
         genre::{genre::Genre, genre_id::GenreId},
+        media_db::interface::MediaQuery,
         media_id::MediaId,
     },
     req::Req,
@@ -116,7 +117,9 @@ async fn get_feed_items(
     feed: &Feed,
     start_feed_index: &usize,
 ) -> Result<Vec<FeedItem>, String> {
-    let queried = ctx.media_db.query(feed.clone().into()).await;
+    let query: MediaQuery = (feed.clone(), *start_feed_index).into();
+
+    let queried = ctx.media_db.query(query).await;
 
     match queried {
         Err(err) => Err(err),
@@ -135,11 +138,11 @@ async fn get_feed_items(
 }
 
 async fn put_feed(ctx: &Ctx, session_id: &SessionId, feed: &Feed) {
-    ctx.feed_db.put(feed.clone()).await.unwrap_or(());
-    ctx.session_feed_mapping_db
-        .put(session_id.clone(), feed.feed_id.clone())
-        .await
-        .unwrap_or(());
+    let put_feed_fut = ctx.feed_db.put(feed.clone());
+    let put_session_mapping_fut = ctx
+        .session_feed_mapping_db
+        .put(session_id.clone(), feed.feed_id.clone());
+    let _ = tokio::join!(put_feed_fut, put_session_mapping_fut);
 }
 
 struct ViewModel {

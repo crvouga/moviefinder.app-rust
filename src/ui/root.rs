@@ -16,10 +16,6 @@ impl Elem {
     pub fn root_push_screen(self, route: Route) -> Self {
         self.root_swap_screen(route).hx_push_url()
     }
-
-    pub fn root_replace_screen(self, route: Route) -> Self {
-        self.root_swap_screen(route).hx_replace_url()
-    }
 }
 
 impl Res {

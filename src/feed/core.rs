@@ -14,8 +14,8 @@ pub struct Feed {
 
 const LIMIT: usize = 3;
 
-impl From<Feed> for MediaQuery {
-    fn from(feed: Feed) -> MediaQuery {
+impl From<(Feed, usize)> for MediaQuery {
+    fn from((_feed, offset): (Feed, usize)) -> MediaQuery {
         // let genre_clauses = feed
         //     .genre_ids
         //     .iter()
@@ -25,8 +25,8 @@ impl From<Feed> for MediaQuery {
         // println!("genre_clauses={}", genre_clauses);
 
         MediaQuery {
+            offset,
             limit: LIMIT,
-            offset: feed.active_index,
             filter: Filter::None,
             // filter: Filter::And(genre_clauses),
         }

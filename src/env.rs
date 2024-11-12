@@ -1,6 +1,6 @@
 use std::{env, time::Duration};
 
-use crate::core::{self, env_stage::EnvSage};
+use crate::core::{self, env_stage::EnvStage};
 
 #[derive(PartialEq, Eq, Clone)]
 pub enum TestEnv {
@@ -38,9 +38,9 @@ pub struct Env {
 impl Env {
     pub fn load() -> Option<Env> {
         core::env::load(".env").unwrap_or(());
-        let env_stage = EnvSage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
+        let env_stage = EnvStage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
 
-        if env_stage == EnvSage::Dev {
+        if env_stage == EnvStage::Dev {
             core::env::load(".env.local").unwrap_or(());
         }
 
