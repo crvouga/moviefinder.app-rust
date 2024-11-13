@@ -6,6 +6,7 @@ pub trait Logger: Send + Sync {
     fn debug(&self, args: fmt::Arguments);
     fn error(&self, args: fmt::Arguments);
     fn child(&self, name: &str) -> Arc<dyn Logger>;
+    fn noop(&self) -> Arc<dyn Logger>;
 }
 
 #[macro_export]

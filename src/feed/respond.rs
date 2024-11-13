@@ -10,6 +10,7 @@ use crate::{
         },
     },
     ctx::Ctx,
+    log_info,
     media::{
         self,
         genre::{genre::Genre, genre_id::GenreId},
@@ -25,35 +26,36 @@ use crate::{
 pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     match route {
         Route::Default => {
-            let feed_id = ctx
+            let res: Res = view_load_default_feed().into();
+            res.cache()
+        }
+
+        Route::DefaultLoad => {
+            let maybe_feed_id = ctx
                 .session_feed_mapping_db
                 .get(req.session_id.clone())
                 .await
-                .unwrap_or(None)
-                .unwrap_or_default();
+                .unwrap_or(None);
 
-            respond_index(&feed_id)
+            log_info!(ctx.logger, "maybe_feed_id: {:?}", maybe_feed_id);
+
+            let feed_id = maybe_feed_id.unwrap_or_default();
+
+            let index_route = route::Route::Feed(Route::Index {
+                feed_id: feed_id.clone(),
+            });
+
+            let res = respond_load_feed(ctx, req, &feed_id).await;
+
+            res.hx_push_url(&index_route.encode())
         }
 
-        Route::Index { feed_id } => respond_index(feed_id),
-
-        Route::Load { feed_id } => {
-            let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
-
-            put_feed(ctx, &req.session_id, &feed).await;
-
-            let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
-
-            let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
-
-            let model = ViewModel {
-                feed: feed.clone(),
-                genres,
-                initial_feed_items,
-            };
-
-            view_feed(&model).into()
+        Route::Index { feed_id } => {
+            let res: Res = view_load_feed(&feed_id).into();
+            res.cache()
         }
+
+        Route::IndexLoad { feed_id } => respond_load_feed(ctx, req, feed_id).await,
 
         Route::ChangedSlide { feed_id } => {
             let maybe_slide_index = req
@@ -109,14 +111,22 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     }
 }
 
-fn respond_index(feed_id: &FeedId) -> Res {
-    let index_route = route::Route::Feed(Route::Index {
-        feed_id: feed_id.clone(),
-    });
+async fn respond_load_feed(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
+    let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-    let res: Res = view_swap_feed(&feed_id).into();
+    put_feed(ctx, &req.session_id, &feed).await;
 
-    res.hx_push_url(&index_route.encode()).cache()
+    let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
+
+    let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
+
+    let model = ViewModel {
+        feed: feed.clone(),
+        genres,
+        initial_feed_items,
+    };
+
+    view_feed(&model).into()
 }
 
 async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
@@ -157,37 +167,54 @@ struct ViewModel {
 const FEED_ID: &str = "feed";
 const FEED_SELECTOR: &str = "#feed";
 
-fn view_top_bar_root(feed_id: &FeedId) -> Elem {
+fn view_top_bar_root() -> Elem {
     button().class(
         "w-full h-16 shrink-0 border-b flex items-center justify-center relative pl-2 overflow-hidden",
     )
-    .root_push_screen(route::Route::Feed(Route::Controls {
+}
+
+fn view_top_bar_clickable_root(feed_id: &FeedId) -> Elem {
+    view_top_bar_root()
+        .root_push_screen(route::Route::Feed(Route::Controls {
             feed_id: feed_id.clone(),
             child: controls::route::Route::Index,
         }))
-    .hx_abort(FEED_SELECTOR)
+        .hx_abort(FEED_SELECTOR)
 }
 
-fn view_feed_root() -> Elem {
+fn view_top_bar(model: &ViewModel) -> Elem {
+    view_top_bar_clickable_root(&model.feed.feed_id)
+        .child(view_chips(&model))
+        .child(view_open_controls_button())
+}
+
+fn view_root() -> Elem {
     div()
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
         .id(FEED_ID)
 }
 
-fn view_top_bar(model: &ViewModel) -> Elem {
-    view_top_bar_root(&model.feed.feed_id)
-        .child(view_chips(&model))
-        .child(view_open_controls_button())
+fn view_empty_slide() -> Elem {
+    Image::view().src(" ").class("w-full h-full object-cover")
 }
 
-fn view_swap_feed(feed_id: &FeedId) -> Elem {
-    view_feed_root()
-        .root_swap_screen(route::Route::Feed(Route::Load {
+fn view_load_feed(feed_id: &FeedId) -> Elem {
+    view_root()
+        .root_swap_screen(route::Route::Feed(Route::IndexLoad {
             feed_id: feed_id.clone(),
         }))
         .hx_trigger_load()
-        .child(view_top_bar_root(&feed_id).child(view_open_controls_button()))
-        .child(Image::view().src(" ").class("w-full h-full object-cover"))
+        .child(view_top_bar_clickable_root(&feed_id).child(view_open_controls_button()))
+        .child(view_empty_slide())
+        .child(view_bottom_bar())
+}
+
+fn view_load_default_feed() -> Elem {
+    view_root()
+        .root_swap_screen(route::Route::Feed(Route::DefaultLoad))
+        .hx_trigger_load()
+        .child(view_top_bar_root().child(view_open_controls_button()))
+        .child(view_empty_slide())
         .child(view_bottom_bar())
 }
 
@@ -235,7 +262,7 @@ fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
 }
 
 fn view_feed(model: &ViewModel) -> Elem {
-    view_feed_root()
+    view_root()
         .child(view_top_bar(&model))
         .child(view_swiper(&model))
         .child(view_bottom_bar())
@@ -290,7 +317,7 @@ fn view_load_more(feed_id: &FeedId, start_feed_index: usize) -> Elem {
         )
         .hx_trigger_intersect()
         .hx_swap_outer_html()
-        .child(Image::view().src(" ").class("w-full h-full object-cover"))
+        .child(view_empty_slide())
 }
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {

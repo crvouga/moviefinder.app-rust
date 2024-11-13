@@ -6,11 +6,13 @@ use super::{controls, feed_id::FeedId};
 pub enum Route {
     Default,
 
+    DefaultLoad,
+
     Index {
         feed_id: FeedId,
     },
 
-    Load {
+    IndexLoad {
         feed_id: FeedId,
     },
 
