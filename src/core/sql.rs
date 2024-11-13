@@ -180,9 +180,12 @@ mod tests {
     #[test]
     fn test_prevent_sql_injection() {
         let mut query = Sql::new("SELECT * FROM users WHERE name = :name");
+
+        let dangerous_input = "John' OR 1=1 --";
+
         query.set(
             "name",
-            SqlVarType::Primitive(SqlPrimitive::Text("John' OR 1=1 --".to_string())),
+            SqlVarType::Primitive(SqlPrimitive::Text(dangerous_input.to_string())),
         );
 
         let expected = "SELECT * FROM users WHERE name = 'John'' OR 1=1 --'";
