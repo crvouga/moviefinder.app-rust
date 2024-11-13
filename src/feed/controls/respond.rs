@@ -29,7 +29,7 @@ const GENRE_ID_KEY: &str = "genre_id";
 pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
         Route::Index => {
-            let res: Res = view_load_controls(&feed_id).into();
+            let res: Res = view_load(&feed_id).into();
 
             res.cache()
         }
@@ -41,7 +41,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let view_model = ViewModel { feed, genres };
 
-            view_controls(&view_model).into()
+            view(&view_model).into()
         }
 
         Route::ClickedSave => {
@@ -81,7 +81,7 @@ impl From<FormData> for Vec<GenreId> {
 const FEED_CONTROLS_ID: &str = "feed-controls";
 const FEED_CONTROLS_SELECTOR: &str = "#feed-controls";
 
-fn view_load_controls(feed_id: &FeedId) -> Elem {
+fn view_load(feed_id: &FeedId) -> Elem {
     div()
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .root_swap_screen(route::Route::Feed(feed::route::Route::Controls {
@@ -99,7 +99,7 @@ fn view_load_controls(feed_id: &FeedId) -> Elem {
         .child(view_bottom_bar(&feed_id))
 }
 
-fn view_controls(view_model: &ViewModel) -> Elem {
+fn view(view_model: &ViewModel) -> Elem {
     form()
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .hx_post(
@@ -147,8 +147,8 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
 
 fn view_form(view_model: &ViewModel) -> Elem {
     div()
-        .class("flex-1 flex flex-col py-8 px-6 overflow-y-auto")
-        .child(view_section("Genres", vec![view_genre_chips(&view_model)]))
+        .class("flex-1 flex flex-col p-4 overflow-y-auto")
+        .child(view_genre_chips(&view_model))
 }
 
 fn view_section(title: &str, children: Vec<Elem>) -> Elem {
@@ -164,7 +164,7 @@ fn view_section_title(title: &str) -> Elem {
 
 fn view_genre_chips(view_model: &ViewModel) -> Elem {
     div()
-        .class("flex-1 flex flex-row items-center flex-wrap gap-2")
+        .class("flex flex-row items-start justify-start flex-wrap gap-2")
         .children(
             view_model
                 .genres
@@ -180,7 +180,7 @@ fn view_genre_chip(view_model: &ViewModel, genre: &Genre) -> Elem {
         .label(&genre.name)
         .name(GENRE_ID_KEY)
         .checked(is_genre_checked(view_model, genre))
-        .size(ui::chip::ChipSize::Large)
+        .size(ui::chip::ChipSize::Medium)
         .view()
 }
 
