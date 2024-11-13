@@ -14,10 +14,7 @@ impl FeedItem {
 }
 
 impl From<(Media, usize)> for FeedItem {
-    fn from(value: (Media, usize)) -> Self {
-        FeedItem::Media {
-            media: value.0,
-            feed_index: value.1,
-        }
+    fn from((media, feed_index): (Media, usize)) -> Self {
+        FeedItem::Media { media, feed_index }
     }
 }
