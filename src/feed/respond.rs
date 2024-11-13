@@ -173,7 +173,7 @@ fn view_top_bar_root() -> Elem {
     )
 }
 
-fn view_top_bar_clickable_root(feed_id: &FeedId) -> Elem {
+fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root()
         .root_push_screen(route::Route::Feed(Route::Controls {
             feed_id: feed_id.clone(),
@@ -183,7 +183,7 @@ fn view_top_bar_clickable_root(feed_id: &FeedId) -> Elem {
 }
 
 fn view_top_bar(model: &ViewModel) -> Elem {
-    view_top_bar_clickable_root(&model.feed.feed_id)
+    view_top_bar_link_root(&model.feed.feed_id)
         .child(view_chips(&model))
         .child(view_open_controls_button())
 }
@@ -204,7 +204,7 @@ fn view_load_feed(feed_id: &FeedId) -> Elem {
             feed_id: feed_id.clone(),
         }))
         .hx_trigger_load()
-        .child(view_top_bar_clickable_root(&feed_id).child(view_open_controls_button()))
+        .child(view_top_bar_link_root(&feed_id).child(view_open_controls_button()))
         .child(view_empty_slide())
         .child(view_bottom_bar())
 }
