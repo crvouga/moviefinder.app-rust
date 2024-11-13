@@ -1,4 +1,3 @@
-use crate::core::http::client::HttpClient;
 #[cfg(test)]
 use crate::{
     core::{db_conn_sql, logger::impl_console::ConsoleLogger},
