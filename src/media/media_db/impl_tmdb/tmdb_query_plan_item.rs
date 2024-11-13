@@ -136,7 +136,10 @@ impl From<MediaQuery> for DiscoverMovieParams {
                                 TMDB_AND_OP,
                                 value
                             );
-                            params.with_genres = Some(with_genres_new)
+
+                            let cleaned = remove_prefix(with_genres_new, TMDB_AND_OP);
+
+                            params.with_genres = Some(cleaned)
                         }
                         _ => {}
                     }
@@ -152,7 +155,10 @@ impl From<MediaQuery> for DiscoverMovieParams {
                                 TMDB_OR_OP,
                                 value
                             );
-                            params.with_genres = Some(with_genres_new)
+
+                            let cleaned = remove_prefix(with_genres_new, TMDB_OR_OP);
+
+                            params.with_genres = Some(cleaned)
                         }
                         _ => {}
                     }
@@ -162,6 +168,14 @@ impl From<MediaQuery> for DiscoverMovieParams {
         }
 
         params
+    }
+}
+
+fn remove_prefix(s: String, prefix: &str) -> String {
+    if s.starts_with(prefix) {
+        s[prefix.len()..].to_string()
+    } else {
+        s
     }
 }
 

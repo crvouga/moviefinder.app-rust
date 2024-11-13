@@ -21,6 +21,7 @@ mod filter_by_genre_id_test {
                 .await
                 .unwrap();
 
+            assert!(queried.items.len() > 0);
             assert!(queried
                 .items
                 .into_iter()
@@ -46,6 +47,7 @@ mod filter_by_genre_id_test {
                 .await
                 .unwrap();
 
+            assert!(queried.items.len() > 0);
             assert!(queried
                 .items
                 .into_iter()
@@ -72,6 +74,7 @@ mod filter_by_genre_id_test {
                 .await
                 .unwrap();
 
+            assert!(queried.items.len() > 0);
             assert!(queried
                 .items
                 .into_iter()

@@ -42,12 +42,14 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
 
             put_feed(ctx, &req.session_id, &feed).await;
 
+            let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
+
+            let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
+
             let model = ViewModel {
                 feed: feed.clone(),
-                genres: ctx.genre_db.get_all().await.unwrap_or(vec![]),
-                initial_feed_items: get_feed_items(ctx, &feed, &feed.active_index)
-                    .await
-                    .unwrap_or_default(),
+                genres,
+                initial_feed_items,
             };
 
             view_feed(&model).into()
@@ -68,7 +70,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_new = Feed {
-                active_index: slide_index_new,
+                start_index: slide_index_new,
                 ..feed
             };
 
@@ -83,7 +85,12 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
         } => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let got = get_feed_items(ctx, &feed, start_feed_index).await;
+            let feed_with_new_index = Feed {
+                start_index: *start_feed_index,
+                ..feed
+            };
+
+            let got = get_feed_items(ctx, &feed_with_new_index).await;
 
             match got {
                 Err(err) => ui::error::page(&err).into(),
@@ -112,12 +119,8 @@ fn respond_index(feed_id: &FeedId) -> Res {
     res.hx_push_url(&index_route.encode()).cache()
 }
 
-async fn get_feed_items(
-    ctx: &Ctx,
-    feed: &Feed,
-    start_feed_index: &usize,
-) -> Result<Vec<FeedItem>, String> {
-    let query: MediaQuery = (feed.clone(), *start_feed_index).into();
+async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
+    let query: MediaQuery = feed.into();
 
     let queried = ctx.media_db.query(query).await;
 
@@ -129,7 +132,7 @@ async fn get_feed_items(
                 .items
                 .into_iter()
                 .enumerate()
-                .map(|(index, media)| FeedItem::from((media, index + start_feed_index)))
+                .map(|(index, media)| FeedItem::from((media, index + feed.start_index)))
                 .collect::<Vec<FeedItem>>();
 
             Ok(feed_items)

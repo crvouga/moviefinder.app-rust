@@ -110,6 +110,7 @@ impl TmdbApi {
         params: DiscoverMovieParams,
     ) -> Result<DiscoverMovieResponse, String> {
         let query_params: QueryParams = params.into();
+
         let req = self.to_get_request("/3/discover/movie", query_params);
 
         let sent = self.http_client.send(req).await;

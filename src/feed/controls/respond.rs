@@ -50,7 +50,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_new = Feed {
-                active_index: 0,
+                start_index: 0,
                 genre_ids: genre_ids_new,
                 ..feed
             };
