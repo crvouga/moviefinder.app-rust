@@ -55,6 +55,9 @@ pub struct DiscoverMovieResponse {
     pub total_results: Option<usize>,
 }
 
+pub const TMDB_AND_OP: &str = ",";
+pub const TMDB_OR_OP: &str = "|";
+
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct DiscoverMovieParams {
     pub language: Option<String>,
@@ -93,15 +96,6 @@ pub struct DiscoverMovieParams {
     pub watch_region: Option<String>,
     pub with_watch_monetization_types: Option<String>,
     pub without_companies: Option<String>,
-}
-
-impl Into<DiscoverMovieParams> for usize {
-    fn into(self) -> DiscoverMovieParams {
-        DiscoverMovieParams {
-            page: Some(self as usize),
-            ..Default::default()
-        }
-    }
 }
 
 impl Into<QueryParams> for DiscoverMovieParams {

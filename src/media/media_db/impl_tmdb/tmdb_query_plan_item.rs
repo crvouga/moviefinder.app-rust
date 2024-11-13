@@ -1,16 +1,22 @@
 use crate::{
-    core::pagination::{PageBased, Paginated},
+    core::{
+        pagination::{PageBased, Paginated},
+        query::{Filter, Op},
+    },
     media::{
         core::Media,
-        media_db::interface::MediaQuery,
+        media_db::interface::{MediaField, MediaQuery},
         media_id::MediaId,
         tmdb_api::{
-            self, config::TmdbConfig, discover_movie::DiscoverMovieParams, TmdbApi, TMDB_PAGE_SIZE,
+            self,
+            config::TmdbConfig,
+            discover_movie::{DiscoverMovieParams, TMDB_AND_OP, TMDB_OR_OP},
+            TmdbApi, TMDB_PAGE_SIZE,
         },
     },
 };
 use futures::future::join_all;
-use std::vec;
+use std::{collections::HashSet, vec};
 
 #[derive(Debug, Clone)]
 pub enum TmdbQueryPlanItem {
@@ -58,13 +64,15 @@ impl TmdbQueryPlanItem {
 
                 let offset = page_based.index;
 
+                let mut seen: HashSet<MediaId> = HashSet::new();
                 let items = discover_responses
                     .clone()
                     .into_iter()
                     .flat_map(|res| res.results.unwrap_or_default())
+                    .map(|result| Media::from((tmdb_config, result)))
+                    .filter(|media| seen.insert(media.media_id.clone()))
                     .skip(offset)
                     .take(limit.clone())
-                    .map(|result| Media::from((tmdb_config, result)))
                     .collect();
 
                 let total = discover_responses
@@ -90,10 +98,10 @@ impl From<MediaQuery> for GetDiscoverMovieParams {
 
         let page_based: PageBased = (&media_query, TMDB_PAGE_SIZE).into();
 
-        for page in page_based.range() {
+        for page in page_based.start_page..=(page_based.end_page + 1) {
             let param = DiscoverMovieParams {
                 page: Some(page as usize),
-                ..Default::default()
+                ..media_query.clone().into()
             };
 
             params.push(param);
@@ -104,6 +112,56 @@ impl From<MediaQuery> for GetDiscoverMovieParams {
             params,
             page_based,
         }
+    }
+}
+
+// https://developer.themoviedb.org/reference/discover-movie
+impl From<MediaQuery> for DiscoverMovieParams {
+    fn from(media_query: MediaQuery) -> DiscoverMovieParams {
+        let mut params = DiscoverMovieParams {
+            ..Default::default()
+        };
+
+        match media_query.filter {
+            Filter::Clause(MediaField::GenreId, Op::Eq, value) => {
+                params.with_genres = Some(value);
+            }
+            Filter::And(filters) => {
+                for filter in filters {
+                    match filter {
+                        Filter::Clause(MediaField::GenreId, Op::Eq, value) => {
+                            let with_genres_new = format!(
+                                "{}{}{}",
+                                params.with_genres.unwrap_or_default(),
+                                TMDB_AND_OP,
+                                value
+                            );
+                            params.with_genres = Some(with_genres_new)
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            Filter::Or(filters) => {
+                for filter in filters {
+                    match filter {
+                        Filter::Clause(MediaField::GenreId, Op::Eq, value) => {
+                            let with_genres_new = format!(
+                                "{}{}{}",
+                                params.with_genres.unwrap_or_default(),
+                                TMDB_OR_OP,
+                                value
+                            );
+                            params.with_genres = Some(with_genres_new)
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+
+        params
     }
 }
 

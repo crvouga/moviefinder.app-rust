@@ -15,7 +15,7 @@ use std::vec;
 
 #[derive(Debug, Clone, Default)]
 pub struct TmdbQueryPlan {
-    items: Vec<TmdbQueryPlanItem>,
+    pub items: Vec<TmdbQueryPlanItem>,
 }
 
 impl TmdbQueryPlan {
@@ -60,6 +60,7 @@ impl From<MediaQuery> for TmdbQueryPlan {
                     query_plan.items.push(item);
                     query_plan
                 }
+
                 _ => {
                     let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
                     query_plan.items.push(item);

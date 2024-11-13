@@ -1,22 +1,18 @@
-#[cfg(test)]
 use crate::{
-    core::{db_conn_sql, logger::impl_console::ConsoleLogger},
+    core::{db_conn_sql, http::client::HttpClient, logger::impl_console::ConsoleLogger},
     ctx::Ctx,
     env::Env,
     feed::{feed_db, session_feed_mapping_db},
     key_value_db,
     media::{genre::genre_db, media_db, tmdb_api},
 };
-#[cfg(test)]
 use std::sync::Arc;
 
-#[cfg(test)]
 pub struct BaseFixture {
     pub ctx: Ctx,
     pub env: Env,
 }
 
-#[cfg(test)]
 impl BaseFixture {
     pub async fn new() -> Self {
         let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));

@@ -34,12 +34,6 @@ pub struct PageBased {
     pub index: usize,
 }
 
-impl PageBased {
-    pub fn range(&self) -> std::ops::Range<usize> {
-        self.start_page..(self.end_page + 2)
-    }
-}
-
 impl From<(Pagination, usize)> for PageBased {
     fn from((pagination, page_size): (Pagination, usize)) -> Self {
         let page_count = (pagination.limit as f64 / page_size as f64).ceil() as usize;

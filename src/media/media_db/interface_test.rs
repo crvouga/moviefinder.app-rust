@@ -10,6 +10,7 @@ mod tests {
         env,
         fixture::BaseFixture,
         media::{
+            genre::{genre_db::interface::GenreDb, genre_id::GenreId},
             media_db::{
                 impl_tmdb,
                 interface::{MediaDb, MediaField},
@@ -20,6 +21,24 @@ mod tests {
 
     struct Fixture {
         pub media_db: Box<dyn MediaDb>,
+        pub genre_db: Box<dyn GenreDb>,
+    }
+
+    impl Fixture {
+        pub async fn random_genre_id(&self) -> GenreId {
+            let genre_ids: Vec<GenreId> = self
+                .genre_db
+                .get_all()
+                .await
+                .unwrap()
+                .iter()
+                .map(|g| g.id.clone())
+                .collect();
+
+            let genre_id = genre_ids.first().cloned().unwrap();
+
+            genre_id
+        }
     }
 
     async fn fixtures() -> Vec<Fixture> {
@@ -28,14 +47,15 @@ mod tests {
         let mut fixtures: Vec<Fixture> = vec![];
 
         if base_fixture.env.test_env == env::TestEnv::Integration {
-            let tmdb_movie = Fixture {
+            let fixture = Fixture {
                 media_db: Box::new(impl_tmdb::ImplTmdb::new(
                     base_fixture.ctx.logger.clone(),
                     base_fixture.ctx.tmdb_api.clone(),
                 )),
+                genre_db: base_fixture.ctx.genre_db,
             };
 
-            fixtures.push(tmdb_movie);
+            fixtures.push(fixture);
         }
 
         fixtures
@@ -166,32 +186,81 @@ mod tests {
         }
     }
 
-    // #[tokio::test]
-    // async fn test_filter_by_genre_id() {
-    //     for f in fixtures().await {
-    //         let genre_id = GenreId::new("9648".to_string());
+    #[tokio::test]
+    async fn test_filter_by_genre_id() {
+        for f in fixtures().await {
+            let genre_id = f.random_genre_id().await;
 
-    //         let queried = f
-    //             .media_db
-    //             .query(Query {
-    //                 limit: 10,
-    //                 offset: 0,
-    //                 filter: Filter::And(vec![Filter::Clause(
-    //                     MediaField::GenreId,
-    //                     Op::Eq,
-    //                     genre_id.to_string(),
-    //                 )]),
-    //             })
-    //             .await
-    //             .unwrap();
+            let queried = f
+                .media_db
+                .query(Query {
+                    limit: 10,
+                    offset: 0,
+                    filter: Filter::Clause(MediaField::GenreId, Op::Eq, genre_id.to_string()),
+                })
+                .await
+                .unwrap();
 
-    //         assert!(queried
-    //             .items
-    //             .into_iter()
-    //             .flat_map(|item| item.media_genre_ids)
-    //             .any(|id| id == genre_id));
-    //     }
-    // }
+            assert!(queried
+                .items
+                .into_iter()
+                .all(|item| item.media_genre_ids.contains(&genre_id)));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_filter_and_two_genre_ids() {
+        for f in fixtures().await {
+            let genre_id_a = f.random_genre_id().await;
+            let genre_id_b = f.random_genre_id().await;
+
+            let queried = f
+                .media_db
+                .query(Query {
+                    limit: 10,
+                    offset: 0,
+                    filter: Filter::And(vec![
+                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_a.to_string()),
+                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_b.to_string()),
+                    ]),
+                })
+                .await
+                .unwrap();
+
+            assert!(queried
+                .items
+                .into_iter()
+                .all(|item| item.media_genre_ids.contains(&genre_id_a)
+                    && item.media_genre_ids.contains(&genre_id_b)));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_filter_or_two_genre_ids() {
+        for f in fixtures().await {
+            let genre_id_a = f.random_genre_id().await;
+            let genre_id_b = f.random_genre_id().await;
+
+            let queried = f
+                .media_db
+                .query(Query {
+                    limit: 10,
+                    offset: 0,
+                    filter: Filter::Or(vec![
+                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_a.to_string()),
+                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_b.to_string()),
+                    ]),
+                })
+                .await
+                .unwrap();
+
+            assert!(queried
+                .items
+                .into_iter()
+                .all(|item| item.media_genre_ids.contains(&genre_id_a)
+                    || item.media_genre_ids.contains(&genre_id_b)));
+        }
+    }
 
     #[tokio::test]
     async fn test_offset_40() {

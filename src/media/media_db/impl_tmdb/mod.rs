@@ -32,17 +32,15 @@ impl MediaDb for ImplTmdb {
 
         let query_plan: TmdbQueryPlan = query.clone().into();
 
+        log_info!(self.logger, "query= {:?}", query);
+        log_info!(self.logger, "query_plan=");
+        for item in query_plan.items.iter() {
+            log_info!(self.logger, "\t{:?}", item);
+        }
+
         let result = query_plan
-            .clone()
             .execute(&self.tmdb_api, &tmdb_config, &query)
             .await?;
-
-        log_info!(
-            self.logger,
-            "\n\tquery={:?}\n\tquery_plan={:?}",
-            query,
-            query_plan
-        );
 
         Ok(result)
     }
