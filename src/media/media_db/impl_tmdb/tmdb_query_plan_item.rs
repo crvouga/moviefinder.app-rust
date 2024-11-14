@@ -21,7 +21,7 @@ use std::{collections::HashSet, vec};
 #[derive(Debug, Clone)]
 pub enum TmdbQueryPlanItem {
     GetMovieDetails { media_id: MediaId },
-    GetDiscoverMovie(GetDiscoverMovieParams),
+    GetDiscoverMovie { params: GetDiscoverMovieParams },
 }
 
 #[derive(Debug, Clone)]
@@ -50,19 +50,16 @@ impl TmdbQueryPlanItem {
                     total: 1,
                 })
             }
-            TmdbQueryPlanItem::GetDiscoverMovie(GetDiscoverMovieParams {
-                limit,
-                page_based,
-                params,
-            }) => {
+            TmdbQueryPlanItem::GetDiscoverMovie { params } => {
                 let discover_requests = params
+                    .params
                     .iter()
                     .map(|params| tmdb_api.discover_movie(params.clone()));
 
                 let discover_responses: Vec<tmdb_api::discover_movie::DiscoverMovieResponse> =
                     partition_results(join_all(discover_requests).await).unwrap_or_default();
 
-                let offset = page_based.index;
+                let offset = params.page_based.index;
 
                 let mut seen: HashSet<MediaId> = HashSet::new();
                 let items = discover_responses
@@ -72,7 +69,7 @@ impl TmdbQueryPlanItem {
                     .map(|result| Media::from((tmdb_config, result)))
                     .filter(|media| seen.insert(media.media_id.clone()))
                     .skip(offset)
-                    .take(limit.clone())
+                    .take(params.limit.clone())
                     .collect();
 
                 let total = discover_responses
@@ -84,7 +81,7 @@ impl TmdbQueryPlanItem {
                 Ok(Paginated {
                     items,
                     total,
-                    limit: limit.clone(),
+                    limit: params.limit.clone(),
                     offset,
                 })
             }

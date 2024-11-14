@@ -49,7 +49,9 @@ impl From<MediaQuery> for TmdbQueryPlan {
 
         match media_query.filter.clone() {
             Filter::None => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
+                let item = TmdbQueryPlanItem::GetDiscoverMovie {
+                    params: media_query.clone().into(),
+                };
                 query_plan.items.push(item);
                 query_plan
             }
@@ -62,18 +64,24 @@ impl From<MediaQuery> for TmdbQueryPlan {
                 }
 
                 _ => {
-                    let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
+                    let item = TmdbQueryPlanItem::GetDiscoverMovie {
+                        params: media_query.clone().into(),
+                    };
                     query_plan.items.push(item);
                     query_plan
                 }
             },
             Filter::And(_filters) => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
+                let item = TmdbQueryPlanItem::GetDiscoverMovie {
+                    params: media_query.clone().into(),
+                };
                 query_plan.items.push(item);
                 query_plan
             }
             Filter::Or(_filters) => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie(media_query.clone().into());
+                let item = TmdbQueryPlanItem::GetDiscoverMovie {
+                    params: media_query.clone().into(),
+                };
                 query_plan.items.push(item);
                 query_plan
             }
