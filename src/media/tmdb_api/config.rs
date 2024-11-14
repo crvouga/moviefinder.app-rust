@@ -66,7 +66,7 @@ impl TmdbConfig {
 
         let lowest_to_highest = sizes
             .iter()
-            .map(|size| format!("{}/{}{}", base_url, size, path));
+            .map(|size| format!("{}{}{}", base_url, size, path));
 
         ImageSet::new(lowest_to_highest.collect())
     }

@@ -22,7 +22,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .icon(ui::icon::home("size-8"))
                     .active(active == Active::Home)
                     .view()
-                    .root_push_screen(route::Route::Feed(feed::route::Route::Default))
+                    .root_push_screen(route::Route::Feed(feed::route::Route::DefaultLoad))
                     .hx_abort(abort_selector),
             )
             .child(

@@ -16,12 +16,12 @@ use super::route::Route;
 
 pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
     match route {
-        Route::Index { media_id } => {
+        Route::IndexLoad { media_id } => {
             let res: Res = view_load(media_id).into();
             res.cache()
         }
 
-        Route::Load { media_id } => {
+        Route::Index { media_id } => {
             let query = Query {
                 limit: 1,
                 offset: 0,
@@ -78,7 +78,7 @@ impl Layout {
             .class("flex flex-col")
             .child(
                 TopBar::default()
-                    .back_button(route::Route::Feed(feed::route::Route::Default))
+                    .back_button(route::Route::Feed(feed::route::Route::DefaultLoad))
                     .title(top_bar_title)
                     .view(),
             )
@@ -131,7 +131,7 @@ fn view_description(media: &Media) -> Elem {
 
 fn load_route(media_id: &MediaId) -> route::Route {
     route::Route::Media(media::route::Route::Details(
-        media::details::route::Route::Load {
+        media::details::route::Route::Index {
             media_id: media_id.clone(),
         },
     ))

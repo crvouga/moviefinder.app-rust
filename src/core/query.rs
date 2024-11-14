@@ -2,14 +2,14 @@ use super::pagination::{PageBased, Pagination};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-pub struct Query<F> {
+pub struct Query<Field> {
     pub limit: usize,
     pub offset: usize,
-    pub filter: Filter<F>,
+    pub filter: Filter<Field>,
 }
 
-impl<F> From<&Query<F>> for Pagination {
-    fn from(query: &Query<F>) -> Pagination {
+impl<Field> From<&Query<Field>> for Pagination {
+    fn from(query: &Query<Field>) -> Pagination {
         Pagination {
             limit: query.limit,
             offset: query.offset,
@@ -17,8 +17,8 @@ impl<F> From<&Query<F>> for Pagination {
     }
 }
 
-impl<F> From<(&Query<F>, usize)> for PageBased {
-    fn from((query, page_size): (&Query<F>, usize)) -> PageBased {
+impl<Field> From<(&Query<Field>, usize)> for PageBased {
+    fn from((query, page_size): (&Query<Field>, usize)) -> PageBased {
         let pagination: Pagination = query.into();
         let page_based = PageBased::from((pagination, page_size));
         page_based
@@ -26,10 +26,10 @@ impl<F> From<(&Query<F>, usize)> for PageBased {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub enum Filter<F> {
-    Clause(F, Op, String),
-    And(Vec<Filter<F>>),
-    Or(Vec<Filter<F>>),
+pub enum Filter<Field> {
+    Clause(Field, Op, String),
+    And(Vec<Filter<Field>>),
+    Or(Vec<Filter<Field>>),
     #[default]
     None,
 }

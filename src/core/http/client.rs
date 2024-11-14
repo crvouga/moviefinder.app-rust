@@ -29,7 +29,7 @@ impl HttpClient {
 
     pub async fn send(&self, request: HttpRequest) -> tokio::io::Result<HttpResponse> {
         if let Some(dur) = self.simulate_latency {
-            // tokio::time::sleep(dur).await;
+            tokio::time::sleep(dur).await;
         }
 
         let addr = format!("{}:80", request.host);

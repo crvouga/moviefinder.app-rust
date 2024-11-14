@@ -3,18 +3,18 @@ use serde::{Deserialize, Serialize};
 
 const SEPARATOR: &str = "___";
 
-pub fn encode<T: Serialize + Clone>(route: T) -> String {
-    let encoded = serde_json::to_string(&route).unwrap_or("".to_owned());
+pub fn encode<T: Serialize + Clone>(data: T) -> String {
+    let encoded = serde_json::to_string(&data).unwrap_or("".to_owned());
 
     let base_64_encoded = core::base64::encode(&encoded);
 
-    let human_friendly = to_human_friendly_str(route);
+    let human_friendly = to_human_friendly_str(data);
 
     format!("{}{}{}", human_friendly, SEPARATOR, base_64_encoded)
 }
 
-pub fn decode<T: for<'de> Deserialize<'de>>(encoded: &str) -> Result<T, String> {
-    let without_slash = remove_leading_slash(encoded);
+pub fn decode<T: for<'de> Deserialize<'de>>(encoded_data: &str) -> Result<T, String> {
+    let without_slash = remove_leading_slash(encoded_data);
 
     let without_query_params = remove_query_params(&without_slash);
 
@@ -106,12 +106,18 @@ mod tests {
     #[test]
     fn test_to_human_friendly_str() {
         let route = Route::Index;
-        assert_eq!(core::route::to_human_friendly_str(route), "Index");
+        assert_eq!(
+            core::human_friendly_base64::to_human_friendly_str(route),
+            "Index"
+        );
     }
 
     #[test]
     fn test_to_human_friendly_str_child() {
         let route = Route::Child(ChildRoute::Index);
-        assert_eq!(core::route::to_human_friendly_str(route), "Child.Index");
+        assert_eq!(
+            core::human_friendly_base64::to_human_friendly_str(route),
+            "Child.Index"
+        );
     }
 }

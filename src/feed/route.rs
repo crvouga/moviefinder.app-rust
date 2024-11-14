@@ -4,15 +4,15 @@ use super::{controls, feed_id::FeedId};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
-    Default,
-
     DefaultLoad,
 
-    Index {
+    Default,
+
+    IndexLoad {
         feed_id: FeedId,
     },
 
-    IndexLoad {
+    Index {
         feed_id: FeedId,
     },
 

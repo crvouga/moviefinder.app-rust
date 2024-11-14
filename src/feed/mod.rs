@@ -1,6 +1,7 @@
 mod controls;
 pub mod core;
 pub mod feed_db;
+pub mod feed_filter;
 pub mod feed_id;
 mod feed_item;
 pub mod respond;

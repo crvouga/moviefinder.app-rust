@@ -25,37 +25,35 @@ use crate::{
 
 pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     match route {
-        Route::Default => {
-            let res: Res = view_load_default_feed().into();
+        Route::DefaultLoad => {
+            let res: Res = view_default_load().into();
             res.cache()
         }
 
-        Route::DefaultLoad => {
+        Route::Default => {
             let maybe_feed_id = ctx
                 .session_feed_mapping_db
                 .get(req.session_id.clone())
                 .await
                 .unwrap_or(None);
 
-            log_info!(ctx.logger, "maybe_feed_id: {:?}", maybe_feed_id);
-
             let feed_id = maybe_feed_id.unwrap_or_default();
 
-            let index_route = route::Route::Feed(Route::Index {
+            let index_route = route::Route::Feed(Route::IndexLoad {
                 feed_id: feed_id.clone(),
             });
 
-            let res = respond_load_feed(ctx, req, &feed_id).await;
+            let res = respond_index(ctx, req, &feed_id).await;
 
             res.hx_push_url(&index_route.encode())
         }
 
-        Route::Index { feed_id } => {
-            let res: Res = view_load_feed(&feed_id).into();
+        Route::IndexLoad { feed_id } => {
+            let res: Res = view_load(&feed_id).into();
             res.cache()
         }
 
-        Route::IndexLoad { feed_id } => respond_load_feed(ctx, req, feed_id).await,
+        Route::Index { feed_id } => respond_index(ctx, req, feed_id).await,
 
         Route::ChangedSlide { feed_id } => {
             let maybe_slide_index = req
@@ -111,7 +109,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     }
 }
 
-async fn respond_load_feed(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
+async fn respond_index(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
     put_feed(ctx, &req.session_id, &feed).await;
@@ -177,7 +175,7 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root()
         .root_push_screen(route::Route::Feed(Route::Controls {
             feed_id: feed_id.clone(),
-            child: controls::route::Route::Index,
+            child: controls::route::Route::LoadIndex,
         }))
         .hx_abort(FEED_SELECTOR)
 }
@@ -198,9 +196,9 @@ fn view_empty_slide() -> Elem {
     Image::view().src(" ").class("w-full h-full object-cover")
 }
 
-fn view_load_feed(feed_id: &FeedId) -> Elem {
+fn view_load(feed_id: &FeedId) -> Elem {
     view_root()
-        .root_swap_screen(route::Route::Feed(Route::IndexLoad {
+        .root_swap_screen(route::Route::Feed(Route::Index {
             feed_id: feed_id.clone(),
         }))
         .hx_trigger_load()
@@ -209,9 +207,9 @@ fn view_load_feed(feed_id: &FeedId) -> Elem {
         .child(view_bottom_bar())
 }
 
-fn view_load_default_feed() -> Elem {
+fn view_default_load() -> Elem {
     view_root()
-        .root_swap_screen(route::Route::Feed(Route::DefaultLoad))
+        .root_swap_screen(route::Route::Feed(Route::Default))
         .hx_trigger_load()
         .child(view_top_bar_root().child(view_open_controls_button()))
         .child(view_empty_slide())
@@ -235,30 +233,11 @@ fn view_chips(model: &ViewModel) -> Elem {
         .children(
             model
                 .feed
-                .genre_ids
+                .filters
                 .iter()
-                .map(|genre_id| view_genre_chip(model, genre_id))
+                .map(|filter| filter.chip().disabled(true).checked(true).view())
                 .collect::<Vec<Elem>>(),
         )
-}
-
-fn view_genre_chip(model: &ViewModel, genre_id: &GenreId) -> Elem {
-    let maybe_genre = model
-        .genres
-        .clone()
-        .into_iter()
-        .find(|g| g.id.clone() == genre_id.clone());
-
-    match maybe_genre {
-        Some(genre) => Chip::default()
-            .id(&genre.id.to_string())
-            .label(&genre.name)
-            .checked(true)
-            .disabled(true)
-            .size(ChipSize::Medium)
-            .view(),
-        None => frag(),
-    }
 }
 
 fn view_feed(model: &ViewModel) -> Elem {
@@ -322,7 +301,7 @@ fn view_load_more(feed_id: &FeedId, start_feed_index: usize) -> Elem {
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {
     route::Route::Media(media::route::Route::Details(
-        media::details::route::Route::Index {
+        media::details::route::Route::IndexLoad {
             media_id: media_id.clone(),
         },
     ))

@@ -7,12 +7,10 @@ use crate::{
         ui::{
             self,
             button::{Button, Color},
-            chip::Chip,
         },
     },
     ctx::Ctx,
-    feed::{self, core::Feed, feed_id::FeedId},
-    media::genre::{genre::Genre, genre_id::GenreId},
+    feed::{self, core::Feed, feed_filter::FeedFilter, feed_id::FeedId},
     req::Req,
     route,
     ui::top_bar,
@@ -21,37 +19,42 @@ use crate::{
 #[derive(Debug)]
 struct ViewModel {
     feed: Feed,
-    genres: Vec<Genre>,
+    filters: Vec<FeedFilter>,
 }
 
-const GENRE_ID_KEY: &str = "genre_id";
+const FEED_FILTER_ID_KEY: &str = "genre_id";
 
 pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
-        Route::Index => {
-            let res: Res = view_load(&feed_id).into();
+        Route::LoadIndex => {
+            let res: Res = view_load_index(&feed_id).into();
 
             res.cache()
         }
 
-        Route::Load => {
+        Route::Index => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
 
-            let view_model = ViewModel { feed, genres };
+            let filters: Vec<FeedFilter> = genres
+                .iter()
+                .map(|genre| FeedFilter::Genre(genre.clone()))
+                .collect();
 
-            view(&view_model).into()
+            let view_model = ViewModel { feed, filters };
+
+            view_index(&view_model).into()
         }
 
         Route::ClickedSave => {
-            let genre_ids_new: Vec<GenreId> = req.form_data.clone().into();
+            let feed_filters_new: Vec<FeedFilter> = req.form_data.clone().into();
 
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_new = Feed {
                 start_index: 0,
-                genre_ids: genre_ids_new,
+                filters: feed_filters_new,
                 ..feed
             };
 
@@ -63,17 +66,21 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 }
 
 fn to_back_route(feed_id: FeedId) -> route::Route {
-    route::Route::Feed(feed::route::Route::Index { feed_id })
+    route::Route::Feed(feed::route::Route::IndexLoad { feed_id })
 }
 
-impl From<FormData> for Vec<GenreId> {
+impl From<FormData> for Vec<FeedFilter> {
     fn from(form_data: FormData) -> Self {
         form_data
-            .get_all(GENRE_ID_KEY)
+            .get_all(FEED_FILTER_ID_KEY)
             .cloned()
             .unwrap_or(vec![])
             .into_iter()
-            .map(GenreId::new)
+            .filter_map(|encoded| {
+                let decoded = FeedFilter::decode(&encoded);
+                println!("encoded {:?}, decoded: {:?}", &encoded, &decoded);
+                decoded
+            })
             .collect()
     }
 }
@@ -81,16 +88,16 @@ impl From<FormData> for Vec<GenreId> {
 const FEED_CONTROLS_ID: &str = "feed-controls";
 const FEED_CONTROLS_SELECTOR: &str = "#feed-controls";
 
-fn view_load(feed_id: &FeedId) -> Elem {
+fn view_load_index(feed_id: &FeedId) -> Elem {
     div()
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .root_swap_screen(route::Route::Feed(feed::route::Route::Controls {
             feed_id: feed_id.clone(),
-            child: Route::Load,
+            child: Route::Index,
         }))
         .hx_trigger_load()
         .id(FEED_CONTROLS_ID)
-        .child(view_top_bar(&feed_id))
+        .child(view_close_button(&feed_id))
         .child(
             div()
                 .class("w-full h-full flex items-center justify-center")
@@ -99,7 +106,7 @@ fn view_load(feed_id: &FeedId) -> Elem {
         .child(view_bottom_bar(&feed_id))
 }
 
-fn view(view_model: &ViewModel) -> Elem {
+fn view_index(view_model: &ViewModel) -> Elem {
     form()
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .hx_post(
@@ -110,16 +117,15 @@ fn view(view_model: &ViewModel) -> Elem {
             .encode(),
         )
         .hx_swap_none()
-        .child(view_top_bar(&view_model.feed.feed_id))
-        .child(view_form(view_model))
+        .child(view_close_button(&view_model.feed.feed_id))
+        .child(view_body(view_model))
         .child(view_bottom_bar(&view_model.feed.feed_id))
 }
 
-fn view_top_bar(feed_id: &FeedId) -> Elem {
-    div().class("absolute right-0 top-0").child(
-        top_bar::CancelButton::view(to_back_route(feed_id.clone()))
-            .hx_abort(FEED_CONTROLS_SELECTOR),
-    )
+fn view_close_button(feed_id: &FeedId) -> Elem {
+    top_bar::CancelButton::view(to_back_route(feed_id.clone()))
+        .hx_abort(FEED_CONTROLS_SELECTOR)
+        .class("absolute top-0 right-0 bg-black/50 rounded-full overflow-hidden")
 }
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
@@ -145,51 +151,42 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
         )
 }
 
-fn view_form(view_model: &ViewModel) -> Elem {
+fn view_body(view_model: &ViewModel) -> Elem {
     div()
-        .class("flex-1 flex flex-col p-4 overflow-y-auto")
-        .child(view_genre_chips(&view_model))
+        .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto")
+        .child(view_chips(&view_model))
 }
 
-fn view_section(title: &str, children: Vec<Elem>) -> Elem {
-    div()
-        .class("flex flex-col gap-4")
-        .child(view_section_title(title))
-        .children(children)
-}
+fn view_chips(view_model: &ViewModel) -> Elem {
+    let mut active: Vec<FeedFilter> = view_model.feed.clone().filters;
+    active.sort();
 
-fn view_section_title(title: &str) -> Elem {
-    div().class("text-4xl font-bold").child_text(title)
-}
+    let mut inactive: Vec<FeedFilter> = view_model
+        .filters
+        .clone()
+        .into_iter()
+        .filter(|filter| !active.contains(filter))
+        .collect();
+    inactive.sort();
 
-fn view_genre_chips(view_model: &ViewModel) -> Elem {
     div()
         .class("flex flex-row items-start justify-start flex-wrap gap-2")
-        .children(
-            view_model
-                .genres
-                .iter()
-                .map(|genre| view_genre_chip(view_model, genre))
-                .collect::<Vec<Elem>>(),
-        )
+        .child(view_chips_frag(active, true))
+        .child(view_chips_frag(inactive, false))
 }
 
-fn view_genre_chip(view_model: &ViewModel, genre: &Genre) -> Elem {
-    Chip::default()
-        .id(genre.id.as_str())
-        .label(&genre.name)
-        .name(GENRE_ID_KEY)
-        .checked(is_genre_checked(view_model, genre))
-        .size(ui::chip::ChipSize::Medium)
-        .view()
-}
-
-fn is_genre_checked(view_model: &ViewModel, genre: &Genre) -> bool {
-    let checked = view_model
-        .feed
-        .genre_ids
-        .iter()
-        .any(|genre_id| genre_id.clone() == genre.id);
-
-    checked
+fn view_chips_frag(feed_filters: Vec<FeedFilter>, is_checked: bool) -> Elem {
+    frag().children(
+        feed_filters
+            .iter()
+            .map(|filter| {
+                filter
+                    .chip()
+                    .checked(is_checked)
+                    .disabled(false)
+                    .name(FEED_FILTER_ID_KEY)
+                    .view()
+            })
+            .collect::<Vec<Elem>>(),
+    )
 }

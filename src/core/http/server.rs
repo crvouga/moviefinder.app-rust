@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+use crate::core::url_encoded;
+
 use super::form_data::FormData;
 use super::query_params::QueryParams;
 use super::request::HttpRequest;
@@ -127,7 +129,9 @@ fn parse_form_data(headers: &HashMap<String, String>, body: &str) -> FormData {
         return form_data;
     }
 
-    for pair in body.split('&') {
+    let decoded_body = url_encoded::decode(body);
+
+    for pair in decoded_body.split('&') {
         if let Some((key, value)) = pair.split_once('=') {
             form_data.insert(key.to_string(), value.to_string());
         }
@@ -135,7 +139,6 @@ fn parse_form_data(headers: &HashMap<String, String>, body: &str) -> FormData {
 
     form_data
 }
-
 fn is_form_data_request(headers: &HashMap<String, String>) -> bool {
     headers
         .get("content-type")
