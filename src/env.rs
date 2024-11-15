@@ -31,7 +31,6 @@ pub struct Env {
     pub database_url: String,
     pub simulate_latency: Option<Duration>,
 
-    #[allow(dead_code)]
     pub test_env: TestEnv,
 }
 

@@ -21,17 +21,16 @@ use crate::{
 };
 
 pub struct Ctx {
-    #[allow(dead_code)]
     pub key_value_db: Arc<dyn KeyValueDb>,
-    #[allow(dead_code)]
+
     pub db_conn_sql: Arc<ImplPostgres>,
     pub media_db: Box<dyn MediaDb>,
     pub feed_db: Box<dyn FeedDb>,
     pub session_feed_mapping_db: Box<dyn SessionFeedMappingDb>,
-    #[allow(dead_code)]
+
     pub tmdb_api: Arc<TmdbApi>,
     pub genre_db: Box<dyn GenreDb>,
-    #[allow(dead_code)]
+
     pub logger: Arc<dyn Logger>,
 }
 

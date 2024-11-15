@@ -6,12 +6,10 @@ pub struct QueryParams {
 }
 
 impl QueryParams {
-    #[allow(dead_code)]
     pub fn empty() -> QueryParams {
         QueryParams { params: vec![] }
     }
 
-    #[allow(dead_code)]
     pub fn add(&mut self, key: &str, value: &str) {
         self.params.push((key.to_string(), value.to_string()));
     }

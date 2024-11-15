@@ -11,7 +11,7 @@ pub struct HttpRequest {
     pub cookies: HashMap<String, String>,
     pub form_data: FormData,
     pub query_params: QueryParams,
-    #[allow(dead_code)]
+
     pub body: String,
 }
 

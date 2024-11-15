@@ -11,7 +11,6 @@ pub struct ImplHashMap {
 }
 
 impl ImplHashMap {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             namespace: vec![],

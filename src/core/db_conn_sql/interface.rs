@@ -4,7 +4,6 @@ use crate::core::sql::Sql;
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 
-#[allow(dead_code)]
 #[async_trait]
 
 pub trait DbConnSql: Send + Sync {
