@@ -8,7 +8,8 @@ pub mod render;
 pub enum Elem {
     Element {
         tag_name: String,
-        attributes: HashMap<String, String>,
+        attrs_safe: HashMap<String, String>,
+        attrs_unsafe: HashMap<String, String>,
         children: Vec<Elem>,
     },
     Fragment(Vec<Elem>),
@@ -27,7 +28,8 @@ pub fn frag() -> Elem {
 pub fn elem(tag_name: &str) -> Elem {
     Elem::Element {
         tag_name: tag_name.to_string(),
-        attributes: HashMap::new(),
+        attrs_safe: HashMap::new(),
+        attrs_unsafe: HashMap::new(),
         children: vec![],
     }
 }
@@ -46,6 +48,10 @@ pub fn link() -> Elem {
 
 pub fn script() -> Elem {
     elem("script")
+}
+
+pub fn style() -> Elem {
+    elem("style")
 }
 
 pub fn div() -> Elem {

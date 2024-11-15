@@ -245,7 +245,7 @@ fn view_swiper(model: &ViewModel) -> Elem {
         .hx_trigger_custom("swiperslidechange from:swiper-container")
         .x_on("swiperslidechange", r#"
             feedActiveIndex = parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10);
-            console.log('feedIndex', feedActiveIndex, 'raw', event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'));
+            // console.log('feedIndex', feedActiveIndex, 'raw', event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'));
         "#)
         .hx_swap_none()
         .hx_post(

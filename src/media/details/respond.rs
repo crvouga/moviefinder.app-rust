@@ -17,7 +17,7 @@ use super::route::Route;
 pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
     match route {
         Route::IndexLoad { media_id } => {
-            let res: Res = view_load(media_id).into();
+            let res: Res = view_index_load(media_id).into();
             res.cache()
         }
 
@@ -40,10 +40,13 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
                 None => return ui::error::page("Media not found").into(),
             };
 
-            view_details(&media).into()
+            view_index(&media).into()
         }
     }
 }
+
+const INDEX_ID: &str = "media-details";
+const INDEX_SELECTOR: &str = "#media-details";
 
 #[derive(Default)]
 struct Layout {
@@ -76,11 +79,13 @@ impl Layout {
 
         div()
             .class("flex flex-col")
+            .id(INDEX_ID)
             .child(
                 TopBar::default()
                     .back_button(route::Route::Feed(feed::route::Route::DefaultLoad))
                     .title(top_bar_title)
-                    .view(),
+                    .view()
+                    .hx_abort(INDEX_SELECTOR),
             )
             .child(
                 div()
@@ -99,15 +104,19 @@ impl Layout {
     }
 }
 
-fn view_load(media_id: &MediaId) -> Elem {
+fn view_index_load(media_id: &MediaId) -> Elem {
     Layout::new()
         .child(ui::icon::spinner("animate-spin size-16"))
         .view()
-        .root_swap_screen(load_route(media_id))
+        .root_swap_screen(route::Route::Media(media::route::Route::Details(
+            media::details::route::Route::Index {
+                media_id: media_id.clone(),
+            },
+        )))
         .hx_trigger_load()
 }
 
-fn view_details(media: &Media) -> Elem {
+fn view_index(media: &Media) -> Elem {
     Layout::new()
         .media(media.clone())
         .child(
@@ -127,12 +136,4 @@ fn view_title(media: &Media) -> Elem {
 fn view_description(media: &Media) -> Elem {
     p().class("text-base text-opacity font-normal text-center px-6")
         .child_text(&media.media_description)
-}
-
-fn load_route(media_id: &MediaId) -> route::Route {
-    route::Route::Media(media::route::Route::Details(
-        media::details::route::Route::Index {
-            media_id: media_id.clone(),
-        },
-    ))
 }

@@ -12,10 +12,13 @@ impl Elem {
         match self {
             Elem::Element {
                 tag_name,
-                attributes,
+                attrs_safe,
+                attrs_unsafe,
                 children,
             } => {
-                let attrs = render_attrs(attributes);
+                let attrs_safe_str = render_attrs_safe(attrs_safe);
+                let attrs_unsafe_str = render_attrs_unsafe(attrs_unsafe);
+                let attrs = format!("{}{}", attrs_safe_str, attrs_unsafe_str);
                 if children.is_empty() {
                     format!("{}<{}{}></{}>\n", indent, tag_name, attrs, tag_name)
                 } else {
@@ -27,7 +30,7 @@ impl Elem {
                 }
             }
             Elem::Fragment(children) => render_children(children, indent_level),
-            Elem::Safe(content) => format!("{}{}\n", indent, escape_html(content)),
+            Elem::Safe(content) => format!("{}{}\n", indent, escape(content)),
             Elem::Unsafe(content) => format!("{}{}\n", indent, content),
         }
     }
@@ -41,7 +44,20 @@ fn render_children(children: &[Elem], indent_level: usize) -> String {
         .join("")
 }
 
-fn render_attrs(attrs: &HashMap<String, String>) -> String {
+fn render_attrs_safe(attrs: &HashMap<String, String>) -> String {
+    render_attrs(attrs, RenderAttrBehavior::Safe)
+}
+
+fn render_attrs_unsafe(attrs: &HashMap<String, String>) -> String {
+    render_attrs(attrs, RenderAttrBehavior::Unsafe)
+}
+
+enum RenderAttrBehavior {
+    Safe,
+    Unsafe,
+}
+
+fn render_attrs(attrs: &HashMap<String, String>, behavior: RenderAttrBehavior) -> String {
     attrs
         .iter()
         .filter_map(|(name, value)| {
@@ -49,14 +65,18 @@ fn render_attrs(attrs: &HashMap<String, String>) -> String {
             if name_cleaned.is_empty() {
                 None
             } else {
-                Some(format!(" {}=\"{}\"", name_cleaned, value))
+                let value_final = match behavior {
+                    RenderAttrBehavior::Safe => escape(value),
+                    RenderAttrBehavior::Unsafe => value.to_string(),
+                };
+                Some(format!(" {}=\"{}\"", name_cleaned, value_final))
             }
         })
         .collect::<Vec<String>>()
         .join("")
 }
 
-fn escape_html(content: &str) -> String {
+fn escape(content: &str) -> String {
     content
         .replace("&", "&amp;")
         .replace("<", "&lt;")

@@ -117,6 +117,7 @@ fn view_index(view_model: &ViewModel) -> Elem {
             .encode(),
         )
         .hx_swap_none()
+        .hx_loading_states()
         .child(view_close_button(&view_model.feed.feed_id))
         .child(view_body(view_model))
         .child(view_bottom_bar(&view_model.feed.feed_id))

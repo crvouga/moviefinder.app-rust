@@ -3,17 +3,29 @@ use super::Elem;
 impl Elem {
     pub fn attr(mut self, name: &str, value: &str) -> Self {
         if let Elem::Element {
-            ref mut attributes, ..
+            ref mut attrs_safe, ..
         } = self
         {
-            attributes.insert(name.to_string(), value.to_string());
+            attrs_safe.insert(name.to_string(), value.to_string());
+        }
+        self
+    }
+
+    pub fn attr_unsafe(mut self, name: &str, value: &str) -> Self {
+        if let Elem::Element {
+            ref mut attrs_unsafe,
+            ..
+        } = self
+        {
+            attrs_unsafe.insert(name.to_string(), value.to_string());
         }
         self
     }
 
     pub fn class(mut self, value: &str) -> Self {
         if let Elem::Element {
-            ref mut attributes, ..
+            attrs_safe: ref mut attributes,
+            ..
         } = self
         {
             let class_existing = attributes.get("class").map_or("", |attr| attr.as_str());

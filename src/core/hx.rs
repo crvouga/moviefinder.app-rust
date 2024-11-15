@@ -1,6 +1,9 @@
 // https://htmx.org/docs/
+// https://v1.htmx.org/extensions/loading-states/
 use crate::core::html;
 use serde::{Deserialize, Serialize};
+
+use super::css;
 
 impl html::Elem {
     pub fn hx_trigger(self, trigger: Trigger) -> Self {
@@ -63,8 +66,12 @@ impl html::Elem {
         self.attr("hx-replace-url", "true").clone()
     }
 
-    pub fn hx_target(self, selector: &str) -> Self {
-        self.attr("hx-target", selector).clone()
+    pub fn hx_target(self, css_selector: &str) -> Self {
+        if css::selector::is_valid(css_selector) {
+            self.attr("hx-target", css_selector).clone()
+        } else {
+            self
+        }
     }
 
     pub fn hx_vals(self, values: &str) -> Self {
@@ -87,15 +94,23 @@ impl html::Elem {
         self.attr("data-loading-disable", "")
     }
 
+    pub fn hx_loading_states(self) -> Self {
+        self.attr("data-loading-states", "")
+    }
+
     pub fn hx_on(self, event: &str, javascript: &str) -> Self {
         self.attr(&format!("hx-on:{}", event), javascript)
     }
 
-    pub fn hx_abort(self, selector: &str) -> Self {
-        self.attr(
-            "onclick",
-            format!("htmx.trigger('{}', 'htmx:abort')", selector).as_str(),
-        )
+    pub fn hx_abort(self, css_selector: &str) -> Self {
+        if css::selector::is_valid(css_selector) {
+            self.attr(
+                "onclick",
+                format!("htmx.trigger('{}', 'htmx:abort')", css_selector).as_str(),
+            )
+        } else {
+            self
+        }
     }
 }
 

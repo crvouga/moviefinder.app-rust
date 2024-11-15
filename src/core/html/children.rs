@@ -13,7 +13,8 @@ impl Elem {
         match self {
             Elem::Element {
                 tag_name: _,
-                attributes: _,
+                attrs_safe: _,
+                attrs_unsafe: _,
                 ref mut children,
             } => {
                 children.push(child);
@@ -30,7 +31,8 @@ impl Elem {
         match self {
             Elem::Element {
                 tag_name: _,
-                attributes: _,
+                attrs_safe: _,
+                attrs_unsafe: _,
                 children: ref mut children_prev,
             } => {
                 for child_new in children {
