@@ -19,5 +19,12 @@
     "tmdb",
     "touchstart",
     "vals"
-  ]
+  ],
+
+  "tailwindCSS.includeLanguages": {
+    "rs": "html"
+  },
+  "[rs]": {
+    "tailwindCSS.experimental.classRegex": ["\\class\\(\"([^\"]*)\"\\)"]
+  }
 }

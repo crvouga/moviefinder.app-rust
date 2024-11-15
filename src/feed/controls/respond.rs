@@ -7,6 +7,7 @@ use crate::{
         ui::{
             self,
             button::{Button, Color},
+            spinner_page,
         },
     },
     ctx::Ctx,
@@ -100,11 +101,7 @@ fn view_load_index(feed_id: &FeedId) -> Elem {
         .hx_trigger_load()
         .id(INDEX_ID)
         .child(view_close_button(&feed_id))
-        .child(
-            div()
-                .class("w-full h-full flex items-center justify-center")
-                .child(ui::icon::spinner("size-16 animate-spin")),
-        )
+        .child(spinner_page::view())
         .child(view_bottom_bar(&feed_id))
 }
 
