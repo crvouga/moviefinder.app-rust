@@ -46,7 +46,9 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
 }
 
 const INDEX_ID: &str = "media-details";
-const INDEX_SELECTOR: &str = "#media-details";
+fn index_selector() -> String {
+    format!("#{}", INDEX_ID)
+}
 
 #[derive(Default)]
 struct Layout {
@@ -85,7 +87,7 @@ impl Layout {
                     .back_button(route::Route::Feed(feed::route::Route::DefaultLoad))
                     .title(top_bar_title)
                     .view()
-                    .hx_abort(INDEX_SELECTOR),
+                    .hx_abort(&index_selector()),
             )
             .child(
                 div()

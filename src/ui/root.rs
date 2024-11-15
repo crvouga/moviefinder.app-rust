@@ -4,11 +4,14 @@ use crate::{
 };
 
 const ROOT_ID: &str = "root";
-const ROOT_SELECTOR: &str = "#root";
+
+fn root_selector() -> String {
+    format!("#{}", ROOT_ID)
+}
 
 impl Elem {
     pub fn root_swap_screen(self, route: Route) -> Self {
-        self.hx_target(ROOT_SELECTOR)
+        self.hx_target(&root_selector())
             .hx_swap_inner_html()
             .hx_get(&route.encode())
     }
@@ -20,7 +23,7 @@ impl Elem {
 
 impl Res {
     pub fn root_redirect_screen(route: Route) -> Self {
-        Res::redirect(route.encode().to_string(), ROOT_SELECTOR.to_string())
+        Res::redirect(route.encode().to_string(), root_selector())
     }
 }
 

@@ -85,8 +85,10 @@ impl From<FormData> for Vec<FeedFilter> {
     }
 }
 
-const FEED_CONTROLS_ID: &str = "feed-controls";
-const FEED_CONTROLS_SELECTOR: &str = "#feed-controls";
+const INDEX_ID: &str = "feed-controls";
+fn index_selector() -> String {
+    format!("#{}", INDEX_ID)
+}
 
 fn view_load_index(feed_id: &FeedId) -> Elem {
     div()
@@ -96,7 +98,7 @@ fn view_load_index(feed_id: &FeedId) -> Elem {
             child: Route::Index,
         }))
         .hx_trigger_load()
-        .id(FEED_CONTROLS_ID)
+        .id(INDEX_ID)
         .child(view_close_button(&feed_id))
         .child(
             div()
@@ -125,7 +127,7 @@ fn view_index(view_model: &ViewModel) -> Elem {
 
 fn view_close_button(feed_id: &FeedId) -> Elem {
     top_bar::CancelButton::view(to_back_route(feed_id.clone()))
-        .hx_abort(FEED_CONTROLS_SELECTOR)
+        .hx_abort(&index_selector())
         .class("absolute top-0 right-0 bg-black/50 rounded-full overflow-hidden")
 }
 
@@ -140,7 +142,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .root_push_screen(to_back_route(feed_id.clone()))
                 .type_("button")
                 .class("flex-1")
-                .hx_abort(FEED_CONTROLS_SELECTOR),
+                .hx_abort(&index_selector()),
         )
         .child(
             Button::new()

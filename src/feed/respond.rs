@@ -148,8 +148,10 @@ struct ViewModel {
     initial_feed_items: Vec<FeedItem>,
 }
 
-const FEED_ID: &str = "feed";
-const FEED_SELECTOR: &str = "#feed";
+const INDEX_ID: &str = "feed";
+fn index_selector() -> String {
+    format!("#{}", INDEX_ID)
+}
 
 fn view_top_bar_root() -> Elem {
     button().class(
@@ -163,7 +165,7 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
             feed_id: feed_id.clone(),
             child: controls::route::Route::LoadIndex,
         }))
-        .hx_abort(FEED_SELECTOR)
+        .hx_abort(&index_selector())
 }
 
 fn view_top_bar(model: &ViewModel) -> Elem {
@@ -175,7 +177,7 @@ fn view_top_bar(model: &ViewModel) -> Elem {
 fn view_root() -> Elem {
     div()
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
-        .id(FEED_ID)
+        .id(INDEX_ID)
 }
 
 fn view_empty_slide() -> Elem {
@@ -234,7 +236,7 @@ fn view_feed(model: &ViewModel) -> Elem {
 }
 
 fn view_bottom_bar() -> Elem {
-    bottom_bar::view(bottom_bar::Active::Home, FEED_SELECTOR)
+    bottom_bar::view(bottom_bar::Active::Home, &index_selector())
 }
 
 fn view_swiper(model: &ViewModel) -> Elem {
