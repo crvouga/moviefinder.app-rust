@@ -3,20 +3,10 @@ use crate::{
     core::{
         html::*,
         res::Res,
-        ui::{
-            self,
-            chip::{Chip, ChipSize},
-            image::Image,
-        },
+        ui::{self, image::Image},
     },
     ctx::Ctx,
-    log_info,
-    media::{
-        self,
-        genre::{genre::Genre, genre_id::GenreId},
-        media_db::interface::MediaQuery,
-        media_id::MediaId,
-    },
+    media::{self, media_db::interface::MediaQuery, media_id::MediaId},
     req::Req,
     route,
     ui::bottom_bar,
@@ -114,13 +104,10 @@ async fn respond_index(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
 
     put_feed(ctx, &req.session_id, &feed).await;
 
-    let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
-
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 
     let model = ViewModel {
         feed: feed.clone(),
-        genres,
         initial_feed_items,
     };
 
@@ -158,7 +145,6 @@ async fn put_feed(ctx: &Ctx, session_id: &SessionId, feed: &Feed) {
 
 struct ViewModel {
     feed: Feed,
-    genres: Vec<Genre>,
     initial_feed_items: Vec<FeedItem>,
 }
 
@@ -257,7 +243,10 @@ fn view_swiper(model: &ViewModel) -> Elem {
         .swiper_slides_per_view("1")
         .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
         .hx_trigger_custom("swiperslidechange from:swiper-container")
-        // .x_on("swiperslidechange", "feedIndex = parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
+        .x_on("swiperslidechange", r#"
+            feedActiveIndex = parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10);
+            console.log('feedIndex', feedActiveIndex, 'raw', event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'));
+        "#)
         .hx_swap_none()
         .hx_post(
             route::Route::Feed(Route::ChangedSlide {
