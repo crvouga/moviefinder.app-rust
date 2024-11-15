@@ -86,6 +86,14 @@ impl Res {
         self.actions.push(ResAction::Cache);
         self
     }
+
+    pub fn no_cache(mut self) -> Self {
+        self.actions.retain(|action| match action {
+            ResAction::Cache => false,
+            _ => true,
+        });
+        self
+    }
 }
 
 impl Default for Res {

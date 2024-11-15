@@ -56,13 +56,14 @@ async fn respond(
 
     let res = respond::respond(&ctx, &req, &route).await;
 
-    let res_mapped = res.map_html(|html| {
-        if http_request.headers.contains_key("hx-request") {
-            html
-        } else {
-            Root::new().children(vec![html]).view()
-        }
-    });
+    let is_hx_request = http_request.headers.contains_key("hx-request");
+
+    let res_mapped = if is_hx_request {
+        res
+    } else {
+        res.no_cache()
+            .map_html(|html| Root::new().children(vec![html]).view())
+    };
 
     let http_response: HttpResponse = res_mapped.into();
 
