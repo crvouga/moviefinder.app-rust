@@ -78,8 +78,9 @@ impl html::Elem {
         self.attr("hx-vals", values).clone()
     }
 
+    /// https://htmx.org/attributes/hx-ext/
     pub fn hx_ext(self, extensions: Vec<&str>) -> Self {
-        self.attr("hx-ext", &extensions.join(" "))
+        self.attr("hx-ext", &extensions.join(","))
     }
 
     pub fn hx_boost(self) -> Self {

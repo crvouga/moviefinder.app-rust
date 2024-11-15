@@ -49,6 +49,8 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         }
 
         Route::ClickedSave => {
+            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+
             let feed_filters_new: Vec<FeedFilter> = req.form_data.clone().into();
 
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
