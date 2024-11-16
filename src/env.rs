@@ -49,7 +49,7 @@ impl Env {
         let test_env = TestEnv::from_str(&env::var("TEST_ENV").unwrap_or("".to_string()));
         let database_url = env::var("DATABASE_URL").unwrap_or("".to_string());
 
-        let simulate_latency_duration = Duration::from_millis(1000);
+        let simulate_latency_duration = Duration::from_millis(150);
 
         let simulate_latency = if env_stage.is_dev() {
             Some(simulate_latency_duration)

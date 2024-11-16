@@ -42,13 +42,13 @@ impl Ctx {
             Arc::new(HttpClient::new(logger.clone()).simulate_latency(env.simulate_latency));
 
         let db_conn_sql = Arc::new(
-            db_conn_sql::impl_postgres::ImplPostgres::new(logger.noop(), &env.database_url)
+            db_conn_sql::impl_postgres::ImplPostgres::new(logger.clone(), &env.database_url)
                 .await?
                 .simulate_latency(env.simulate_latency),
         );
 
         let key_value_db = Arc::new(key_value_db::impl_cached_postgres::ImplCachedPostgres::new(
-            logger.noop(),
+            logger.clone(),
             db_conn_sql.clone(),
         ));
 
