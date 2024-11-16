@@ -48,6 +48,7 @@ impl Default for QueryParams {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
 

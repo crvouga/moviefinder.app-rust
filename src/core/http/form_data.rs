@@ -58,6 +58,7 @@ impl Default for FormData {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
 
