@@ -1,5 +1,5 @@
 run: #
-  RUSTFLAGS="-A dead_code" cargo watch -x run
+  cargo watch -x run
 
 db-start: #
   sudo docker-compose -f ./docker-compose.dev.yml up -d

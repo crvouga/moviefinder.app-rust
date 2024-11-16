@@ -22,15 +22,12 @@ use crate::{
 
 pub struct Ctx {
     pub key_value_db: Arc<dyn KeyValueDb>,
-
     pub db_conn_sql: Arc<ImplPostgres>,
     pub media_db: Box<dyn MediaDb>,
     pub feed_db: Box<dyn FeedDb>,
     pub session_feed_mapping_db: Box<dyn SessionFeedMappingDb>,
-
     pub tmdb_api: Arc<TmdbApi>,
     pub genre_db: Box<dyn GenreDb>,
-
     pub logger: Arc<dyn Logger>,
 }
 
