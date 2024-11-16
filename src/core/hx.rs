@@ -95,6 +95,10 @@ impl html::Elem {
         self.attr("data-loading-disable", "")
     }
 
+    pub fn hx_loading_path(self, path: &str) -> Self {
+        self.attr("data-loading-path", path)
+    }
+
     pub fn hx_loading_states(self) -> Self {
         self.attr("data-loading-states", "")
     }

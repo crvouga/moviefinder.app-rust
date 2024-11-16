@@ -102,41 +102,48 @@ fn view_load_index(feed_id: &FeedId) -> Elem {
         }))
         .hx_trigger_load()
         .id(INDEX_ID)
-        .child(view_close_button(&feed_id))
+        .child(view_close_button(&feed_id, ""))
         .child(spinner_page::view())
-        .child(view_bottom_bar(&feed_id))
+        .child(view_bottom_bar(&feed_id, ""))
 }
 
 fn view_index(view_model: &ViewModel) -> Elem {
+    let clicked_save_path = route::Route::Feed(feed::route::Route::Controls {
+        feed_id: view_model.feed.feed_id.clone(),
+        child: Route::ClickedSave,
+    })
+    .encode();
     form()
         .class("w-full h-full flex flex-col overflow-hidden relative")
-        .hx_post(
-            &route::Route::Feed(feed::route::Route::Controls {
-                feed_id: view_model.feed.feed_id.clone(),
-                child: Route::ClickedSave,
-            })
-            .encode(),
-        )
+        .hx_post(&clicked_save_path)
         .hx_swap_none()
-        .hx_loading_states()
-        .child(view_close_button(&view_model.feed.feed_id))
+        .child(view_close_button(
+            &view_model.feed.feed_id,
+            &clicked_save_path,
+        ))
         .child(view_body(view_model))
-        .child(view_bottom_bar(&view_model.feed.feed_id))
+        .child(view_bottom_bar(
+            &view_model.feed.feed_id,
+            &clicked_save_path,
+        ))
 }
 
-fn view_close_button(feed_id: &FeedId) -> Elem {
-    top_bar::CancelButton::view(to_back_route(feed_id.clone()))
+fn view_close_button(feed_id: &FeedId, loading_path: &str) -> Elem {
+    top_bar::CancelButton::new(to_back_route(feed_id.clone()))
+        .loading_disabled_path(loading_path)
+        .view()
         .hx_abort(&index_selector())
         .class("absolute top-0 right-0 bg-black/50 rounded-full overflow-hidden")
 }
 
-fn view_bottom_bar(feed_id: &FeedId) -> Elem {
+fn view_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
     div()
         .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4")
         .child(
             Button::new()
                 .label("Cancel")
                 .color(Color::Gray)
+                .loading_disabled_path(&loading_path)
                 .view()
                 .root_push_screen(to_back_route(feed_id.clone()))
                 .type_("button")
@@ -147,6 +154,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
             Button::new()
                 .label("Save")
                 .color(ui::button::Color::Primary)
+                .loading_path(&loading_path)
                 .view()
                 .type_("submit")
                 .class("flex-1"),

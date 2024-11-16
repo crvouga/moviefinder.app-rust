@@ -28,7 +28,9 @@ impl TopBar {
             .title
             .map_or(div().class("flex-1 truncate"), |s| Title::view(&s));
 
-        let cancel_button_elem = self.cancel_route.map_or(Empty::view(), CancelButton::view);
+        let cancel_button_elem = self
+            .cancel_route
+            .map_or(Empty::view(), |route| CancelButton::new(route).view());
 
         div()
         .class("flex items-center justify-center w-full border-b h-16 font-bold text-lg text-center truncate")
@@ -50,15 +52,43 @@ impl BackButton {
     }
 }
 
-pub struct CancelButton {}
+#[derive(Default)]
+pub struct CancelButton {
+    loading_disabled_path: Option<String>,
+    cancel_route: Option<Route>,
+}
 
 impl CancelButton {
-    pub fn view(cancel_route: Route) -> Elem {
+    pub fn new(cancel_route: Route) -> Self {
+        Self {
+            cancel_route: Some(cancel_route),
+            ..Self::default()
+        }
+    }
+
+    pub fn loading_disabled_path(mut self, loading_disabled_path: &str) -> Self {
+        self.loading_disabled_path = Some(loading_disabled_path.to_string());
+        self
+    }
+
+    pub fn view(self) -> Elem {
         button()
             .class("size-16 flex items-center justify-center")
-            .root_push_screen(cancel_route)
+            .class("disabled:opacity-80 disabled:cursor-not-allowed")
+            .map(|elem| match self.cancel_route {
+                Some(route) => elem.root_push_screen(route),
+                None => elem,
+            })
             .aria_label("cancel")
             .child(icon::x_mark("size-8"))
+            .map(|elem| {
+                if let Some(loading_disabled_path) = self.loading_disabled_path {
+                    elem.hx_loading_disabled()
+                        .hx_loading_path(&loading_disabled_path)
+                } else {
+                    elem
+                }
+            })
     }
 }
 

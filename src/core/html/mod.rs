@@ -17,6 +17,12 @@ pub enum Elem {
     Unsafe(String),
 }
 
+impl Elem {
+    pub fn map(self, f: impl FnOnce(Elem) -> Elem) -> Elem {
+        f(self)
+    }
+}
+
 pub fn unsafe_html(content: &str) -> Elem {
     Elem::Unsafe(content.to_string())
 }
