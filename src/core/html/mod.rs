@@ -21,6 +21,21 @@ impl Elem {
     pub fn map(self, f: impl FnOnce(Elem) -> Elem) -> Elem {
         f(self)
     }
+
+    pub fn tag_name(mut self, tag_name_new: &str) -> Self {
+        if let Elem::Element {
+            ref mut tag_name, ..
+        } = self
+        {
+            *tag_name = tag_name_new.to_string();
+        }
+
+        self
+    }
+
+    pub fn button(self) -> Self {
+        self.tag_name("button")
+    }
 }
 
 pub fn unsafe_html(content: &str) -> Elem {

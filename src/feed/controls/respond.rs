@@ -7,6 +7,7 @@ use crate::{
         ui::{
             self,
             button::{Button, Color},
+            chip::ChipSize,
             spinner_page,
         },
     },
@@ -93,6 +94,22 @@ fn index_selector() -> String {
     format!("#{}", INDEX_ID)
 }
 
+fn view_top_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
+    top_bar::view_root()
+        //
+        .child(
+            input()
+                .class("w-full h-full bg-transparent px-6")
+                .placeholder("Search"),
+        )
+        .child(
+            top_bar::CancelButton::new(to_back_route(feed_id.clone()))
+                .loading_disabled_path(loading_path)
+                .view()
+                .hx_abort(&index_selector()),
+        )
+}
+
 fn view_load_index(feed_id: &FeedId) -> Elem {
     div()
         .class("w-full h-full flex flex-col overflow-hidden relative")
@@ -102,7 +119,7 @@ fn view_load_index(feed_id: &FeedId) -> Elem {
         }))
         .hx_trigger_load()
         .id(INDEX_ID)
-        .child(view_close_button(&feed_id, ""))
+        .child(view_top_bar(&feed_id, ""))
         .child(spinner_page::view())
         .child(view_bottom_bar(&feed_id, ""))
 }
@@ -117,23 +134,12 @@ fn view_index(view_model: &ViewModel) -> Elem {
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .hx_post(&clicked_save_path)
         .hx_swap_none()
-        .child(view_close_button(
-            &view_model.feed.feed_id,
-            &clicked_save_path,
-        ))
+        .child(view_top_bar(&view_model.feed.feed_id, &clicked_save_path))
         .child(view_body(view_model))
         .child(view_bottom_bar(
             &view_model.feed.feed_id,
             &clicked_save_path,
         ))
-}
-
-fn view_close_button(feed_id: &FeedId, loading_path: &str) -> Elem {
-    top_bar::CancelButton::new(to_back_route(feed_id.clone()))
-        .loading_disabled_path(loading_path)
-        .view()
-        .hx_abort(&index_selector())
-        .class("absolute top-0 right-0 bg-black/50 rounded-full overflow-hidden")
 }
 
 fn view_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
@@ -192,6 +198,7 @@ fn view_chips_frag(feed_filters: Vec<FeedFilter>, is_checked: bool) -> Elem {
             .map(|filter| {
                 filter
                     .chip()
+                    .size(ChipSize::Large)
                     .checked(is_checked)
                     .disabled(false)
                     .name(FEED_FILTER_ID_KEY)

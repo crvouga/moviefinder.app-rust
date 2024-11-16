@@ -9,7 +9,7 @@ use crate::{
     media::{self, media_db::interface::MediaQuery, media_id::MediaId},
     req::Req,
     route,
-    ui::bottom_bar,
+    ui::{bottom_bar, top_bar},
     user_session::session_id::SessionId,
 };
 
@@ -154,9 +154,7 @@ fn index_selector() -> String {
 }
 
 fn view_top_bar_root() -> Elem {
-    button().class(
-        "w-full h-16 shrink-0 border-b flex items-center justify-center relative pl-2 overflow-hidden",
-    )
+    top_bar::view_root().button().class("relative")
 }
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {

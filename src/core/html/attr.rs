@@ -120,4 +120,8 @@ impl Elem {
     pub fn for_(self, value: &str) -> Self {
         self.attr("for", value)
     }
+
+    pub fn placeholder(self, value: &str) -> Self {
+        self.attr("placeholder", value)
+    }
 }

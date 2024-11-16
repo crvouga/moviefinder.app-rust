@@ -3,6 +3,11 @@ use crate::{
     route::Route,
 };
 
+pub fn view_root() -> Elem {
+    div()
+        .class("flex items-center justify-center shrink-0 w-full border-b h-16 font-bold text-lg text-center truncate")
+}
+
 #[derive(Default)]
 pub struct TopBar {
     back_route: Option<Route>,
@@ -32,11 +37,10 @@ impl TopBar {
             .cancel_route
             .map_or(Empty::view(), |route| CancelButton::new(route).view());
 
-        div()
-        .class("flex items-center justify-center w-full border-b h-16 font-bold text-lg text-center truncate")
-        .child(back_button_elem)
-        .child(title_elem)
-        .child(cancel_button_elem)
+        view_root()
+            .child(back_button_elem)
+            .child(title_elem)
+            .child(cancel_button_elem)
     }
 }
 
