@@ -1,7 +1,7 @@
 use crate::{
     core::{
         pagination::{PageBased, Paginated},
-        query::{Filter, Op},
+        query::{QueryFilter, QueryOp},
     },
     media::{
         core::Media,
@@ -120,13 +120,13 @@ impl From<MediaQuery> for DiscoverMovieParams {
         };
 
         match media_query.filter {
-            Filter::Clause(MediaField::GenreId, Op::Eq, value) => {
+            QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, value) => {
                 params.with_genres = Some(value);
             }
-            Filter::And(filters) => {
+            QueryFilter::And(filters) => {
                 for filter in filters {
                     match filter {
-                        Filter::Clause(MediaField::GenreId, Op::Eq, value) => {
+                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, value) => {
                             let with_genres_new = format!(
                                 "{}{}{}",
                                 params.with_genres.unwrap_or_default(),
@@ -142,10 +142,10 @@ impl From<MediaQuery> for DiscoverMovieParams {
                     }
                 }
             }
-            Filter::Or(filters) => {
+            QueryFilter::Or(filters) => {
                 for filter in filters {
                     match filter {
-                        Filter::Clause(MediaField::GenreId, Op::Eq, value) => {
+                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, value) => {
                             let with_genres_new = format!(
                                 "{}{}{}",
                                 params.with_genres.unwrap_or_default(),

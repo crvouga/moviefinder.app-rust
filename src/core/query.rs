@@ -2,10 +2,10 @@ use super::pagination::{PageBased, Pagination};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-pub struct Query<Field> {
+pub struct Query<QueryField> {
     pub limit: usize,
     pub offset: usize,
-    pub filter: Filter<Field>,
+    pub filter: QueryFilter<QueryField>,
 }
 
 impl<Field> From<&Query<Field>> for Pagination {
@@ -26,15 +26,15 @@ impl<Field> From<(&Query<Field>, usize)> for PageBased {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub enum Filter<Field> {
-    Clause(Field, Op, String),
-    And(Vec<Filter<Field>>),
-    Or(Vec<Filter<Field>>),
+pub enum QueryFilter<QueryField> {
+    Clause(QueryField, QueryOp, String),
+    And(Vec<QueryFilter<QueryField>>),
+    Or(Vec<QueryFilter<QueryField>>),
     #[default]
     None,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum Op {
+pub enum QueryOp {
     Eq,
 }

@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod filter_by_id_test {
     use super::super::fixture::fixtures;
-    use crate::core::query::{Filter, Op, Query};
+    use crate::core::query::{QueryFilter, QueryOp, Query};
     use crate::media::media_db::interface::MediaField;
     use crate::media::media_id::MediaId;
 
@@ -13,7 +13,7 @@ mod filter_by_id_test {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: Filter::Clause(MediaField::MediaId, Op::Eq, media_id.as_str().to_string()),
+                filter: QueryFilter::Clause(MediaField::MediaId, QueryOp::Eq, media_id.as_str().to_string()),
             };
             let result = f.media_db.query(query).await;
             let first = result.unwrap().items.into_iter().next().unwrap();

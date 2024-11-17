@@ -1,6 +1,6 @@
 use super::{feed_filter::FeedFilter, feed_id::FeedId};
 use crate::{
-    core::query::Filter,
+    core::query::QueryFilter,
     media::media_db::interface::{MediaField, MediaQuery},
 };
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,7 @@ const LIMIT: usize = 3;
 
 impl From<&Feed> for MediaQuery {
     fn from(feed: &Feed) -> MediaQuery {
-        let filters: Vec<Filter<MediaField>> = feed
+        let filters: Vec<QueryFilter<MediaField>> = feed
             .clone()
             .filters
             .into_iter()
@@ -26,7 +26,7 @@ impl From<&Feed> for MediaQuery {
         MediaQuery {
             offset: feed.start_index,
             limit: LIMIT,
-            filter: Filter::And(filters),
+            filter: QueryFilter::And(filters),
         }
     }
 }

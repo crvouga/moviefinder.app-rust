@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod deduplicated_test {
     use super::super::fixture::{fixtures, frequencies};
-    use crate::core::query::{Filter, Query};
+    use crate::core::query::{QueryFilter, Query};
     use crate::media::media_id::MediaId;
     use std::collections::HashSet;
 
@@ -15,7 +15,7 @@ mod deduplicated_test {
                 .query(Query {
                     limit,
                     offset: 0,
-                    filter: Filter::None,
+                    filter: QueryFilter::None,
                 })
                 .await
                 .unwrap();
@@ -47,7 +47,7 @@ mod deduplicated_test {
                 .query(Query {
                     limit,
                     offset: 5,
-                    filter: Filter::None,
+                    filter: QueryFilter::None,
                 })
                 .await
                 .unwrap();

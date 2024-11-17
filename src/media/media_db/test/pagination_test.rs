@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod limit_offset_test {
     use super::super::fixture::fixtures;
-    use crate::core::query::{Filter, Query};
+    use crate::core::query::{QueryFilter, Query};
 
     #[tokio::test]
     async fn test_limit_and_offset() {
@@ -11,7 +11,7 @@ mod limit_offset_test {
             let query = Query {
                 limit,
                 offset: 0,
-                filter: Filter::None,
+                filter: QueryFilter::None,
             };
             let result = f.media_db.query(query).await.unwrap();
             assert_eq!(result.items.len(), limit);
@@ -30,7 +30,7 @@ mod limit_offset_test {
                 .query(Query {
                     limit,
                     offset,
-                    filter: Filter::None,
+                    filter: QueryFilter::None,
                 })
                 .await
                 .unwrap();
@@ -48,7 +48,7 @@ mod limit_offset_test {
                 .query(Query {
                     limit,
                     offset,
-                    filter: Filter::None,
+                    filter: QueryFilter::None,
                 })
                 .await
                 .unwrap();

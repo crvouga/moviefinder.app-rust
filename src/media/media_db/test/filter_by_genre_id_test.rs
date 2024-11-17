@@ -3,7 +3,7 @@
 mod filter_by_genre_id_test {
     use super::super::fixture::fixtures;
     use crate::{
-        core::query::{Filter, Op, Query},
+        core::query::{QueryFilter, QueryOp, Query},
         media::media_db::interface::MediaField,
     };
 
@@ -16,7 +16,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    filter: Filter::Clause(MediaField::GenreId, Op::Eq, genre_id.to_string()),
+                    filter: QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id.to_string()),
                 })
                 .await
                 .unwrap();
@@ -39,9 +39,9 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    filter: Filter::And(vec![
-                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_a.to_string()),
-                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_b.to_string()),
+                    filter: QueryFilter::And(vec![
+                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
+                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
                     ]),
                 })
                 .await
@@ -66,9 +66,9 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    filter: Filter::Or(vec![
-                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_a.to_string()),
-                        Filter::Clause(MediaField::GenreId, Op::Eq, genre_id_b.to_string()),
+                    filter: QueryFilter::Or(vec![
+                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
+                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
                     ]),
                 })
                 .await

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     core::{
         human_friendly_base64,
-        query::{Filter, Op},
+        query::{QueryFilter, QueryOp},
         ui::chip::{Chip, ChipSize},
     },
     media::{genre::genre::Genre, media_db::interface::MediaField},
@@ -26,11 +26,11 @@ impl Ord for FeedFilter {
     }
 }
 
-impl From<FeedFilter> for Filter<MediaField> {
-    fn from(feed_filter: FeedFilter) -> Filter<MediaField> {
+impl From<FeedFilter> for QueryFilter<MediaField> {
+    fn from(feed_filter: FeedFilter) -> QueryFilter<MediaField> {
         match feed_filter {
             FeedFilter::Genre(genre) => {
-                Filter::Clause(MediaField::GenreId, Op::Eq, genre.id.to_string())
+                QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre.id.to_string())
             }
         }
     }

@@ -2,7 +2,7 @@ use super::tmdb_query_plan_item::TmdbQueryPlanItem;
 use crate::{
     core::{
         pagination::Paginated,
-        query::{Filter, Op},
+        query::{QueryFilter, QueryOp},
     },
     media::{
         core::Media,
@@ -48,15 +48,15 @@ impl From<MediaQuery> for TmdbQueryPlan {
         let mut query_plan = TmdbQueryPlan::default();
 
         match media_query.filter.clone() {
-            Filter::None => {
+            QueryFilter::None => {
                 let item = TmdbQueryPlanItem::GetDiscoverMovie {
                     params: media_query.clone().into(),
                 };
                 query_plan.items.push(item);
                 query_plan
             }
-            Filter::Clause(field, operator, value) => match (field, operator, value) {
-                (MediaField::MediaId, Op::Eq, value) => {
+            QueryFilter::Clause(field, operator, value) => match (field, operator, value) {
+                (MediaField::MediaId, QueryOp::Eq, value) => {
                     let media_id = MediaId::new(value);
                     let item = TmdbQueryPlanItem::GetMovieDetails { media_id };
                     query_plan.items.push(item);
@@ -71,14 +71,14 @@ impl From<MediaQuery> for TmdbQueryPlan {
                     query_plan
                 }
             },
-            Filter::And(_filters) => {
+            QueryFilter::And(_filters) => {
                 let item = TmdbQueryPlanItem::GetDiscoverMovie {
                     params: media_query.clone().into(),
                 };
                 query_plan.items.push(item);
                 query_plan
             }
-            Filter::Or(_filters) => {
+            QueryFilter::Or(_filters) => {
                 let item = TmdbQueryPlanItem::GetDiscoverMovie {
                     params: media_query.clone().into(),
                 };
