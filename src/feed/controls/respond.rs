@@ -95,19 +95,9 @@ fn index_selector() -> String {
 }
 
 fn view_top_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
-    top_bar::view_root()
-        // .child(view_close_button(feed_id, loading_path))
-        .child(
-            div()
-                .class("flex-1 h-full")
-                .child(view_search_input(feed_id, loading_path)),
-        )
-}
-
-fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
     div()
-        .class("w-full h-full relative")
-        .x_data("{search:''}")
+        .class("w-full h-16 shrink-0 border-b relative")
+        .x_data("{js_val_search:''}")
         .child(
             div()
                 .class("absolute top-1/2 left-5 transform -translate-y-1/2")
@@ -115,8 +105,8 @@ fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             button()
-                .x_show("search.length > 0")
-                .x_on("click", "search = ''; $refs.search.focus();")
+                .x_show("js_val_search.length > 0")
+                .x_on("click", "js_val_search = ''; $refs.js_ref_search.focus();")
                 .type_("button")
                 .tab_index(0)
                 .aria_label("clear search")
@@ -125,7 +115,7 @@ fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             button()
-                .x_show("search.length === 0")
+                .x_show("js_val_search.length === 0")
                 .type_("button")
                 .tab_index(0)
                 .aria_label("close")
@@ -138,8 +128,8 @@ fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             input()
-                .x_model("search")
-                .x_ref("search")
+                .x_model("js_val_search")
+                .x_ref("js_ref_search")
                 .class("w-full h-full bg-transparent")
                 .class("pl-14")
                 .class("pr-14")
