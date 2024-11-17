@@ -1,4 +1,4 @@
-use crate::media::core::Media;
+use crate::media::media_::Media;
 
 #[derive(Debug, Clone)]
 pub enum FeedItem {

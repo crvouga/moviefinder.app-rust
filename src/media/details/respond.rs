@@ -7,7 +7,7 @@ use crate::{
     },
     ctx::Ctx,
     feed,
-    media::{self, core::Media, media_db::interface::MediaQueryField, media_id::MediaId},
+    media::{self, media_::Media, media_db::interface::MediaQueryField, media_id::MediaId},
     route,
     ui::top_bar::TopBar,
 };

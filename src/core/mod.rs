@@ -15,6 +15,7 @@ pub mod random;
 pub mod res;
 pub mod sql;
 pub mod struct_ext;
+pub mod tmdb_api;
 pub mod ui;
 pub mod url;
 pub mod url_encoded;

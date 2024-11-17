@@ -2,7 +2,7 @@ use super::interface::{MediaDb, MediaQuery};
 use crate::{
     core::{logger::interface::Logger, pagination::Paginated},
     log_info,
-    media::{core::Media, tmdb_api},
+    media::{media_::Media, tmdb_api},
 };
 use async_trait::async_trait;
 use std::sync::Arc;

@@ -1,6 +1,6 @@
 use crate::core::pagination::Paginated;
 use crate::core::query::Query;
-use crate::media::core::Media;
+use crate::media::media_::Media;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 

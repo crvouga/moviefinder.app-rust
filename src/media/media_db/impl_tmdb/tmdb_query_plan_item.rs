@@ -4,7 +4,7 @@ use crate::{
         query::{QueryFilter, QueryOp},
     },
     media::{
-        core::Media,
+        media_::Media,
         media_db::interface::{MediaQuery, MediaQueryField},
         media_id::MediaId,
         tmdb_api::{

@@ -12,6 +12,7 @@ mod feed;
 mod fixture;
 mod key_value_db;
 mod media;
+mod person;
 mod req;
 mod respond;
 mod route;
