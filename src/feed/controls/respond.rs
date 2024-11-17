@@ -121,7 +121,7 @@ fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .tab_index(0)
                 .aria_label("clear search")
                 .class("absolute top-1/2 right-0 size-16 grid place-items-center transform -translate-y-1/2")
-                .child(icon::x_mark("size-6")),
+                .child(icon::x_circle_mark("size-6")),
         )
         .child(
             button()
@@ -134,7 +134,7 @@ fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .hx_abort(&index_selector())
                 .root_push_screen(to_back_route(feed_id.clone()))
                 .class("absolute top-1/2 right-0 size-16 grid place-items-center transform -translate-y-1/2")
-                .child(icon::chevron_down("size-6")),
+                .child(icon::x_mark("size-6")),
         )
         .child(
             input()
