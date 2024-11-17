@@ -6,7 +6,7 @@ use crate::{
     feed::feed_id::FeedId, key_value_db::interface::KeyValueDb, user_session::session_id::SessionId,
 };
 
-use super::interface::SessionFeedMappingDb;
+use super::interface::FeedSessionMappingDb;
 
 pub struct ImplKeyValueDb {
     key_value_db: Arc<dyn KeyValueDb>,
@@ -23,7 +23,7 @@ impl ImplKeyValueDb {
 }
 
 #[async_trait]
-impl SessionFeedMappingDb for ImplKeyValueDb {
+impl FeedSessionMappingDb for ImplKeyValueDb {
     async fn get(&self, session_id: SessionId) -> Result<Option<FeedId>, String> {
         match self.key_value_db.get(session_id.as_str()).await {
             Ok(Some(value)) => Ok(Some(FeedId::new(value))),

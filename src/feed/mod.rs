@@ -7,4 +7,4 @@ pub mod feed_tag;
 pub mod feed_tag_db;
 pub mod respond;
 pub mod route;
-pub mod session_feed_mapping_db;
+pub mod feed_session_mapping_db;

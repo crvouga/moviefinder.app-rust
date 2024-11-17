@@ -6,11 +6,11 @@ use crate::{
         media_db::{impl_tmdb, interface::MediaDb},
     },
 };
-use std::{collections::HashMap, hash::Hash};
+use std::{collections::HashMap, hash::Hash, sync::Arc};
 
 pub struct Fixture {
     pub media_db: Box<dyn MediaDb>,
-    pub genre_db: Box<dyn GenreDb>,
+    pub genre_db: Arc<dyn GenreDb>,
 }
 
 impl Fixture {

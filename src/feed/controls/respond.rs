@@ -3,6 +3,8 @@ use crate::{
     core::{
         html::*,
         http::form_data::FormData,
+        pagination::Paginated,
+        query::{Query, QueryFilter},
         res::Res,
         ui::{
             self,
@@ -15,13 +17,12 @@ use crate::{
     feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag},
     req::Req,
     route,
-    ui::top_bar,
 };
 
 #[derive(Debug)]
 struct ViewModel {
     feed: Feed,
-    filters: Vec<FeedTag>,
+    feed_tags: Vec<FeedTag>,
 }
 
 const FEED_FILTER_ID_KEY: &str = "genre_id";
@@ -37,21 +38,25 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         Route::Index => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
+            let feed_tags = ctx
+                .feed_tag_db
+                .query(Query {
+                    offset: 0,
+                    limit: 100,
+                    filter: QueryFilter::None,
+                })
+                .await
+                .unwrap_or(Paginated::default());
 
-            let filters: Vec<FeedTag> = genres
-                .iter()
-                .map(|genre| FeedTag::Genre(genre.clone()))
-                .collect();
-
-            let view_model = ViewModel { feed, filters };
+            let view_model = ViewModel {
+                feed,
+                feed_tags: feed_tags.items,
+            };
 
             view_index(&view_model).into()
         }
 
         Route::ClickedSave => {
-            // tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-
             let feed_tags_new: Vec<FeedTag> = req.form_data.clone().into();
 
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
@@ -205,7 +210,7 @@ fn view_chips(view_model: &ViewModel) -> Elem {
     active.sort();
 
     let mut inactive: Vec<FeedTag> = view_model
-        .filters
+        .feed_tags
         .clone()
         .into_iter()
         .filter(|feed_tag| !active.contains(feed_tag))

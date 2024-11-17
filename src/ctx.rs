@@ -11,7 +11,8 @@ use crate::{
     feed::{
         self,
         feed_db::{self, interface::FeedDb},
-        session_feed_mapping_db::interface::SessionFeedMappingDb,
+        feed_session_mapping_db::interface::FeedSessionMappingDb,
+        feed_tag_db::{self, interface::FeedTagDb},
     },
     key_value_db::{self, interface::KeyValueDb},
     media::{
@@ -25,9 +26,10 @@ pub struct Ctx {
     pub db_conn_sql: Arc<ImplPostgres>,
     pub media_db: Box<dyn MediaDb>,
     pub feed_db: Box<dyn FeedDb>,
-    pub session_feed_mapping_db: Box<dyn SessionFeedMappingDb>,
+    pub feed_tag_db: Box<dyn FeedTagDb>,
+    pub feed_session_mapping_db: Box<dyn FeedSessionMappingDb>,
     pub tmdb_api: Arc<TmdbApi>,
-    pub genre_db: Box<dyn GenreDb>,
+    pub genre_db: Arc<dyn GenreDb>,
     pub logger: Arc<dyn Logger>,
 }
 
@@ -63,13 +65,15 @@ impl Ctx {
             key_value_db.clone(),
         ));
 
-        let session_feed_mapping_db = Box::new(
-            feed::session_feed_mapping_db::impl_key_value_db::ImplKeyValueDb::new(
+        let genre_db = Arc::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
+
+        let feed_tag_db = Box::new(feed_tag_db::impl_::Impl_::new(genre_db.clone()));
+
+        let feed_session_mapping_db = Box::new(
+            feed::feed_session_mapping_db::impl_key_value_db::ImplKeyValueDb::new(
                 key_value_db.clone(),
             ),
         );
-
-        let genre_db = Box::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
 
         Ok(Ctx {
             logger,
@@ -77,8 +81,9 @@ impl Ctx {
             db_conn_sql,
             tmdb_api,
             media_db,
-            session_feed_mapping_db,
+            feed_session_mapping_db,
             feed_db,
+            feed_tag_db,
             key_value_db,
         })
     }

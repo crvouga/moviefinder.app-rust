@@ -20,7 +20,19 @@ impl Impl_ {
 
 #[async_trait]
 impl FeedTagDb for Impl_ {
-    async fn query(&self, _query: Query<FeedTagQueryField>) -> Result<Paginated<FeedTag>, String> {
-        unimplemented!()
+    async fn query(&self, query: Query<FeedTagQueryField>) -> Result<Paginated<FeedTag>, String> {
+        let genres = self.genre_db.get_all().await.unwrap_or(vec![]);
+
+        let feed_tags: Vec<FeedTag> = genres
+            .iter()
+            .map(|genre| FeedTag::Genre(genre.clone()))
+            .collect();
+
+        Ok(Paginated {
+            total: feed_tags.len(),
+            items: feed_tags,
+            limit: query.limit,
+            offset: query.offset,
+        })
     }
 }

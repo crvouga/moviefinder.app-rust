@@ -22,7 +22,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
 
         Route::Default => {
             let maybe_feed_id = ctx
-                .session_feed_mapping_db
+                .feed_session_mapping_db
                 .get(req.session_id.clone())
                 .await
                 .unwrap_or(None);
@@ -138,7 +138,7 @@ async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String>
 async fn put_feed(ctx: &Ctx, session_id: &SessionId, feed: &Feed) {
     let put_feed_fut = ctx.feed_db.put(feed.clone());
     let put_session_mapping_fut = ctx
-        .session_feed_mapping_db
+        .feed_session_mapping_db
         .put(session_id.clone(), feed.feed_id.clone());
     let _ = tokio::join!(put_feed_fut, put_session_mapping_fut);
 }
