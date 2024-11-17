@@ -49,6 +49,10 @@ impl Elem {
         self.attr("type", type_)
     }
 
+    pub fn tab_index(self, value: i32) -> Self {
+        self.attr("tabindex", &value.to_string())
+    }
+
     pub fn href(self, value: &str) -> Self {
         self.attr("href", value)
     }

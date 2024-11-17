@@ -13,4 +13,8 @@ impl Elem {
     pub fn x_on(self, event: &str, javascript: &str) -> Self {
         self.attr(&format!("x-on:{}", event), javascript)
     }
+
+    pub fn x_model(self, javascript: &str) -> Self {
+        self.attr("x-model", javascript)
+    }
 }

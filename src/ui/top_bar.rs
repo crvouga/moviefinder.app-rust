@@ -27,7 +27,9 @@ impl TopBar {
     }
 
     pub fn view(self) -> Elem {
-        let back_button_elem = self.back_route.map_or(Empty::view(), BackButton::view);
+        let back_button_elem = self
+            .back_route
+            .map_or(Empty::view(), |route| BackButton::new(route).view());
 
         let title_elem = self
             .title
@@ -44,28 +46,16 @@ impl TopBar {
     }
 }
 
-pub struct BackButton {}
+#[derive(Default)]
+pub struct BackButton {
+    loading_disabled_path: Option<String>,
+    route: Option<Route>,
+}
 
 impl BackButton {
-    pub fn view(back_route: Route) -> Elem {
-        button()
-            .class("size-16 flex items-center justify-center")
-            .aria_label("go back")
-            .root_push_screen(back_route)
-            .child(icon::back_arrow("size-8"))
-    }
-}
-
-#[derive(Default)]
-pub struct CancelButton {
-    loading_disabled_path: Option<String>,
-    cancel_route: Option<Route>,
-}
-
-impl CancelButton {
-    pub fn new(cancel_route: Route) -> Self {
+    pub fn new(route: Route) -> Self {
         Self {
-            cancel_route: Some(cancel_route),
+            route: Some(route),
             ..Self::default()
         }
     }
@@ -78,12 +68,44 @@ impl CancelButton {
     pub fn view(self) -> Elem {
         button()
             .class("size-16 flex items-center justify-center")
+            .aria_label("go back")
+            .map(|elem| match self.route {
+                Some(route) => elem.root_push_screen(route),
+                None => elem,
+            })
+            .child(icon::back_arrow("size-8"))
+    }
+}
+
+#[derive(Default)]
+pub struct CancelButton {
+    loading_disabled_path: Option<String>,
+    route: Option<Route>,
+}
+
+impl CancelButton {
+    pub fn new(cancel_route: Route) -> Self {
+        Self {
+            route: Some(cancel_route),
+            ..Self::default()
+        }
+    }
+
+    pub fn loading_disabled_path(mut self, loading_disabled_path: &str) -> Self {
+        self.loading_disabled_path = Some(loading_disabled_path.to_string());
+        self
+    }
+
+    pub fn view(self) -> Elem {
+        button()
+            .class("size-16 flex items-center justify-center shrink-0")
             .class("disabled:opacity-80 disabled:cursor-not-allowed")
-            .map(|elem| match self.cancel_route {
+            .map(|elem| match self.route {
                 Some(route) => elem.root_push_screen(route),
                 None => elem,
             })
             .aria_label("cancel")
+            .tab_index(0)
             .child(icon::x_mark("size-8"))
             .map(|elem| {
                 if let Some(loading_disabled_path) = self.loading_disabled_path {

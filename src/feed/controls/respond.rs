@@ -8,7 +8,7 @@ use crate::{
             self,
             button::{Button, Color},
             chip::ChipSize,
-            spinner_page,
+            icon, spinner_page,
         },
     },
     ctx::Ctx,
@@ -96,17 +96,53 @@ fn index_selector() -> String {
 
 fn view_top_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
     top_bar::view_root()
-        //
+        // .child(view_close_button(feed_id, loading_path))
         .child(
-            input()
-                .class("w-full h-full bg-transparent px-6")
-                .placeholder("Search"),
+            div()
+                .class("flex-1 h-full")
+                .child(view_search_input(feed_id, loading_path)),
+        )
+}
+
+fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
+    div()
+        .class("w-full h-full relative")
+        .x_data("{search:''}")
+        .child(
+            div()
+                .class("absolute top-1/2 left-5 transform -translate-y-1/2")
+                .child(icon::magnifying_glass("size-6")),
         )
         .child(
-            top_bar::CancelButton::new(to_back_route(feed_id.clone()))
-                .loading_disabled_path(loading_path)
-                .view()
-                .hx_abort(&index_selector()),
+            button()
+                .x_show("search.length > 0")
+                .x_on("click", "search = ''")
+                .type_("button")
+                .tab_index(0)
+                .aria_label("clear search")
+                .class("absolute top-1/2 right-0 size-16 grid place-items-center transform -translate-y-1/2")
+                .child(icon::x_mark("size-6")),
+        )
+        .child(
+            button()
+                .x_show("search.length === 0")
+                .type_("button")
+                .tab_index(0)
+                .aria_label("close")
+                .hx_loading_disabled()
+                .hx_loading_path(loading_path)
+                .hx_abort(&index_selector())
+                .root_push_screen(to_back_route(feed_id.clone()))
+                .class("absolute top-1/2 right-0 size-16 grid place-items-center transform -translate-y-1/2")
+                .child(icon::chevron_down("size-6")),
+        )
+        .child(
+            input()
+                .x_model("search")
+                .class("w-full h-full bg-transparent")
+                .class("pl-14")
+                .class("pr-14")
+                .placeholder("Search"),
         )
 }
 
