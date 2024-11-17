@@ -2,16 +2,16 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::media::{genre::genre::Genre, tmdb_api::TmdbApi};
+use crate::{core::tmdb_api, media::genre::genre::Genre};
 
 use super::interface::GenreDb;
 
 pub struct ImplTmdb {
-    tmdb_api: Arc<TmdbApi>,
+    tmdb_api: Arc<tmdb_api::TmdbApi>,
 }
 
 impl ImplTmdb {
-    pub fn new(tmdb_api: Arc<TmdbApi>) -> ImplTmdb {
+    pub fn new(tmdb_api: Arc<tmdb_api::TmdbApi>) -> ImplTmdb {
         ImplTmdb { tmdb_api }
     }
 }

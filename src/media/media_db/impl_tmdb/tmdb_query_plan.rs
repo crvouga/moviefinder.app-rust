@@ -3,12 +3,12 @@ use crate::{
     core::{
         pagination::Paginated,
         query::{QueryFilter, QueryOp},
+        tmdb_api::{config::TmdbConfig, TmdbApi},
     },
     media::{
         media_::Media,
         media_db::interface::{MediaQuery, MediaQueryField},
         media_id::MediaId,
-        tmdb_api::{config::TmdbConfig, TmdbApi},
     },
 };
 use std::vec;

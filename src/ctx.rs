@@ -5,6 +5,7 @@ use crate::{
         db_conn_sql::{self, impl_postgres::ImplPostgres},
         http::client::HttpClient,
         logger::{impl_console::ConsoleLogger, interface::Logger},
+        tmdb_api::{self, TmdbApi},
     },
     env::Env,
     feed::{
@@ -16,7 +17,6 @@ use crate::{
     media::{
         genre::genre_db::{self, interface::GenreDb},
         media_db::{self, interface::MediaDb},
-        tmdb_api::{self, TmdbApi},
     },
 };
 

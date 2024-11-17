@@ -1,8 +1,8 @@
 use super::interface::{MediaDb, MediaQuery};
 use crate::{
-    core::{logger::interface::Logger, pagination::Paginated},
+    core::{logger::interface::Logger, pagination::Paginated, tmdb_api},
     log_info,
-    media::{media_::Media, tmdb_api},
+    media::media_::Media,
 };
 use async_trait::async_trait;
 use std::sync::Arc;

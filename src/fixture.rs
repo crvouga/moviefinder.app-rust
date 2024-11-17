@@ -1,10 +1,10 @@
 use crate::{
-    core::{db_conn_sql, http::client::HttpClient, logger::impl_console::ConsoleLogger},
+    core::{db_conn_sql, http::client::HttpClient, logger::impl_console::ConsoleLogger, tmdb_api},
     ctx::Ctx,
     env::Env,
     feed::{feed_db, session_feed_mapping_db},
     key_value_db,
-    media::{genre::genre_db, media_db, tmdb_api},
+    media::{genre::genre_db, media_db},
 };
 use std::sync::Arc;
 

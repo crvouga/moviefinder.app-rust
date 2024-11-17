@@ -2,17 +2,17 @@ use crate::{
     core::{
         pagination::{PageBased, Paginated},
         query::{QueryFilter, QueryOp},
-    },
-    media::{
-        media_::Media,
-        media_db::interface::{MediaQuery, MediaQueryField},
-        media_id::MediaId,
         tmdb_api::{
             self,
             config::TmdbConfig,
             discover_movie::{DiscoverMovieParams, TMDB_AND_OP, TMDB_OR_OP},
             TmdbApi, TMDB_PAGE_SIZE,
         },
+    },
+    media::{
+        media_::Media,
+        media_db::interface::{MediaQuery, MediaQueryField},
+        media_id::MediaId,
     },
 };
 use futures::future::join_all;
