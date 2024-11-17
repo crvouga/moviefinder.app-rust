@@ -17,4 +17,8 @@ impl Elem {
     pub fn x_model(self, javascript: &str) -> Self {
         self.attr("x-model", javascript)
     }
+
+    pub fn x_ref(self, javascript: &str) -> Self {
+        self.attr("x-ref", javascript)
+    }
 }

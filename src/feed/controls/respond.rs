@@ -28,7 +28,7 @@ const FEED_FILTER_ID_KEY: &str = "genre_id";
 
 pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
-        Route::LoadIndex => {
+        Route::IndexLoad => {
             let res: Res = view_load_index(&feed_id).into();
 
             res.cache()
@@ -116,7 +116,7 @@ fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
         .child(
             button()
                 .x_show("search.length > 0")
-                .x_on("click", "search = ''")
+                .x_on("click", "search = ''; $refs.search.focus();")
                 .type_("button")
                 .tab_index(0)
                 .aria_label("clear search")
@@ -139,6 +139,7 @@ fn view_search_input(feed_id: &FeedId, loading_path: &str) -> Elem {
         .child(
             input()
                 .x_model("search")
+                .x_ref("search")
                 .class("w-full h-full bg-transparent")
                 .class("pl-14")
                 .class("pr-14")

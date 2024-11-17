@@ -161,7 +161,7 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root()
         .root_push_screen(route::Route::Feed(Route::Controls {
             feed_id: feed_id.clone(),
-            child: controls::route::Route::LoadIndex,
+            child: controls::route::Route::IndexLoad,
         }))
         .hx_abort(&index_selector())
 }
