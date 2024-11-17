@@ -61,11 +61,11 @@ impl Ctx {
             tmdb_api.clone(),
         ));
 
+        let genre_db = Arc::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
+
         let feed_db = Box::new(feed_db::impl_key_value_db::ImplKeyValueDb::new(
             key_value_db.clone(),
         ));
-
-        let genre_db = Arc::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
 
         let feed_tag_db = Box::new(feed_tag_db::impl_::Impl_::new(genre_db.clone()));
 
