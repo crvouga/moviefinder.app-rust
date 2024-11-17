@@ -5,13 +5,13 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub enum MediaField {
+pub enum MediaQueryField {
     #[default]
     MediaId,
     GenreId,
 }
 
-pub type MediaQuery = Query<MediaField>;
+pub type MediaQuery = Query<MediaQueryField>;
 
 #[async_trait]
 pub trait MediaDb: Send + Sync {

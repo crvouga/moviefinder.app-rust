@@ -6,7 +6,7 @@ use crate::{
     },
     media::{
         core::Media,
-        media_db::interface::{MediaField, MediaQuery},
+        media_db::interface::{MediaQueryField, MediaQuery},
         media_id::MediaId,
         tmdb_api::{config::TmdbConfig, TmdbApi},
     },
@@ -56,7 +56,7 @@ impl From<MediaQuery> for TmdbQueryPlan {
                 query_plan
             }
             QueryFilter::Clause(field, operator, value) => match (field, operator, value) {
-                (MediaField::MediaId, QueryOp::Eq, value) => {
+                (MediaQueryField::MediaId, QueryOp::Eq, value) => {
                     let media_id = MediaId::new(value);
                     let item = TmdbQueryPlanItem::GetMovieDetails { media_id };
                     query_plan.items.push(item);

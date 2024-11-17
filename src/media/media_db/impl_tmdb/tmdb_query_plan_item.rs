@@ -5,7 +5,7 @@ use crate::{
     },
     media::{
         core::Media,
-        media_db::interface::{MediaField, MediaQuery},
+        media_db::interface::{MediaQueryField, MediaQuery},
         media_id::MediaId,
         tmdb_api::{
             self,
@@ -120,13 +120,13 @@ impl From<MediaQuery> for DiscoverMovieParams {
         };
 
         match media_query.filter {
-            QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, value) => {
+            QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, value) => {
                 params.with_genres = Some(value);
             }
             QueryFilter::And(filters) => {
                 for filter in filters {
                     match filter {
-                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, value) => {
+                        QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, value) => {
                             let with_genres_new = format!(
                                 "{}{}{}",
                                 params.with_genres.unwrap_or_default(),
@@ -145,7 +145,7 @@ impl From<MediaQuery> for DiscoverMovieParams {
             QueryFilter::Or(filters) => {
                 for filter in filters {
                     match filter {
-                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, value) => {
+                        QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, value) => {
                             let with_genres_new = format!(
                                 "{}{}{}",
                                 params.with_genres.unwrap_or_default(),

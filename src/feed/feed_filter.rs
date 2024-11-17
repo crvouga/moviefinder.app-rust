@@ -6,7 +6,7 @@ use crate::{
         query::{QueryFilter, QueryOp},
         ui::chip::{Chip, ChipSize},
     },
-    media::{genre::genre::Genre, media_db::interface::MediaField},
+    media::{genre::genre::Genre, media_db::interface::MediaQueryField},
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Eq)]
@@ -26,11 +26,11 @@ impl Ord for FeedFilter {
     }
 }
 
-impl From<FeedFilter> for QueryFilter<MediaField> {
-    fn from(feed_filter: FeedFilter) -> QueryFilter<MediaField> {
+impl From<FeedFilter> for QueryFilter<MediaQueryField> {
+    fn from(feed_filter: FeedFilter) -> QueryFilter<MediaQueryField> {
         match feed_filter {
             FeedFilter::Genre(genre) => {
-                QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre.id.to_string())
+                QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre.id.to_string())
             }
         }
     }

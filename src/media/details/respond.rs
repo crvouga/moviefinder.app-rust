@@ -1,13 +1,13 @@
 use crate::{
     core::{
         html::*,
-        query::{QueryFilter, QueryOp, Query},
+        query::{Query, QueryFilter, QueryOp},
         res::Res,
         ui::{self, image::Image},
     },
     ctx::Ctx,
     feed,
-    media::{self, core::Media, media_db::interface::MediaField, media_id::MediaId},
+    media::{self, core::Media, media_db::interface::MediaQueryField, media_id::MediaId},
     route,
     ui::top_bar::TopBar,
 };
@@ -25,7 +25,11 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                filter: QueryFilter::Clause(MediaField::MediaId, QueryOp::Eq, media_id.as_str().to_string()),
+                filter: QueryFilter::Clause(
+                    MediaQueryField::MediaId,
+                    QueryOp::Eq,
+                    media_id.as_str().to_string(),
+                ),
             };
 
             let queried = ctx.media_db.query(query).await;

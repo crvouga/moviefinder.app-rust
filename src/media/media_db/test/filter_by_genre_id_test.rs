@@ -4,7 +4,7 @@ mod filter_by_genre_id_test {
     use super::super::fixture::fixtures;
     use crate::{
         core::query::{QueryFilter, QueryOp, Query},
-        media::media_db::interface::MediaField,
+        media::media_db::interface::MediaQueryField,
     };
 
     #[tokio::test]
@@ -16,7 +16,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    filter: QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id.to_string()),
+                    filter: QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id.to_string()),
                 })
                 .await
                 .unwrap();
@@ -40,8 +40,8 @@ mod filter_by_genre_id_test {
                     limit: 10,
                     offset: 0,
                     filter: QueryFilter::And(vec![
-                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
-                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
+                        QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
+                        QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
                     ]),
                 })
                 .await
@@ -67,8 +67,8 @@ mod filter_by_genre_id_test {
                     limit: 10,
                     offset: 0,
                     filter: QueryFilter::Or(vec![
-                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
-                        QueryFilter::Clause(MediaField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
+                        QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
+                        QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
                     ]),
                 })
                 .await
