@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::feed::{core::Feed, feed_id::FeedId};
+use crate::feed::{feed_::Feed, feed_id::FeedId};
 
 #[async_trait]
 pub trait FeedDb: Send + Sync {

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use super::interface::FeedDb;
 use crate::{
-    feed::{core::Feed, feed_id::FeedId},
+    feed::{feed_::Feed, feed_id::FeedId},
     key_value_db::interface::KeyValueDb,
 };
 use async_trait::async_trait;

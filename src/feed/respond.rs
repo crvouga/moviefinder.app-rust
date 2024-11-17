@@ -1,4 +1,4 @@
-use super::{controls, core::Feed, feed_id::FeedId, feed_item::FeedItem, route::Route};
+use super::{controls, feed_::Feed, feed_id::FeedId, feed_item::FeedItem, route::Route};
 use crate::{
     core::{
         html::*,
@@ -168,7 +168,7 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
 
 fn view_top_bar(model: &ViewModel) -> Elem {
     view_top_bar_link_root(&model.feed.feed_id)
-        .child(view_chips(&model))
+        .child(view_tags(&model))
         .child(view_open_controls_button())
 }
 
@@ -213,15 +213,15 @@ fn view_open_controls_button() -> Elem {
         )
 }
 
-fn view_chips(model: &ViewModel) -> Elem {
+fn view_tags(model: &ViewModel) -> Elem {
     div()
         .class("flex flex-row gap-2 p-2 flex-1 overflow-hidden")
         .children(
             model
                 .feed
-                .filters
+                .tags
                 .iter()
-                .map(|filter| filter.chip().disabled(true).checked(true).view())
+                .map(|tag| tag.chip().disabled(true).checked(true).view())
                 .collect::<Vec<Elem>>(),
         )
 }

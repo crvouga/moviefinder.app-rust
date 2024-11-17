@@ -10,33 +10,33 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Eq)]
-pub enum FeedFilter {
+pub enum FeedTag {
     Genre(Genre),
 }
 
-impl PartialOrd for FeedFilter {
+impl PartialOrd for FeedTag {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.label().partial_cmp(&other.label())
     }
 }
 
-impl Ord for FeedFilter {
+impl Ord for FeedTag {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.label().cmp(&other.label())
     }
 }
 
-impl From<FeedFilter> for QueryFilter<MediaQueryField> {
-    fn from(feed_filter: FeedFilter) -> QueryFilter<MediaQueryField> {
-        match feed_filter {
-            FeedFilter::Genre(genre) => {
+impl From<FeedTag> for QueryFilter<MediaQueryField> {
+    fn from(feed_tag: FeedTag) -> QueryFilter<MediaQueryField> {
+        match feed_tag {
+            FeedTag::Genre(genre) => {
                 QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre.id.to_string())
             }
         }
     }
 }
 
-impl FeedFilter {
+impl FeedTag {
     pub fn chip(&self) -> Chip {
         Chip::default()
             .id(&self.encode())
@@ -46,7 +46,7 @@ impl FeedFilter {
 
     pub fn label(&self) -> String {
         match self {
-            FeedFilter::Genre(genre) => genre.name.clone(),
+            FeedTag::Genre(genre) => genre.name.clone(),
         }
     }
 
@@ -67,12 +67,12 @@ mod tests {
 
     #[test]
     fn test_encode_decode() {
-        let route = FeedFilter::Genre(Genre {
+        let route = FeedTag::Genre(Genre {
             id: GenreId::new("id".to_string()),
             name: "name".to_string(),
         });
         let encoded = route.encode();
-        let decoded = FeedFilter::decode(&encoded).unwrap();
+        let decoded = FeedTag::decode(&encoded).unwrap();
         assert_eq!(decoded, route);
     }
 }

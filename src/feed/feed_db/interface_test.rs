@@ -2,7 +2,7 @@
 mod tests {
     use crate::{
         feed::{
-            core::Feed,
+            feed_::Feed,
             feed_db::{impl_key_value_db, interface::FeedDb},
         },
         fixture::BaseFixture,

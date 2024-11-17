@@ -12,7 +12,7 @@ use crate::{
         },
     },
     ctx::Ctx,
-    feed::{self, core::Feed, feed_filter::FeedFilter, feed_id::FeedId},
+    feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag},
     req::Req,
     route,
     ui::top_bar,
@@ -21,7 +21,7 @@ use crate::{
 #[derive(Debug)]
 struct ViewModel {
     feed: Feed,
-    filters: Vec<FeedFilter>,
+    filters: Vec<FeedTag>,
 }
 
 const FEED_FILTER_ID_KEY: &str = "genre_id";
@@ -39,9 +39,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let genres = ctx.genre_db.get_all().await.unwrap_or(vec![]);
 
-            let filters: Vec<FeedFilter> = genres
+            let filters: Vec<FeedTag> = genres
                 .iter()
-                .map(|genre| FeedFilter::Genre(genre.clone()))
+                .map(|genre| FeedTag::Genre(genre.clone()))
                 .collect();
 
             let view_model = ViewModel { feed, filters };
@@ -52,13 +52,13 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         Route::ClickedSave => {
             // tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
-            let feed_filters_new: Vec<FeedFilter> = req.form_data.clone().into();
+            let feed_tags_new: Vec<FeedTag> = req.form_data.clone().into();
 
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_new = Feed {
                 start_index: 0,
-                filters: feed_filters_new,
+                tags: feed_tags_new,
                 ..feed
             };
 
@@ -73,7 +73,7 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
     route::Route::Feed(feed::route::Route::IndexLoad { feed_id })
 }
 
-impl From<FormData> for Vec<FeedFilter> {
+impl From<FormData> for Vec<FeedTag> {
     fn from(form_data: FormData) -> Self {
         form_data
             .get_all(FEED_FILTER_ID_KEY)
@@ -81,7 +81,7 @@ impl From<FormData> for Vec<FeedFilter> {
             .unwrap_or(vec![])
             .into_iter()
             .filter_map(|encoded| {
-                let decoded = FeedFilter::decode(&encoded);
+                let decoded = FeedTag::decode(&encoded);
                 println!("encoded {:?}, decoded: {:?}", &encoded, &decoded);
                 decoded
             })
@@ -211,14 +211,14 @@ fn view_body(view_model: &ViewModel) -> Elem {
 }
 
 fn view_chips(view_model: &ViewModel) -> Elem {
-    let mut active: Vec<FeedFilter> = view_model.feed.clone().filters;
+    let mut active: Vec<FeedTag> = view_model.feed.clone().tags;
     active.sort();
 
-    let mut inactive: Vec<FeedFilter> = view_model
+    let mut inactive: Vec<FeedTag> = view_model
         .filters
         .clone()
         .into_iter()
-        .filter(|filter| !active.contains(filter))
+        .filter(|feed_tag| !active.contains(feed_tag))
         .collect();
     inactive.sort();
 
@@ -228,12 +228,12 @@ fn view_chips(view_model: &ViewModel) -> Elem {
         .child(view_chips_frag(inactive, false))
 }
 
-fn view_chips_frag(feed_filters: Vec<FeedFilter>, is_checked: bool) -> Elem {
+fn view_chips_frag(feed_tags: Vec<FeedTag>, is_checked: bool) -> Elem {
     frag().children(
-        feed_filters
+        feed_tags
             .iter()
-            .map(|filter| {
-                filter
+            .map(|feed_tag| {
+                feed_tag
                     .chip()
                     .size(ChipSize::Large)
                     .checked(is_checked)

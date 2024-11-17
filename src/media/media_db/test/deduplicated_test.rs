@@ -15,7 +15,7 @@ mod deduplicated_test {
                 .query(Query {
                     limit,
                     offset: 0,
-                    filter: QueryFilter::None,
+                    r#where: QueryFilter::None,
                 })
                 .await
                 .unwrap();
@@ -47,7 +47,7 @@ mod deduplicated_test {
                 .query(Query {
                     limit,
                     offset: 5,
-                    filter: QueryFilter::None,
+                    r#where: QueryFilter::None,
                 })
                 .await
                 .unwrap();

@@ -11,7 +11,7 @@ mod limit_offset_test {
             let query = Query {
                 limit,
                 offset: 0,
-                filter: QueryFilter::None,
+                r#where: QueryFilter::None,
             };
             let result = f.media_db.query(query).await.unwrap();
             assert_eq!(result.items.len(), limit);
@@ -30,7 +30,7 @@ mod limit_offset_test {
                 .query(Query {
                     limit,
                     offset,
-                    filter: QueryFilter::None,
+                    r#where: QueryFilter::None,
                 })
                 .await
                 .unwrap();
@@ -48,7 +48,7 @@ mod limit_offset_test {
                 .query(Query {
                     limit,
                     offset,
-                    filter: QueryFilter::None,
+                    r#where: QueryFilter::None,
                 })
                 .await
                 .unwrap();

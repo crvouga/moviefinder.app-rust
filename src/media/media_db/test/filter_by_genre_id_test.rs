@@ -16,7 +16,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    filter: QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id.to_string()),
+                    r#where: QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id.to_string()),
                 })
                 .await
                 .unwrap();
@@ -39,7 +39,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    filter: QueryFilter::And(vec![
+                    r#where: QueryFilter::And(vec![
                         QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
                         QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
                     ]),
@@ -66,7 +66,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    filter: QueryFilter::Or(vec![
+                    r#where: QueryFilter::Or(vec![
                         QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_a.to_string()),
                         QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre_id_b.to_string()),
                     ]),

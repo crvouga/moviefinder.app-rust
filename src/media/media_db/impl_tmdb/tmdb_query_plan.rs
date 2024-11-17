@@ -6,7 +6,7 @@ use crate::{
     },
     media::{
         core::Media,
-        media_db::interface::{MediaQueryField, MediaQuery},
+        media_db::interface::{MediaQuery, MediaQueryField},
         media_id::MediaId,
         tmdb_api::{config::TmdbConfig, TmdbApi},
     },
