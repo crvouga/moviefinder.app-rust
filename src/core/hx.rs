@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 // https://htmx.org/docs/
 // https://v1.htmx.org/extensions/loading-states/
 use crate::core::html;
@@ -20,6 +22,10 @@ impl html::Elem {
 
     pub fn hx_trigger_custom(self, value: &str) -> Self {
         self.hx_trigger(Trigger::Custom(value.to_string()))
+    }
+
+    pub fn hx_trigger_input_changed(self, delay: Duration) -> Self {
+        self.hx_trigger_custom(format!("input changed delay:{}ms", delay.as_millis()).as_str())
     }
 
     pub fn hx_trigger_intersect(self) -> Self {
@@ -101,6 +107,14 @@ impl html::Elem {
 
     pub fn hx_loading_states(self) -> Self {
         self.attr("data-loading-states", "")
+    }
+
+    pub fn hx_loading_target(self, css_selector: &str) -> Self {
+        if css::selector::is_valid(css_selector) {
+            self.attr("data-loading-target", css_selector)
+        } else {
+            self
+        }
     }
 
     pub fn hx_on(self, event: &str, javascript: &str) -> Self {

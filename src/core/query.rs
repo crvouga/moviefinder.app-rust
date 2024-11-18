@@ -37,4 +37,5 @@ pub enum QueryFilter<QueryField> {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum QueryOp {
     Eq,
+    Like,
 }

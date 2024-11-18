@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod limit_offset_test {
     use super::super::fixture::fixtures;
-    use crate::core::query::{QueryFilter, Query};
+    use crate::core::query::{Query, QueryFilter};
 
     #[tokio::test]
     async fn test_limit_and_offset() {

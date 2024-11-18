@@ -5,4 +5,5 @@ pub enum Route {
     IndexLoad,
     Index,
     ClickedSave,
+    InputtedSearch,
 }

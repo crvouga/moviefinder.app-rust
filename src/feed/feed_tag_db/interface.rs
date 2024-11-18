@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub enum FeedTagQueryField {
-    None,
+    Label,
 }
 
 #[async_trait]
