@@ -13,7 +13,7 @@ mod filter_by_id_test {
             let query = Query {
                 limit: 1,
                 offset: 0,
-                r#where: QueryFilter::Clause(
+                filter: QueryFilter::Clause(
                     MediaQueryField::MediaId,
                     QueryOp::Eq,
                     media_id.as_str().to_string(),

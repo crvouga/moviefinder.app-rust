@@ -16,7 +16,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    r#where: QueryFilter::Clause(
+                    filter: QueryFilter::Clause(
                         MediaQueryField::GenreId,
                         QueryOp::Eq,
                         genre_id.to_string(),
@@ -43,7 +43,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    r#where: QueryFilter::And(vec![
+                    filter: QueryFilter::And(vec![
                         QueryFilter::Clause(
                             MediaQueryField::GenreId,
                             QueryOp::Eq,
@@ -78,7 +78,7 @@ mod filter_by_genre_id_test {
                 .query(Query {
                     limit: 10,
                     offset: 0,
-                    r#where: QueryFilter::Or(vec![
+                    filter: QueryFilter::Or(vec![
                         QueryFilter::Clause(
                             MediaQueryField::GenreId,
                             QueryOp::Eq,
