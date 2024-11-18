@@ -29,12 +29,12 @@ impl KeyValueDb for ImplWithCache {
     }
 
     async fn put(&self, key: &str, value: String) -> Result<(), String> {
-        self.source.put(key, value.clone()).await?;
+        let _fut = self.source.put(key, value.clone());
         self.cache.put(key, value).await
     }
 
     async fn zap(&self, key: &str) -> Result<(), String> {
-        self.source.zap(key).await?;
+        let _fut = self.source.zap(key).await;
         self.cache.zap(key).await
     }
 
