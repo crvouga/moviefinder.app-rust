@@ -1,15 +1,13 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        feed::{
-            feed_::Feed,
-            feed_db::{impl_key_value_db, interface::FeedDb},
-        },
+        core::query::{Query, QueryFilter},
+        feed::feed_tag_db::{self, interface::FeedTagDb},
         fixture::BaseFixture,
     };
 
     struct Fixture {
-        feed_db: Box<dyn FeedDb>,
+        feed_tag_db: Box<dyn FeedTagDb>,
     }
 
     async fn fixtures() -> Vec<Fixture> {
@@ -18,26 +16,27 @@ mod tests {
         let base = BaseFixture::new().await;
 
         fixtures.push(Fixture {
-            feed_db: Box::new(impl_key_value_db::ImplKeyValueDb::new(
-                base.ctx.key_value_db,
-            )),
+            feed_tag_db: Box::new(feed_tag_db::impl_::Impl_::new(base.ctx.genre_db)),
         });
 
         fixtures
     }
 
     #[tokio::test]
-    async fn test_get_and_put() {
+    async fn test_get() {
         for f in fixtures().await {
-            let feed = Feed::default();
+            let queried = f
+                .feed_tag_db
+                .query(Query {
+                    filter: QueryFilter::None,
+                    limit: 10,
+                    offset: 0,
+                })
+                .await
+                .unwrap()
+                .items;
 
-            let before = f.feed_db.get(feed.feed_id.clone()).await;
-            let put = f.feed_db.put(feed.clone()).await;
-            let after = f.feed_db.get(feed.feed_id.clone()).await;
-
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(feed)));
+            assert!(queried.len() > 0);
         }
     }
 }
