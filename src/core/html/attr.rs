@@ -117,6 +117,10 @@ impl Elem {
         self.attr("src", value)
     }
 
+    pub fn alt(self, value: &str) -> Self {
+        self.attr("alt", value)
+    }
+
     pub fn defer(self) -> Self {
         self.attr("defer", "true")
     }

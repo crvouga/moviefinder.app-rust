@@ -154,7 +154,10 @@ fn index_selector() -> String {
 }
 
 fn view_top_bar_root() -> Elem {
-    top_bar::view_root().button().class("relative")
+    top_bar::view_root()
+        .button()
+        .class("relative")
+        .aria_label("open controls")
 }
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
@@ -310,12 +313,14 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
         } => button()
             .class("w-full h-full")
             .root_push_screen(to_media_details_route(&media.media_id))
+            .aria_label("open media details")
             .child(
                 Image::view()
                     .class("w-full h-full object-cover")
                     .width("100%")
                     .height("100%")
-                    .src(media.media_poster.to_highest_res()),
+                    .src(media.media_poster.to_highest_res())
+                    .alt(media.media_title.as_str()),
             ),
     }
 }
