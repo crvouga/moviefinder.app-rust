@@ -95,7 +95,14 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         }
 
         Route::ClickedSave => {
-            let feed_tags_new: Vec<FeedTag> = req.form_data.clone().into();
+            let feed_tags_new: Vec<FeedTag> = req
+                .form_data
+                .get_all(FEED_TAG_ID_NAME)
+                .cloned()
+                .unwrap_or(vec![])
+                .into_iter()
+                .filter_map(|encoded| FeedTag::decode(&encoded))
+                .collect();
 
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
@@ -143,22 +150,6 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
 fn to_back_route(feed_id: FeedId) -> route::Route {
     route::Route::Feed(feed::route::Route::IndexLoad { feed_id })
-}
-
-impl From<FormData> for Vec<FeedTag> {
-    fn from(form_data: FormData) -> Self {
-        form_data
-            .get_all(FEED_TAG_ID_NAME)
-            .cloned()
-            .unwrap_or(vec![])
-            .into_iter()
-            .filter_map(|encoded| {
-                let decoded = FeedTag::decode(&encoded);
-                println!("encoded {:?}, decoded: {:?}", &encoded, &decoded);
-                decoded
-            })
-            .collect()
-    }
 }
 
 fn view_root() -> Elem {
