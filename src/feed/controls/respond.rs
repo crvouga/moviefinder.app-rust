@@ -153,19 +153,19 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
 }
 
 fn view_root() -> Elem {
-    div()
-        .class("w-full h-full flex flex-col overflow-hidden relative")
-        .x_data("{js_val_search:''}")
+    div().class("w-full h-full flex flex-col overflow-hidden relative")
 }
 
-const SEARCH_BAR_SPINNER_ID: &str = "search-bar-spinner";
-fn search_bar_spinner_selector() -> String {
-    format!("#{}", SEARCH_BAR_SPINNER_ID)
+const SEARCH_BAR_ROOT_ID: &str = "search-bar";
+fn search_bar_root_selector() -> String {
+    format!("#{}", SEARCH_BAR_ROOT_ID)
 }
-
 fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
     div()
-        .class("w-full h-16 shrink-0 border-b relative")
+        .id(SEARCH_BAR_ROOT_ID)
+        .class("w-full h-16 shrink-0 border-b relative group")
+        .hx_loading_aria_busy()
+        .x_data("{js_val_search:''}")
         .child(
             div()
                 .class("absolute top-1/2 left-5 transform -translate-y-1/2")
@@ -178,9 +178,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 )
                 .child(
                     div()
-                        .class("aria-busy:opacity-100 opacity-0")
-                        .id(SEARCH_BAR_SPINNER_ID)
-                        .hx_loading_aria_busy()
+                        .class("group-aria-busy:opacity-100 opacity-0")
                         .child(spinner("size-8 animate-spin")),
                 )
                 .child(
@@ -213,7 +211,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .x_ref("js_ref_search")
                 .class("w-full h-full bg-transparent")
                 .class("pl-14")
-                .class("pr-14")
+                .class("pr-14 group-aria-busy:pr-24")
                 .type_("text")
                 .name(SEARCH_NAME)
                 .placeholder("Search")
@@ -227,20 +225,22 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .hx_target(&tags_selector())
                 .hx_trigger_input_changed(Duration::from_millis(300))
                 .hx_swap_inner_html()
-                .hx_loading_target(&search_bar_spinner_selector()),
+                .hx_loading_target(&search_bar_root_selector()),
         )
 }
 
 fn view_load_index(feed_id: &FeedId) -> Elem {
     view_root()
-        .root_swap_screen(route::Route::Feed(feed::route::Route::Controls {
-            feed_id: feed_id.clone(),
-            child: Route::Index,
-        }))
-        .hx_trigger_load()
-        .id(INDEX_ID)
         .child(view_search_bar(&feed_id, ""))
-        .child(spinner_page::view())
+        .child(
+            spinner_page::view()
+                .root_swap_screen(route::Route::Feed(feed::route::Route::Controls {
+                    feed_id: feed_id.clone(),
+                    child: Route::Index,
+                }))
+                .hx_trigger_load()
+                .id(INDEX_ID),
+        )
         .child(view_bottom_bar(&feed_id, ""))
 }
 
