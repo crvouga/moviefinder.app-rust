@@ -201,7 +201,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             div()
-                .class("group-aria-busy:static group-aria-busy:opacity-100 absolute opacity-0")
+                .class("group-aria-busy:block hidden")
                 .child(spinner("size-8 animate-spin")),
         )
         .child(
@@ -213,18 +213,21 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .hx_loading_path(loading_path)
                 .hx_abort(&index_selector())
                 .root_push_screen(to_back_route(feed_id.clone()))
-                .class("h-full pr-5 grid place-items-center")
-                .class("opacity-0 absolute peer-placeholder-shown:static peer-placeholder-shown:opacity-100") 
+                .class("h-full pr-5 place-items-center")
+                .class("hidden peer-placeholder-shown:grid")
                 .child(icon::x_mark("size-6")),
         )
         .child(
             button()
                 .type_("button")
-                .on_click(&format!("const s = document.querySelector('{}'); s.value = ''; s.focus();", search_bar_input_selector()))
+                .on_click(&format!(
+                    "const s = document.querySelector('{}'); s.value = ''; s.focus();",
+                    search_bar_input_selector()
+                ))
                 .tab_index(0)
                 .aria_label("clear search")
-                .class("h-full pr-5 grid place-items-center")
-                .class("opacity-100 peer-placeholder-shown:opacity-0 peer-placeholder-shown:absolute") 
+                .class("h-full pr-5 place-items-center")
+                .class("grid peer-placeholder-shown:hidden")
                 .child(icon::x_circle_mark("size-6")),
         )
 }
