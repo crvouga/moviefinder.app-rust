@@ -206,7 +206,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                         .x_show("js_val_search.length > 0")
                         .x_on(
                             "click",
-                            "$refs.js_ref_search.value = ''; $refs.js_ref_search.focus();",
+                            "js_val_search = ''; $refs.js_ref_search.value = ''; $refs.js_ref_search.focus();",
                         )
                         .type_("button")
                         .tab_index(0)
