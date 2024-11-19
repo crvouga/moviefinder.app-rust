@@ -163,19 +163,16 @@ fn view_root() -> Elem {
     div().class("w-full h-full flex flex-col overflow-hidden relative")
 }
 
-const SEARCH_BAR_ROOT_ID: &str = "search-bar";
-fn search_bar_root_selector() -> String {
-    format!("#{}", SEARCH_BAR_ROOT_ID)
-}
-const SEARCH_BAR_INPUT_ID: &str = "search-input";
-fn search_bar_input_selector() -> String {
-    format!("#{}", SEARCH_BAR_INPUT_ID)
-}
-
 fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
+    const SEARCH_BAR_ROOT_ID: &str = "search-bar";
+    fn search_bar_root_selector() -> String {
+        format!("#{}", SEARCH_BAR_ROOT_ID)
+    }
+    fn search_bar_input_selector() -> String {
+        format!("#{} > input", SEARCH_BAR_ROOT_ID)
+    }
     label()
         .id(SEARCH_BAR_ROOT_ID)
-        .for_(SEARCH_BAR_INPUT_ID)
         .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
         .hx_loading_aria_busy()
         .child(
@@ -185,7 +182,6 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             input()
-                .id(SEARCH_BAR_INPUT_ID)
                 .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
                 .name(SEARCH_NAME)
@@ -224,7 +220,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         .child(
             button()
                 .type_("button")
-                .on_click(&format!("const s = document.getElementById('{}'); s.value = ''; s.focus();", SEARCH_BAR_INPUT_ID))
+                .on_click(&format!("const s = document.querySelector('{}'); s.value = ''; s.focus();", search_bar_input_selector()))
                 .tab_index(0)
                 .aria_label("clear search")
                 .class("h-full pr-5 grid place-items-center")
