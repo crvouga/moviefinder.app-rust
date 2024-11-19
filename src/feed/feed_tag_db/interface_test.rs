@@ -1,8 +1,11 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        core::query::{Query, QueryFilter},
-        feed::feed_tag_db::{self, interface::FeedTagDb},
+        core::query::{Query, QueryFilter, QueryOp},
+        feed::feed_tag_db::{
+            self,
+            interface::{FeedTagDb, FeedTagQueryField},
+        },
         fixture::BaseFixture,
     };
 
@@ -37,6 +40,31 @@ mod tests {
                 .items;
 
             assert!(queried.len() > 0);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_search() {
+        for f in fixtures().await {
+            let queried = f
+                .feed_tag_db
+                .query(Query {
+                    filter: QueryFilter::Clause(
+                        FeedTagQueryField::Label,
+                        QueryOp::Like,
+                        "horror".to_string(),
+                    ),
+                    limit: 10,
+                    offset: 0,
+                })
+                .await
+                .unwrap()
+                .items;
+
+            let first = queried.first().unwrap();
+
+            assert!(queried.len() > 0);
+            assert!(first.label().to_lowercase().contains("horror"));
         }
     }
 }
