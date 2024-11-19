@@ -220,10 +220,9 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         .child(
             button()
                 .type_("button")
-                .on_click(&format!(
-                    "const s = document.querySelector('{}'); s.value = ''; s.focus();",
-                    search_bar_input_selector()
-                ))
+                .on_click(
+                    "const i = this.parentElement.querySelector('input'); i.value = ''; i.focus();",
+                )
                 .tab_index(0)
                 .aria_label("clear search")
                 .class("h-full pr-5 place-items-center")
