@@ -167,61 +167,26 @@ const SEARCH_BAR_ROOT_ID: &str = "search-bar";
 fn search_bar_root_selector() -> String {
     format!("#{}", SEARCH_BAR_ROOT_ID)
 }
+const SEARCH_BAR_INPUT_ID: &str = "search-input";
+fn search_bar_input_selector() -> String {
+    format!("#{}", SEARCH_BAR_INPUT_ID)
+}
+
 fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
-    div()
+    label()
         .id(SEARCH_BAR_ROOT_ID)
-        .class("w-full h-16 shrink-0 border-b relative group")
+        .for_(SEARCH_BAR_INPUT_ID)
+        .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
         .hx_loading_aria_busy()
-        .x_data("{js_val_search:''}")
         .child(
             div()
-                .class("absolute top-1/2 left-5 transform -translate-y-1/2")
+                .class("h-full grid place-items-center pl-4 pr-2")
                 .child(icon::magnifying_glass("size-6")),
         )
         .child(
-            div()
-                .class(
-                    "absolute top-1/2 right-0 transform -translate-y-1/2 flex items-center gap-2",
-                )
-                .child(
-                    div()
-                        .class("group-aria-busy:opacity-100 opacity-0")
-                        .child(spinner("size-8 animate-spin")),
-                )
-                .child(
-                    button()
-                        .x_show("js_val_search.length === 0")
-                        .type_("button")
-                        .tab_index(0)
-                        .aria_label("close")
-                        .hx_loading_disabled()
-                        .hx_loading_path(loading_path)
-                        .hx_abort(&index_selector())
-                        .root_push_screen(to_back_route(feed_id.clone()))
-                        .class("h-full pr-5 grid place-items-center")
-                        .child(icon::x_mark("size-6")),
-                )
-                .child(
-                    button()
-                        .x_show("js_val_search.length > 0")
-                        .x_on(
-                            "click",
-                            "js_val_search = ''; $refs.js_ref_search.value = ''; $refs.js_ref_search.focus();",
-                        )
-                        .type_("button")
-                        .tab_index(0)
-                        .aria_label("clear search")
-                        .class("h-full pr-5 grid place-items-center")
-                        .child(icon::x_circle_mark("size-6")),
-                ),
-        )
-        .child(
             input()
-                .x_model("js_val_search")
-                .x_ref("js_ref_search")
-                .class("w-full h-full bg-transparent")
-                .class("pl-14")
-                .class("pr-14 group-aria-busy:pr-24")
+                .id(SEARCH_BAR_INPUT_ID)
+                .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
                 .name(SEARCH_NAME)
                 .placeholder("Search")
@@ -237,6 +202,34 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .hx_trigger_focus()
                 .hx_swap_inner_html()
                 .hx_loading_target(&search_bar_root_selector()),
+        )
+        .child(
+            div()
+                .class("group-aria-busy:static group-aria-busy:opacity-100 absolute opacity-0")
+                .child(spinner("size-8 animate-spin")),
+        )
+        .child(
+            button()
+                .type_("button")
+                .tab_index(0)
+                .aria_label("close")
+                .hx_loading_disabled()
+                .hx_loading_path(loading_path)
+                .hx_abort(&index_selector())
+                .root_push_screen(to_back_route(feed_id.clone()))
+                .class("h-full pr-5 grid place-items-center")
+                .class("opacity-0 absolute peer-placeholder-shown:static peer-placeholder-shown:opacity-100") 
+                .child(icon::x_mark("size-6")),
+        )
+        .child(
+            button()
+                .type_("button")
+                .on_click(&format!("const s = document.getElementById('{}'); s.value = ''; s.focus();", SEARCH_BAR_INPUT_ID))
+                .tab_index(0)
+                .aria_label("clear search")
+                .class("h-full pr-5 grid place-items-center")
+                .class("opacity-100 peer-placeholder-shown:opacity-0 peer-placeholder-shown:absolute") 
+                .child(icon::x_circle_mark("size-6")),
         )
 }
 

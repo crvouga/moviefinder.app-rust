@@ -8,6 +8,18 @@ use serde::{Deserialize, Serialize};
 use super::{css, html};
 
 impl html::Elem {
+    pub fn src_htmx(self) -> Self {
+        self.src("https://unpkg.com/htmx.org@2.0.1")
+    }
+
+    pub fn src_htmx_preload(self) -> Self {
+        self.src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js")
+    }
+
+    pub fn src_htmx_loading_states(self) -> Self {
+        self.src("https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js")
+    }
+
     pub fn hx_trigger(mut self, value: &str) -> Self {
         if let html::Elem::Element {
             attrs_unsafe: ref mut attributes,

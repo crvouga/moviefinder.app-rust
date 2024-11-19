@@ -85,6 +85,10 @@ impl Elem {
         self.attr("value", value)
     }
 
+    pub fn on_click(self, value: &str) -> Self {
+        self.attr("onclick", value)
+    }
+
     pub fn checked(self, checked: bool) -> Self {
         if checked {
             self.attr("checked", "true")

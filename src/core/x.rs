@@ -2,6 +2,11 @@
 use super::html::Elem;
 
 impl Elem {
+    pub fn src_alpine(self) -> Self {
+        self.src("https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js")
+            .defer()
+    }
+
     pub fn x_data(self, javascript: &str) -> Self {
         self.attr_unsafe("x-data", javascript)
     }
