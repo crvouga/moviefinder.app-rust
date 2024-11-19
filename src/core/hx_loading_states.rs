@@ -23,6 +23,10 @@ impl Elem {
         self.attr("data-loading-aria-busy", "")
     }
 
+    pub fn hx_loading_states(self) -> Self {
+        self.attr("data-loading-states", "")
+    }
+
     pub fn hx_loading_disabled(self) -> Self {
         self.attr("data-loading-disable", "")
     }
