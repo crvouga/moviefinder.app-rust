@@ -39,10 +39,6 @@ impl html::Elem {
         self.hx_trigger("load")
     }
 
-    pub fn hx_trigger_input_changed(self, delay: Duration) -> Self {
-        self.hx_trigger(format!("input changed delay:{}ms", delay.as_millis()).as_str())
-    }
-
     pub fn hx_trigger_focus(self) -> Self {
         self.hx_trigger("focus")
     }
@@ -89,6 +85,14 @@ impl html::Elem {
 
     pub fn hx_vals(self, values: &str) -> Self {
         self.attr("hx-vals", values).clone()
+    }
+
+    pub fn hx_include(self, value: &str) -> Self {
+        self.attr("hx-include", value).clone()
+    }
+
+    pub fn hx_include_this(self) -> Self {
+        self.hx_include("this")
     }
 
     /// https://htmx.org/attributes/hx-ext/

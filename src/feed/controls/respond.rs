@@ -164,17 +164,20 @@ fn view_root() -> Elem {
 }
 
 fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
-    const SEARCH_BAR_ROOT_ID: &str = "search-bar";
-    fn search_bar_root_selector() -> String {
-        format!("#{}", SEARCH_BAR_ROOT_ID)
-    }
-    fn search_bar_input_selector() -> String {
-        format!("#{} > input", SEARCH_BAR_ROOT_ID)
-    }
     label()
-        .id(SEARCH_BAR_ROOT_ID)
-        .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
+        .hx_post(
+            &route::Route::Feed(feed::route::Route::Controls {
+                feed_id: feed_id.clone(),
+                child: Route::InputtedSearch,
+            })
+            .encode(),
+        )
+        .hx_target(&tags_selector())
+        .hx_trigger("input delay:300ms from:input, focus from:input")
+        .hx_swap_inner_html()
         .hx_loading_aria_busy()
+        .hx_include_this()
+        .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
         .child(
             div()
                 .class("h-full grid place-items-center pl-4 pr-2")
@@ -185,19 +188,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
                 .name(SEARCH_NAME)
-                .placeholder("Search")
-                .hx_post(
-                    &route::Route::Feed(feed::route::Route::Controls {
-                        feed_id: feed_id.clone(),
-                        child: Route::InputtedSearch,
-                    })
-                    .encode(),
-                )
-                .hx_target(&tags_selector())
-                .hx_trigger_input_changed(Duration::from_millis(300))
-                .hx_trigger_focus()
-                .hx_swap_inner_html()
-                .hx_loading_target(&search_bar_root_selector()),
+                .placeholder("Search"),
         )
         .child(
             div()
