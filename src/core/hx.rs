@@ -50,28 +50,28 @@ impl html::Elem {
         self.hx_trigger("intersect")
     }
 
-    pub fn hx_preload(self, preload: Preload) -> Self {
-        self.attr("preload", preload.as_str()).clone()
+    pub fn hx_preload(self, value: &str) -> Self {
+        self.attr("preload", value)
     }
 
     pub fn hx_preload_mouse_down(self) -> Self {
-        self.hx_preload(Preload::MouseDown)
+        self.hx_preload("mousedown")
     }
 
-    pub fn hx_swap(self, swap: Swap) -> Self {
-        self.attr("hx-swap", swap.as_str()).clone()
+    pub fn hx_swap(self, value: &str) -> Self {
+        self.attr("hx-swap", value)
     }
 
     pub fn hx_swap_outer_html(self) -> Self {
-        self.hx_swap(Swap::OuterHtml)
+        self.hx_swap("outerHTML")
     }
 
     pub fn hx_swap_none(self) -> Self {
-        self.hx_swap(Swap::None)
+        self.hx_swap("none")
     }
 
     pub fn hx_swap_inner_html(self) -> Self {
-        self.hx_swap(Swap::InnerHtml)
+        self.hx_swap("innerHTML")
     }
 
     pub fn hx_get(self, href: &str) -> Self {
@@ -84,10 +84,6 @@ impl html::Elem {
 
     pub fn hx_push_url(self) -> Self {
         self.attr("hx-push-url", "true").clone()
-    }
-
-    pub fn hx_replace_url(self) -> Self {
-        self.attr("hx-replace-url", "true").clone()
     }
 
     pub fn hx_target(self, css_selector: &str) -> Self {
@@ -123,20 +119,12 @@ impl html::Elem {
         self.attr("data-loading-path", path)
     }
 
-    pub fn hx_loading_states(self) -> Self {
-        self.attr("data-loading-states", "")
-    }
-
     pub fn hx_loading_target(self, css_selector: &str) -> Self {
         if css::selector::is_valid(css_selector) {
             self.attr("data-loading-target", css_selector)
         } else {
             self
         }
-    }
-
-    pub fn hx_on(self, event: &str, javascript: &str) -> Self {
-        self.attr(&format!("hx-on:{}", event), javascript)
     }
 
     pub fn hx_abort(self, css_selector: &str) -> Self {
@@ -147,34 +135,6 @@ impl html::Elem {
             )
         } else {
             self
-        }
-    }
-}
-
-pub enum Swap {
-    InnerHtml,
-    OuterHtml,
-    None,
-}
-
-impl Swap {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Swap::InnerHtml => "innerHTML",
-            Swap::OuterHtml => "outerHTML",
-            Swap::None => "none",
-        }
-    }
-}
-
-pub enum Preload {
-    MouseDown,
-}
-
-impl Preload {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Preload::MouseDown => "mousedown",
         }
     }
 }
