@@ -5,6 +5,7 @@ use std::{collections::HashMap, sync::Arc};
 
 pub mod config;
 pub mod discover_movie;
+pub mod html_meta;
 pub mod movie_details;
 pub mod movie_genre;
 

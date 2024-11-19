@@ -1,23 +1,12 @@
-use std::time::Duration;
-
 // https://htmx.org/docs/
 // https://v1.htmx.org/extensions/loading-states/
-
-use serde::{Deserialize, Serialize};
-
 use super::{css, html};
+use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
 impl html::Elem {
     pub fn src_htmx(self) -> Self {
         self.src("https://unpkg.com/htmx.org@2.0.1")
-    }
-
-    pub fn src_htmx_preload(self) -> Self {
-        self.src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js")
-    }
-
-    pub fn src_htmx_loading_states(self) -> Self {
-        self.src("https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js")
     }
 
     pub fn hx_trigger(mut self, value: &str) -> Self {
@@ -62,14 +51,6 @@ impl html::Elem {
         self.hx_trigger("intersect")
     }
 
-    pub fn hx_preload(self, value: &str) -> Self {
-        self.attr("preload", value)
-    }
-
-    pub fn hx_preload_mouse_down(self) -> Self {
-        self.hx_preload("mousedown")
-    }
-
     pub fn hx_swap(self, value: &str) -> Self {
         self.attr("hx-swap", value)
     }
@@ -111,32 +92,28 @@ impl html::Elem {
     }
 
     /// https://htmx.org/attributes/hx-ext/
-    pub fn hx_ext(self, extensions: Vec<&str>) -> Self {
-        self.attr("hx-ext", &extensions.join(","))
+    pub fn hx_ext(mut self, value: &str) -> Self {
+        if let html::Elem::Element {
+            attrs_unsafe: ref mut attributes,
+            ..
+        } = self
+        {
+            let existing = attributes.get("hx-ext").map_or("", |attr| attr.as_str());
+
+            let new = if existing.is_empty() {
+                value.trim().to_string()
+            } else {
+                format!("{}, {}", existing, value).trim().to_string()
+            };
+
+            attributes.insert("hx-ext".to_string(), new);
+        }
+
+        self
     }
 
     pub fn hx_boost(self) -> Self {
         self.attr("hx-boost", "true")
-    }
-
-    pub fn hx_loading_aria_busy(self) -> Self {
-        self.attr("data-loading-aria-busy", "")
-    }
-
-    pub fn hx_loading_disabled(self) -> Self {
-        self.attr("data-loading-disable", "")
-    }
-
-    pub fn hx_loading_path(self, path: &str) -> Self {
-        self.attr("data-loading-path", path)
-    }
-
-    pub fn hx_loading_target(self, css_selector: &str) -> Self {
-        if css::selector::is_valid(css_selector) {
-            self.attr("data-loading-target", css_selector)
-        } else {
-            self
-        }
     }
 
     pub fn hx_abort(self, css_selector: &str) -> Self {

@@ -1,5 +1,5 @@
 use crate::{
-    core::{html::*, res::Res, ui::image::Image},
+    core::{html::*, res::Res},
     route::Route,
 };
 
@@ -52,36 +52,22 @@ impl Root {
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
                 meta().name("htmx-config").content(r#"{"historyCacheSize": 0, "refreshOnHistoryMiss": true}"#),
-                link().rel("preconnect").href("https://image.tmdb.org"),
-                script().src("https://cdn.tailwindcss.com"),
-                script().child_unsafe_text(r#"
-                tailwind.config = {
-                    theme: {
-                        extend: {
-                            borderColor: {
-                                DEFAULT: '#3f3f46',
-                            },
-                        },
-                    },
-                }
-                "#),
+                frag().meta_tmdb_api(),
+                script().src_tailwindcss(),
+                script().js_tailwindcss_theme(),
                 script().src_htmx().defer(),
                 script().src_htmx_preload().defer(),
                 script().src_htmx_loading_states().defer(),
+                style().css_htmx_loading_states(),
                 script().src_swiper().defer(),
-                Image::script(),
-                style().child_unsafe_text(
-                r#"
-                [data-loading] {
-                    display: none;
-                }
-                "#),
+                script().js_image_element(),
             ])
         )
         .child(
             body()
                 .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
-                .hx_ext(vec!["preload", "loading-states"])
+                .hx_ext_loading_states()
+                .hx_ext_preload()
                 .hx_boost()
                 .child(
                     div()

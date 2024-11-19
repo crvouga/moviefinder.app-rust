@@ -92,11 +92,13 @@ customElements.define("image-element", ImageElement);
 pub struct Image {}
 
 impl Image {
-    pub fn script() -> Elem {
-        script().child(unsafe_html(IMAGE_ELEMENT_SCRIPT))
-    }
-
     pub fn view() -> Elem {
         elem("image-element")
+    }
+}
+
+impl Elem {
+    pub fn js_image_element(self) -> Self {
+        self.child_unsafe_text(IMAGE_ELEMENT_SCRIPT)
     }
 }
