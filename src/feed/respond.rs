@@ -245,7 +245,7 @@ fn view_swiper(model: &ViewModel) -> Elem {
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
         .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
-        .hx_trigger_custom("swiperslidechange from:swiper-container")
+        .hx_trigger("swiperslidechange from:swiper-container")
         .x_on("swiperslidechange", r#"
             feedActiveIndex = parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10);
         "#)

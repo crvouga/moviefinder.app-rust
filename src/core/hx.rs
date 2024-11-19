@@ -2,34 +2,52 @@ use std::time::Duration;
 
 // https://htmx.org/docs/
 // https://v1.htmx.org/extensions/loading-states/
-use crate::core::html;
+
 use serde::{Deserialize, Serialize};
 
-use super::css;
+use super::{css, html};
 
 impl html::Elem {
-    pub fn hx_trigger(self, trigger: Trigger) -> Self {
-        self.attr("hx-trigger", trigger.as_str())
+    pub fn hx_trigger(mut self, value: &str) -> Self {
+        if let html::Elem::Element {
+            attrs_unsafe: ref mut attributes,
+            ..
+        } = self
+        {
+            let existing = attributes
+                .get("hx-trigger")
+                .map_or("", |attr| attr.as_str());
+
+            let new = if existing.is_empty() {
+                value.trim().to_string()
+            } else {
+                format!("{}, {}", existing, value).trim().to_string()
+            };
+
+            attributes.insert("hx-trigger".to_string(), new);
+        }
+
+        self
     }
 
     pub fn hx_trigger_click(self) -> Self {
-        self.hx_trigger(Trigger::Click)
+        self.hx_trigger("click")
     }
 
     pub fn hx_trigger_load(self) -> Self {
-        self.hx_trigger(Trigger::Load)
-    }
-
-    pub fn hx_trigger_custom(self, value: &str) -> Self {
-        self.hx_trigger(Trigger::Custom(value.to_string()))
+        self.hx_trigger("load")
     }
 
     pub fn hx_trigger_input_changed(self, delay: Duration) -> Self {
-        self.hx_trigger_custom(format!("input changed delay:{}ms", delay.as_millis()).as_str())
+        self.hx_trigger(format!("input changed delay:{}ms", delay.as_millis()).as_str())
+    }
+
+    pub fn hx_trigger_focus(self) -> Self {
+        self.hx_trigger("focus")
     }
 
     pub fn hx_trigger_intersect(self) -> Self {
-        self.hx_trigger(Trigger::Intersect)
+        self.hx_trigger("intersect")
     }
 
     pub fn hx_preload(self, preload: Preload) -> Self {
@@ -129,25 +147,6 @@ impl html::Elem {
             )
         } else {
             self
-        }
-    }
-}
-
-// https://htmx.org/attributes/hx-trigger/
-pub enum Trigger {
-    Load,
-    Click,
-    Intersect,
-    Custom(String),
-}
-
-impl Trigger {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Trigger::Intersect => "intersect",
-            Trigger::Load => "load",
-            Trigger::Click => "click",
-            Trigger::Custom(value) => value,
         }
     }
 }

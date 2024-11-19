@@ -4,8 +4,6 @@ use super::route::Route;
 use crate::{
     core::{
         html::*,
-        http::form_data::FormData,
-        hx,
         pagination::Paginated,
         query::{Query, QueryFilter, QueryOp},
         res::Res,
@@ -43,6 +41,7 @@ fn index_selector() -> String {
 struct ViewModel {
     feed: Feed,
     feed_tags: Vec<FeedTag>,
+    search_input: String,
 }
 
 impl ViewModel {
@@ -89,7 +88,11 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
                 .unwrap_or(Paginated::default())
                 .items;
 
-            let model = ViewModel { feed, feed_tags };
+            let model = ViewModel {
+                feed,
+                feed_tags,
+                search_input: "".to_string(),
+            };
 
             view_index(&model).into()
         }
@@ -139,7 +142,11 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let model = ViewModel { feed, feed_tags };
+            let model = ViewModel {
+                feed,
+                feed_tags,
+                search_input: search_input.clone(),
+            };
 
             let res: Res = view_tag_chips(&model).into();
 
@@ -197,7 +204,10 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .child(
                     button()
                         .x_show("js_val_search.length > 0")
-                        .x_on("click", "js_val_search = ''; $refs.js_ref_search.focus();")
+                        .x_on(
+                            "click",
+                            "$refs.js_ref_search.value = ''; $refs.js_ref_search.focus();",
+                        )
                         .type_("button")
                         .tab_index(0)
                         .aria_label("clear search")
@@ -224,6 +234,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 )
                 .hx_target(&tags_selector())
                 .hx_trigger_input_changed(Duration::from_millis(300))
+                .hx_trigger_focus()
                 .hx_swap_inner_html()
                 .hx_loading_target(&search_bar_root_selector()),
         )
@@ -296,6 +307,12 @@ fn view_tags(model: &ViewModel) -> Elem {
 }
 
 fn view_tag_chips(model: &ViewModel) -> Elem {
+    if model.feed_tags.len() == 0 {
+        return div()
+            .class("w-full overflow-hidden flex-1 flex items-start justify-start font-bold text-lg break-all")
+            .child_text(&format!(r#"No results for "{}""#, model.search_input));
+    }
+
     let (active, inactive) = model.to_tags();
     div()
         .class("flex flex-row items-start justify-start flex-wrap gap-2")
