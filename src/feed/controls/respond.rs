@@ -169,6 +169,8 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             res
         }
+
+        Route::ClickedGoBack => Res::empty(),
     }
 }
 

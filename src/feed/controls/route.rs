@@ -9,4 +9,5 @@ pub enum Route {
     ClickedSave,
     InputtedSearch,
     ClickedTag { tag: FeedTag },
+    ClickedGoBack,
 }
