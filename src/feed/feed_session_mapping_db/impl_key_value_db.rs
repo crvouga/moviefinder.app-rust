@@ -26,7 +26,7 @@ impl ImplKeyValueDb {
 impl FeedSessionMappingDb for ImplKeyValueDb {
     async fn get(&self, session_id: SessionId) -> Result<Option<FeedId>, String> {
         match self.key_value_db.get(session_id.as_str()).await {
-            Ok(Some(value)) => Ok(Some(FeedId::new(value))),
+            Ok(Some(value)) => Ok(Some(FeedId::new(&value))),
             Ok(None) => Ok(None),
             Err(err) => Err(err),
         }

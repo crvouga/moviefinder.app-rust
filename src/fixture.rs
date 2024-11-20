@@ -2,8 +2,7 @@ use crate::{
     core::{db_conn_sql, http::client::HttpClient, logger::impl_console::ConsoleLogger, tmdb_api},
     ctx::Ctx,
     env::Env,
-    feed::{feed_db, feed_session_mapping_db, feed_tag_db},
-    key_value_db,
+    feed, key_value_db,
     media::{genre::genre_db, media_db},
 };
 use std::sync::Arc;
@@ -34,29 +33,24 @@ impl BaseFixture {
             env.tmdb_api_read_access_token.clone(),
         ));
 
-        let media_db = Box::new(media_db::impl_random::Random::new());
+        let media_db = Arc::new(media_db::impl_random::Random::new());
 
         let genre_db = Arc::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
 
-        let feed_db: Box<feed_db::impl_key_value_db::ImplKeyValueDb> = Box::new(
-            feed_db::impl_key_value_db::ImplKeyValueDb::new(key_value_db.clone()),
-        );
-
-        let feed_tag_db = Box::new(feed_tag_db::impl_::Impl_::new(genre_db.clone()));
-
-        let feed_session_mapping_db = Box::new(
-            feed_session_mapping_db::impl_key_value_db::ImplKeyValueDb::new(key_value_db.clone()),
+        let feed = feed::ctx::Ctx::new(
+            media_db.clone(),
+            key_value_db.clone(),
+            genre_db.clone(),
+            logger.clone(),
         );
 
         let ctx = Ctx {
+            feed,
             genre_db,
             tmdb_api,
             db_conn_sql,
             key_value_db,
             media_db,
-            feed_session_mapping_db,
-            feed_db,
-            feed_tag_db,
             logger,
         };
 

@@ -6,8 +6,8 @@ use crate::core::uuid;
 pub struct FeedId(String);
 
 impl FeedId {
-    pub fn new(id: String) -> Self {
-        Self(id)
+    pub fn new(id: &str) -> Self {
+        Self(id.to_string())
     }
 
     pub fn as_str(&self) -> &str {
@@ -17,6 +17,6 @@ impl FeedId {
 
 impl Default for FeedId {
     fn default() -> Self {
-        FeedId::new(format!("feed:{}", uuid::v4()))
+        FeedId::new(&format!("feed:{}", uuid::v4()))
     }
 }

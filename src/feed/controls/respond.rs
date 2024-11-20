@@ -1,6 +1,4 @@
-use std::time::Duration;
-
-use super::route::Route;
+use super::{ctx::Ctx, form_state::FormState, route::Route};
 use crate::{
     core::{
         html::*,
@@ -15,7 +13,6 @@ use crate::{
             spinner_page,
         },
     },
-    ctx::Ctx,
     feed::{
         self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag,
         feed_tag_db::interface::FeedTagQueryField,
@@ -41,6 +38,7 @@ fn index_selector() -> String {
 struct ViewModel {
     feed: Feed,
     feed_tags: Vec<FeedTag>,
+    form_state: FormState,
     search_input: String,
 }
 
@@ -50,7 +48,7 @@ impl ViewModel {
             .feed_tags
             .clone()
             .into_iter()
-            .filter(|feed_tag| self.feed.tags.contains(feed_tag))
+            .filter(|feed_tag| self.form_state.tags.contains(feed_tag))
             .collect();
         active.sort();
 
@@ -58,7 +56,7 @@ impl ViewModel {
             .feed_tags
             .clone()
             .into_iter()
-            .filter(|feed_tag| !self.feed.tags.contains(feed_tag))
+            .filter(|feed_tag| !self.form_state.tags.contains(feed_tag))
             .collect();
         inactive.sort();
 
@@ -88,36 +86,52 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
                 .unwrap_or(Paginated::default())
                 .items;
 
+            let form_state = get_form_state(ctx, &feed).await;
+
             let model = ViewModel {
                 feed,
                 feed_tags,
                 search_input: "".to_string(),
+                form_state,
             };
 
             view_index(&model).into()
         }
 
         Route::ClickedSave => {
-            let feed_tags_new: Vec<FeedTag> = req
-                .form_data
-                .get_all(FEED_TAG_ID_NAME)
-                .cloned()
-                .unwrap_or(vec![])
-                .into_iter()
-                .filter_map(|encoded| FeedTag::decode(&encoded))
-                .collect();
+            let form_state = get_form_state(ctx, &Feed::default()).await;
 
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_new = Feed {
                 start_index: 0,
-                tags: feed_tags_new,
+                tags: form_state.tags,
                 ..feed
             };
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
             Res::root_redirect_screen(to_back_route(feed_new.feed_id))
+        }
+
+        Route::ClickedTag { tag } => {
+            let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
+
+            let mut form_state = get_form_state(ctx, &feed).await;
+
+            if form_state.tags.contains(tag) {
+                form_state.tags.retain(|t| t != tag);
+            } else {
+                form_state.tags.retain(|t| t != tag);
+                form_state.tags.push(tag.clone());
+            }
+
+            ctx.form_state_db
+                .put(form_state.clone())
+                .await
+                .unwrap_or(());
+
+            Res::empty()
         }
 
         Route::InputtedSearch => {
@@ -142,10 +156,13 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
+            let form_state = get_form_state(ctx, &feed).await;
+
             let model = ViewModel {
                 feed,
                 feed_tags,
                 search_input: search_input.clone(),
+                form_state,
             };
 
             let res: Res = view_tag_chips(&model).into();
@@ -153,6 +170,17 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
             res
         }
     }
+}
+
+async fn get_form_state(ctx: &Ctx, feed: &Feed) -> FormState {
+    let feed_id = FeedId::new("id");
+
+    let maybe_form_state = ctx.form_state_db.get(&feed_id).await.unwrap_or(None);
+
+    let mut form_state = maybe_form_state.unwrap_or(FormState::new(feed));
+    form_state.feed_id = feed_id;
+
+    form_state
 }
 
 fn to_back_route(feed_id: FeedId) -> route::Route {
@@ -173,7 +201,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
             .encode(),
         )
         .hx_target(&tags_selector())
-        .hx_trigger("input delay:300ms from:input, focus from:input")
+        .hx_trigger("input delay:300ms from:.search-input, focus from:.search-input")
         .hx_swap_inner_html()
         .hx_loading_aria_busy()
         .hx_include_this()
@@ -185,6 +213,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             input()
+                .class("search-input")
                 .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
                 .name(SEARCH_NAME)
@@ -296,13 +325,15 @@ fn view_tag_chips(model: &ViewModel) -> Elem {
     }
 
     let (active, inactive) = model.to_tags();
+
+    let feed_id = model.feed.feed_id.clone();
     div()
         .class("flex flex-row items-start justify-start flex-wrap gap-2")
-        .child(view_tag_chips_frag(active, true))
-        .child(view_tag_chips_frag(inactive, false))
+        .child(view_tag_chips_frag(&feed_id, active, true))
+        .child(view_tag_chips_frag(&feed_id, inactive, false))
 }
 
-fn view_tag_chips_frag(feed_tags: Vec<FeedTag>, is_checked: bool) -> Elem {
+fn view_tag_chips_frag(feed_id: &FeedId, feed_tags: Vec<FeedTag>, is_checked: bool) -> Elem {
     frag().children(
         feed_tags
             .iter()
@@ -314,6 +345,18 @@ fn view_tag_chips_frag(feed_tags: Vec<FeedTag>, is_checked: bool) -> Elem {
                     .disabled(false)
                     .name(FEED_TAG_ID_NAME)
                     .view()
+                    .hx_trigger_click()
+                    .hx_swap_none()
+                    .hx_include_this()
+                    .hx_post(
+                        &route::Route::Feed(feed::route::Route::Controls {
+                            feed_id: feed_id.clone(),
+                            child: Route::ClickedTag {
+                                tag: feed_tag.clone(),
+                            },
+                        })
+                        .encode(),
+                    )
             })
             .collect::<Vec<Elem>>(),
     )

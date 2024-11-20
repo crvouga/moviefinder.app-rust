@@ -1,11 +1,10 @@
-use super::{controls, feed_::Feed, feed_id::FeedId, feed_item::FeedItem, route::Route};
+use super::{controls, ctx::Ctx, feed_::Feed, feed_id::FeedId, feed_item::FeedItem, route::Route};
 use crate::{
     core::{
         html::*,
         res::Res,
         ui::{self, image::Image},
     },
-    ctx::Ctx,
     media::{self, media_db::interface::MediaQuery, media_id::MediaId},
     req::Req,
     route,
@@ -94,7 +93,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
         }
 
         Route::Controls { feed_id, child } => {
-            controls::respond::respond(ctx, req, feed_id, child).await
+            controls::respond::respond(&ctx.controls, req, feed_id, child).await
         }
     }
 }
