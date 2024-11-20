@@ -52,6 +52,7 @@ impl Chip {
             .value(&self.id)
             .checked(self.checked)
             .disabled(self.disabled)
+            .on_click("event.stopPropagation()")
         )
         .child(
             label()
@@ -61,7 +62,7 @@ impl Chip {
             .class(&self.size.to_class())
             .tab_index(0)
             .child_text(&self.label)
-            .on_click("event.stopPropagation()")
+            
         )
     }
 }
