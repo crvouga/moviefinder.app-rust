@@ -99,9 +99,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         }
 
         Route::ClickedSave => {
-            let form_state = get_form_state(ctx, &Feed::default()).await;
-
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
+
+            let form_state = get_form_state(ctx, &feed).await;
 
             let feed_new = Feed {
                 start_index: 0,
@@ -175,7 +175,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 }
 
 async fn get_form_state(ctx: &Ctx, feed: &Feed) -> FormState {
-    let feed_id = FeedId::new("id");
+    let feed_id = feed.feed_id.clone();
 
     let maybe_form_state = ctx.form_state_db.get(&feed_id).await.unwrap_or(None);
 

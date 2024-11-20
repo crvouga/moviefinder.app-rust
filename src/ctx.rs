@@ -44,6 +44,11 @@ impl Ctx {
             db_conn_sql.clone(),
         ));
 
+        // let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(
+        //     logger.clone(),
+        //     db_conn_sql.clone(),
+        // ));
+
         // let key_value_db = Arc::new(key_value_db::impl_hash_map::ImplHashMap::new());
 
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
