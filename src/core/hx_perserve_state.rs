@@ -73,7 +73,7 @@ impl Elem {
         self.hx_ext("preserve-state")
     }
 
-    pub fn hx_perserve_state(self, id: &str) -> Self {
-        self.attr("data-preserve-state", id)
+    pub fn hx_perserve_state(self, key: &str) -> Self {
+        self.attr("data-preserve-state", key)
     }
 }

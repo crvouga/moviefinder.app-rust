@@ -16,7 +16,7 @@ impl html::Elem {
         } = self
         {
             let existing = attributes
-                .get("hx-trigger")
+                .get("data-hx-trigger")
                 .map_or("", |attr| attr.as_str());
 
             let new = if existing.is_empty() {
@@ -25,7 +25,7 @@ impl html::Elem {
                 format!("{}, {}", existing, value).trim().to_string()
             };
 
-            attributes.insert("hx-trigger".to_string(), new);
+            attributes.insert("data-hx-trigger".to_string(), new);
         }
 
         self
@@ -48,7 +48,7 @@ impl html::Elem {
     }
 
     pub fn hx_swap(self, value: &str) -> Self {
-        self.attr("hx-swap", value)
+        self.attr("data-hx-swap", value)
     }
 
     pub fn hx_swap_outer_html(self) -> Self {
@@ -64,31 +64,31 @@ impl html::Elem {
     }
 
     pub fn hx_get(self, href: &str) -> Self {
-        self.attr("hx-get", href).clone()
+        self.attr("data-hx-get", href).clone()
     }
 
     pub fn hx_post(self, href: &str) -> Self {
-        self.attr("hx-post", href).clone()
+        self.attr("data-hx-post", href).clone()
     }
 
     pub fn hx_push_url(self) -> Self {
-        self.attr("hx-push-url", "true").clone()
+        self.attr("data-hx-push-url", "true").clone()
     }
 
     pub fn hx_target(self, css_selector: &str) -> Self {
         if css::selector::is_valid(css_selector) {
-            self.attr("hx-target", css_selector).clone()
+            self.attr("data-hx-target", css_selector).clone()
         } else {
             self
         }
     }
 
     pub fn hx_vals(self, values: &str) -> Self {
-        self.attr("hx-vals", values).clone()
+        self.attr("data-hx-vals", values).clone()
     }
 
     pub fn hx_include(self, value: &str) -> Self {
-        self.attr("hx-include", value).clone()
+        self.attr("data-hx-include", value).clone()
     }
 
     pub fn hx_include_this(self) -> Self {
@@ -102,7 +102,9 @@ impl html::Elem {
             ..
         } = self
         {
-            let existing = attributes.get("hx-ext").map_or("", |attr| attr.as_str());
+            let existing = attributes
+                .get("data-hx-ext")
+                .map_or("", |attr| attr.as_str());
 
             let new = if existing.is_empty() {
                 value.trim().to_string()
@@ -110,18 +112,18 @@ impl html::Elem {
                 format!("{}, {}", existing, value).trim().to_string()
             };
 
-            attributes.insert("hx-ext".to_string(), new);
+            attributes.insert("data-hx-ext".to_string(), new);
         }
 
         self
     }
 
     pub fn hx_boost(self) -> Self {
-        self.attr("hx-boost", "true")
+        self.attr("data-hx-boost", "true")
     }
 
     pub fn hx_preserve(self) -> Self {
-        self.attr("hx-preserve", "true")
+        self.attr("data-hx-preserve", "true")
     }
 
     pub fn hx_abort(self, css_selector: &str) -> Self {
