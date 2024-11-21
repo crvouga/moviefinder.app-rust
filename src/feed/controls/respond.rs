@@ -201,7 +201,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
     .encode();
     label()
         .hx_post(&inputted_search_path)
-        .hx_trigger("load, input delay:300ms from:.search-input, focus from:.search-input")
+        .hx_trigger("load, input delay:300ms from:input, cleared from:input")
         .hx_target(&tags_selector())
         .hx_swap_outer_html()
         .hx_loading_aria_busy()
@@ -216,10 +216,13 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         .child(
             input()
                 .hx_perserve_state("feed-controls-search-input")
-                .class("search-input")
                 .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
                 .name(SEARCH_NAME)
+                .hx_on(
+                    "clear",
+                    "this.value = ''; this.focus(); this.dispatchEvent(new Event('cleared'))",
+                )
                 .placeholder("Search"),
         )
         .child(
@@ -243,8 +246,9 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         .child(
             button()
                 .type_("button")
-                .on_click(
-                    "const i = this.parentElement.querySelector('input'); i.value = ''; i.focus();",
+                .hx_on(
+                    "click",
+                    "this.parentElement.querySelector('input').dispatchEvent(new Event('clear'));",
                 )
                 .tab_index(0)
                 .aria_label("clear search")
