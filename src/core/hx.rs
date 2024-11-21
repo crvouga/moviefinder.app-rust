@@ -120,9 +120,13 @@ impl html::Elem {
         self.attr("hx-boost", "true")
     }
 
+    pub fn hx_preserve(self) -> Self {
+        self.attr("hx-preserve", "true")
+    }
+
     pub fn hx_abort(self, css_selector: &str) -> Self {
         if css::selector::is_valid(css_selector) {
-            self.attr(
+            self.attr_unsafe(
                 "onclick",
                 format!("htmx.trigger('{}', 'htmx:abort')", css_selector).as_str(),
             )

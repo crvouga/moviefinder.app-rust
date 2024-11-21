@@ -161,7 +161,7 @@ fn view_top_bar_root() -> Elem {
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root()
-        .root_push_screen(route::Route::Feed(Route::Controls {
+        .root_push_route(route::Route::Feed(Route::Controls {
             feed_id: feed_id.clone(),
             child: controls::route::Route::IndexLoad,
         }))
@@ -186,7 +186,7 @@ fn view_empty_slide() -> Elem {
 
 fn view_load(feed_id: &FeedId) -> Elem {
     view_root()
-        .root_swap_screen(route::Route::Feed(Route::Index {
+        .root_swap_route(route::Route::Feed(Route::Index {
             feed_id: feed_id.clone(),
         }))
         .hx_trigger_load()
@@ -197,7 +197,7 @@ fn view_load(feed_id: &FeedId) -> Elem {
 
 fn view_default_load() -> Elem {
     view_root()
-        .root_swap_screen(route::Route::Feed(Route::Default))
+        .root_swap_route(route::Route::Feed(Route::Default))
         .hx_trigger_load()
         .child(view_top_bar_root().child(view_open_controls_button()))
         .child(view_empty_slide())
@@ -308,7 +308,7 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
             feed_index: _,
         } => button()
             .class("w-full h-full")
-            .root_push_screen(to_media_details_route(&media.media_id))
+            .root_push_route(to_media_details_route(&media.media_id))
             .aria_label("open media details")
             .child(
                 Image::view()

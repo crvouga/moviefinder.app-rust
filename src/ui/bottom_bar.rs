@@ -22,7 +22,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .icon(ui::icon::home("size-8"))
                     .active(active == Active::Home)
                     .view()
-                    .root_push_screen(route::Route::Feed(feed::route::Route::DefaultLoad))
+                    .root_push_route(route::Route::Feed(feed::route::Route::DefaultLoad))
                     .hx_abort(abort_selector),
             )
             .child(
@@ -31,7 +31,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .icon(ui::icon::user_circle("size-8"))
                     .active(active == Active::Account)
                     .view()
-                    .root_push_screen(route::Route::Account(account::route::Route::Index))
+                    .root_push_route(route::Route::Account(account::route::Route::Index))
                     .hx_abort(abort_selector),
             ),
     )

@@ -10,19 +10,21 @@ fn root_selector() -> String {
 }
 
 impl Elem {
-    pub fn root_swap_screen(self, route: Route) -> Self {
-        self.hx_target(&root_selector())
-            .hx_swap_inner_html()
-            .hx_get(&route.encode())
+    pub fn root_swap(self) -> Self {
+        self.hx_target(&root_selector()).hx_swap_inner_html()
     }
 
-    pub fn root_push_screen(self, route: Route) -> Self {
-        self.root_swap_screen(route).hx_push_url()
+    pub fn root_swap_route(self, route: Route) -> Self {
+        self.root_swap().hx_get(&route.encode())
+    }
+
+    pub fn root_push_route(self, route: Route) -> Self {
+        self.root_swap_route(route).hx_push_url()
     }
 }
 
 impl Res {
-    pub fn root_redirect_screen(route: Route) -> Self {
+    pub fn root_redirect(route: Route) -> Self {
         Res::redirect(route.encode().to_string(), root_selector())
     }
 }
@@ -58,6 +60,7 @@ impl Root {
                 script().src_htmx().defer(),
                 script().src_htmx_preload().defer(),
                 script().src_htmx_loading_states().defer(),
+                script().js_htmx_preserve_input_state(),
                 style().css_htmx_loading_states(),
                 script().src_swiper().defer(),
                 script().js_image_element(),
@@ -68,7 +71,7 @@ impl Root {
                 .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
                 .hx_ext_loading_states()
                 .hx_ext_preload()
-                .hx_boost()
+                .hx_ext_preserve_input_state()
                 .child(
                     div()
                     .id(ROOT_ID)

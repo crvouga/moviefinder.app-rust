@@ -8,6 +8,7 @@ pub mod http;
 pub mod human_friendly_base64;
 pub mod hx;
 pub mod hx_loading_states;
+pub mod hx_perserve_input_state;
 pub mod hx_preload;
 pub mod image_set;
 pub mod logger;

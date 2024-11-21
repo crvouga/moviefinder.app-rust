@@ -73,6 +73,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         }
 
         Route::Index => {
+            // sleep
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+
             let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_tags = ctx
@@ -113,7 +116,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            Res::root_redirect_screen(to_back_route(feed_new.feed_id))
+            Res::root_redirect(to_back_route(feed_new.feed_id))
         }
 
         Route::ClickedTag { tag } => {
@@ -164,9 +167,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
                 form_state,
             };
 
-            let res: Res = view_tag_chips(&model).into();
-
-            res
+            view_tags(&model).into()
         }
 
         Route::ClickedGoBack => Res::empty(),
@@ -193,19 +194,19 @@ fn view_root() -> Elem {
 }
 
 fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
+    let inputted_search_path = route::Route::Feed(feed::route::Route::Controls {
+        feed_id: feed_id.clone(),
+        child: Route::InputtedSearch,
+    })
+    .encode();
     label()
-        .hx_post(
-            &route::Route::Feed(feed::route::Route::Controls {
-                feed_id: feed_id.clone(),
-                child: Route::InputtedSearch,
-            })
-            .encode(),
-        )
+        .hx_post(&inputted_search_path)
+        .hx_trigger("load, input delay:300ms from:.search-input, focus from:.search-input")
         .hx_target(&tags_selector())
-        .hx_trigger("input delay:300ms from:.search-input, focus from:.search-input")
-        .hx_swap_inner_html()
+        .hx_swap_outer_html()
         .hx_loading_aria_busy()
         .hx_include_this()
+        .hx_loading_path(&inputted_search_path)
         .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
         .child(
             div()
@@ -214,6 +215,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             input()
+                .id("feed-controls-search-id")
                 .class("search-input")
                 .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
@@ -233,7 +235,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .hx_loading_disabled()
                 .hx_loading_path(loading_path)
                 .hx_abort(&index_selector())
-                .root_push_screen(to_back_route(feed_id.clone()))
+                .root_push_route(to_back_route(feed_id.clone()))
                 .class("h-full pr-5 place-items-center")
                 .class("hidden peer-placeholder-shown:grid")
                 .child(icon::x_mark("size-6")),
@@ -257,7 +259,7 @@ fn view_load_index(feed_id: &FeedId) -> Elem {
         .child(view_search_bar(&feed_id, ""))
         .child(
             spinner_page::view()
-                .root_swap_screen(route::Route::Feed(feed::route::Route::Controls {
+                .root_swap_route(route::Route::Feed(feed::route::Route::Controls {
                     feed_id: feed_id.clone(),
                     child: Route::Index,
                 }))
@@ -295,7 +297,7 @@ fn view_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .color(Color::Gray)
                 .loading_disabled_path(&loading_path)
                 .view()
-                .root_push_screen(to_back_route(feed_id.clone()))
+                .root_push_route(to_back_route(feed_id.clone()))
                 .type_("button")
                 .class("flex-1")
                 .hx_abort(&index_selector()),

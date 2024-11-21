@@ -1,18 +1,18 @@
 use super::{css, html::Elem};
 
+const HX_LOADING_STATES_STYLE: &str = r#"
+[data-loading] {
+    display: none;
+}
+"#;
+
 impl Elem {
     pub fn src_htmx_loading_states(self) -> Self {
         self.src("https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js")
     }
 
     pub fn css_htmx_loading_states(self) -> Self {
-        self.child_unsafe_text(
-            r#"
-            [data-loading] {
-                display: none;
-            }
-            "#,
-        )
+        self.child_unsafe_text(HX_LOADING_STATES_STYLE)
     }
 
     pub fn hx_ext_loading_states(self) -> Self {

@@ -114,7 +114,7 @@ fn view_index_load(media_id: &MediaId) -> Elem {
     Layout::new()
         .child(ui::icon::spinner("animate-spin size-16"))
         .view()
-        .root_swap_screen(route::Route::Media(media::route::Route::Details(
+        .root_swap_route(route::Route::Media(media::route::Route::Details(
             media::details::route::Route::Index {
                 media_id: media_id.clone(),
             },
