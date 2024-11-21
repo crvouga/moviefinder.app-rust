@@ -2,12 +2,9 @@
 mod tests {
     use crate::{
         core::query::{Query, QueryFilter, QueryOp},
-        feed::{
-            feed_tag::FeedTag,
-            feed_tag_db::{
-                self,
-                interface::{FeedTagDb, FeedTagQueryField},
-            },
+        feed::feed_tag_db::{
+            self,
+            interface::{FeedTagDb, FeedTagQueryField},
         },
         fixture::BaseFixture,
     };
@@ -55,7 +52,7 @@ mod tests {
                     filter: QueryFilter::Clause(
                         FeedTagQueryField::Label,
                         QueryOp::Like,
-                        "Horror".to_string(),
+                        "horror".to_string(),
                     ),
                     limit: 10,
                     offset: 0,
@@ -64,12 +61,10 @@ mod tests {
                 .unwrap()
                 .items;
 
+            let first = queried.first().unwrap();
+
             assert!(queried.len() > 0);
-
-            let first = queried.into_iter().next().unwrap();
-
-            assert!(matches!(first, FeedTag::Genre(_)));
-            // assert!(first.label().contains("Horror"));
+            assert!(first.label().to_lowercase().contains("horror"));
         }
     }
 }

@@ -5,6 +5,7 @@ use crate::{
     feed::feed_tag::FeedTag,
 };
 
+#[derive(Clone, Debug)]
 pub enum FeedTagQueryField {
     Label,
 }

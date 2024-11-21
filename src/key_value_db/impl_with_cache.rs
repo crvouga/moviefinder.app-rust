@@ -16,25 +16,28 @@ impl ImplWithCache {
 #[async_trait]
 impl KeyValueDb for ImplWithCache {
     async fn get(&self, key: &str) -> Result<Option<String>, String> {
-        let got = self.cache.get(key).await?;
+        let got_cache = self.cache.get(key).await?;
 
-        if got.is_none() {
-            let got = self.source.get(key).await?;
-            if let Some(value) = &got {
-                self.cache.put(key, value.clone()).await?;
-            }
+        if let Some(value) = &got_cache {
+            return Ok(Some(value.clone()));
         }
 
-        Ok(got)
+        let got_source = self.source.get(key).await?;
+
+        if let Some(value) = &got_source {
+            self.cache.put(key, value.clone()).await?;
+        }
+
+        Ok(got_source)
     }
 
     async fn put(&self, key: &str, value: String) -> Result<(), String> {
-        self.source.put(key, value.clone()).await?;
+        let _fut = self.source.put(key, value.clone());
         self.cache.put(key, value).await
     }
 
     async fn zap(&self, key: &str) -> Result<(), String> {
-        self.source.zap(key).await?;
+        let _fut = self.source.zap(key);
         self.cache.zap(key).await
     }
 

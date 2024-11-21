@@ -52,14 +52,17 @@ impl Chip {
             .value(&self.id)
             .checked(self.checked)
             .disabled(self.disabled)
+            .on_click("event.stopPropagation()")
         )
         .child(
             label()
             .for_(&self.id)
-            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none tuncate whitespace-nowrap")
+            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none truncate whitespace-nowrap")
             .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
             .class(&self.size.to_class())
+            .tab_index(0)
             .child_text(&self.label)
+            
         )
     }
 }

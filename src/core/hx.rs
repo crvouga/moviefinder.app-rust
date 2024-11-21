@@ -1,59 +1,66 @@
-use std::time::Duration;
-
 // https://htmx.org/docs/
 // https://v1.htmx.org/extensions/loading-states/
-use crate::core::html;
+use super::{css, html};
 use serde::{Deserialize, Serialize};
-
-use super::css;
+use std::time::Duration;
 
 impl html::Elem {
-    pub fn hx_trigger(self, trigger: Trigger) -> Self {
-        self.attr("hx-trigger", trigger.as_str())
+    pub fn src_htmx(self) -> Self {
+        self.src("https://unpkg.com/htmx.org@2.0.1")
+    }
+
+    pub fn hx_trigger(mut self, value: &str) -> Self {
+        if let html::Elem::Element {
+            attrs_unsafe: ref mut attributes,
+            ..
+        } = self
+        {
+            let existing = attributes
+                .get("hx-trigger")
+                .map_or("", |attr| attr.as_str());
+
+            let new = if existing.is_empty() {
+                value.trim().to_string()
+            } else {
+                format!("{}, {}", existing, value).trim().to_string()
+            };
+
+            attributes.insert("hx-trigger".to_string(), new);
+        }
+
+        self
     }
 
     pub fn hx_trigger_click(self) -> Self {
-        self.hx_trigger(Trigger::Click)
+        self.hx_trigger("click")
     }
 
     pub fn hx_trigger_load(self) -> Self {
-        self.hx_trigger(Trigger::Load)
+        self.hx_trigger("load")
     }
 
-    pub fn hx_trigger_custom(self, value: &str) -> Self {
-        self.hx_trigger(Trigger::Custom(value.to_string()))
-    }
-
-    pub fn hx_trigger_input_changed(self, delay: Duration) -> Self {
-        self.hx_trigger_custom(format!("input changed delay:{}ms", delay.as_millis()).as_str())
+    pub fn hx_trigger_focus(self) -> Self {
+        self.hx_trigger("focus")
     }
 
     pub fn hx_trigger_intersect(self) -> Self {
-        self.hx_trigger(Trigger::Intersect)
+        self.hx_trigger("intersect")
     }
 
-    pub fn hx_preload(self, preload: Preload) -> Self {
-        self.attr("preload", preload.as_str()).clone()
-    }
-
-    pub fn hx_preload_mouse_down(self) -> Self {
-        self.hx_preload(Preload::MouseDown)
-    }
-
-    pub fn hx_swap(self, swap: Swap) -> Self {
-        self.attr("hx-swap", swap.as_str()).clone()
+    pub fn hx_swap(self, value: &str) -> Self {
+        self.attr("hx-swap", value)
     }
 
     pub fn hx_swap_outer_html(self) -> Self {
-        self.hx_swap(Swap::OuterHtml)
+        self.hx_swap("outerHTML")
     }
 
     pub fn hx_swap_none(self) -> Self {
-        self.hx_swap(Swap::None)
+        self.hx_swap("none")
     }
 
     pub fn hx_swap_inner_html(self) -> Self {
-        self.hx_swap(Swap::InnerHtml)
+        self.hx_swap("innerHTML")
     }
 
     pub fn hx_get(self, href: &str) -> Self {
@@ -68,10 +75,6 @@ impl html::Elem {
         self.attr("hx-push-url", "true").clone()
     }
 
-    pub fn hx_replace_url(self) -> Self {
-        self.attr("hx-replace-url", "true").clone()
-    }
-
     pub fn hx_target(self, css_selector: &str) -> Self {
         if css::selector::is_valid(css_selector) {
             self.attr("hx-target", css_selector).clone()
@@ -84,41 +87,37 @@ impl html::Elem {
         self.attr("hx-vals", values).clone()
     }
 
+    pub fn hx_include(self, value: &str) -> Self {
+        self.attr("hx-include", value).clone()
+    }
+
+    pub fn hx_include_this(self) -> Self {
+        self.hx_include("this")
+    }
+
     /// https://htmx.org/attributes/hx-ext/
-    pub fn hx_ext(self, extensions: Vec<&str>) -> Self {
-        self.attr("hx-ext", &extensions.join(","))
+    pub fn hx_ext(mut self, value: &str) -> Self {
+        if let html::Elem::Element {
+            attrs_unsafe: ref mut attributes,
+            ..
+        } = self
+        {
+            let existing = attributes.get("hx-ext").map_or("", |attr| attr.as_str());
+
+            let new = if existing.is_empty() {
+                value.trim().to_string()
+            } else {
+                format!("{}, {}", existing, value).trim().to_string()
+            };
+
+            attributes.insert("hx-ext".to_string(), new);
+        }
+
+        self
     }
 
     pub fn hx_boost(self) -> Self {
         self.attr("hx-boost", "true")
-    }
-
-    pub fn hx_loading_aria_busy(self) -> Self {
-        self.attr("data-loading-aria-busy", "")
-    }
-
-    pub fn hx_loading_disabled(self) -> Self {
-        self.attr("data-loading-disable", "")
-    }
-
-    pub fn hx_loading_path(self, path: &str) -> Self {
-        self.attr("data-loading-path", path)
-    }
-
-    pub fn hx_loading_states(self) -> Self {
-        self.attr("data-loading-states", "")
-    }
-
-    pub fn hx_loading_target(self, css_selector: &str) -> Self {
-        if css::selector::is_valid(css_selector) {
-            self.attr("data-loading-target", css_selector)
-        } else {
-            self
-        }
-    }
-
-    pub fn hx_on(self, event: &str, javascript: &str) -> Self {
-        self.attr(&format!("hx-on:{}", event), javascript)
     }
 
     pub fn hx_abort(self, css_selector: &str) -> Self {
@@ -129,53 +128,6 @@ impl html::Elem {
             )
         } else {
             self
-        }
-    }
-}
-
-// https://htmx.org/attributes/hx-trigger/
-pub enum Trigger {
-    Load,
-    Click,
-    Intersect,
-    Custom(String),
-}
-
-impl Trigger {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Trigger::Intersect => "intersect",
-            Trigger::Load => "load",
-            Trigger::Click => "click",
-            Trigger::Custom(value) => value,
-        }
-    }
-}
-
-pub enum Swap {
-    InnerHtml,
-    OuterHtml,
-    None,
-}
-
-impl Swap {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Swap::InnerHtml => "innerHTML",
-            Swap::OuterHtml => "outerHTML",
-            Swap::None => "none",
-        }
-    }
-}
-
-pub enum Preload {
-    MouseDown,
-}
-
-impl Preload {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Preload::MouseDown => "mousedown",
         }
     }
 }

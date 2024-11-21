@@ -1,11 +1,7 @@
-use std::time::Duration;
-
-use super::route::Route;
+use super::{ctx::Ctx, form_state::FormState, route::Route};
 use crate::{
     core::{
         html::*,
-        http::form_data::FormData,
-        hx,
         pagination::Paginated,
         query::{Query, QueryFilter, QueryOp},
         res::Res,
@@ -17,7 +13,6 @@ use crate::{
             spinner_page,
         },
     },
-    ctx::Ctx,
     feed::{
         self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag,
         feed_tag_db::interface::FeedTagQueryField,
@@ -43,6 +38,8 @@ fn index_selector() -> String {
 struct ViewModel {
     feed: Feed,
     feed_tags: Vec<FeedTag>,
+    form_state: FormState,
+    search_input: String,
 }
 
 impl ViewModel {
@@ -51,7 +48,7 @@ impl ViewModel {
             .feed_tags
             .clone()
             .into_iter()
-            .filter(|feed_tag| self.feed.tags.contains(feed_tag))
+            .filter(|feed_tag| self.form_state.tags.contains(feed_tag))
             .collect();
         active.sort();
 
@@ -59,7 +56,7 @@ impl ViewModel {
             .feed_tags
             .clone()
             .into_iter()
-            .filter(|feed_tag| !self.feed.tags.contains(feed_tag))
+            .filter(|feed_tag| !self.form_state.tags.contains(feed_tag))
             .collect();
         inactive.sort();
 
@@ -89,32 +86,52 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
                 .unwrap_or(Paginated::default())
                 .items;
 
-            let model = ViewModel { feed, feed_tags };
+            let form_state = get_form_state(ctx, &feed).await;
+
+            let model = ViewModel {
+                feed,
+                feed_tags,
+                search_input: "".to_string(),
+                form_state,
+            };
 
             view_index(&model).into()
         }
 
         Route::ClickedSave => {
-            let feed_tags_new: Vec<FeedTag> = req
-                .form_data
-                .get_all(FEED_TAG_ID_NAME)
-                .cloned()
-                .unwrap_or(vec![])
-                .into_iter()
-                .filter_map(|encoded| FeedTag::decode(&encoded))
-                .collect();
-
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
+
+            let form_state = get_form_state(ctx, &feed).await;
 
             let feed_new = Feed {
                 start_index: 0,
-                tags: feed_tags_new,
+                tags: form_state.tags,
                 ..feed
             };
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
             Res::root_redirect_screen(to_back_route(feed_new.feed_id))
+        }
+
+        Route::ClickedTag { tag } => {
+            let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
+
+            let mut form_state = get_form_state(ctx, &feed).await;
+
+            if form_state.tags.contains(tag) {
+                form_state.tags.retain(|t| t != tag);
+            } else {
+                form_state.tags.retain(|t| t != tag);
+                form_state.tags.push(tag.clone());
+            }
+
+            ctx.form_state_db
+                .put(form_state.clone())
+                .await
+                .unwrap_or(());
+
+            Res::empty()
         }
 
         Route::InputtedSearch => {
@@ -139,13 +156,33 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let model = ViewModel { feed, feed_tags };
+            let form_state = get_form_state(ctx, &feed).await;
+
+            let model = ViewModel {
+                feed,
+                feed_tags,
+                search_input: search_input.clone(),
+                form_state,
+            };
 
             let res: Res = view_tag_chips(&model).into();
 
             res
         }
+
+        Route::ClickedGoBack => Res::empty(),
     }
+}
+
+async fn get_form_state(ctx: &Ctx, feed: &Feed) -> FormState {
+    let feed_id = feed.feed_id.clone();
+
+    let maybe_form_state = ctx.form_state_db.get(&feed_id).await.unwrap_or(None);
+
+    let mut form_state = maybe_form_state.unwrap_or(FormState::new(feed));
+    form_state.feed_id = feed_id;
+
+    form_state
 }
 
 fn to_back_route(feed_id: FeedId) -> route::Route {
@@ -156,76 +193,63 @@ fn view_root() -> Elem {
     div().class("w-full h-full flex flex-col overflow-hidden relative")
 }
 
-const SEARCH_BAR_ROOT_ID: &str = "search-bar";
-fn search_bar_root_selector() -> String {
-    format!("#{}", SEARCH_BAR_ROOT_ID)
-}
 fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
-    div()
-        .id(SEARCH_BAR_ROOT_ID)
-        .class("w-full h-16 shrink-0 border-b relative group")
+    label()
+        .hx_post(
+            &route::Route::Feed(feed::route::Route::Controls {
+                feed_id: feed_id.clone(),
+                child: Route::InputtedSearch,
+            })
+            .encode(),
+        )
+        .hx_target(&tags_selector())
+        .hx_trigger("input delay:300ms from:.search-input, focus from:.search-input")
+        .hx_swap_inner_html()
         .hx_loading_aria_busy()
-        .x_data("{js_val_search:''}")
+        .hx_include_this()
+        .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
         .child(
             div()
-                .class("absolute top-1/2 left-5 transform -translate-y-1/2")
+                .class("h-full grid place-items-center pl-4 pr-2")
                 .child(icon::magnifying_glass("size-6")),
         )
         .child(
-            div()
-                .class(
-                    "absolute top-1/2 right-0 transform -translate-y-1/2 flex items-center gap-2",
-                )
-                .child(
-                    div()
-                        .class("group-aria-busy:opacity-100 opacity-0")
-                        .child(spinner("size-8 animate-spin")),
-                )
-                .child(
-                    button()
-                        .x_show("js_val_search.length === 0")
-                        .type_("button")
-                        .tab_index(0)
-                        .aria_label("close")
-                        .hx_loading_disabled()
-                        .hx_loading_path(loading_path)
-                        .hx_abort(&index_selector())
-                        .root_push_screen(to_back_route(feed_id.clone()))
-                        .class("h-full pr-5 grid place-items-center")
-                        .child(icon::x_mark("size-6")),
-                )
-                .child(
-                    button()
-                        .x_show("js_val_search.length > 0")
-                        .x_on("click", "js_val_search = ''; $refs.js_ref_search.focus();")
-                        .type_("button")
-                        .tab_index(0)
-                        .aria_label("clear search")
-                        .class("h-full pr-5 grid place-items-center")
-                        .child(icon::x_circle_mark("size-6")),
-                ),
-        )
-        .child(
             input()
-                .x_model("js_val_search")
-                .x_ref("js_ref_search")
-                .class("w-full h-full bg-transparent")
-                .class("pl-14")
-                .class("pr-14 group-aria-busy:pr-24")
+                .class("search-input")
+                .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
                 .name(SEARCH_NAME)
-                .placeholder("Search")
-                .hx_post(
-                    &route::Route::Feed(feed::route::Route::Controls {
-                        feed_id: feed_id.clone(),
-                        child: Route::InputtedSearch,
-                    })
-                    .encode(),
+                .placeholder("Search"),
+        )
+        .child(
+            div()
+                .class("group-aria-busy:block hidden")
+                .child(spinner("size-8 animate-spin")),
+        )
+        .child(
+            button()
+                .type_("button")
+                .tab_index(0)
+                .aria_label("close")
+                .hx_loading_disabled()
+                .hx_loading_path(loading_path)
+                .hx_abort(&index_selector())
+                .root_push_screen(to_back_route(feed_id.clone()))
+                .class("h-full pr-5 place-items-center")
+                .class("hidden peer-placeholder-shown:grid")
+                .child(icon::x_mark("size-6")),
+        )
+        .child(
+            button()
+                .type_("button")
+                .on_click(
+                    "const i = this.parentElement.querySelector('input'); i.value = ''; i.focus();",
                 )
-                .hx_target(&tags_selector())
-                .hx_trigger_input_changed(Duration::from_millis(300))
-                .hx_swap_inner_html()
-                .hx_loading_target(&search_bar_root_selector()),
+                .tab_index(0)
+                .aria_label("clear search")
+                .class("h-full pr-5 place-items-center")
+                .class("grid peer-placeholder-shown:hidden")
+                .child(icon::x_circle_mark("size-6")),
         )
 }
 
@@ -296,14 +320,22 @@ fn view_tags(model: &ViewModel) -> Elem {
 }
 
 fn view_tag_chips(model: &ViewModel) -> Elem {
+    if model.feed_tags.len() == 0 {
+        return div()
+            .class("w-full overflow-hidden flex-1 flex items-start justify-start font-bold text-lg break-all")
+            .child_text(&format!(r#"No results for "{}""#, model.search_input));
+    }
+
     let (active, inactive) = model.to_tags();
+
+    let feed_id = model.feed.feed_id.clone();
     div()
         .class("flex flex-row items-start justify-start flex-wrap gap-2")
-        .child(view_tag_chips_frag(active, true))
-        .child(view_tag_chips_frag(inactive, false))
+        .child(view_tag_chips_frag(&feed_id, active, true))
+        .child(view_tag_chips_frag(&feed_id, inactive, false))
 }
 
-fn view_tag_chips_frag(feed_tags: Vec<FeedTag>, is_checked: bool) -> Elem {
+fn view_tag_chips_frag(feed_id: &FeedId, feed_tags: Vec<FeedTag>, is_checked: bool) -> Elem {
     frag().children(
         feed_tags
             .iter()
@@ -315,6 +347,18 @@ fn view_tag_chips_frag(feed_tags: Vec<FeedTag>, is_checked: bool) -> Elem {
                     .disabled(false)
                     .name(FEED_TAG_ID_NAME)
                     .view()
+                    .hx_trigger_click()
+                    .hx_swap_none()
+                    .hx_include_this()
+                    .hx_post(
+                        &route::Route::Feed(feed::route::Route::Controls {
+                            feed_id: feed_id.clone(),
+                            child: Route::ClickedTag {
+                                tag: feed_tag.clone(),
+                            },
+                        })
+                        .encode(),
+                    )
             })
             .collect::<Vec<Elem>>(),
     )

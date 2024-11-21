@@ -8,7 +8,7 @@ use crate::route::Route;
 
 pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
     match route {
-        Route::Feed(route) => feed::respond::respond(ctx, req, route).await,
+        Route::Feed(route) => feed::respond::respond(&ctx.feed, req, route).await,
 
         Route::Account(route) => account::respond::respond(route),
 
