@@ -37,7 +37,7 @@ impl FormStateDb {
         Ok(Some(parsed))
     }
 
-    pub async fn put(&self, form_state: FormState) -> Result<(), String> {
+    pub async fn put(&self, form_state: &FormState) -> Result<(), String> {
         let value = serde_json::to_string(&form_state).map_err(|e| e.to_string())?;
 
         self.key_value_db

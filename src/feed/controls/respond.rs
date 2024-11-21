@@ -86,7 +86,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
                 .unwrap_or(Paginated::default())
                 .items;
 
-            let form_state = get_form_state(ctx, &feed).await;
+            let form_state = FormState::new(&feed);
+
+            ctx.form_state_db.put(&form_state).await.unwrap_or(());
 
             let model = ViewModel {
                 feed,
@@ -126,10 +128,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
                 form_state.tags.push(tag.clone());
             }
 
-            ctx.form_state_db
-                .put(form_state.clone())
-                .await
-                .unwrap_or(());
+            ctx.form_state_db.put(&form_state).await.unwrap_or(());
 
             Res::empty()
         }

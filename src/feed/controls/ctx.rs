@@ -2,10 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     core::logger::interface::Logger,
-    feed::{
-        feed_db::interface::FeedDb,
-        feed_tag_db::{self, interface::FeedTagDb},
-    },
+    feed::{feed_db::interface::FeedDb, feed_tag_db::interface::FeedTagDb},
     key_value_db::interface::KeyValueDb,
 };
 
