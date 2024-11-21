@@ -60,7 +60,7 @@ impl Root {
                 script().src_htmx().defer(),
                 script().src_htmx_preload().defer(),
                 script().src_htmx_loading_states().defer(),
-                script().js_htmx_preserve_input_state(),
+                script().js_htmx_preserve_state(),
                 style().css_htmx_loading_states(),
                 script().src_swiper().defer(),
                 script().js_image_element(),
@@ -71,7 +71,7 @@ impl Root {
                 .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
                 .hx_ext_loading_states()
                 .hx_ext_preload()
-                .hx_ext_preserve_input_state()
+                .hx_ext_preserve_state()
                 .child(
                     div()
                     .id(ROOT_ID)
