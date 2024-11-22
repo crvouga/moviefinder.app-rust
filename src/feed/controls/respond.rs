@@ -1,9 +1,7 @@
-use super::{ctx::Ctx, form_state::FormState, route::Route};
+use super::{ctx::Ctx, form_state::FormState, route::Route, view_model::ViewModel};
 use crate::{
     core::{
         html::*,
-        pagination::Paginated,
-        query::{Query, QueryFilter, QueryOp},
         res::Res,
         ui::{
             self,
@@ -13,10 +11,7 @@ use crate::{
             spinner_page,
         },
     },
-    feed::{
-        self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag,
-        feed_tag_db::interface::FeedTagQueryField,
-    },
+    feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag},
     req::Req,
     route,
 };
@@ -34,36 +29,6 @@ fn index_selector() -> String {
     format!("#{}", INDEX_ID)
 }
 
-#[derive(Debug)]
-struct ViewModel {
-    feed: Feed,
-    feed_tags: Vec<FeedTag>,
-    form_state: FormState,
-    search_input: String,
-}
-
-impl ViewModel {
-    fn to_tags(&self) -> (Vec<FeedTag>, Vec<FeedTag>) {
-        let mut active: Vec<FeedTag> = self
-            .feed_tags
-            .clone()
-            .into_iter()
-            .filter(|feed_tag| self.form_state.tags.contains(feed_tag))
-            .collect();
-        active.sort();
-
-        let mut inactive: Vec<FeedTag> = self
-            .feed_tags
-            .clone()
-            .into_iter()
-            .filter(|feed_tag| !self.form_state.tags.contains(feed_tag))
-            .collect();
-        inactive.sort();
-
-        (active, inactive)
-    }
-}
-
 pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
         Route::IndexLoad => {
@@ -73,37 +38,14 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         }
 
         Route::Index => {
-            let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
-
-            let feed_tags = ctx
-                .feed_tag_db
-                .query(Query {
-                    offset: 0,
-                    limit: 100,
-                    filter: QueryFilter::None,
-                })
-                .await
-                .unwrap_or(Paginated::default())
-                .items;
-
-            let form_state = FormState::new(&feed);
-
-            ctx.form_state_db.put(&form_state).await.unwrap_or(());
-
-            let model = ViewModel {
-                feed,
-                feed_tags,
-                search_input: "".to_string(),
-                form_state,
-            };
-
+            let model = ViewModel::load(ctx, feed_id, "").await;
             view_index(&model).into()
         }
 
         Route::ClickedSave => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let form_state = get_form_state(ctx, &feed).await;
+            let form_state = FormState::load(ctx, &feed).await;
 
             let feed_new = Feed {
                 start_index: 0,
@@ -119,16 +61,11 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         Route::ClickedTag { tag } => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let mut form_state = get_form_state(ctx, &feed).await;
+            let form_state = FormState::load(ctx, &feed).await;
 
-            if form_state.tags.contains(tag) {
-                form_state.tags.retain(|t| t != tag);
-            } else {
-                form_state.tags.retain(|t| t != tag);
-                form_state.tags.push(tag.clone());
-            }
+            let form_state_new = form_state.toggle(tag);
 
-            ctx.form_state_db.put(&form_state).await.unwrap_or(());
+            ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
 
             Res::empty()
         }
@@ -138,48 +75,13 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let search_input = req.form_data.get_first(SEARCH_NAME).unwrap_or(&default);
 
-            let feed_tags = ctx
-                .feed_tag_db
-                .query(Query {
-                    offset: 0,
-                    limit: 100,
-                    filter: QueryFilter::Clause(
-                        FeedTagQueryField::Label,
-                        QueryOp::Like,
-                        search_input.clone(),
-                    ),
-                })
-                .await
-                .unwrap_or(Paginated::default())
-                .items;
-
-            let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
-
-            let form_state = get_form_state(ctx, &feed).await;
-
-            let model = ViewModel {
-                feed,
-                feed_tags,
-                search_input: search_input.clone(),
-                form_state,
-            };
+            let model = ViewModel::load(ctx, feed_id, search_input).await;
 
             view_tags(&model).into()
         }
 
         Route::ClickedGoBack => Res::empty(),
     }
-}
-
-async fn get_form_state(ctx: &Ctx, feed: &Feed) -> FormState {
-    let feed_id = feed.feed_id.clone();
-
-    let maybe_form_state = ctx.form_state_db.get(&feed_id).await.unwrap_or(None);
-
-    let mut form_state = maybe_form_state.unwrap_or(FormState::new(feed));
-    form_state.feed_id = feed_id;
-
-    form_state
 }
 
 fn to_back_route(feed_id: FeedId) -> route::Route {

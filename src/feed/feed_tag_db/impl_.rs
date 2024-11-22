@@ -8,7 +8,7 @@ use crate::{
     },
     feed::feed_tag::FeedTag,
     media::genre::genre_db::interface::GenreDb,
-    person::person_db::interface::PersonDb,
+    person::person_db::interface::{PersonDb, PersonQueryField},
 };
 use async_trait::async_trait;
 
@@ -30,12 +30,24 @@ impl Impl_ {
 impl FeedTagDb for Impl_ {
     async fn query(&self, query: Query<FeedTagQueryField>) -> Result<Paginated<FeedTag>, String> {
         let genres = self.genre_db.get_all().await.unwrap_or(vec![]);
+
         let people = self
             .person_db
-            .query(Query {
-                filter: QueryFilter::None,
-                limit: query.limit,
-                offset: query.offset,
+            .query(match &query.filter {
+                QueryFilter::Clause(FeedTagQueryField::Label, QueryOp::Like, value) => Query {
+                    filter: QueryFilter::Clause(
+                        PersonQueryField::Name,
+                        QueryOp::Like,
+                        value.clone(),
+                    ),
+                    limit: query.limit,
+                    offset: query.offset,
+                },
+                _ => Query {
+                    filter: QueryFilter::None,
+                    limit: query.limit,
+                    offset: query.offset,
+                },
             })
             .await
             .unwrap_or_default()

@@ -2,9 +2,12 @@
 mod tests {
     use crate::{
         core::query::{Query, QueryFilter, QueryOp},
-        feed::feed_tag_db::{
-            self,
-            interface::{FeedTagDb, FeedTagQueryField},
+        feed::{
+            feed_tag::FeedTag,
+            feed_tag_db::{
+                self,
+                interface::{FeedTagDb, FeedTagQueryField},
+            },
         },
         fixture::BaseFixture,
     };
@@ -19,7 +22,10 @@ mod tests {
         let base = BaseFixture::new().await;
 
         fixtures.push(Fixture {
-            feed_tag_db: Box::new(feed_tag_db::impl_::Impl_::new(base.ctx.genre_db)),
+            feed_tag_db: Box::new(feed_tag_db::impl_::Impl_::new(
+                base.ctx.genre_db,
+                base.ctx.person_db,
+            )),
         });
 
         fixtures
@@ -65,6 +71,32 @@ mod tests {
 
             assert!(queried.len() > 0);
             assert!(first.label().to_lowercase().contains("horror"));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_search_person() {
+        for f in fixtures().await {
+            let queried = f
+                .feed_tag_db
+                .query(Query {
+                    filter: QueryFilter::Clause(
+                        FeedTagQueryField::Label,
+                        QueryOp::Like,
+                        "Tom Cruise".to_string(),
+                    ),
+                    limit: 10,
+                    offset: 0,
+                })
+                .await
+                .unwrap()
+                .items;
+
+            let first = queried.first().unwrap();
+
+            assert!(queried.len() > 0);
+            assert!(first.label().to_lowercase().contains("tom cruise"));
+            assert!(matches!(first, FeedTag::Person(_)));
         }
     }
 }

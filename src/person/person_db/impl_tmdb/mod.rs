@@ -48,8 +48,6 @@ impl ImplTmdb {
             .person_search(&search_query, &page_based.start_page)
             .await?;
 
-        println!("searched: {:?}", searched);
-
         let items: Vec<Person> = searched
             .results
             .unwrap_or(vec![])
@@ -58,8 +56,6 @@ impl ImplTmdb {
             .skip(query.offset)
             .take(query.limit)
             .collect();
-
-        println!("items: {:?}", items);
 
         Ok(Paginated {
             items: items,
@@ -82,8 +78,6 @@ impl ImplTmdb {
             .skip(query.offset)
             .take(query.limit)
             .collect();
-
-        println!("items: {:?}", items);
 
         Ok(Paginated {
             items: items,
