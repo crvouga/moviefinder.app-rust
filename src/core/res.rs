@@ -21,6 +21,7 @@ pub enum ResVariant {
     Redirect { location: String, target: String },
     RedirectWindow(String),
     Text(String),
+    Css(String),
     Empty,
 }
 
@@ -42,6 +43,13 @@ impl Res {
     pub fn text(text: &str) -> Self {
         Self {
             variant: ResVariant::Text(text.to_owned()),
+            ..Res::default()
+        }
+    }
+
+    pub fn css(css: &str) -> Self {
+        Self {
+            variant: ResVariant::Css(css.to_owned()),
             ..Res::default()
         }
     }
@@ -177,6 +185,12 @@ impl From<ResVariant> for HttpResponse {
                 HttpResponse::new(302, "".to_owned(), headers)
             }
             ResVariant::Text(text) => HttpResponse::new(200, text, HashMap::new()),
+            ResVariant::Css(css) => {
+                let mut headers = HashMap::new();
+                headers.insert("Content-Type".to_string(), "text/css".to_string());
+                let res = HttpResponse::new(200, css, headers);
+                res
+            }
             ResVariant::Empty => HttpResponse::new(204, "".to_owned(), HashMap::new()),
         }
     }
