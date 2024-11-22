@@ -10,8 +10,12 @@ RUN apt-get update && apt-get install -y curl \
 
 COPY . .
 
+RUN tailwindcss -i ./src/input.css -o ./src/output.css --minify
+
 RUN cargo build --release
 
 ARG DATABASE_URL
 
-CMD tailwindcss -i ./src/input.css -o ./src/output.css --minify && dbmate --url $DATABASE_URL up && ./target/release/moviefinder-app
+RUN dbmate --url $DATABASE_URL up
+
+CMD ./target/release/moviefinder-app
