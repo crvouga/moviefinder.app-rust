@@ -31,3 +31,11 @@ pub struct PersonResult {
     pub profile_path: Option<String>,
     pub known_for: Option<Vec<KnownFor>>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct GetPersonResponse {
+    pub page: Option<usize>,
+    pub results: Option<Vec<PersonResult>>,
+    pub total_pages: Option<usize>,
+    pub total_results: Option<usize>,
+}

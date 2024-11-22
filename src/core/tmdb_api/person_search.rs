@@ -1,15 +1,6 @@
 // https://developer.themoviedb.org/reference/search-person
-use super::{person::PersonResult, TmdbApi};
+use super::{person::GetPersonResponse, TmdbApi};
 use crate::core::http::query_params::QueryParams;
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PersonSearchResponse {
-    pub page: Option<usize>,
-    pub results: Option<Vec<PersonResult>>,
-    pub total_pages: Option<usize>,
-    pub total_results: Option<usize>,
-}
 
 impl TmdbApi {
     /// Searches for persons in the TMDB API.
@@ -26,7 +17,7 @@ impl TmdbApi {
         self: &TmdbApi,
         query: &str,
         page: &usize,
-    ) -> Result<PersonSearchResponse, String> {
+    ) -> Result<GetPersonResponse, String> {
         let mut params = QueryParams::empty();
         params.insert("query", query.to_string());
 
@@ -42,7 +33,7 @@ impl TmdbApi {
 
         let response = sent.map_err(|err| err.to_string())?;
 
-        let parsed = serde_json::from_str::<PersonSearchResponse>(&response.body)
+        let parsed = serde_json::from_str::<GetPersonResponse>(&response.body)
             .map_err(|err| format!("Error parsing response: {} {}", err, response.body))?;
 
         Ok(parsed)
