@@ -1,8 +1,9 @@
 // test/deduplicated_test.rs
 #[cfg(test)]
 mod deduplicated_test {
-    use super::super::fixture::{fixtures, frequencies};
+    use super::super::fixture::fixtures;
     use crate::core::query::{Query, QueryFilter};
+    use crate::core::vec_ext::VecExt;
     use crate::media::media_id::MediaId;
     use std::collections::HashSet;
 
@@ -24,7 +25,8 @@ mod deduplicated_test {
                 .iter()
                 .map(|media| media.media_id.clone())
                 .collect();
-            let media_id_frequencies = frequencies(media_ids.clone());
+
+            let media_id_frequencies = media_ids.clone().frequencies();
 
             let duplicate_media_ids: Vec<MediaId> = media_ids
                 .clone()
@@ -56,7 +58,7 @@ mod deduplicated_test {
                 .iter()
                 .map(|media| media.media_id.clone())
                 .collect::<Vec<MediaId>>();
-            let media_id_frequencies = frequencies(media_ids.clone());
+            let media_id_frequencies = media_ids.clone().frequencies();
 
             let duplicate_media_ids = media_ids
                 .iter()

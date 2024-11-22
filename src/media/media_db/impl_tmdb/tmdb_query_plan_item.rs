@@ -93,7 +93,7 @@ impl From<MediaQuery> for GetDiscoverMovieParams {
     fn from(media_query: MediaQuery) -> GetDiscoverMovieParams {
         let mut params = vec![];
 
-        let page_based: PageBased = (&media_query, TMDB_PAGE_SIZE).into();
+        let page_based = media_query.to_page_based(TMDB_PAGE_SIZE);
 
         for page in page_based.start_page..=(page_based.end_page + 1) {
             let param = DiscoverMovieParams {

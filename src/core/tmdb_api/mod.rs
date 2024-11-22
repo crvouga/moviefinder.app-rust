@@ -8,6 +8,9 @@ pub mod discover_movie;
 pub mod html_meta;
 pub mod movie_details;
 pub mod movie_genre;
+pub mod person;
+pub mod person_popular;
+pub mod person_search;
 
 #[derive(Clone)]
 pub struct TmdbApi {

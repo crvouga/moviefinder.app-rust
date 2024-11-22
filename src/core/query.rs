@@ -17,9 +17,9 @@ impl<Field> From<&Query<Field>> for Pagination {
     }
 }
 
-impl<Field> From<(&Query<Field>, usize)> for PageBased {
-    fn from((query, page_size): (&Query<Field>, usize)) -> PageBased {
-        let pagination: Pagination = query.into();
+impl<T> Query<T> {
+    pub fn to_page_based(&self, page_size: usize) -> PageBased {
+        let pagination: Pagination = self.into();
         let page_based = PageBased::from((pagination, page_size));
         page_based
     }

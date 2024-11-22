@@ -12,6 +12,10 @@ impl QueryParams {
         QueryParams(HashMap::new())
     }
 
+    pub fn insert(&mut self, key: &str, value: String) {
+        self.0.insert(key.to_string(), value);
+    }
+
     pub fn to_string(&self) -> String {
         self.0
             .iter()

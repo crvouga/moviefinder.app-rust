@@ -1,5 +1,5 @@
+#[derive(Debug, Clone)]
 pub struct Person {
-    name: String,
-    age: i32,
-    id: String,
+    pub name: String,
+    pub id: String,
 }

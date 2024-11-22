@@ -46,14 +46,3 @@ pub async fn fixtures() -> Vec<Fixture> {
 
     fixtures
 }
-
-pub fn frequencies<T>(items: Vec<T>) -> HashMap<T, usize>
-where
-    T: Hash + Eq,
-{
-    let mut freq = HashMap::new();
-    for item in items {
-        *freq.entry(item).or_insert(0) += 1;
-    }
-    freq
-}

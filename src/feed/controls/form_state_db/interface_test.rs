@@ -36,7 +36,7 @@ mod tests {
 
             let feed_id = feed.feed_id.clone();
             let before = f.form_state_db.get(&feed_id).await;
-            let put = f.form_state_db.put(form_state.clone()).await;
+            let put = f.form_state_db.put(&form_state).await;
             let after = f.form_state_db.get(&feed_id).await;
 
             assert_eq!(before, Ok(None));

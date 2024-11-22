@@ -24,4 +24,5 @@ pub mod ui;
 pub mod url;
 pub mod url_encoded;
 pub mod uuid;
+pub mod vec_ext;
 // pub mod x;
