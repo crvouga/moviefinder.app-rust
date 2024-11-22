@@ -68,7 +68,7 @@ async fn respond(
 
     let mut http_response: HttpResponse = res_with_root.into();
 
-    http_response.compress(&http_request);
+    http_response.compress_gzip();
 
     http_response
 }
