@@ -25,13 +25,7 @@ impl TmdbApi {
 
         let req = self.to_get_request("/3/search/person", params);
 
-        println!("req: {:?}", req);
-
-        println!("http {}", req.to_http_string());
-
         let sent = self.http_client.send(req).await;
-
-        println!("sent: {:?}", sent);
 
         let response = sent.map_err(|err| err.to_string())?;
 

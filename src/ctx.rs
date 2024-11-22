@@ -14,6 +14,7 @@ use crate::{
         genre::genre_db::{self, interface::GenreDb},
         media_db::{self, interface::MediaDb},
     },
+    person::person_db::{self, interface::PersonDb},
 };
 
 pub struct Ctx {
@@ -22,6 +23,7 @@ pub struct Ctx {
     pub media_db: Arc<dyn MediaDb>,
     pub tmdb_api: Arc<TmdbApi>,
     pub genre_db: Arc<dyn GenreDb>,
+    pub person_db: Arc<dyn PersonDb>,
     pub logger: Arc<dyn Logger>,
     pub feed: feed::ctx::Ctx,
 }
@@ -63,6 +65,11 @@ impl Ctx {
 
         let genre_db = Arc::new(genre_db::impl_tmdb::ImplTmdb::new(tmdb_api.clone()));
 
+        let person_db = Arc::new(person_db::impl_tmdb::ImplTmdb::new(
+            logger.clone(),
+            tmdb_api.clone(),
+        ));
+
         let feed = feed::ctx::Ctx::new(
             media_db.clone(),
             key_value_db.clone(),
@@ -73,6 +80,7 @@ impl Ctx {
         Ok(Ctx {
             logger,
             genre_db,
+            person_db,
             db_conn_sql,
             tmdb_api,
             media_db,
