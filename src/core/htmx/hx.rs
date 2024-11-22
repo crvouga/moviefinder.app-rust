@@ -1,16 +1,15 @@
 // https://htmx.org/docs/
 // https://v1.htmx.org/extensions/loading-states/
-use super::{css, html};
+use crate::core::{css, html::Elem};
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
 
-impl html::Elem {
+impl Elem {
     pub fn src_htmx(self) -> Self {
         self.src("https://unpkg.com/htmx.org@2.0.1")
     }
 
     pub fn hx_trigger(mut self, value: &str) -> Self {
-        if let html::Elem::Element {
+        if let Elem::Element {
             attrs_unsafe: ref mut attributes,
             ..
         } = self
@@ -97,7 +96,7 @@ impl html::Elem {
 
     /// https://htmx.org/attributes/hx-ext/
     pub fn hx_ext(mut self, value: &str) -> Self {
-        if let html::Elem::Element {
+        if let Elem::Element {
             attrs_unsafe: ref mut attributes,
             ..
         } = self

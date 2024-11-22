@@ -1,4 +1,4 @@
-use super::{http::response::HttpResponse, hx::HxLocation};
+use super::{htmx::hx::HxLocation, http::response::HttpResponse};
 use crate::core::html::Elem;
 use std::collections::HashMap;
 

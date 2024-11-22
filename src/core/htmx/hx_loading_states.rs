@@ -1,4 +1,4 @@
-use super::{css, html::Elem};
+use crate::core::{css, html::Elem};
 
 const HX_LOADING_STATES_STYLE: &str = r#"
 [data-loading] {

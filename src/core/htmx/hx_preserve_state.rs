@@ -1,4 +1,4 @@
-use super::html::Elem;
+use crate::core::html::Elem;
 
 const SCRIPT: &str = r#"
 document.addEventListener("DOMContentLoaded", function () {
@@ -73,7 +73,7 @@ impl Elem {
         self.hx_ext("preserve-state")
     }
 
-    pub fn hx_perserve_state(self, key: &str) -> Self {
+    pub fn hx_preserve_state(self, key: &str) -> Self {
         self.attr("data-preserve-state", key)
     }
 }

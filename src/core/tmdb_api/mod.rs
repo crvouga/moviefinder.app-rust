@@ -5,7 +5,6 @@ use std::{collections::HashMap, sync::Arc};
 
 pub mod config;
 pub mod discover_movie;
-pub mod html_meta;
 pub mod movie_details;
 pub mod movie_genre;
 pub mod person;
@@ -29,6 +28,7 @@ impl TmdbApi {
 
 pub const TMDB_PAGE_SIZE: usize = 20;
 pub const TMDB_HOST: &str = "api.themoviedb.org";
+pub const TMDB_IMAGE_BASE_URL: &str = "https://image.tmdb.org";
 
 impl TmdbApi {
     pub fn to_get_request(self: &TmdbApi, path: &str, query_params: QueryParams) -> HttpRequest {

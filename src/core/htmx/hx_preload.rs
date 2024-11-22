@@ -1,6 +1,6 @@
-use super::html;
+use crate::core::html::Elem;
 
-impl html::Elem {
+impl Elem {
     pub fn src_htmx_preload(self) -> Self {
         self.src("https://unpkg.com/htmx-ext-preload@2.0.1/preload.js")
     }

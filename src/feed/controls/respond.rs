@@ -212,7 +212,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             input()
-                .hx_perserve_state("feed-controls-search-input")
+                .hx_preserve_state("feed-controls-search-input")
                 .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
                 .name(SEARCH_NAME)
