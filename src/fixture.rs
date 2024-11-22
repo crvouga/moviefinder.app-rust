@@ -45,6 +45,7 @@ impl BaseFixture {
 
         let feed = feed::ctx::Ctx::new(
             media_db.clone(),
+            person_db.clone(),
             key_value_db.clone(),
             genre_db.clone(),
             logger.clone(),

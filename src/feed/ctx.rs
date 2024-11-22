@@ -4,6 +4,7 @@ use crate::{
     core::logger::interface::Logger,
     key_value_db::interface::KeyValueDb,
     media::{genre::genre_db::interface::GenreDb, media_db::interface::MediaDb},
+    person::person_db::interface::PersonDb,
 };
 
 use super::{
@@ -18,11 +19,13 @@ pub struct Ctx {
     pub feed_db: Arc<dyn FeedDb>,
     pub feed_session_mapping_db: Arc<dyn FeedSessionMappingDb>,
     pub media_db: Arc<dyn MediaDb>,
+    pub person_db: Arc<dyn PersonDb>,
 }
 
 impl Ctx {
     pub fn new(
         media_db: Arc<dyn MediaDb>,
+        person_db: Arc<dyn PersonDb>,
         key_value_db: Arc<dyn KeyValueDb>,
         genre_db: Arc<dyn GenreDb>,
         logger: Arc<dyn Logger>,
@@ -31,7 +34,10 @@ impl Ctx {
             key_value_db.clone(),
         ));
 
-        let feed_tag_db = Arc::new(feed_tag_db::impl_::Impl_::new(genre_db.clone()));
+        let feed_tag_db = Arc::new(feed_tag_db::impl_::Impl_::new(
+            genre_db.clone(),
+            person_db.clone(),
+        ));
 
         let feed_session_mapping_db = Arc::new(
             feed_session_mapping_db::impl_key_value_db::ImplKeyValueDb::new(key_value_db.clone()),
@@ -45,6 +51,7 @@ impl Ctx {
         );
 
         Self {
+            person_db,
             media_db,
             controls,
             feed_db,

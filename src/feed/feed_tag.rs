@@ -7,11 +7,13 @@ use crate::{
         ui::chip::{Chip, ChipSize},
     },
     media::{genre::genre::Genre, media_db::interface::MediaQueryField},
+    person::person_::Person,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Eq)]
 pub enum FeedTag {
     Genre(Genre),
+    Person(Person),
 }
 
 impl PartialOrd for FeedTag {
@@ -32,6 +34,11 @@ impl From<FeedTag> for QueryFilter<MediaQueryField> {
             FeedTag::Genre(genre) => {
                 QueryFilter::Clause(MediaQueryField::GenreId, QueryOp::Eq, genre.id.to_string())
             }
+            FeedTag::Person(person) => QueryFilter::Clause(
+                MediaQueryField::PersonId,
+                QueryOp::Eq,
+                person.id.to_string(),
+            ),
         }
     }
 }
@@ -47,6 +54,7 @@ impl FeedTag {
     pub fn label(&self) -> String {
         match self {
             FeedTag::Genre(genre) => genre.name.clone(),
+            FeedTag::Person(person) => person.name.clone(),
         }
     }
 

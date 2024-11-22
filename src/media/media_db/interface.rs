@@ -9,6 +9,7 @@ pub enum MediaQueryField {
     #[default]
     MediaId,
     GenreId,
+    PersonId,
 }
 
 pub type MediaQuery = Query<MediaQueryField>;

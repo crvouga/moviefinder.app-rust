@@ -138,6 +138,18 @@ impl From<MediaQuery> for DiscoverMovieParams {
 
                             params.with_genres = Some(cleaned)
                         }
+                        QueryFilter::Clause(MediaQueryField::PersonId, QueryOp::Eq, value) => {
+                            let with_cast_new = format!(
+                                "{}{}{}",
+                                params.with_cast.unwrap_or_default(),
+                                TMDB_AND_OP,
+                                value
+                            );
+
+                            let cleaned = remove_prefix(with_cast_new, TMDB_AND_OP);
+
+                            params.with_cast = Some(cleaned)
+                        }
                         _ => {}
                     }
                 }

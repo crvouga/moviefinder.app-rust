@@ -6,18 +6,23 @@ use crate::{
         pagination::Paginated,
         query::{Query, QueryFilter, QueryOp},
     },
-    feed::{self, feed_tag::FeedTag},
+    feed::feed_tag::FeedTag,
     media::genre::genre_db::interface::GenreDb,
+    person::person_db::interface::PersonDb,
 };
 use async_trait::async_trait;
 
 pub struct Impl_ {
     genre_db: Arc<dyn GenreDb>,
+    person_db: Arc<dyn PersonDb>,
 }
 
 impl Impl_ {
-    pub fn new(genre_db: Arc<dyn GenreDb>) -> Self {
-        Self { genre_db }
+    pub fn new(genre_db: Arc<dyn GenreDb>, person_db: Arc<dyn PersonDb>) -> Self {
+        Self {
+            genre_db,
+            person_db,
+        }
     }
 }
 
@@ -25,11 +30,31 @@ impl Impl_ {
 impl FeedTagDb for Impl_ {
     async fn query(&self, query: Query<FeedTagQueryField>) -> Result<Paginated<FeedTag>, String> {
         let genres = self.genre_db.get_all().await.unwrap_or(vec![]);
+        let people = self
+            .person_db
+            .query(Query {
+                filter: QueryFilter::None,
+                limit: query.limit,
+                offset: query.offset,
+            })
+            .await
+            .unwrap_or_default()
+            .items;
 
-        let feed_tags: Vec<FeedTag> = genres
+        let genre_feed_tags: Vec<FeedTag> = genres
             .iter()
             .map(|genre| FeedTag::Genre(genre.clone()))
             .collect();
+
+        let people_feed_tags: Vec<FeedTag> = people
+            .into_iter()
+            .map(|person| FeedTag::Person(person))
+            .collect();
+
+        let feed_tags = genre_feed_tags
+            .into_iter()
+            .chain(people_feed_tags.into_iter())
+            .collect::<Vec<FeedTag>>();
 
         let filtered: Vec<FeedTag> = feed_tags
             .into_iter()
