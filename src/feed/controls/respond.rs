@@ -73,9 +73,6 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         }
 
         Route::Index => {
-            // sleep
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-
             let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_tags = ctx
