@@ -27,6 +27,8 @@ impl TmdbApi {
 
         println!("req: {:?}", req);
 
+        println!("http {}", req.to_http_string());
+
         let sent = self.http_client.send(req).await;
 
         println!("sent: {:?}", sent);

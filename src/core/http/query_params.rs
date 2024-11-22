@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::core::url_encoded;
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct QueryParams(HashMap<String, String>);
 
@@ -19,7 +21,7 @@ impl QueryParams {
     pub fn to_string(&self) -> String {
         self.0
             .iter()
-            .map(|(key, value)| format!("{}={}", key, value))
+            .map(|(key, value)| format!("{}={}", key, url_encoded::encode(value)))
             .collect::<Vec<String>>()
             .join("&")
     }
