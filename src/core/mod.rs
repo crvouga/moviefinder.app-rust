@@ -15,7 +15,6 @@ pub mod random;
 pub mod res;
 pub mod sql;
 pub mod struct_ext;
-pub mod tailwindcss;
 pub mod tmdb_api;
 pub mod ui;
 pub mod url;

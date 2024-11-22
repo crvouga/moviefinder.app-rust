@@ -2,3 +2,5 @@ target
 .lsp
 .clj-kondo
 .env
+tailwindcss
+src/output.css

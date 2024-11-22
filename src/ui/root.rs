@@ -56,8 +56,7 @@ impl Root {
                 // 
                 meta().name("htmx-config").content(r#"{"historyCacheSize": 0, "refreshOnHistoryMiss": true}"#),
                 link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
-                script().src_tailwindcss(),
-                script().js_tailwindcss_theme(),
+                style().child_unsafe_text(include_str!("../output.css")),
                 script().src_htmx().defer(),
                 script().src_htmx_loading_states().defer(),
                 script().js_htmx_preserve_state(),
