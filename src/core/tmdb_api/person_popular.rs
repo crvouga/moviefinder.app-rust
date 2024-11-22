@@ -1,9 +1,5 @@
-use super::{
-    person::{GetPersonResponse, PersonResult},
-    TmdbApi,
-};
+use super::{person::GetPersonResponse, TmdbApi};
 use crate::core::http::query_params::QueryParams;
-use serde::{Deserialize, Serialize};
 
 impl TmdbApi {
     /// Fetches the list of popular people from the TMDB API.
@@ -26,8 +22,14 @@ impl TmdbApi {
 
         let response = sent.map_err(|err| err.to_string())?;
 
-        let parsed = serde_json::from_str::<GetPersonResponse>(&response.body)
-            .map_err(|err| format!("Error parsing response: {} {}", err, response.body))?;
+        let parsed = serde_json::from_str::<GetPersonResponse>(&response.clone().to_body_string())
+            .map_err(|err| {
+                format!(
+                    "Error parsing response: {} {}",
+                    err,
+                    response.to_body_string()
+                )
+            })?;
 
         Ok(parsed)
     }

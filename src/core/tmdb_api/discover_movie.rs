@@ -120,10 +120,14 @@ impl TmdbApi {
             Err(err) => return Err(err.to_string()),
         };
 
-        match serde_json::from_str(&response.body) {
+        match serde_json::from_str(&response.clone().to_body_string()) {
             Ok(parsed) => Ok(parsed),
             Err(e) => {
-                let err = format!("Error parsing response: {} {}", e, response.body);
+                let err = format!(
+                    "Error parsing response: {} {}",
+                    e,
+                    response.to_body_string()
+                );
                 Err(err)
             }
         }

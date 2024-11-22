@@ -18,6 +18,8 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
         Route::RobotsTxt => Res::text("User-agent: *\nDisallow:"),
 
+        Route::OutputCss => Res::text(include_str!("./output.css")),
+
         Route::Unknown(_route) => {
             Res::redirect_window(Route::Feed(feed::route::Route::DefaultLoad).encode())
         }

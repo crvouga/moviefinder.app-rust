@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::{form_data::FormData, query_params::QueryParams};
+use super::{content_encoding::ContentEncoding, form_data::FormData, query_params::QueryParams};
 
 #[derive(Debug)]
 pub struct HttpRequest {
@@ -11,8 +11,7 @@ pub struct HttpRequest {
     pub cookies: HashMap<String, String>,
     pub form_data: FormData,
     pub query_params: QueryParams,
-
-    pub body: String,
+    pub body: Vec<u8>,
 }
 
 impl HttpRequest {
@@ -40,5 +39,14 @@ impl HttpRequest {
             "{} {} HTTP/1.1\r\n{}Connection: close\r\n\r\n",
             self.method, path_with_query_params, headers_string
         )
+    }
+
+    pub fn to_accept_encoding(&self) -> Vec<ContentEncoding> {
+        self.headers
+            .get("Accept-Encoding")
+            .unwrap_or(&"".to_string())
+            .split(",")
+            .map(ContentEncoding::from_str)
+            .collect::<Vec<ContentEncoding>>()
     }
 }

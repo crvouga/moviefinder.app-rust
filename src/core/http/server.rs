@@ -94,7 +94,7 @@ fn find_headers_end(buffer: &[u8]) -> Option<usize> {
 }
 
 fn parse_utf8_string(data: &[u8]) -> String {
-    String::from_utf8_lossy(data).to_string()
+    String::from_utf8_lossy(&data).to_string()
 }
 
 fn split_request_lines(request_string: &str) -> Vec<&str> {
@@ -122,14 +122,16 @@ fn parse_cookies(headers: &HashMap<String, String>) -> HashMap<String, String> {
     cookies
 }
 
-fn parse_form_data(headers: &HashMap<String, String>, body: &str) -> FormData {
+fn parse_form_data(headers: &HashMap<String, String>, body: &Vec<u8>) -> FormData {
     let mut form_data = FormData::empty();
 
     if !is_form_data_request(headers) {
         return form_data;
     }
 
-    let decoded_body = url_encoded::decode(body);
+    let body_string = String::from_utf8_lossy(&body).to_string();
+
+    let decoded_body = url_encoded::decode(&body_string);
 
     for pair in decoded_body.split('&') {
         if let Some((key, value)) = pair.split_once('=') {
@@ -170,7 +172,7 @@ async fn parse_body(
     headers_end: usize,
     content_length: usize,
     stream: &mut TcpStream,
-) -> String {
+) -> Vec<u8> {
     let mut body = Vec::new();
 
     let body_start = headers_end + 4;
@@ -186,12 +188,12 @@ async fn parse_body(
         }
     }
 
-    String::from_utf8_lossy(&body).to_string()
+    body
 }
 
 async fn send_response(stream: &mut TcpStream, response: HttpResponse) {
-    let response_string = response.to_http_string();
-    if let Ok(()) = stream.write_all(response_string.as_bytes()).await {
+    let response_bytes = response.to_http_bytes(); // Use `to_http_bytes` for binary-safe response
+    if let Ok(()) = stream.write_all(&response_bytes).await {
         let _ = stream.flush().await;
     }
 }

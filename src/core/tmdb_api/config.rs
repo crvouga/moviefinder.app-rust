@@ -28,7 +28,7 @@ impl TmdbApi {
 
         match sent {
             Ok(response) => {
-                let body = response.body;
+                let body = response.to_body_string();
                 let parsed = serde_json::from_str(&body);
                 match parsed {
                     Ok(parsed) => Ok(parsed),

@@ -8,6 +8,7 @@ pub enum Route {
     Media(media::route::Route),
     Favicon,
     RobotsTxt,
+    OutputCss,
     Unknown(String),
 }
 
@@ -20,6 +21,7 @@ impl Route {
         match encoded {
             "/favicon.ico" => Route::Favicon,
             "/robots.txt" => Route::RobotsTxt,
+            "/output.css" => Route::OutputCss,
             _ => {
                 let decoded = human_friendly_base64::decode(encoded);
 

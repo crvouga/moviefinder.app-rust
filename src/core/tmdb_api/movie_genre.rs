@@ -35,8 +35,14 @@ impl TmdbApi {
 
         let response = sent.map_err(|err| err.to_string())?;
 
-        let parsed = serde_json::from_str::<MovieGenreResponse>(&response.body)
-            .map_err(|err| format!("Error parsing response: {} {}", err, response.body))?;
+        let parsed = serde_json::from_str::<MovieGenreResponse>(&response.clone().to_body_string())
+            .map_err(|err| {
+                format!(
+                    "Error parsing response: {} {}",
+                    err,
+                    response.to_body_string()
+                )
+            })?;
 
         Ok(parsed)
     }

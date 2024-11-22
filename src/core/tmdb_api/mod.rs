@@ -46,7 +46,7 @@ impl TmdbApi {
             host: TMDB_HOST.to_string(),
             method: method.to_string(),
             path: path.to_string(),
-            body: "".to_string(),
+            body: vec![],
             cookies: HashMap::new(),
             form_data: FormData::empty(),
             query_params,

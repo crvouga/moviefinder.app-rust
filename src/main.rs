@@ -50,7 +50,7 @@ async fn respond(
 
     let req = Req {
         session_id,
-        form_data: http_request.form_data,
+        form_data: http_request.form_data.clone(),
     };
 
     log_info!(ctx.logger, "{:?} {:?}", route, req);
@@ -59,14 +59,16 @@ async fn respond(
 
     let is_hx_request = http_request.headers.contains_key("hx-request");
 
-    let res_mapped = if is_hx_request {
+    let res_with_root = if is_hx_request {
         res
     } else {
         res.no_cache()
             .map_html(|html| Root::new().children(vec![html]).view())
     };
 
-    let http_response: HttpResponse = res_mapped.into();
+    let mut http_response: HttpResponse = res_with_root.into();
+
+    http_response.compress(&http_request);
 
     http_response
 }
