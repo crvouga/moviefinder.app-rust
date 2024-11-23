@@ -114,6 +114,7 @@ fn view_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
         .child(
             input()
+                .id("feed-controls-search-input")
                 .hx_preserve_state("feed-controls-search-input")
                 .class("flex-1 h-full bg-transparent peer outline-none")
                 .type_("text")
@@ -254,6 +255,7 @@ fn view_tag_chips_frag(feed_id: &FeedId, feed_tags: Vec<FeedTag>, is_checked: bo
                     .hx_trigger_click()
                     .hx_swap_none()
                     .hx_include_this()
+                    // .hx_on("click", "console.log('hello');document.getElementById('feed-controls-search-input').dispatchEvent(new Event('clear'));")
                     .hx_post(
                         &route::Route::Feed(feed::route::Route::Controls {
                             feed_id: feed_id.clone(),

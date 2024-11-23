@@ -42,6 +42,16 @@ impl ViewModel {
 
     pub async fn load(ctx: &Ctx, feed_id: &FeedId, search_input: &str) -> Self {
         let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
+        let form_state = FormState::load(ctx, &feed).await;
+
+        let mut existing_tags: Vec<FeedTag> = form_state
+            .tags
+            .iter()
+            .chain(feed.tags.clone().iter())
+            .cloned()
+            .collect();
+
+        existing_tags.dedup();
 
         let feed_tags: Vec<FeedTag> = match search_input {
             "" => {
@@ -56,7 +66,7 @@ impl ViewModel {
                     .unwrap_or(Paginated::default())
                     .items
                     .iter()
-                    .chain(feed.tags.iter())
+                    .chain(existing_tags.iter())
                     .cloned()
                     .collect::<Vec<FeedTag>>();
 

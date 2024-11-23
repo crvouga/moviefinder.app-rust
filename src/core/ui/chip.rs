@@ -79,7 +79,7 @@ impl Chip {
                         e.child(
                             img()
                             .class(&self.size.to_h())
-                            .class("aspect-square object-cover rounded-full overflow-hidden bg-neutral-700 border-neutral-800")
+                            .class("shrink-0 aspect-square object-cover rounded-full overflow-hidden bg-neutral-700 border-neutral-800")
                             .src(&image_src)
                         )
                     }
