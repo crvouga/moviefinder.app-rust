@@ -1,10 +1,9 @@
-use std::sync::Arc;
-
-use async_trait::async_trait;
-
 use crate::{
-    feed::feed_id::FeedId, key_value_db::interface::KeyValueDb, user_session::session_id::SessionId,
+    core::session::session_id::SessionId, feed::feed_id::FeedId,
+    key_value_db::interface::KeyValueDb,
 };
+use async_trait::async_trait;
+use std::sync::Arc;
 
 use super::interface::FeedSessionMappingDb;
 

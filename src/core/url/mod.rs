@@ -1,3 +1,5 @@
+use super::params::Params;
+
 pub mod query_params;
 
 #[derive(Debug, Eq, PartialEq, Default)]
@@ -28,7 +30,7 @@ impl Url {
         let path = host_and_path.get(3..).unwrap_or(&[]).join("/");
 
         let query_params = match url_parts.get(1) {
-            Some(query_params_str) => query_params::QueryParams::from_str(query_params_str),
+            Some(query_params_str) => query_params::QueryParams::from_string(query_params_str),
             None => query_params::QueryParams::default(),
         };
 

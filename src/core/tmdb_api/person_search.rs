@@ -1,6 +1,6 @@
 // https://developer.themoviedb.org/reference/search-person
 use super::{person::GetPersonResponse, TmdbApi};
-use crate::core::url::query_params::QueryParams;
+use crate::core::{params::Params, url::query_params::QueryParams};
 
 impl TmdbApi {
     /// Searches for persons in the TMDB API.
@@ -18,10 +18,9 @@ impl TmdbApi {
         query: &str,
         page: &usize,
     ) -> Result<GetPersonResponse, String> {
-        let mut params = QueryParams::empty();
-        params.insert("query", query.to_string());
-
-        params.insert("page", page.to_string());
+        let params = QueryParams::empty()
+            .insert("query", query.to_string())
+            .insert("page", page.to_string());
 
         let req = self.to_get_request("/3/search/person", params);
 

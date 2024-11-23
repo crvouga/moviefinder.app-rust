@@ -1,12 +1,12 @@
 use core::{
     http::{request::HttpRequest, response::HttpResponse},
+    req::Req,
     res::ResVariant,
+    session::{session_id::SessionId, wrap_session_id::wrap_session_id},
 };
 use env::Env;
-use req::Req;
 use std::sync::Arc;
 use ui::root::Root;
-use user_session::{session_id::SessionId, wrap_session_id::wrap_session_id};
 
 mod account;
 mod core;
@@ -17,11 +17,9 @@ mod fixture;
 mod key_value_db;
 mod media;
 mod person;
-mod req;
 mod respond;
 mod route;
 mod ui;
-mod user_session;
 
 #[tokio::main]
 async fn main() {
@@ -54,7 +52,7 @@ async fn respond(
 
     let req = Req {
         session_id,
-        form_data: http_request.form_data.clone(),
+        form_data: http_request.form_data,
     };
 
     log_info!(ctx.logger, "{:?} {:?}", route, req);

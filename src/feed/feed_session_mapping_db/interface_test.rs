@@ -1,12 +1,12 @@
 #[cfg(test)]
 mod tests {
     use crate::{
+        core::session::session_id::SessionId,
         feed::{
             feed_id::FeedId,
             feed_session_mapping_db::{impl_key_value_db, interface::FeedSessionMappingDb},
         },
         fixture::BaseFixture,
-        user_session::session_id::SessionId,
     };
 
     struct Fixture {

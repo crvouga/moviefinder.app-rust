@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+use crate::core::params::Params;
 use crate::core::url::query_params::QueryParams;
 use crate::core::url::Url;
 use crate::core::url_encoded;
@@ -56,7 +57,7 @@ where
     let body = parse_body(&buffer, headers_end, content_length, &mut stream).await;
     let cookies = parse_cookies(&headers);
     let form_data = parse_form_data(&headers, &body);
-    let query_params: QueryParams = path.as_str().into();
+    let query_params = QueryParams::from_string(path.as_str());
     let request = HttpRequest {
         method,
         url: Url {
@@ -126,23 +127,15 @@ fn parse_cookies(headers: &HashMap<String, String>) -> HashMap<String, String> {
 }
 
 fn parse_form_data(headers: &HashMap<String, String>, body: &Vec<u8>) -> FormData {
-    let mut form_data = FormData::empty();
-
     if !is_form_data_request(headers) {
-        return form_data;
+        return FormData::empty();
     }
 
     let body_string = String::from_utf8_lossy(&body).to_string();
 
     let decoded_body = url_encoded::decode(&body_string);
 
-    for pair in decoded_body.split('&') {
-        if let Some((key, value)) = pair.split_once('=') {
-            form_data.insert(key.to_string(), value.to_string());
-        }
-    }
-
-    form_data
+    FormData::from_string(&decoded_body)
 }
 fn is_form_data_request(headers: &HashMap<String, String>) -> bool {
     headers

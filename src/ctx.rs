@@ -80,7 +80,8 @@ impl Ctx {
             logger.clone(),
         );
 
-        let resizable_image = resizable_image::ctx::Ctx::new(http_client.clone()).await;
+        let resizable_image =
+            resizable_image::ctx::Ctx::new(http_client.clone(), logger.clone()).await;
 
         Ok(Ctx {
             resizable_image,

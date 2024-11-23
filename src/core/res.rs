@@ -2,27 +2,31 @@ use super::{htmx::hx::HxLocation, http::response::HttpResponse};
 use crate::core::html::Elem;
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Res {
     pub variant: ResVariant,
-    pub actions: Vec<ResAction>,
+    pub modifiers: Vec<ResModifier>,
 }
 
 #[derive(Debug)]
-pub enum ResAction {
+pub enum ResModifier {
     HxPushUrl(String),
     HxReplaceUrl(String),
     Cache,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum ResVariant {
     Html(Elem),
-    Redirect { location: String, target: String },
+    Redirect {
+        location: String,
+        target: String,
+    },
     RedirectWindow(String),
     Text(String),
     Css(String),
     Image(Vec<u8>),
+    #[default]
     Empty,
 }
 
@@ -88,36 +92,28 @@ impl Res {
     }
 
     pub fn hx_push_url(mut self, url: &str) -> Self {
-        self.actions.push(ResAction::HxPushUrl(url.to_owned()));
+        self.modifiers.push(ResModifier::HxPushUrl(url.to_owned()));
         self
     }
 
     pub fn hx_replace_url(mut self, url: &str) -> Self {
-        self.actions.push(ResAction::HxReplaceUrl(url.to_owned()));
+        self.modifiers
+            .push(ResModifier::HxReplaceUrl(url.to_owned()));
 
         self
     }
 
     pub fn cache(mut self) -> Self {
-        self.actions.push(ResAction::Cache);
+        self.modifiers.push(ResModifier::Cache);
         self
     }
 
     pub fn no_cache(mut self) -> Self {
-        self.actions.retain(|action| match action {
-            ResAction::Cache => false,
+        self.modifiers.retain(|action| match action {
+            ResModifier::Cache => false,
             _ => true,
         });
         self
-    }
-}
-
-impl Default for Res {
-    fn default() -> Self {
-        Res {
-            variant: ResVariant::Empty,
-            actions: Vec::new(),
-        }
     }
 }
 
@@ -131,9 +127,9 @@ impl From<Res> for HttpResponse {
     fn from(res: Res) -> Self {
         let mut http_response: HttpResponse = res.variant.into();
 
-        for action in res.actions {
+        for action in res.modifiers {
             match action {
-                ResAction::HxPushUrl(url) => {
+                ResModifier::HxPushUrl(url) => {
                     http_response
                         .headers
                         .insert("HX-Push-Url".to_string(), ensure_leading_slash(&url));
@@ -143,7 +139,7 @@ impl From<Res> for HttpResponse {
                     );
                 }
 
-                ResAction::HxReplaceUrl(url) => {
+                ResModifier::HxReplaceUrl(url) => {
                     http_response
                         .headers
                         .insert("HX-Replace-Url".to_string(), ensure_leading_slash(&url));
@@ -153,7 +149,7 @@ impl From<Res> for HttpResponse {
                     );
                 }
 
-                ResAction::Cache => {
+                ResModifier::Cache => {
                     http_response.headers.insert(
                         "Cache-Control".to_string(),
                         "public, max-age=31536000, immutable".to_string(),

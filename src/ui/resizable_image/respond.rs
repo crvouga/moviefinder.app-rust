@@ -4,11 +4,12 @@ use crate::{
     core::{
         html::{div, img, script, Elem},
         http::request::HttpRequest,
+        params::Params,
+        req::Req,
         res::Res,
         url::Url,
     },
-    req::Req,
-    route,
+    log_info, route,
 };
 
 use image::{self, imageops::FilterType};
@@ -27,7 +28,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 .unwrap_or_default();
 
             if width == 0 {
-                println!("Width is 0");
+                log_info!(ctx.logger, "Width is 0");
                 return fallback;
             }
 
@@ -39,7 +40,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 .unwrap_or_default();
 
             if height == 0 {
-                println!("Height is 0");
+                log_info!(ctx.logger, "Height is 0");
                 return fallback;
             }
 
@@ -53,7 +54,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 .trim();
 
             if src.is_empty() {
-                println!("Src is empty");
+                log_info!(ctx.logger, "Src is empty");
                 return fallback;
             }
 
@@ -73,26 +74,30 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 method: "GET".to_string(),
             };
 
-            println!("Request: {:?}", request);
+            log_info!(ctx.logger, "Request: {:?}", request);
 
             let sent = ctx.http_client.send(request).await;
 
             let response = match sent {
                 Ok(response) => response,
                 Err(err) => {
-                    println!("Error sending request {}", err);
+                    log_info!(ctx.logger, "Error sending request {}", err);
                     return fallback;
                 }
             };
 
-            println!("Response: {:?}", response.clone().to_body_string());
+            log_info!(
+                ctx.logger,
+                "Response: {:?}",
+                response.clone().to_body_string()
+            );
 
             let image = image::load_from_memory(&response.body);
 
             let image = match image {
                 Ok(image) => image,
                 Err(err) => {
-                    println!("Error loading image {}", err);
+                    log_info!(ctx.logger, "Error loading image {}", err);
                     return fallback;
                 }
             };

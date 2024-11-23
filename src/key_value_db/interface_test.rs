@@ -5,7 +5,6 @@ mod tests {
 
     use crate::{
         core::uuid,
-        env::{Env, TestEnv},
         fixture::BaseFixture,
         key_value_db::{
             impl_cached_postgres::ImplCachedPostgres, impl_hash_map::ImplHashMap,
@@ -35,15 +34,13 @@ mod tests {
     async fn fixtures() -> Vec<Fixture> {
         let base_fixture = BaseFixture::new().await;
 
-        let env = Env::load().unwrap();
-
         let mut fixtures: Vec<Fixture> = vec![];
 
         fixtures.push(Fixture {
             key_value_db: Box::new(ImplHashMap::new()),
         });
 
-        if env.test_env == TestEnv::Integration {
+        if base_fixture.env.test_env.is_integration() {
             fixtures.push(Fixture {
                 key_value_db: Box::new(ImplPostgres::new(
                     base_fixture.ctx.logger.clone(),

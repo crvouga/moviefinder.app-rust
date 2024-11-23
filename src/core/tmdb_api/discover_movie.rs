@@ -1,5 +1,5 @@
 // https://developer.themoviedb.org/reference/discover-movie
-use crate::core::{struct_ext::struct_to_map, url::query_params::QueryParams};
+use crate::core::{params::Params, struct_ext::struct_to_map, url::query_params::QueryParams};
 
 use super::TmdbApi;
 use serde::{Deserialize, Serialize};
@@ -75,7 +75,7 @@ pub struct DiscoverMovieParams {
 
 impl Into<QueryParams> for DiscoverMovieParams {
     fn into(self) -> QueryParams {
-        struct_to_map(&self).into()
+        QueryParams::from_hash_map(struct_to_map(&self))
     }
 }
 

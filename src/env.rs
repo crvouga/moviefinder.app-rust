@@ -10,6 +10,20 @@ pub enum TestEnv {
 }
 
 impl TestEnv {
+    pub fn is_unit(&self) -> bool {
+        self == &TestEnv::Unit
+    }
+
+    pub fn is_integration(&self) -> bool {
+        self == &TestEnv::Integration
+    }
+
+    pub fn is_none(&self) -> bool {
+        self == &TestEnv::None
+    }
+}
+
+impl TestEnv {
     pub fn from_str(s: &str) -> TestEnv {
         let cleaned = s.to_ascii_lowercase();
 

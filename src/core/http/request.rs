@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::core::url::Url;
+use crate::core::{params::Params, url::Url};
 
 use super::{content_encoding::ContentEncoding, form_data::FormData};
 

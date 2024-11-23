@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::{feed::feed_id::FeedId, user_session::session_id::SessionId};
+use crate::{core::session::session_id::SessionId, feed::feed_id::FeedId};
 
 #[async_trait]
 pub trait FeedSessionMappingDb: Send + Sync {
