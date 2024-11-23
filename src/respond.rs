@@ -5,6 +5,7 @@ use crate::feed;
 use crate::media;
 use crate::req::Req;
 use crate::route::Route;
+use crate::ui::resizable_image;
 
 pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
     match route {
@@ -12,7 +13,11 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
         Route::Account(route) => account::respond::respond(route),
 
-        Route::Media(route) => media::respond::respond(ctx, route).await,
+        Route::Media(route) => media::respond::respond(&ctx, route).await,
+
+        Route::ResizableImage(route) => {
+            resizable_image::respond::response(&ctx.resizable_image, route, req.clone()).await
+        }
 
         Route::Favicon => Res::empty(),
 

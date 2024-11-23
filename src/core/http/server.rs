@@ -2,10 +2,11 @@ use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+use crate::core::url::query_params::QueryParams;
+use crate::core::url::Url;
 use crate::core::url_encoded;
 
 use super::form_data::FormData;
-use super::query_params::QueryParams;
 use super::request::HttpRequest;
 use super::response::HttpResponse;
 
@@ -58,13 +59,15 @@ where
     let query_params: QueryParams = path.as_str().into();
     let request = HttpRequest {
         method,
-        path,
+        url: Url {
+            path,
+            query_params,
+            host: "".to_string(),
+        },
         headers,
         cookies,
         body,
-        query_params,
         form_data,
-        host: "".to_string(),
     };
     let response = handle_request(request).await;
 

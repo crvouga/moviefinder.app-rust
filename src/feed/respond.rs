@@ -3,7 +3,7 @@ use crate::{
     core::{
         html::*,
         res::Res,
-        ui::{self, image::Image},
+        ui::{self, chip::ChipSize, image::Image},
     },
     media::{self, media_db::interface::MediaQuery, media_id::MediaId},
     req::Req,
@@ -181,7 +181,10 @@ fn view_root() -> Elem {
 }
 
 fn view_empty_slide() -> Elem {
-    Image::view().src(" ").class("w-full h-full object-cover")
+    Image::new()
+        .view()
+        .src(" ")
+        .class("w-full h-full object-cover")
 }
 
 fn view_load(feed_id: &FeedId) -> Elem {
@@ -223,7 +226,13 @@ fn view_tags(model: &ViewModel) -> Elem {
                 .feed
                 .tags
                 .iter()
-                .map(|tag| tag.chip().disabled(true).checked(true).view())
+                .map(|tag| {
+                    tag.chip()
+                        .disabled(true)
+                        .checked(true)
+                        .size(ChipSize::Small)
+                        .view()
+                })
                 .collect::<Vec<Elem>>(),
         )
 }
@@ -311,7 +320,8 @@ fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
             .root_push_route(to_media_details_route(&media.media_id))
             .aria_label("open media details")
             .child(
-                Image::view()
+                Image::new()
+                    .view()
                     .class("w-full h-full object-cover")
                     .width("100%")
                     .height("100%")

@@ -15,6 +15,7 @@ use crate::{
         media_db::{self, interface::MediaDb},
     },
     person::person_db::{self, interface::PersonDb},
+    ui::resizable_image,
 };
 
 pub struct Ctx {
@@ -26,6 +27,7 @@ pub struct Ctx {
     pub person_db: Arc<dyn PersonDb>,
     pub logger: Arc<dyn Logger>,
     pub feed: feed::ctx::Ctx,
+    pub resizable_image: resizable_image::ctx::Ctx,
 }
 
 impl Ctx {
@@ -78,7 +80,10 @@ impl Ctx {
             logger.clone(),
         );
 
+        let resizable_image = resizable_image::ctx::Ctx::new(http_client.clone()).await;
+
         Ok(Ctx {
+            resizable_image,
             logger,
             genre_db,
             person_db,

@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::http::query_params::QueryParams,
+    core::url::query_params::QueryParams,
     media::{genre::genre_id::GenreId, media_::Media, media_id::MediaId, media_type::MediaType},
 };
 

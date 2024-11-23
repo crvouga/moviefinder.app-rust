@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 
-use super::{content_encoding::ContentEncoding, form_data::FormData, query_params::QueryParams};
+use crate::core::url::Url;
+
+use super::{content_encoding::ContentEncoding, form_data::FormData};
 
 #[derive(Debug)]
 pub struct HttpRequest {
+    pub url: Url,
     pub method: String,
-    pub path: String,
-    pub host: String,
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
     pub form_data: FormData,
-    pub query_params: QueryParams,
     pub body: Vec<u8>,
 }
 
@@ -26,13 +26,13 @@ impl HttpRequest {
             .iter()
             .any(|(key, _)| key.to_lowercase() == "host")
         {
-            headers_string.push_str(&format!("Host: {}\r\n", self.host));
+            headers_string.push_str(&format!("Host: {}\r\n", self.url.host));
         }
 
-        let path_with_query_params = if self.query_params.is_empty() {
-            self.path.clone()
+        let path_with_query_params = if self.url.query_params.is_empty() {
+            self.url.path.clone()
         } else {
-            format!("{}?{}", self.path, self.query_params.to_string())
+            format!("{}?{}", self.url.path, self.url.query_params.to_string())
         };
 
         format!(

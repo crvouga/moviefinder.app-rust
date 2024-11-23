@@ -1,6 +1,6 @@
 // https://developer.themoviedb.org/reference/configuration-details
 use super::TmdbApi;
-use crate::core::{http::query_params::QueryParams, image_set::ImageSet};
+use crate::core::{image_set::ImageSet, url::query_params::QueryParams};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,6 +41,16 @@ impl TmdbApi {
 }
 
 impl TmdbConfig {
+    pub fn to_profile_image_set(self: &TmdbConfig, profile_path: &str) -> ImageSet {
+        self.to_image_set(self.to_profile_sizes(), profile_path)
+    }
+
+    pub fn to_profile_sizes(self: &TmdbConfig) -> Vec<String> {
+        self.images.as_ref().map_or(vec![], |images| {
+            images.profile_sizes.as_ref().unwrap_or(&vec![]).clone()
+        })
+    }
+
     pub fn to_poster_image_set(self: &TmdbConfig, poster_path: &str) -> ImageSet {
         self.to_image_set(self.to_poster_sizes(), poster_path)
     }
@@ -62,6 +72,9 @@ impl TmdbConfig {
     }
 
     fn to_image_set(self: &TmdbConfig, sizes: Vec<String>, path: &str) -> ImageSet {
+        if path.trim().is_empty() {
+            return ImageSet::new(vec![]);
+        }
         let base_url = self.to_base_url();
 
         let lowest_to_highest = sizes

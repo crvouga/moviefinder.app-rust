@@ -5,6 +5,7 @@ use crate::{
     feed, key_value_db,
     media::{genre::genre_db, media_db},
     person::person_db,
+    ui::resizable_image,
 };
 use std::sync::Arc;
 
@@ -51,7 +52,10 @@ impl BaseFixture {
             logger.clone(),
         );
 
+        let resizable_image = resizable_image::ctx::Ctx::new(http_client.clone()).await;
+
         let ctx = Ctx {
+            resizable_image,
             person_db,
             feed,
             genre_db,

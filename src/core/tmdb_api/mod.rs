@@ -1,7 +1,7 @@
-use crate::core::http::{
-    client::HttpClient, form_data::FormData, query_params::QueryParams, request::HttpRequest,
-};
+use crate::core::http::{client::HttpClient, form_data::FormData, request::HttpRequest};
 use std::{collections::HashMap, sync::Arc};
+
+use super::url::{query_params::QueryParams, Url};
 
 pub mod config;
 pub mod discover_movie;
@@ -43,13 +43,15 @@ impl TmdbApi {
     ) -> HttpRequest {
         HttpRequest {
             headers: self.to_base_headers(),
-            host: TMDB_HOST.to_string(),
+            url: Url {
+                host: TMDB_HOST.to_string(),
+                path: path.to_string(),
+                query_params,
+            },
             method: method.to_string(),
-            path: path.to_string(),
             body: vec![],
             cookies: HashMap::new(),
             form_data: FormData::empty(),
-            query_params,
         }
     }
 

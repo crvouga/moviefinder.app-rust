@@ -8,11 +8,17 @@ pub struct Chip {
     pub checked: bool,
     pub disabled: bool,
     pub size: ChipSize,
+    pub image: Option<String>,
 }
 
 impl Chip {
     pub fn id(mut self, id: &str) -> Self {
         self.id = id.to_string();
+        self
+    }
+
+    pub fn image(mut self, image: &str) -> Self {
+        self.image = Some(image.to_string());
         self
     }
 
@@ -43,6 +49,7 @@ impl Chip {
 
     pub fn view(self) -> Elem {
         div()
+        .class("overflow-hidden")
         .child(
             input()
             .class("hidden peer")
@@ -57,12 +64,33 @@ impl Chip {
         .child(
             label()
             .for_(&self.id)
-            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none truncate whitespace-nowrap")
+            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none truncate whitespace-nowrap overflow-hidden")
             .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
-            .class(&self.size.to_class())
+            .class(&self.size.to_text_size())
+            .class(&self.size.to_h())
             .tab_index(0)
-            .child_text(&self.label)
-            
+            .map(|e| {
+                match self.image {
+                    None => e,
+                    Some(image_src) => 
+                    if image_src.trim().is_empty() {
+                        e
+                    } else {
+                        e.child(
+                            img()
+                            .class(&self.size.to_h())
+                            .class("aspect-square object-cover rounded-full overflow-hidden bg-neutral-700 border-neutral-800")
+                            .src(&image_src)
+                        )
+                    }
+                }
+            })
+            .child(
+                div()
+                .class(&self.size.to_py())
+                .class(&self.size.to_px())
+                .child_text(&self.label)
+            )
         )
     }
 }
@@ -76,11 +104,34 @@ pub enum ChipSize {
 }
 
 impl ChipSize {
-    fn to_class(self) -> String {
+    fn to_text_size(&self) -> String {
         match self {
-            ChipSize::Small => "text-xs px-2 py-1".to_string(),
-            ChipSize::Medium => "text-sm px-2.5 py-1.5".to_string(),
-            ChipSize::Large => "text-base px-3 py-2".to_string(),
+            ChipSize::Small => "text-sm".to_string(),
+            ChipSize::Medium => "text-base".to_string(),
+            ChipSize::Large => "text-lg".to_string(),
+        }
+    }
+
+    fn to_h(&self) -> String {
+        match self {
+            ChipSize::Small => "h-9".to_string(),
+            ChipSize::Medium => "h-10".to_string(),
+            ChipSize::Large => "h-12".to_string(),
+        }
+    }
+
+    fn to_px(&self) -> String {
+        match self {
+            ChipSize::Small => "px-2".to_string(),
+            ChipSize::Medium => "px-2.5".to_string(),
+            ChipSize::Large => "px-3.5".to_string(),
+        }
+    }
+    fn to_py(&self) -> String {
+        match self {
+            ChipSize::Small => "py-1".to_string(),
+            ChipSize::Medium => "py-1.5".to_string(),
+            ChipSize::Large => "py-2.5".to_string(),
         }
     }
 }

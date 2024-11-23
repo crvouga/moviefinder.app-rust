@@ -82,8 +82,12 @@ impl Elem {
         }
     }
 
+    pub fn hx_target_this(self) -> Self {
+        self.hx_target("this")
+    }
+
     pub fn hx_vals(self, values: &str) -> Self {
-        self.attr("hx-vals", values).clone()
+        self.attr_unsafe("hx-vals", values).clone()
     }
 
     pub fn hx_include(self, value: &str) -> Self {

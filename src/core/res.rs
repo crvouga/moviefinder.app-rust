@@ -22,6 +22,7 @@ pub enum ResVariant {
     RedirectWindow(String),
     Text(String),
     Css(String),
+    Image(Vec<u8>),
     Empty,
 }
 
@@ -43,6 +44,13 @@ impl Res {
     pub fn text(text: &str) -> Self {
         Self {
             variant: ResVariant::Text(text.to_owned()),
+            ..Res::default()
+        }
+    }
+
+    pub fn image(image: Vec<u8>) -> Self {
+        Self {
+            variant: ResVariant::Image(image),
             ..Res::default()
         }
     }
@@ -165,7 +173,9 @@ impl From<Res> for HttpResponse {
 impl From<ResVariant> for HttpResponse {
     fn from(res_variant: ResVariant) -> Self {
         match res_variant {
-            ResVariant::Html(body) => HttpResponse::new(200, body.render(), HashMap::new()),
+            ResVariant::Html(body) => {
+                HttpResponse::new(200, body.render().into_bytes(), HashMap::new())
+            }
             ResVariant::Redirect { location, target } => {
                 let mut headers = HashMap::new();
                 headers.insert(
@@ -177,21 +187,26 @@ impl From<ResVariant> for HttpResponse {
                     "Access-Control-Expose-Headers".to_string(),
                     "HX-Location".to_string(),
                 );
-                HttpResponse::new(302, "".to_owned(), headers)
+                HttpResponse::new(302, vec![], headers)
             }
             ResVariant::RedirectWindow(location) => {
                 let mut headers = HashMap::new();
                 headers.insert("Location".to_string(), location.clone());
-                HttpResponse::new(302, "".to_owned(), headers)
+                HttpResponse::new(302, vec![], headers)
             }
-            ResVariant::Text(text) => HttpResponse::new(200, text, HashMap::new()),
+            ResVariant::Text(text) => HttpResponse::new(200, text.into_bytes(), HashMap::new()),
             ResVariant::Css(css) => {
                 let mut headers = HashMap::new();
                 headers.insert("Content-Type".to_string(), "text/css".to_string());
-                let res = HttpResponse::new(200, css, headers);
+                let res = HttpResponse::new(200, css.into_bytes(), headers);
                 res
             }
-            ResVariant::Empty => HttpResponse::new(204, "".to_owned(), HashMap::new()),
+            ResVariant::Image(image) => {
+                let mut headers = HashMap::new();
+                headers.insert("Content-Type".to_string(), "image/jpeg".to_string());
+                HttpResponse::new(200, image, headers)
+            }
+            ResVariant::Empty => HttpResponse::new(204, vec![], HashMap::new()),
         }
     }
 }

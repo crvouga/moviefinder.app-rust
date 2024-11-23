@@ -45,10 +45,14 @@ impl From<FeedTag> for QueryFilter<MediaQueryField> {
 
 impl FeedTag {
     pub fn chip(&self) -> Chip {
-        Chip::default()
+        let base_chip = Chip::default()
             .id(&self.encode())
             .label(&self.label())
-            .size(ChipSize::Medium)
+            .size(ChipSize::Medium);
+        match self {
+            FeedTag::Genre(genre) => base_chip,
+            FeedTag::Person(person) => base_chip.image(&person.profile.to_highest_res()),
+        }
     }
 
     pub fn label(&self) -> String {

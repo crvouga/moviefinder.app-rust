@@ -1,5 +1,6 @@
+use crate::core::url::query_params::QueryParams;
+
 use super::{person::GetPersonResponse, TmdbApi};
-use crate::core::http::query_params::QueryParams;
 
 impl TmdbApi {
     /// Fetches the list of popular people from the TMDB API.

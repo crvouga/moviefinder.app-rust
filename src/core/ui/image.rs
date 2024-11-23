@@ -92,7 +92,11 @@ customElements.define("image-element", ImageElement);
 pub struct Image {}
 
 impl Image {
-    pub fn view() -> Elem {
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    pub fn view(self) -> Elem {
         elem("image-element")
     }
 }

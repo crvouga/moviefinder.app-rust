@@ -5,14 +5,16 @@ use crate::{
         tmdb_api::{
             self,
             config::TmdbConfig,
-            discover_movie::{DiscoverMovieParams, TMDB_AND_OP, TMDB_OR_OP},
+            discover_movie::{DiscoverMovieParams, DiscoverMovieResult, TMDB_AND_OP, TMDB_OR_OP},
             TmdbApi, TMDB_PAGE_SIZE,
         },
     },
     media::{
+        genre::genre_id::GenreId,
         media_::Media,
         media_db::interface::{MediaQuery, MediaQueryField},
         media_id::MediaId,
+        media_type::MediaType,
     },
 };
 use futures::future::join_all;
@@ -203,5 +205,27 @@ fn partition_results<T, E>(results: Vec<Result<T, E>>) -> Result<Vec<T>, Vec<E>>
         Ok(oks)
     } else {
         Err(errs)
+    }
+}
+
+impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
+    fn from((config, result): (&TmdbConfig, DiscoverMovieResult)) -> Self {
+        Media {
+            media_id: MediaId::new(result.id.unwrap_or(0.0).to_string()),
+            media_backdrop: config
+                .to_backdrop_image_set(result.backdrop_path.unwrap_or("".to_string()).as_str()),
+            media_description: result.overview.unwrap_or("".to_string()),
+            media_genre_ids: result
+                .genre_ids
+                .unwrap_or(vec![])
+                .iter()
+                .map(|id| GenreId::new(id.to_string()))
+                .collect(),
+            media_popularity: result.popularity.unwrap_or(0.0),
+            media_poster: config
+                .to_poster_image_set(result.poster_path.unwrap_or("".to_string()).as_str()),
+            media_title: result.title.unwrap_or("".to_string()),
+            media_type: MediaType::Movie,
+        }
     }
 }

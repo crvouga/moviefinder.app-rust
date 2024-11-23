@@ -100,9 +100,10 @@ impl Layout {
                         div()
                             .class("w-full aspect-video overflow-hidden border-b")
                             .child(
-                                Image::view()
-                                    .class("w-full h-full select-none")
-                                    .src(image_src),
+                                Image::new()
+                                    .view()
+                                    .src(&image_src)
+                                    .class("w-full h-full select-none"),
                             ),
                     )
                     .children(self.children),

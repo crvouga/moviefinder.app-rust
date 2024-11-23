@@ -1,4 +1,6 @@
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Eq)]
 pub struct ImageSet {
     lowest_to_highest_res: Vec<String>,
 }
@@ -17,6 +19,10 @@ impl ImageSet {
     }
 
     pub fn to_highest_res(&self) -> &str {
-        &self.lowest_to_highest_res[self.lowest_to_highest_res.len() - 1]
+        let maybe_src = self.lowest_to_highest_res.last();
+        match maybe_src {
+            Some(src) => src,
+            None => "",
+        }
     }
 }

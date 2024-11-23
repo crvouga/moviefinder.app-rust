@@ -86,7 +86,11 @@ impl Elem {
     }
 
     pub fn on_click(self, value: &str) -> Self {
-        self.attr("onclick", value)
+        self.attr_unsafe("onclick", value)
+    }
+
+    pub fn on_load(self, value: &str) -> Self {
+        self.attr_unsafe("onload", value)
     }
 
     pub fn checked(self, checked: bool) -> Self {

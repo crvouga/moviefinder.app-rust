@@ -46,7 +46,7 @@ async fn respond(
     session_id: SessionId,
     ctx: Arc<ctx::Ctx>,
 ) -> HttpResponse {
-    let route = route::Route::decode(&http_request.path);
+    let route = route::Route::decode(&http_request.url.path);
 
     let req = Req {
         session_id,

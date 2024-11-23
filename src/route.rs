@@ -1,4 +1,4 @@
-use crate::{account, core::human_friendly_base64, feed, media};
+use crate::{account, core::human_friendly_base64, feed, media, ui::resizable_image};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -10,6 +10,7 @@ pub enum Route {
     RobotsTxt,
     OutputCss,
     Unknown(String),
+    ResizableImage(resizable_image::route::Route),
 }
 
 impl Route {

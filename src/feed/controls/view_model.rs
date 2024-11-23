@@ -26,6 +26,7 @@ impl ViewModel {
             .filter(|feed_tag| self.form_state.tags.contains(feed_tag))
             .collect();
         active.sort();
+        active.dedup();
 
         let mut inactive: Vec<FeedTag> = self
             .feed_tags
@@ -34,6 +35,7 @@ impl ViewModel {
             .filter(|feed_tag| !self.form_state.tags.contains(feed_tag))
             .collect();
         inactive.sort();
+        inactive.dedup();
 
         (active, inactive)
     }

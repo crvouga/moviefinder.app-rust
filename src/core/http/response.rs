@@ -13,10 +13,10 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
-    pub fn new(status_code: u16, body: String, headers: HashMap<String, String>) -> HttpResponse {
+    pub fn new(status_code: u16, body: Vec<u8>, headers: HashMap<String, String>) -> HttpResponse {
         HttpResponse {
             status_code,
-            body: body.into_bytes(),
+            body,
             headers,
         }
     }

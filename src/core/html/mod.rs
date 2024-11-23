@@ -79,6 +79,10 @@ pub fn div() -> Elem {
     elem("div")
 }
 
+pub fn img() -> Elem {
+    elem("img")
+}
+
 pub fn form() -> Elem {
     elem("form")
 }

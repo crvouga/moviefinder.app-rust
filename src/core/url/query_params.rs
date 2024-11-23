@@ -1,42 +1,80 @@
-use core::fmt;
-use std::fmt::{Display, Formatter};
+use std::collections::HashMap;
 
-pub struct QueryParams {
-    params: Vec<(String, String)>,
-}
+use crate::core::url_encoded;
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct QueryParams(HashMap<String, String>);
 
 impl QueryParams {
-    pub fn empty() -> QueryParams {
-        QueryParams { params: vec![] }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
-    pub fn add(&mut self, key: &str, value: &str) {
-        self.params.push((key.to_string(), value.to_string()));
+    pub fn empty() -> QueryParams {
+        QueryParams(HashMap::new())
+    }
+
+    pub fn insert(&mut self, key: &str, value: String) {
+        self.0.insert(key.to_string(), value);
+    }
+
+    pub fn to_string(&self) -> String {
+        self.0
+            .iter()
+            .map(|(key, value)| format!("{}={}", key, url_encoded::encode(value)))
+            .collect::<Vec<String>>()
+            .join("&")
+    }
+
+    pub fn from_str(query_string: &str) -> QueryParams {
+        query_string.into()
     }
 }
 
-impl Display for QueryParams {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let str = self
-            .params
-            .iter()
-            .map(|(key, value)| format!("{}={}", key, value))
-            .collect::<Vec<String>>()
-            .join("&");
+impl From<HashMap<String, String>> for QueryParams {
+    fn from(query_params: HashMap<String, String>) -> QueryParams {
+        QueryParams(query_params)
+    }
+}
 
-        write!(f, "{}", str)
+impl From<&str> for QueryParams {
+    fn from(query_string: &str) -> QueryParams {
+        query_string
+            .split('&')
+            .map(|pair| {
+                let mut parts = pair.split('=');
+                let key = parts.next().unwrap_or("").to_string();
+                let value = parts.next().unwrap_or("").to_string();
+                (key, value)
+            })
+            .collect::<HashMap<String, String>>()
+            .into()
+    }
+}
+
+impl Default for QueryParams {
+    fn default() -> Self {
+        QueryParams(HashMap::new())
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
 
     #[test]
-    fn test_it_works() {
-        let mut start = QueryParams::empty();
-        start.add("key", "value");
-        start.add("key2", "value2");
-        assert_eq!(start.to_string(), "key=value&key2=value2");
+    fn test_from_string() {
+        let query_string = "name=John&age=20";
+        let query_params = QueryParams::from(query_string);
+        let expected = QueryParams(
+            [
+                ("name".to_string(), "John".to_string()),
+                ("age".to_string(), "20".to_string()),
+            ]
+            .iter()
+            .cloned()
+            .collect(),
+        );
+        assert_eq!(query_params, expected);
     }
 }

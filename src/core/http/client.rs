@@ -32,7 +32,7 @@ impl HttpClient {
             tokio::time::sleep(dur).await;
         }
 
-        let addr = format!("{}:80", request.host);
+        let addr = format!("{}:80", request.url.host);
         let mut stream = TcpStream::connect(addr).await?;
 
         let request_string = request.to_http_string();

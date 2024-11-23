@@ -1,6 +1,6 @@
 // https://developer.themoviedb.org/reference/discover-movie
 use crate::{
-    core::http::query_params::QueryParams,
+    core::url::query_params::QueryParams,
     media::genre::{genre::Genre, genre_id::GenreId},
 };
 

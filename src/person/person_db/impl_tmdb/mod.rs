@@ -3,7 +3,7 @@ use crate::{
         logger::interface::Logger,
         pagination::Paginated,
         query::{QueryFilter, QueryOp},
-        tmdb_api::{self, person::PersonResult, TMDB_PAGE_SIZE},
+        tmdb_api::{self, config::TmdbConfig, person::PersonResult, TMDB_PAGE_SIZE},
     },
     person::person_::Person,
 };
@@ -26,11 +26,12 @@ impl ImplTmdb {
     }
 }
 
-impl From<PersonResult> for Person {
-    fn from(person_result: PersonResult) -> Person {
+impl From<(&TmdbConfig, PersonResult)> for Person {
+    fn from((config, result): (&TmdbConfig, PersonResult)) -> Self {
         Person {
-            id: person_result.id.unwrap_or(0).to_string(),
-            name: person_result.name.unwrap_or("".to_string()),
+            id: result.id.unwrap_or(0).to_string(),
+            name: result.name.unwrap_or("".to_string()),
+            profile: config.to_profile_image_set(&result.profile_path.unwrap_or("".to_string())),
         }
     }
 }
@@ -41,6 +42,8 @@ impl ImplTmdb {
         query: &PersonQuery,
         search_query: &str,
     ) -> Result<Paginated<Person>, String> {
+        let tmdb_config = self.tmdb_api.config().await?;
+
         let page_based = query.to_page_based(TMDB_PAGE_SIZE);
 
         let searched = self
@@ -52,7 +55,7 @@ impl ImplTmdb {
             .results
             .unwrap_or(vec![])
             .into_iter()
-            .map(|p| p.into())
+            .map(|p| (&tmdb_config, p).into())
             .skip(query.offset)
             .take(query.limit)
             .collect();
@@ -66,6 +69,8 @@ impl ImplTmdb {
     }
 
     async fn person_popular(&self, query: &PersonQuery) -> Result<Paginated<Person>, String> {
+        let tmdb_config = self.tmdb_api.config().await?;
+
         let page_based = query.to_page_based(TMDB_PAGE_SIZE);
 
         let searched = self.tmdb_api.person_popular(page_based.start_page).await?;
@@ -74,7 +79,7 @@ impl ImplTmdb {
             .results
             .unwrap_or(vec![])
             .into_iter()
-            .map(|p| p.into())
+            .map(|p| (&tmdb_config, p).into())
             .skip(query.offset)
             .take(query.limit)
             .collect();

@@ -1,10 +1,7 @@
 // https://developer.themoviedb.org/reference/discover-movie
-use crate::{
-    core::{http::query_params::QueryParams, struct_ext::struct_to_map},
-    media::{genre::genre_id::GenreId, media_::Media, media_id::MediaId, media_type::MediaType},
-};
+use crate::core::{struct_ext::struct_to_map, url::query_params::QueryParams};
 
-use super::{config::TmdbConfig, TmdbApi};
+use super::TmdbApi;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -23,28 +20,6 @@ pub struct DiscoverMovieResult {
     pub video: Option<bool>,
     pub vote_average: Option<f64>,
     pub vote_count: Option<f64>,
-}
-
-impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
-    fn from((config, result): (&TmdbConfig, DiscoverMovieResult)) -> Self {
-        Media {
-            media_id: MediaId::new(result.id.unwrap_or(0.0).to_string()),
-            media_backdrop: config
-                .to_backdrop_image_set(result.backdrop_path.unwrap_or("".to_string()).as_str()),
-            media_description: result.overview.unwrap_or("".to_string()),
-            media_genre_ids: result
-                .genre_ids
-                .unwrap_or(vec![])
-                .iter()
-                .map(|id| GenreId::new(id.to_string()))
-                .collect(),
-            media_popularity: result.popularity.unwrap_or(0.0),
-            media_poster: config
-                .to_poster_image_set(result.poster_path.unwrap_or("".to_string()).as_str()),
-            media_title: result.title.unwrap_or("".to_string()),
-            media_type: MediaType::Movie,
-        }
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
