@@ -31,7 +31,7 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub async fn new(env: Env) -> Result<Ctx, String> {
+    pub async fn new(env: &Env) -> Result<Ctx, String> {
         let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
 
         let http_client =
@@ -43,12 +43,12 @@ impl Ctx {
                 .simulate_latency(env.simulate_latency),
         );
 
-        let key_value_db = Arc::new(key_value_db::impl_cached_postgres::ImplCachedPostgres::new(
+        let _key_value_db = Arc::new(key_value_db::impl_cached_postgres::ImplCachedPostgres::new(
             logger.clone(),
             db_conn_sql.clone(),
         ));
 
-        let _key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(
+        let key_value_db = Arc::new(key_value_db::impl_postgres::ImplPostgres::new(
             logger.clone(),
             db_conn_sql.clone(),
         ));

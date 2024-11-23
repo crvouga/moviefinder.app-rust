@@ -3,7 +3,7 @@ use crate::{
     core::{
         html::*,
         res::Res,
-        ui::{self, chip::ChipSize, image::Image},
+        ui::{self, chip::ChipSize, icon, image::Image},
     },
     media::{self, media_db::interface::MediaQuery, media_id::MediaId},
     req::Req,
@@ -105,7 +105,7 @@ async fn respond_index(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
 
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 
-    let model = ViewModel {
+    let model: ViewModel = ViewModel {
         feed: feed.clone(),
         initial_feed_items,
     };
@@ -249,6 +249,9 @@ fn view_bottom_bar() -> Elem {
 }
 
 fn view_swiper(model: &ViewModel) -> Elem {
+    if model.initial_feed_items.len() == 0 {
+        return view_empty_state();
+    }
     ui::swiper::container()
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
@@ -266,6 +269,17 @@ fn view_swiper(model: &ViewModel) -> Elem {
             "js:{feed_index: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)}"
         )
         .child(view_feed_items(&model.feed.feed_id, &model.initial_feed_items))
+}
+
+fn view_empty_state() -> Elem {
+    div()
+        .class("w-full h-full flex items-center justify-center flex-col gap-4")
+        .child(icon::magnifying_glass("size-24"))
+        .child(
+            div()
+                .class("text-3xl font-bold w-full text-center")
+                .child_text("No results found"),
+        )
 }
 
 fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {

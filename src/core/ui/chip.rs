@@ -49,7 +49,6 @@ impl Chip {
 
     pub fn view(self) -> Elem {
         div()
-        .class("overflow-hidden")
         .child(
             input()
             .class("hidden peer")
@@ -64,7 +63,7 @@ impl Chip {
         .child(
             label()
             .for_(&self.id)
-            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 text-white cursor-pointer select-none truncate whitespace-nowrap overflow-hidden")
+            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 border border-neutral-800 text-white cursor-pointer select-none truncate whitespace-nowrap")
             .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
             .class(&self.size.to_text_size())
             .class(&self.size.to_h())
@@ -79,7 +78,7 @@ impl Chip {
                         e.child(
                             img()
                             .class(&self.size.to_h())
-                            .class("shrink-0 aspect-square object-cover rounded-full overflow-hidden bg-neutral-700 border-neutral-800")
+                            .class("shrink-0 aspect-square object-cover rounded-full overflow-hidden bg-neutral-700 border-neutral-800 pointer-events-none")
                             .src(&image_src)
                         )
                     }

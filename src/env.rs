@@ -30,12 +30,11 @@ pub struct Env {
     pub port: String,
     pub database_url: String,
     pub simulate_latency: Option<Duration>,
-
     pub test_env: TestEnv,
 }
 
 impl Env {
-    pub fn load() -> Option<Env> {
+    pub fn load() -> Env {
         core::env::load(".env").unwrap_or(());
         let env_stage = EnvStage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
 
@@ -65,6 +64,6 @@ impl Env {
             test_env,
         };
 
-        Some(env)
+        env
     }
 }

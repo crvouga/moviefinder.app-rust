@@ -1,4 +1,8 @@
-use core::http::{request::HttpRequest, response::HttpResponse};
+use core::{
+    http::{request::HttpRequest, response::HttpResponse},
+    res::ResVariant,
+};
+use env::Env;
 use req::Req;
 use std::sync::Arc;
 use ui::root::Root;
@@ -21,11 +25,11 @@ mod user_session;
 
 #[tokio::main]
 async fn main() {
-    let env = env::Env::load().unwrap();
+    let env = Env::load();
 
     let address = format!("0.0.0.0:{}", env.port);
 
-    let ctx = Arc::new(ctx::Ctx::new(env).await.unwrap());
+    let ctx = Arc::new(ctx::Ctx::new(&env).await.unwrap());
 
     log_info!(ctx.logger, "Starting server on http://{}", address);
 
@@ -57,13 +61,13 @@ async fn respond(
 
     let res = respond::respond(&ctx, &req, &route).await;
 
-    let is_hx_request = http_request.headers.contains_key("hx-request");
-
-    let res_with_root = if is_hx_request {
+    let res_with_root = if http_request.headers.contains_key("hx-request") {
         res
-    } else {
+    } else if matches!(res.variant, ResVariant::Html(_)) {
         res.no_cache()
             .map_html(|html| Root::new().children(vec![html]).view())
+    } else {
+        res
     };
 
     let mut http_response: HttpResponse = res_with_root.into();

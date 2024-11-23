@@ -49,9 +49,21 @@ pub fn to_human_friendly_str<T: Serialize>(route: T) -> String {
         .replace("{", "")
         .replace("}", "")
         .replace(",", ".")
-        .replace(" ", "");
+        .replace(" ", "")
+        .split(".")
+        .filter(|s| {
+            if s.starts_with('[') && s.ends_with(']') {
+                let content = &s[1..s.len() - 1];
+                content.len() > 0 && content.len() < 50
+            } else {
+                s.len() > 0 && s.len() < 20
+            }
+        })
+        .collect::<Vec<&str>>()
+        .join(".");
 
-    human_friendly.truncate(human_friendly.len().min(100));
+    human_friendly.truncate(100);
+
     human_friendly
 }
 
