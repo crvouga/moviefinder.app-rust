@@ -52,7 +52,7 @@ async fn respond(
 
     let req = Req {
         session_id,
-        form_data: http_request.form_data,
+        params: http_request.to_params(),
     };
 
     log_info!(ctx.logger, "{:?} {:?}", route, req);

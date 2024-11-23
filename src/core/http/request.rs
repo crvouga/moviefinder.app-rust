@@ -1,13 +1,14 @@
+use super::{content_encoding::ContentEncoding, form_data::FormData, method::HttpMethod};
+use crate::core::{
+    params::{Params, ParamsHashMap},
+    url::Url,
+};
 use std::collections::HashMap;
-
-use crate::core::{params::Params, url::Url};
-
-use super::{content_encoding::ContentEncoding, form_data::FormData};
 
 #[derive(Debug)]
 pub struct HttpRequest {
     pub url: Url,
-    pub method: String,
+    pub method: HttpMethod,
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
     pub form_data: FormData,
@@ -37,8 +38,17 @@ impl HttpRequest {
 
         format!(
             "{} {} HTTP/1.1\r\n{}Connection: close\r\n\r\n",
-            self.method, path_with_query_params, headers_string
+            self.method.to_string(),
+            path_with_query_params,
+            headers_string
         )
+    }
+
+    pub fn to_params(&self) -> ParamsHashMap {
+        match self.method {
+            HttpMethod::Get => self.url.query_params.params.clone(),
+            _ => self.form_data.params.clone(),
+        }
     }
 
     pub fn to_accept_encoding(&self) -> Vec<ContentEncoding> {

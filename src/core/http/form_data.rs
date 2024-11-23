@@ -2,7 +2,7 @@ use crate::core::params::{Params, ParamsHashMap};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct FormData {
-    params: ParamsHashMap,
+    pub params: ParamsHashMap,
 }
 
 impl Params for FormData {

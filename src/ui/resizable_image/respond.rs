@@ -3,7 +3,7 @@ use std::{collections::HashMap, io::Cursor};
 use crate::{
     core::{
         html::{div, img, script, Elem},
-        http::request::HttpRequest,
+        http::{method::HttpMethod, request::HttpRequest},
         params::Params,
         req::Req,
         res::Res,
@@ -21,7 +21,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
         Route::Resize => {
             let fallback = Res::image(vec![]);
             let width = req
-                .form_data
+                .params
                 .get_first("width")
                 .unwrap_or(&"".to_string())
                 .parse::<u32>()
@@ -33,7 +33,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
             }
 
             let height = req
-                .form_data
+                .params
                 .get_first("height")
                 .unwrap_or(&"".to_string())
                 .parse::<u32>()
@@ -47,7 +47,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
             let src_empty = String::new();
 
             let src = req
-                .form_data
+                .params
                 .get_first("src")
                 .to_owned()
                 .unwrap_or(&src_empty)
@@ -71,7 +71,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 cookies: Default::default(),
                 form_data: Default::default(),
                 headers,
-                method: "GET".to_string(),
+                method: HttpMethod::Get,
             };
 
             log_info!(ctx.logger, "Request: {:?}", request);

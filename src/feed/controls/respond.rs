@@ -74,7 +74,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         Route::InputtedSearch => {
             let default = "".to_string();
 
-            let search_input = req.form_data.get_first(SEARCH_NAME).unwrap_or(&default);
+            let search_input = req.params.get_first(SEARCH_NAME).unwrap_or(&default);
 
             let model = ViewModel::load(ctx, feed_id, search_input).await;
 

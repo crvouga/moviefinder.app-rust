@@ -1,15 +1,14 @@
-use std::collections::HashMap;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
-
+use super::form_data::FormData;
+use super::method::HttpMethod;
+use super::request::HttpRequest;
+use super::response::HttpResponse;
 use crate::core::params::Params;
 use crate::core::url::query_params::QueryParams;
 use crate::core::url::Url;
 use crate::core::url_encoded;
-
-use super::form_data::FormData;
-use super::request::HttpRequest;
-use super::response::HttpResponse;
+use std::collections::HashMap;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream};
 
 pub async fn start<F, Fut>(address: &str, handle_request: F) -> Result<(), std::io::Error>
 where
@@ -105,9 +104,9 @@ fn split_request_lines(request_string: &str) -> Vec<&str> {
     request_string.split("\r\n").collect()
 }
 
-fn parse_request_line(request_line: &str) -> (String, String) {
+fn parse_request_line(request_line: &str) -> (HttpMethod, String) {
     let mut parts = request_line.split_whitespace();
-    let method = parts.next().unwrap_or("").to_string();
+    let method = HttpMethod::from_string(parts.next().unwrap_or(""));
     let path = parts.next().unwrap_or("/").to_string();
     (method, path)
 }

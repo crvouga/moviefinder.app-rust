@@ -5,7 +5,7 @@ use crate::core::{
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct QueryParams {
-    params: ParamsHashMap,
+    pub params: ParamsHashMap,
 }
 
 impl Params for QueryParams {

@@ -2,6 +2,7 @@ use crate::core::http::{client::HttpClient, form_data::FormData, request::HttpRe
 use std::{collections::HashMap, sync::Arc};
 
 use super::{
+    http::method::HttpMethod,
     params::Params,
     url::{query_params::QueryParams, Url},
 };
@@ -35,12 +36,12 @@ pub const TMDB_IMAGE_BASE_URL: &str = "https://image.tmdb.org";
 
 impl TmdbApi {
     pub fn to_get_request(self: &TmdbApi, path: &str, query_params: QueryParams) -> HttpRequest {
-        self.to_request("GET", path, query_params)
+        self.to_request(HttpMethod::Get, path, query_params)
     }
 
     pub fn to_request(
         self: &TmdbApi,
-        method: &str,
+        method: HttpMethod,
         path: &str,
         query_params: QueryParams,
     ) -> HttpRequest {
@@ -51,7 +52,7 @@ impl TmdbApi {
                 path: path.to_string(),
                 query_params,
             },
-            method: method.to_string(),
+            method,
             body: vec![],
             cookies: HashMap::new(),
             form_data: FormData::empty(),
