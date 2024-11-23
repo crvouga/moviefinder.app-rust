@@ -1,5 +1,6 @@
 use crate::{
-    core::{html::*, res::Res, tmdb_api::TMDB_IMAGE_BASE_URL},
+    core::{html::*, tmdb_api::TMDB_IMAGE_BASE_URL},
+    res::Res,
     route::Route,
 };
 

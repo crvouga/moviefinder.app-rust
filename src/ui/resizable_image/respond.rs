@@ -5,11 +5,12 @@ use crate::{
         html::{div, img, script, Elem},
         http::{method::HttpMethod, request::HttpRequest},
         params::Params,
-        req::Req,
-        res::Res,
         url::Url,
     },
-    log_info, route,
+    log_info,
+    req::Req,
+    res::Res,
+    route,
 };
 
 use image::{self, imageops::FilterType};

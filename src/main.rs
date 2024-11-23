@@ -1,10 +1,10 @@
 use core::{
     http::{request::HttpRequest, response::HttpResponse},
-    req::Req,
-    res::ResVariant,
     session::{session_id::SessionId, wrap_session_id::wrap_session_id},
 };
 use env::Env;
+use req::Req;
+use res::ResVariant;
 use std::sync::Arc;
 use ui::root::Root;
 
@@ -17,6 +17,8 @@ mod fixture;
 mod key_value_db;
 mod media;
 mod person;
+mod req;
+mod res;
 mod respond;
 mod route;
 mod ui;

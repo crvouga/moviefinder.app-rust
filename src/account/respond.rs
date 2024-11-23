@@ -1,8 +1,5 @@
 use super::route::Route;
-use crate::{
-    core::{html::*, res::Res},
-    ui::bottom_bar,
-};
+use crate::{core::html::*, res::Res, ui::bottom_bar};
 
 pub fn respond(route: &Route) -> Res {
     match route {

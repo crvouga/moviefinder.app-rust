@@ -1,5 +1,5 @@
-use super::http::response::HttpResponse;
 use crate::core::html::Elem;
+use crate::core::http::response::HttpResponse;
 
 #[derive(Debug, Default)]
 pub struct Res {

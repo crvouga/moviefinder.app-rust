@@ -13,8 +13,6 @@ pub mod pagination;
 pub mod params;
 pub mod query;
 pub mod random;
-pub mod req;
-pub mod res;
 pub mod session;
 pub mod sql;
 pub mod struct_ext;
