@@ -106,32 +106,18 @@ impl From<Elem> for Res {
 
 impl From<Res> for HttpResponse {
     fn from(res: Res) -> Self {
-        let mut http_response: HttpResponse = res.variant.into();
+        res.modifiers.iter().fold(
+            res.variant.into(),
+            |mut http_response, modifier| match modifier {
+                ResModifier::HxPushUrl(url) => http_response.hx_push_url(&url).to_owned(),
 
-        for action in res.modifiers {
-            match action {
-                ResModifier::HxPushUrl(url) => {
-                    http_response.hx_push_url(&url);
-                }
+                ResModifier::HxReplaceUrl(url) => http_response.hx_replace_url(&url).to_owned(),
 
-                ResModifier::HxReplaceUrl(url) => {
-                    http_response.hx_replace_url(&url);
-                }
-
-                ResModifier::Cache => {
-                    http_response.headers.insert(
-                        "Cache-Control".to_string(),
-                        "public, max-age=31536000, immutable".to_string(),
-                    );
-                    http_response.headers.insert(
-                        "Access-Control-Expose-Headers".to_string(),
-                        "Cache-Control".to_string(),
-                    );
-                }
-            }
-        }
-
-        http_response
+                ResModifier::Cache => http_response
+                    .header("Cache-Control", "public, max-age=31536000, immutable")
+                    .header("Access-Control-Expose-Headers", "Cache-Control"),
+            },
+        )
     }
 }
 
