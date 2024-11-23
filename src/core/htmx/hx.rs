@@ -1,6 +1,6 @@
 // https://htmx.org/docs/
 // https://v1.htmx.org/extensions/loading-states/
-use crate::core::{css, html::Elem};
+use crate::core::{css, html::Elem, http::response::HttpResponse};
 use serde::{Deserialize, Serialize};
 
 impl Elem {
@@ -154,5 +154,48 @@ pub struct HxLocation {
 impl HxLocation {
     pub fn new(path: String, target: String) -> Self {
         Self { path, target }
+    }
+}
+
+impl HttpResponse {
+    pub fn hx_push_url(&mut self, url: &str) -> &Self {
+        self.headers
+            .insert("HX-Push-Url".to_string(), ensure_leading_slash(&url));
+        self.headers.insert(
+            "Access-Control-Expose-Headers".to_string(),
+            "HX-Push-Url".to_string(),
+        );
+        self
+    }
+
+    pub fn hx_replace_url(&mut self, url: &str) -> &Self {
+        self.headers
+            .insert("HX-Replace-Url".to_string(), ensure_leading_slash(&url));
+        self.headers.insert(
+            "Access-Control-Expose-Headers".to_string(),
+            "HX-Replace-Url".to_string(),
+        );
+        self
+    }
+
+    pub fn hx_redirect(&mut self, location: &str, target: &str) -> &Self {
+        self.headers.insert(
+            "HX-Location".to_string(),
+            serde_json::to_string(&HxLocation::new(location.to_string(), target.to_string()))
+                .unwrap_or(location.to_string()),
+        );
+        self.headers.insert(
+            "Access-Control-Expose-Headers".to_string(),
+            "HX-Location".to_string(),
+        );
+        self
+    }
+}
+
+fn ensure_leading_slash(path: &str) -> String {
+    if path.starts_with('/') {
+        path.to_owned()
+    } else {
+        format!("/{}", path)
     }
 }

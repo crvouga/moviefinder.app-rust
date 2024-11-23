@@ -13,12 +13,22 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
-    pub fn new(status_code: u16, body: Vec<u8>, headers: HashMap<String, String>) -> HttpResponse {
+    pub fn new(status_code: u16) -> HttpResponse {
         HttpResponse {
             status_code,
-            body,
-            headers,
+            body: Vec::new(),
+            headers: HashMap::new(),
         }
+    }
+
+    pub fn body(mut self, body: Vec<u8>) -> Self {
+        self.body = body;
+        self
+    }
+
+    pub fn header(mut self, key: &str, value: &str) -> Self {
+        self.headers.insert(key.to_string(), value.to_string());
+        self
     }
 
     pub fn to_body_string(self) -> String {

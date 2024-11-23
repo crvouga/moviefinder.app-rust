@@ -21,12 +21,14 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
 
         Route::Favicon => Res::empty(),
 
-        Route::RobotsTxt => Res::text("User-agent: *\nDisallow:"),
+        Route::RobotsTxt => Res::content("text", "User-agent: *\nDisallow:".as_bytes().to_vec()),
 
-        Route::OutputCss => Res::css(include_str!("./output.css")).cache(),
+        Route::OutputCss => {
+            Res::content("text/css", include_bytes!("./output.css").to_vec()).cache()
+        }
 
         Route::Unknown(_route) => {
-            Res::redirect_window(Route::Feed(feed::route::Route::DefaultLoad).encode())
+            feed::respond::respond(&ctx.feed, req, &feed::route::Route::Default).await
         }
     }
 }

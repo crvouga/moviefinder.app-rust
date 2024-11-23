@@ -1,6 +1,5 @@
-use super::{htmx::hx::HxLocation, http::response::HttpResponse};
+use super::http::response::HttpResponse;
 use crate::core::html::Elem;
-use std::collections::HashMap;
 
 #[derive(Debug, Default)]
 pub struct Res {
@@ -17,17 +16,17 @@ pub enum ResModifier {
 
 #[derive(Debug, Default)]
 pub enum ResVariant {
+    #[default]
+    Empty,
     Html(Elem),
     Redirect {
         location: String,
         target: String,
     },
-    RedirectWindow(String),
-    Text(String),
-    Css(String),
-    Image(Vec<u8>),
-    #[default]
-    Empty,
+    Content {
+        content_type: String,
+        body: Vec<u8>,
+    },
 }
 
 impl Res {
@@ -45,23 +44,12 @@ impl Res {
         }
     }
 
-    pub fn text(text: &str) -> Self {
+    pub fn content(content_type: &str, body: Vec<u8>) -> Self {
         Self {
-            variant: ResVariant::Text(text.to_owned()),
-            ..Res::default()
-        }
-    }
-
-    pub fn image(image: Vec<u8>) -> Self {
-        Self {
-            variant: ResVariant::Image(image),
-            ..Res::default()
-        }
-    }
-
-    pub fn css(css: &str) -> Self {
-        Self {
-            variant: ResVariant::Css(css.to_owned()),
+            variant: ResVariant::Content {
+                content_type: content_type.to_string(),
+                body,
+            },
             ..Res::default()
         }
     }
@@ -72,13 +60,6 @@ impl Res {
                 location: location.to_string(),
                 target: target.to_string(),
             },
-            ..Res::default()
-        }
-    }
-
-    pub fn redirect_window(location: String) -> Self {
-        Self {
-            variant: ResVariant::RedirectWindow(location),
             ..Res::default()
         }
     }
@@ -130,23 +111,11 @@ impl From<Res> for HttpResponse {
         for action in res.modifiers {
             match action {
                 ResModifier::HxPushUrl(url) => {
-                    http_response
-                        .headers
-                        .insert("HX-Push-Url".to_string(), ensure_leading_slash(&url));
-                    http_response.headers.insert(
-                        "Access-Control-Expose-Headers".to_string(),
-                        "HX-Push-Url".to_string(),
-                    );
+                    http_response.hx_push_url(&url);
                 }
 
                 ResModifier::HxReplaceUrl(url) => {
-                    http_response
-                        .headers
-                        .insert("HX-Replace-Url".to_string(), ensure_leading_slash(&url));
-                    http_response.headers.insert(
-                        "Access-Control-Expose-Headers".to_string(),
-                        "HX-Replace-Url".to_string(),
-                    );
+                    http_response.hx_replace_url(&url);
                 }
 
                 ResModifier::Cache => {
@@ -169,48 +138,17 @@ impl From<Res> for HttpResponse {
 impl From<ResVariant> for HttpResponse {
     fn from(res_variant: ResVariant) -> Self {
         match res_variant {
-            ResVariant::Html(body) => {
-                HttpResponse::new(200, body.render().into_bytes(), HashMap::new())
-            }
-            ResVariant::Redirect { location, target } => {
-                let mut headers = HashMap::new();
-                headers.insert(
-                    "HX-Location".to_string(),
-                    serde_json::to_string(&HxLocation::new(location.clone(), target.clone()))
-                        .unwrap_or(location.clone()),
-                );
-                headers.insert(
-                    "Access-Control-Expose-Headers".to_string(),
-                    "HX-Location".to_string(),
-                );
-                HttpResponse::new(302, vec![], headers)
-            }
-            ResVariant::RedirectWindow(location) => {
-                let mut headers = HashMap::new();
-                headers.insert("Location".to_string(), location.clone());
-                HttpResponse::new(302, vec![], headers)
-            }
-            ResVariant::Text(text) => HttpResponse::new(200, text.into_bytes(), HashMap::new()),
-            ResVariant::Css(css) => {
-                let mut headers = HashMap::new();
-                headers.insert("Content-Type".to_string(), "text/css".to_string());
-                let res = HttpResponse::new(200, css.into_bytes(), headers);
-                res
-            }
-            ResVariant::Image(image) => {
-                let mut headers = HashMap::new();
-                headers.insert("Content-Type".to_string(), "image/jpeg".to_string());
-                HttpResponse::new(200, image, headers)
-            }
-            ResVariant::Empty => HttpResponse::new(204, vec![], HashMap::new()),
-        }
-    }
-}
+            ResVariant::Empty => HttpResponse::new(204),
 
-fn ensure_leading_slash(path: &str) -> String {
-    if path.starts_with('/') {
-        path.to_owned()
-    } else {
-        format!("/{}", path)
+            ResVariant::Html(body) => HttpResponse::new(200).body(body.render().into_bytes()),
+
+            ResVariant::Redirect { location, target } => HttpResponse::new(302)
+                .hx_redirect(&location, &target)
+                .to_owned(),
+
+            ResVariant::Content { body, content_type } => HttpResponse::new(200)
+                .body(body)
+                .header("Content-Type", &content_type),
+        }
     }
 }

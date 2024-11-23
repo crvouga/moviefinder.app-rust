@@ -19,7 +19,7 @@ use super::{ctx::Ctx, route::Route};
 pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
     match route {
         Route::Resize => {
-            let fallback = Res::image(vec![]);
+            let fallback = Res::content("image/jpeg", vec![]);
             let width = req
                 .params
                 .get_first("width")
@@ -113,7 +113,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 )
                 .unwrap_or(());
 
-            Res::image(buffer)
+            Res::content("image/jpeg", buffer)
         }
     }
 }
