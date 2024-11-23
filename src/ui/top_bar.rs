@@ -73,7 +73,7 @@ impl BackButton {
                 Some(route) => elem.root_push_route(route),
                 None => elem,
             })
-            .child(icon::back_arrow("size-8"))
+            .child(icon::back_arrow("size-6"))
     }
 }
 

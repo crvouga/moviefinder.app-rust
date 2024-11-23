@@ -215,7 +215,7 @@ fn view_open_controls_button() -> Elem {
         .child(
             div()
                 .class("size-16 bg-black flex items-center justify-center")
-                .child(ui::icon::adjustments_vertical("size-8")),
+                .child(ui::icon::adjustments_vertical("size-6")),
         )
 }
 
