@@ -57,7 +57,10 @@ impl Params for ParamsHashMap {
         let mut map = HashMap::new();
         for pair in string.split('&') {
             let mut parts = pair.split('=');
-            let key = parts.next().unwrap_or("").to_string();
+            let key: String = parts.next().unwrap_or("").to_string();
+            if key.is_empty() {
+                continue;
+            }
             let value = parts.next().unwrap_or("").to_string();
             map.entry(key).or_insert_with(Vec::new).push(value);
         }

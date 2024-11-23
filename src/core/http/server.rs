@@ -56,7 +56,8 @@ where
     let body = parse_body(&buffer, headers_end, content_length, &mut stream).await;
     let cookies = parse_cookies(&headers);
     let form_data = parse_form_data(&headers, &body);
-    let query_params = QueryParams::from_string(path.as_str());
+    let query_params_string = path.split_once('?').map(|(_, query)| query).unwrap_or("");
+    let query_params = QueryParams::from_string(query_params_string);
     let request = HttpRequest {
         method,
         url: Url {
