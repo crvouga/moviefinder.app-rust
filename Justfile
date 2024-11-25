@@ -1,5 +1,5 @@
 run: #
-  npx concurrently "just tw-watch" "just watch"
+  npx kill-port 8000 && npx concurrently "just tw-watch" "just watch"
 
 watch: #
   cargo watch -x run
