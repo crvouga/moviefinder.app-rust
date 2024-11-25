@@ -57,6 +57,10 @@ impl Elem {
         self.attr("href", value)
     }
 
+    pub fn crossorigin(self) -> Self {
+        self.attr("crossorigin", "")
+    }
+
     pub fn lang(self, lang: &str) -> Self {
         self.attr("lang", lang)
     }
