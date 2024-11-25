@@ -60,11 +60,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
         }
 
         Route::ClickedTag { tag } => {
-            let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
+            let model = ViewModel::load(ctx, feed_id, "").await;
 
-            let form_state = FormState::load(ctx, &feed).await;
-
-            let form_state_new = form_state.toggle(tag);
+            let form_state_new = model.form_state.toggle(tag);
 
             ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
 
