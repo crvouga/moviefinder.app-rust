@@ -1,5 +1,5 @@
 use crate::{
-    core::{html::*, tmdb_api::TMDB_IMAGE_BASE_URL},
+    core::{html::*, htmx::hx::HxHeaders, tmdb_api::TMDB_IMAGE_BASE_URL},
     res::Res,
     route::Route,
 };
@@ -27,6 +27,10 @@ impl Elem {
 impl Res {
     pub fn root_redirect(route: Route) -> Self {
         Res::redirect(route.encode().to_string(), root_selector())
+    }
+
+    pub fn root_retarget(self) -> Self {
+        self.hx_retarget(&root_selector()).hx_reswap("innerHTML")
     }
 }
 

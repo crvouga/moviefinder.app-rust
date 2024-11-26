@@ -12,15 +12,15 @@ use crate::{
 #[derive(Debug)]
 pub struct ViewModel {
     pub feed: Feed,
-    pub feed_tags: Vec<FeedTag>,
+    pub tags: Vec<FeedTag>,
     pub form_state: FormState,
     pub search_input: String,
 }
 
 impl ViewModel {
-    pub fn to_tags(&self) -> (Vec<FeedTag>, Vec<FeedTag>) {
+    pub fn to_seperated_tags(&self) -> (Vec<FeedTag>, Vec<FeedTag>) {
         let mut active: Vec<FeedTag> = self
-            .feed_tags
+            .tags
             .clone()
             .into_iter()
             .filter(|feed_tag| self.form_state.tags.contains(feed_tag))
@@ -29,7 +29,7 @@ impl ViewModel {
         active.dedup();
 
         let mut inactive: Vec<FeedTag> = self
-            .feed_tags
+            .tags
             .clone()
             .into_iter()
             .filter(|feed_tag| !self.form_state.tags.contains(feed_tag))
@@ -38,6 +38,13 @@ impl ViewModel {
         inactive.dedup();
 
         (active, inactive)
+    }
+
+    pub fn to_tags(&self) -> Vec<FeedTag> {
+        let mut tags = self.tags.clone();
+        tags.sort();
+        tags.dedup();
+        tags
     }
 
     pub async fn load(ctx: &Ctx, feed_id: &FeedId, search_input: &str) -> Self {
@@ -99,7 +106,7 @@ impl ViewModel {
 
         let model = ViewModel {
             feed,
-            feed_tags,
+            tags: feed_tags,
             search_input: search_input.to_string(),
             form_state,
         };

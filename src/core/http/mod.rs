@@ -1,6 +1,7 @@
 pub mod client;
 pub mod content_encoding;
 pub mod form_data;
+pub mod header;
 pub mod method;
 pub mod request;
 pub mod response;

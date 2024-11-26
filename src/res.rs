@@ -1,20 +1,17 @@
+use std::collections::HashMap;
+
 use crate::core::html::Elem;
+use crate::core::htmx::hx::HxHeaders;
+use crate::core::http::header::Header;
 use crate::core::http::response::HttpResponse;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Res {
     pub variant: ResVariant,
-    pub modifiers: Vec<ResModifier>,
+    pub headers: HashMap<String, String>,
 }
 
-#[derive(Debug)]
-pub enum ResModifier {
-    HxPushUrl(String),
-    HxReplaceUrl(String),
-    Cache,
-}
-
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub enum ResVariant {
     #[default]
     Empty,
@@ -35,6 +32,14 @@ impl Res {
             variant: ResVariant::Html(body),
             ..Res::default()
         }
+    }
+
+    pub fn map_html(mut self, f: impl FnOnce(Elem) -> Elem) -> Self {
+        self.variant = match self.variant {
+            ResVariant::Html(body) => ResVariant::Html(f(body)),
+            other => other,
+        };
+        self
     }
 
     pub fn empty() -> Self {
@@ -64,39 +69,27 @@ impl Res {
         }
     }
 
-    pub fn map_html(mut self, f: impl FnOnce(Elem) -> Elem) -> Self {
-        self.variant = match self.variant {
-            ResVariant::Html(body) => ResVariant::Html(f(body)),
-            other => other,
-        };
-        self
+    pub fn cache(self) -> Self {
+        self.header("Cache-Control", "public, max-age=31536000, immutable")
     }
 
-    pub fn hx_push_url(mut self, url: &str) -> Self {
-        self.modifiers.push(ResModifier::HxPushUrl(url.to_owned()));
-        self
-    }
-
-    pub fn hx_replace_url(mut self, url: &str) -> Self {
-        self.modifiers
-            .push(ResModifier::HxReplaceUrl(url.to_owned()));
-
-        self
-    }
-
-    pub fn cache(mut self) -> Self {
-        self.modifiers.push(ResModifier::Cache);
-        self
-    }
-
-    pub fn no_cache(mut self) -> Self {
-        self.modifiers.retain(|action| match action {
-            ResModifier::Cache => false,
-            _ => true,
-        });
-        self
+    pub fn no_cache(self) -> Self {
+        self.header("Cache-Control", "no-store")
     }
 }
+
+impl Header for Res {
+    fn header(&self, key: &str, value: &str) -> Self {
+        let mut headers = self.headers.clone();
+        headers.insert(key.to_string(), value.to_string());
+        Res {
+            headers,
+            ..self.clone()
+        }
+    }
+}
+
+impl HxHeaders for Res {}
 
 impl From<Elem> for Res {
     fn from(elem: Elem) -> Self {
@@ -106,18 +99,11 @@ impl From<Elem> for Res {
 
 impl From<Res> for HttpResponse {
     fn from(res: Res) -> Self {
-        res.modifiers.iter().fold(
-            res.variant.into(),
-            |mut http_response, modifier| match modifier {
-                ResModifier::HxPushUrl(url) => http_response.hx_push_url(&url).to_owned(),
+        let mut http_response: HttpResponse = res.variant.into();
 
-                ResModifier::HxReplaceUrl(url) => http_response.hx_replace_url(&url).to_owned(),
+        http_response.headers.extend(res.headers);
 
-                ResModifier::Cache => http_response
-                    .header("Cache-Control", "public, max-age=31536000, immutable")
-                    .header("Access-Control-Expose-Headers", "Cache-Control"),
-            },
-        )
+        http_response
     }
 }
 
@@ -128,9 +114,9 @@ impl From<ResVariant> for HttpResponse {
 
             ResVariant::Html(body) => HttpResponse::new(200).body(body.render().into_bytes()),
 
-            ResVariant::Redirect { location, target } => HttpResponse::new(302)
-                .hx_redirect(&location, &target)
-                .to_owned(),
+            ResVariant::Redirect { location, target } => {
+                HttpResponse::new(302).hx_redirect(&location, &target)
+            }
 
             ResVariant::Content { body, content_type } => HttpResponse::new(200)
                 .body(body)

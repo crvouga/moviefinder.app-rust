@@ -2,6 +2,7 @@ use super::{controls, ctx::Ctx, feed_::Feed, feed_id::FeedId, feed_item::FeedIte
 use crate::{
     core::{
         html::*,
+        htmx::hx::HxHeaders,
         params::Params,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image},

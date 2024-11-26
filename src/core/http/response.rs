@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::io::Write;
 
 use super::content_encoding::ContentEncoding;
+use super::header::Header;
 use super::request::HttpRequest;
 
 #[derive(Debug, Clone)]
@@ -23,11 +24,6 @@ impl HttpResponse {
 
     pub fn body(mut self, body: Vec<u8>) -> Self {
         self.body = body;
-        self
-    }
-
-    pub fn header(mut self, key: &str, value: &str) -> Self {
-        self.headers.insert(key.to_string(), value.to_string());
         self
     }
 
@@ -144,5 +140,13 @@ impl HttpResponse {
 
         self.headers
             .insert("Content-Length".to_string(), self.body.len().to_string());
+    }
+}
+
+impl Header for HttpResponse {
+    fn header(&self, key: &str, value: &str) -> Self {
+        let mut cloned = self.clone();
+        cloned.headers.insert(key.to_string(), value.to_string());
+        cloned
     }
 }

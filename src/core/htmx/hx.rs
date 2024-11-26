@@ -1,6 +1,10 @@
 // https://htmx.org/docs/
 // https://v1.htmx.org/extensions/loading-states/
-use crate::core::{css, html::Elem, http::response::HttpResponse};
+use crate::core::{
+    css,
+    html::Elem,
+    http::{header::Header, response::HttpResponse},
+};
 use serde::{Deserialize, Serialize};
 
 impl Elem {
@@ -157,40 +161,37 @@ impl HxLocation {
     }
 }
 
-impl HttpResponse {
-    pub fn hx_push_url(&mut self, url: &str) -> &Self {
-        self.headers
-            .insert("HX-Push-Url".to_string(), ensure_leading_slash(&url));
-        self.headers.insert(
-            "Access-Control-Expose-Headers".to_string(),
-            "HX-Push-Url".to_string(),
-        );
-        self
+pub trait HxHeaders: Header + Sized {
+    fn hx_push_url(self, url: &str) -> Self {
+        self.header("HX-Push-Url", url)
+            .header("Access-Control-Expose-Headers", "HX-Push-Url")
     }
 
-    pub fn hx_replace_url(&mut self, url: &str) -> &Self {
-        self.headers
-            .insert("HX-Replace-Url".to_string(), ensure_leading_slash(&url));
-        self.headers.insert(
-            "Access-Control-Expose-Headers".to_string(),
-            "HX-Replace-Url".to_string(),
-        );
-        self
+    fn hx_replace_url(self, url: &str) -> Self {
+        self.header("HX-Replace-Url", &ensure_leading_slash(url))
+            .header("Access-Control-Expose-Headers", "HX-Replace-Url")
     }
 
-    pub fn hx_redirect(&mut self, location: &str, target: &str) -> &Self {
-        self.headers.insert(
-            "HX-Location".to_string(),
-            serde_json::to_string(&HxLocation::new(location.to_string(), target.to_string()))
-                .unwrap_or(location.to_string()),
-        );
-        self.headers.insert(
-            "Access-Control-Expose-Headers".to_string(),
-            "HX-Location".to_string(),
-        );
-        self
+    fn hx_redirect(self, location: &str, target: &str) -> Self {
+        let hx_location = HxLocation::new(location.to_string(), target.to_string());
+        let location_str =
+            serde_json::to_string(&hx_location).unwrap_or_else(|_| location.to_string());
+        self.header("HX-Location", &location_str)
+            .header("Access-Control-Expose-Headers", "HX-Location")
+    }
+
+    fn hx_retarget(self, target: &str) -> Self {
+        self.header("HX-Retarget", target)
+            .header("Access-Control-Expose-Headers", "HX-Retarget")
+    }
+
+    fn hx_reswap(self, target: &str) -> Self {
+        self.header("HX-Reswap", target)
+            .header("Access-Control-Expose-Headers", "HX-Reswap")
     }
 }
+
+impl HxHeaders for HttpResponse {}
 
 fn ensure_leading_slash(path: &str) -> String {
     if path.starts_with('/') {
