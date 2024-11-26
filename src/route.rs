@@ -6,11 +6,11 @@ pub enum Route {
     Feed(feed::route::Route),
     Account(account::route::Route),
     Media(media::route::Route),
+    ResizableImage(resizable_image::route::Route),
+    Unknown(String),
     Favicon,
     RobotsTxt,
     OutputCss,
-    Unknown(String),
-    ResizableImage(resizable_image::route::Route),
 }
 
 impl Route {
