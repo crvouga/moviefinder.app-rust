@@ -123,3 +123,10 @@ impl Elem {
         Res::html(self)
     }
 }
+
+impl HttpResponseWriter {
+    pub async fn css(&mut self, css: &[u8]) {
+        self.set_header("Content-Type", "text/css");
+        let _ = self.write_body(css).await;
+    }
+}

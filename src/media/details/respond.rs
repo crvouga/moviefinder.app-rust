@@ -85,7 +85,7 @@ impl Layout {
             .id(INDEX_ID)
             .child(
                 TopBar::default()
-                    .back_button(route::Route::Feed(feed::route::Route::DefaultLoad))
+                    .back_button(route::Route::Feed(feed::route::Route::Default))
                     .title(top_bar_title)
                     .view()
                     .hx_abort(&index_selector()),

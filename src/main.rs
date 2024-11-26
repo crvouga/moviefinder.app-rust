@@ -1,12 +1,13 @@
 use core::{
-    http::{request::HttpRequest, response_writer::HttpResponseWriter},
+    http::{header::SetHeader, request::HttpRequest, response_writer::HttpResponseWriter},
     session::{session_id::SessionId, session_id_cookie::read_write_session_id_cookie},
 };
 use env::Env;
 use req::Req;
 use res::{Res, ResVariant};
+use route::Route;
 use std::sync::Arc;
-use ui::root::Root;
+use ui::root::{self, Root};
 
 mod account;
 mod core;
@@ -50,6 +51,14 @@ async fn respond(
 ) -> Result<(), std::io::Error> {
     let route: route::Route = route::Route::decode(&request.url.path);
 
+    if !is_fragment_request(&request) && is_html_request(&request) {
+        response_writer.set_header("Content-Type", "text/html");
+        response_writer
+            .write_body(root::Root::new(route).view().render().as_bytes())
+            .await?;
+        return response_writer.end().await;
+    }
+
     let req = Req {
         session_id,
         params: request.to_params(),
@@ -57,22 +66,19 @@ async fn respond(
 
     log_info!(ctx.logger, "{:?} {:?}", route, req);
 
-    let res = respond::respond(&ctx, &req, &route).await;
+    respond::respond(&mut response_writer, &ctx, &req, &route).await;
 
-    let wrapped_res = if should_wrap_with_root(&res, &request) {
-        res.no_cache()
-            .map_html(|html| Root::new().children(vec![html]).view())
-    } else {
-        res
-    };
-
-    wrapped_res
-        .write_http_response(&mut response_writer)
-        .await?;
-
-    response_writer.end().await
+    Ok(())
 }
 
-fn should_wrap_with_root(res: &Res, request: &HttpRequest) -> bool {
-    !request.headers.contains_key("hx-request") && matches!(res.variant, ResVariant::Html(_))
+fn is_html_request(request: &HttpRequest) -> bool {
+    request
+        .headers
+        .get("accept")
+        .unwrap_or(&"".to_string())
+        .contains("html")
+}
+
+fn is_fragment_request(request: &HttpRequest) -> bool {
+    request.headers.contains_key("hx-request") || request.headers.contains_key("datastar-request")
 }

@@ -2,7 +2,7 @@ use super::{controls, ctx::Ctx, feed_::Feed, feed_id::FeedId, feed_item::FeedIte
 use crate::{
     core::{
         html::*,
-        htmx::hx::HxHeaders,
+        http::response_writer::HttpResponseWriter,
         params::Params,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image},
@@ -11,14 +11,19 @@ use crate::{
     req::Req,
     res::Res,
     route,
-    ui::{bottom_bar, top_bar},
+    ui::{bottom_bar, root::ROOT_ID, top_bar},
 };
 
-pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
+pub async fn respond(
+    response_writer: &mut HttpResponseWriter,
+    ctx: &Ctx,
+    req: &Req,
+    route: &Route,
+) -> Res {
     match route {
-        Route::DefaultLoad => view_default_load().res().cache(),
-
         Route::Default => {
+            response_writer.merge_fragment(view_default_loading()).await;
+
             let maybe_feed_id = ctx
                 .feed_session_mapping_db
                 .get(req.session_id.clone())
@@ -27,20 +32,21 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
 
             let feed_id = maybe_feed_id.unwrap_or_default();
 
-            let index_route = route::Route::Feed(Route::IndexLoad {
+            let index_route = route::Route::Feed(Route::Index {
                 feed_id: feed_id.clone(),
             });
 
-            let mut res = respond_index(ctx, req, &feed_id).await;
-            res.hx_push_url(&index_route.encode());
-            res
+            response_writer
+                .execute_script_replace_url(index_route.encode().as_str())
+                .await;
+
+            respond_index(response_writer, ctx, req, &feed_id).await
         }
 
-        Route::IndexLoad { feed_id } => view_load(&feed_id).res().cache(),
-
-        Route::Index { feed_id } => respond_index(ctx, req, feed_id).await,
+        Route::Index { feed_id } => respond_index(response_writer, ctx, req, feed_id).await,
 
         Route::ChangedSlide { feed_id } => {
+            response_writer.merge_fragment(div()).await;
             let maybe_slide_index = req
                 .params
                 .get_first("feed_index")
@@ -80,7 +86,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
             match got {
                 Err(err) => ui::error::page(&err).res(),
 
-                Ok(feed_items) => view_feed_items(feed_id, &feed_items).res(),
+                Ok(feed_items) => view_swiper_slides(feed_id, &feed_items).res(),
             }
         }
 
@@ -88,7 +94,16 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     }
 }
 
-async fn respond_index(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
+async fn respond_index(
+    response_writer: &mut HttpResponseWriter,
+    ctx: &Ctx,
+    req: &Req,
+    feed_id: &FeedId,
+) -> Res {
+    response_writer
+        .merge_fragment(view_index_loading(&feed_id))
+        .await;
+
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
     put_feed(ctx, &req.session_id, &feed).await;
@@ -100,7 +115,9 @@ async fn respond_index(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
         initial_feed_items,
     };
 
-    view_index(&model).res()
+    response_writer.merge_fragment(view_index(&model)).await;
+
+    Res::empty()
 }
 
 async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
@@ -168,7 +185,7 @@ fn view_top_bar(model: &ViewModel) -> Elem {
 fn view_root() -> Elem {
     div()
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
-        .id(INDEX_ID)
+        .id(ROOT_ID)
 }
 
 fn view_empty_slide() -> Elem {
@@ -178,21 +195,15 @@ fn view_empty_slide() -> Elem {
         .class("w-full h-full object-cover")
 }
 
-fn view_load(feed_id: &FeedId) -> Elem {
+fn view_index_loading(feed_id: &FeedId) -> Elem {
     view_root()
-        .hx_swap_root_route(route::Route::Feed(Route::Index {
-            feed_id: feed_id.clone(),
-        }))
-        .hx_trigger_load()
         .child(view_top_bar_link_root(&feed_id).child(view_open_controls_button()))
         .child(view_empty_slide())
         .child(view_bottom_bar())
 }
 
-fn view_default_load() -> Elem {
+fn view_default_loading() -> Elem {
     view_root()
-        .hx_swap_root_route(route::Route::Feed(Route::Default))
-        .hx_trigger_load()
         .child(view_top_bar_root().child(view_open_controls_button()))
         .child(view_empty_slide())
         .child(view_bottom_bar())
@@ -241,32 +252,19 @@ fn view_bottom_bar() -> Elem {
 
 fn view_swiper(model: &ViewModel) -> Elem {
     if model.initial_feed_items.len() == 0 {
-        return view_empty_state();
+        return view_swiper_empty();
     }
     ui::swiper::container()
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
         .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
-        .hx_trigger("swiperslidechange from:swiper-container")
-        .data_on("swiperslidechange", "console.log('hello')")
-        .data_on("swiperslidechange", "$feed_index = evt.detail.slides[evt.detail.activeIndex].getAttribute('data-feed-index')")
+        .data_store("{feedIndex: 0}")
+        .data_on("swiperslidechange", "$feedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
         .data_on_then_post("swiperslidechange",route::Route::Feed(Route::ChangedSlide { feed_id: model.feed.feed_id.clone() }).encode().as_str())
-        
-        .hx_swap_none()
-        .hx_post(
-            route::Route::Feed(Route::ChangedSlide {
-                feed_id: model.feed.feed_id.clone(),
-            })
-            .encode()
-            .as_str(),
-        )
-        .hx_vals(
-            "js:{feed_index: parseInt(event?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)}"
-        )
-        .child(view_feed_items(&model.feed.feed_id, &model.initial_feed_items))
+        .child(view_swiper_slides(&model.feed.feed_id, &model.initial_feed_items))
 }
 
-fn view_empty_state() -> Elem {
+fn view_swiper_empty() -> Elem {
     div()
         .class("w-full h-full flex items-center justify-center flex-col gap-4")
         .child(icon::magnifying_glass("size-24"))
@@ -277,30 +275,36 @@ fn view_empty_state() -> Elem {
         )
 }
 
-fn view_feed_items(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
+fn view_swiper_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
     frag()
-        .children(feed_items.iter().map(view_feed_item).collect::<Vec<Elem>>())
+        .children(
+            feed_items
+                .iter()
+                .map(view_swiper_slide)
+                .collect::<Vec<Elem>>(),
+        )
         .child(
             feed_items
                 .iter()
                 .last()
-                .map(|feed_item| view_load_more(feed_id, feed_item.to_feed_index() + 1))
+                .map(|last_feed_item| {
+                    view_swiper_slide_load_more(feed_id, last_feed_item.to_feed_index() + 1)
+                })
                 .unwrap_or(frag()),
         )
 }
 
-fn view_load_more(feed_id: &FeedId, start_feed_index: usize) -> Elem {
+fn view_swiper_slide_load_more(feed_id: &FeedId, start_feed_index: usize) -> Elem {
     ui::swiper::slide()
         .class("flex-1 flex flex-col items-center justify-center")
-        .hx_get(
+        .attr("data-feed-index", &start_feed_index.to_string())
+        .data_intersects_get(
             &route::Route::Feed(Route::LoadMore {
                 feed_id: feed_id.clone(),
                 start_feed_index,
             })
             .encode(),
         )
-        .hx_trigger_intersect()
-        .hx_swap_outer_html()
         .child(view_empty_slide())
 }
 
@@ -312,7 +316,7 @@ fn to_media_details_route(media_id: &MediaId) -> route::Route {
     ))
 }
 
-fn view_feed_item(feed_item: &FeedItem) -> Elem {
+fn view_swiper_slide(feed_item: &FeedItem) -> Elem {
     ui::swiper::slide()
         .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative")
         .attr("data-feed-index", &feed_item.to_feed_index().to_string())

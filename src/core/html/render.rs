@@ -4,7 +4,8 @@ use super::Elem;
 
 impl Elem {
     pub fn render(&self) -> String {
-        append_doc_type(&self.render_with_indent(0))
+        self.render_with_indent(0)
+        // append_doc_type(&self.render_with_indent(0))
     }
 
     pub fn render_with_indent(&self, indent_level: usize) -> String {

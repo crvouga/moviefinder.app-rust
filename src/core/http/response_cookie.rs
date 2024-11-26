@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt};
+use std::fmt;
 
 #[derive(Debug, Default, Clone)]
 pub struct HttpResponseCookie {
@@ -18,12 +18,6 @@ pub enum SameSite {
     Lax,
     Strict,
     None,
-}
-
-impl HttpResponseCookie {
-    pub fn set_cookie(&self, headers: &mut HashMap<String, String>) {
-        headers.insert("Set-Cookie".to_string(), self.to_string());
-    }
 }
 
 impl fmt::Display for HttpResponseCookie {

@@ -1,4 +1,5 @@
 use crate::account;
+use crate::core::http::response_writer::HttpResponseWriter;
 use crate::ctx;
 use crate::feed;
 use crate::media;
@@ -7,11 +8,16 @@ use crate::res::Res;
 use crate::route::Route;
 use crate::ui::resizable_image;
 
-pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
+pub async fn respond(
+    response_writer: &mut HttpResponseWriter,
+    ctx: &ctx::Ctx,
+    req: &Req,
+    route: &Route,
+) -> Res {
     match route {
-        Route::Feed(route) => feed::respond::respond(&ctx.feed, req, route).await,
+        Route::Feed(route) => feed::respond::respond(response_writer, &ctx.feed, req, route).await,
 
-        Route::Account(route) => account::respond::respond(route),
+        Route::Account(route) => account::respond::respond(response_writer, route).await,
 
         Route::Media(route) => media::respond::respond(&ctx, route).await,
 
@@ -24,11 +30,12 @@ pub async fn respond(ctx: &ctx::Ctx, req: &Req, route: &Route) -> Res {
         Route::RobotsTxt => Res::content("text", "User-agent: *\nDisallow:".as_bytes().to_vec()),
 
         Route::OutputCss => {
-            Res::content("text/css", include_bytes!("./output.css").to_vec()).cache()
+            response_writer.css(include_bytes!("./output.css")).await;
+            Res::empty()
         }
 
         Route::Unknown(_route) => {
-            feed::respond::respond(&ctx.feed, req, &feed::route::Route::Default).await
+            account::respond::respond(response_writer, &account::route::Route::Index).await
         }
     }
 }

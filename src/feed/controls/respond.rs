@@ -86,7 +86,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
 }
 
 fn to_back_route(feed_id: FeedId) -> route::Route {
-    route::Route::Feed(feed::route::Route::IndexLoad { feed_id })
+    route::Route::Feed(feed::route::Route::Index { feed_id })
 }
 
 fn view_root() -> Elem {

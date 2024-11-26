@@ -34,9 +34,6 @@ impl BottomButton {
 
     pub fn view(&self) -> Elem {
         button()
-        .hx_swap_inner_html()
-        .hx_push_url()
-        .hx_trigger_click()
         .class_list(
             &[
                     "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm h-full cursor-pointer select-none active:opacity-75 transition-opacity",

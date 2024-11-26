@@ -1,10 +1,10 @@
 use crate::{
-    core::{html::*, htmx::hx::HxHeaders, tmdb_api::TMDB_IMAGE_BASE_URL},
+    core::{html::*, htmx::hx::HxHeaders, tmdb_api::TMDB_IMAGE_BASE_URL, ui},
     res::Res,
     route::Route,
 };
 
-const ROOT_ID: &str = "root";
+pub const ROOT_ID: &str = "root";
 
 fn root_selector() -> String {
     format!("#{}", ROOT_ID)
@@ -38,11 +38,15 @@ impl Res {
 
 pub struct Root {
     children: Vec<Elem>,
+    route: Route,
 }
 
 impl Root {
-    pub fn new() -> Self {
-        Self { children: vec![] }
+    pub fn new(route: Route) -> Self {
+        Self {
+            children: vec![],
+            route,
+        }
     }
 
     pub fn children(mut self, children: Vec<Elem>) -> Self {
@@ -60,36 +64,39 @@ impl Root {
                 title().child_text("moviefinder.app"),
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
-                // 
-                link().rel("preconnect").href("https://fonts.googleapis.com"),
-                link().rel("preconnect").href("https://fonts.gstatic.com").crossorigin(),
-                link().href("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap").rel("stylesheet"),
-                // 
-                meta().name("htmx-config").content(r#"{"historyCacheSize": 0, "refreshOnHistoryMiss": true}"#),
-                link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
-                // style().child_unsafe_text(include_str!("../output.css")),
+                // link().rel("preconnect").href("https://fonts.googleapis.com"),
+                // link().rel("preconnect").href("https://fonts.gstatic.com").crossorigin(),
+                // link().href("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap").rel("stylesheet"),
                 link().rel("stylesheet").href("./output.css"),
-                script().src_htmx().defer(),
-                script().src_htmx_loading_states().defer(),
-                script().js_htmx_preserve_state(),
-                style().css_htmx_loading_states(),
+                link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
+                // meta().name("htmx-config").content(r#"{"historyCacheSize": 0, "refreshOnHistoryMiss": true}"#),
+                // style().child_unsafe_text(include_str!("../output.css")),
+                // script().src_htmx().defer(),
+                // script().src_htmx_loading_states().defer(),
+                // script().js_htmx_preserve_state(),
+                // style().css_htmx_loading_states(),
                 script().src_swiper().defer(),
                 script().js_image_element(),
                 // 
                 script().src_datastar().defer(),
-                style().child_unsafe_text("* { font-family: 'Inter', sans-serif; }")
+                script().child_unsafe_text(r#"
+                window.addEventListener('popstate', function () {
+                    console.log('popstate');
+                    location.reload();
+                });
+                "#)
             ])
         )
         .child(
             body()
                 .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
-                .hx_ext_loading_states()
-                .hx_ext_preserve_state()
                 .child(
-                    div()
-                    .id(ROOT_ID)
-                    .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col")
-                    .children(self.children)
+                    div().class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col").child(
+                        div()
+                        .id(ROOT_ID)
+                        .children(self.children)
+                        .child(ui::spinner_page::view().data_on_load_get(&self.route.encode()))
+                    )
                 )
         )
     }

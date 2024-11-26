@@ -4,13 +4,7 @@ use super::{controls, feed_id::FeedId};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
-    DefaultLoad,
-
     Default,
-
-    IndexLoad {
-        feed_id: FeedId,
-    },
 
     Index {
         feed_id: FeedId,

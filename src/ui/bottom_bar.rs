@@ -22,8 +22,9 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .icon(ui::icon::home("size-6"))
                     .active(active == Active::Home)
                     .view()
-                    .hx_push_root_route(route::Route::Feed(feed::route::Route::DefaultLoad))
-                    .hx_abort(abort_selector),
+                    .data_on_click_push_get(
+                        &route::Route::Feed(feed::route::Route::Default).encode(),
+                    ),
             )
             .child(
                 BottomButton::default()
@@ -31,8 +32,9 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .icon(ui::icon::user_circle("size-6"))
                     .active(active == Active::Account)
                     .view()
-                    .hx_push_root_route(route::Route::Account(account::route::Route::Index))
-                    .hx_abort(abort_selector),
+                    .data_on_click_push_get(
+                        &route::Route::Account(account::route::Route::Index).encode(),
+                    ),
             ),
     )
 }

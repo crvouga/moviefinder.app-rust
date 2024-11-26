@@ -5,9 +5,9 @@ use tokio::net::TcpStream;
 use super::header::SetHeader;
 
 pub struct HttpResponseWriter {
-    stream: TcpStream,
-    headers_sent: bool,
-    initial_headers: HashMap<String, String>,
+    pub stream: TcpStream,
+    pub headers_sent: bool,
+    pub initial_headers: HashMap<String, String>,
 }
 
 impl HttpResponseWriter {
@@ -19,7 +19,7 @@ impl HttpResponseWriter {
         }
     }
 
-    async fn write_headers(&mut self) -> Result<(), std::io::Error> {
+    pub async fn write_headers(&mut self) -> Result<(), std::io::Error> {
         if self.headers_sent {
             return Ok(());
         }
@@ -43,25 +43,6 @@ impl HttpResponseWriter {
         Ok(())
     }
 
-    pub async fn write_sse_event(&mut self, event: &str, data: &str) -> Result<(), std::io::Error> {
-        if !self.headers_sent {
-            self.set_header("content-type", "text/event-stream");
-            self.set_header("cache-control", "no-cache");
-            self.set_header("connection", "keep-open");
-            self.write_headers().await?;
-        }
-
-        let mut sse_message = String::new();
-        if !event.is_empty() {
-            sse_message.push_str(&format!("event: {}\n", event));
-        }
-        sse_message.push_str(&format!("data: {}\n\n", data));
-
-        self.stream.write_all(sse_message.as_bytes()).await?;
-        self.stream.flush().await?;
-        Ok(())
-    }
-
     pub async fn write_body(&mut self, body: &[u8]) -> Result<(), std::io::Error> {
         if !self.headers_sent {
             self.write_headers().await?;
@@ -72,7 +53,7 @@ impl HttpResponseWriter {
         Ok(())
     }
 
-    pub async fn end(mut self) -> Result<(), std::io::Error> {
+    pub async fn end(&mut self) -> Result<(), std::io::Error> {
         if !self.headers_sent {
             self.write_headers().await?;
         }

@@ -50,6 +50,7 @@ pub fn to_human_friendly_str<T: Serialize>(route: T) -> String {
         .replace("}", "")
         .replace(",", ".")
         .replace(" ", "")
+        .replace("/", ".")
         .split(".")
         .filter(|s| {
             if s.starts_with('[') && s.ends_with(']') {
