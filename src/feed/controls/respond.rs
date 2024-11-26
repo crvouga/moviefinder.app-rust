@@ -33,27 +33,23 @@ fn index_selector() -> String {
 
 pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
-        Route::IndexLoad => {
-            let res: Res = view_screen_load_index(&feed_id).into();
-
-            res.root_retarget().cache()
-        }
+        Route::IndexLoad => view_screen_load_index(&feed_id)
+            .res()
+            .root_retarget()
+            .cache(),
 
         Route::Index => {
             let model = ViewModel::load(ctx, feed_id, "").await;
-            let res: Res = view_screen_index(&model).into();
-            res.root_retarget()
+            view_screen_index(&model).res().root_retarget()
         }
 
         Route::ClickedSave => {
-            let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
-
-            let form_state = FormState::load(ctx, &feed).await;
+            let model = ViewModel::load(ctx, feed_id, "").await;
 
             let feed_new = Feed {
                 start_index: 0,
-                tags: form_state.tags,
-                ..feed
+                tags: model.form_state.tags,
+                ..model.feed
             };
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
@@ -78,9 +74,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             let model = ViewModel::load(ctx, feed_id, search_input).await;
 
-            let res: Res = view_section_tags(&model).into();
-
-            res.hx_reswap(&tags_selector())
+            view_section_tags(&model).res()
         }
 
         Route::ClickedGoBack => Res::empty(),

@@ -16,10 +16,7 @@ use crate::{
 
 pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     match route {
-        Route::DefaultLoad => {
-            let res: Res = view_default_load().into();
-            res.cache()
-        }
+        Route::DefaultLoad => view_default_load().res().cache(),
 
         Route::Default => {
             let maybe_feed_id = ctx
@@ -39,10 +36,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
             res.hx_push_url(&index_route.encode())
         }
 
-        Route::IndexLoad { feed_id } => {
-            let res: Res = view_load(&feed_id).into();
-            res.cache()
-        }
+        Route::IndexLoad { feed_id } => view_load(&feed_id).res().cache(),
 
         Route::Index { feed_id } => respond_index(ctx, req, feed_id).await,
 
@@ -84,13 +78,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
             let got = get_feed_items(ctx, &feed_with_new_index).await;
 
             match got {
-                Err(err) => ui::error::page(&err).into(),
+                Err(err) => ui::error::page(&err).res(),
 
-                Ok(feed_items) => {
-                    let res = view_feed_items(feed_id, &feed_items).into();
-
-                    res
-                }
+                Ok(feed_items) => view_feed_items(feed_id, &feed_items).res(),
             }
         }
 
@@ -112,7 +102,7 @@ async fn respond_index(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
         initial_feed_items,
     };
 
-    view_feed(&model).into()
+    view_feed(&model).res()
 }
 
 async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {

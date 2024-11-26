@@ -16,10 +16,7 @@ use super::route::Route;
 
 pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
     match route {
-        Route::IndexLoad { media_id } => {
-            let res: Res = view_index_load(media_id).into();
-            res.cache()
-        }
+        Route::IndexLoad { media_id } => view_index_load(media_id).res().cache(),
 
         Route::Index { media_id } => {
             let query = Query {
@@ -36,15 +33,15 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
 
             let result = match queried {
                 Ok(result) => result,
-                Err(err) => return ui::error::page(&err).into(),
+                Err(err) => return ui::error::page(&err).res(),
             };
 
             let media = match result.items.into_iter().next() {
                 Some(media) => media,
-                None => return ui::error::page("Media not found").into(),
+                None => return ui::error::page("Media not found").res(),
             };
 
-            view_index(&media).into()
+            view_index(&media).res()
         }
     }
 }

@@ -3,10 +3,7 @@ use crate::{core::html::*, res::Res, ui::bottom_bar};
 
 pub fn respond(route: &Route) -> Res {
     match route {
-        Route::Index => {
-            let res: Res = view_login_cta().into();
-            res.cache()
-        }
+        Route::Index => view_login_cta().res().cache(),
     }
 }
 

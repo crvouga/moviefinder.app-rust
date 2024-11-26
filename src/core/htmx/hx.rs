@@ -185,6 +185,10 @@ pub trait HxHeaders: Header + Sized {
             .header("Access-Control-Expose-Headers", "HX-Retarget")
     }
 
+    fn hx_retarget_outer_html(self) -> Self {
+        self.hx_retarget("outerHTML")
+    }
+
     fn hx_reswap(self, target: &str) -> Self {
         self.header("HX-Reswap", target)
             .header("Access-Control-Expose-Headers", "HX-Reswap")

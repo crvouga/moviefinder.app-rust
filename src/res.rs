@@ -69,6 +69,14 @@ impl Res {
         }
     }
 
+    pub fn to_http_response(self) -> HttpResponse {
+        let mut http_response: HttpResponse = self.variant.into();
+
+        http_response.headers.extend(self.headers);
+
+        http_response
+    }
+
     pub fn cache(self) -> Self {
         self.header("Cache-Control", "public, max-age=31536000, immutable")
     }
@@ -91,19 +99,9 @@ impl Header for Res {
 
 impl HxHeaders for Res {}
 
-impl From<Elem> for Res {
-    fn from(elem: Elem) -> Self {
-        Res::html(elem)
-    }
-}
-
-impl From<Res> for HttpResponse {
-    fn from(res: Res) -> Self {
-        let mut http_response: HttpResponse = res.variant.into();
-
-        http_response.headers.extend(res.headers);
-
-        http_response
+impl Elem {
+    pub fn res(self) -> Res {
+        Res::html(self)
     }
 }
 
