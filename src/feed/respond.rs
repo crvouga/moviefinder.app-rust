@@ -320,10 +320,10 @@ fn view_swiper_slide(feed_item: &FeedItem) -> Elem {
     ui::swiper::slide()
         .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative")
         .attr("data-feed-index", &feed_item.to_feed_index().to_string())
-        .child(view_feed_item_content(feed_item))
+        .child(view_swiper_slide_content(feed_item))
 }
 
-fn view_feed_item_content(feed_item: &FeedItem) -> Elem {
+fn view_swiper_slide_content(feed_item: &FeedItem) -> Elem {
     match feed_item {
         FeedItem::Media {
             media,
