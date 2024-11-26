@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use crate::core::html::Elem;
 use crate::core::htmx::hx::HxHeaders;
-use crate::core::http::header::Header;
+use crate::core::http::header::SetHeader;
 use crate::core::http::response::HttpResponse;
+use crate::core::http::response_writer::HttpResponseWriter;
 
 #[derive(Debug, Default, Clone)]
 pub struct Res {
@@ -77,27 +78,54 @@ impl Res {
         http_response
     }
 
-    pub fn cache(self) -> Self {
-        self.header("Cache-Control", "public, max-age=31536000, immutable")
+    pub fn cache(mut self) -> Self {
+        self.set_header("Cache-Control", "public, max-age=31536000, immutable");
+        self
     }
 
-    pub fn no_cache(self) -> Self {
-        self.header("Cache-Control", "no-store")
+    pub fn no_cache(mut self) -> Self {
+        self.set_header("Cache-Control", "no-store");
+        self
     }
-}
 
-impl Header for Res {
-    fn header(&self, key: &str, value: &str) -> Self {
-        let mut headers = self.headers.clone();
-        headers.insert(key.to_string(), value.to_string());
-        Res {
-            headers,
-            ..self.clone()
+    pub async fn write_http_response(
+        self,
+        response_writer: &mut HttpResponseWriter,
+    ) -> Result<(), std::io::Error> {
+        for (key, value) in self.headers {
+            response_writer.set_header(&key, &value);
+        }
+        match self.variant {
+            ResVariant::Empty => Ok(()),
+
+            ResVariant::Html(elem) => {
+                response_writer
+                    .write_body(&elem.render().into_bytes())
+                    .await
+            }
+
+            ResVariant::Redirect { location, target } => {
+                response_writer.hx_redirect(&location, &target);
+                Ok(())
+            }
+
+            ResVariant::Content { body, content_type } => {
+                response_writer.set_header("Content-Type", &content_type);
+                response_writer.write_body(&body).await
+            }
         }
     }
 }
 
+impl SetHeader for Res {
+    fn set_header(&mut self, key: &str, value: &str) -> &Self {
+        self.headers.insert(key.to_string(), value.to_string());
+        self
+    }
+}
+
 impl HxHeaders for Res {}
+impl HxHeaders for HttpResponseWriter {}
 
 impl Elem {
     pub fn res(self) -> Res {
@@ -113,12 +141,16 @@ impl From<ResVariant> for HttpResponse {
             ResVariant::Html(body) => HttpResponse::new(200).body(body.render().into_bytes()),
 
             ResVariant::Redirect { location, target } => {
-                HttpResponse::new(302).hx_redirect(&location, &target)
+                let mut response = HttpResponse::new(302);
+                response.hx_redirect(&location, &target);
+                response
             }
 
-            ResVariant::Content { body, content_type } => HttpResponse::new(200)
-                .body(body)
-                .header("Content-Type", &content_type),
+            ResVariant::Content { body, content_type } => {
+                let mut response = HttpResponse::new(200).body(body);
+                response.set_header("Content-Type", &content_type);
+                response
+            }
         }
     }
 }

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::io::Write;
 
 use super::content_encoding::ContentEncoding;
-use super::header::Header;
+use super::header::SetHeader;
 use super::request::HttpRequest;
 
 #[derive(Debug, Clone)]
@@ -143,10 +143,9 @@ impl HttpResponse {
     }
 }
 
-impl Header for HttpResponse {
-    fn header(&self, key: &str, value: &str) -> Self {
-        let mut cloned = self.clone();
-        cloned.headers.insert(key.to_string(), value.to_string());
-        cloned
+impl SetHeader for HttpResponse {
+    fn set_header(&mut self, key: &str, value: &str) -> &Self {
+        self.headers.insert(key.to_string(), value.to_string());
+        self
     }
 }

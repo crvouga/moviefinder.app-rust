@@ -31,9 +31,9 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
                 feed_id: feed_id.clone(),
             });
 
-            let res = respond_index(ctx, req, &feed_id).await;
-
-            res.hx_push_url(&index_route.encode())
+            let mut res = respond_index(ctx, req, &feed_id).await;
+            res.hx_push_url(&index_route.encode());
+            res
         }
 
         Route::IndexLoad { feed_id } => view_load(&feed_id).res().cache(),

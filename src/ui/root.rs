@@ -29,8 +29,10 @@ impl Res {
         Res::redirect(route.encode().to_string(), root_selector())
     }
 
-    pub fn hx_retarget_root(self) -> Self {
-        self.hx_retarget(&root_selector()).hx_reswap("innerHTML")
+    pub fn hx_retarget_root(mut self) -> Self {
+        self.hx_retarget(&root_selector());
+        self.hx_reswap("innerHTML");
+        self
     }
 }
 

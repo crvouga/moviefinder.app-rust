@@ -17,6 +17,8 @@
     "nanos",
     "onclick",
     "posix",
+    "Reswap",
+    "retarget",
     "serde",
     "stylesheet",
     "swiperslidechange",

@@ -1,6 +1,6 @@
 use core::{
-    http::{request::HttpRequest, response::HttpResponse},
-    session::{session_id::SessionId, wrap_session_id::wrap_session_id},
+    http::{request::HttpRequest, response_writer::HttpResponseWriter},
+    session::{session_id::SessionId, wrap_session_id_v2::write_session_id},
 };
 use env::Env;
 use req::Req;
@@ -33,35 +33,33 @@ async fn main() {
 
     log_info!(ctx.logger, "Starting server on http://{}", address);
 
-    core::http::server::start(
-        &address,
-        wrap_session_id(move |session_id, http_request| {
-            let ctx_arc = Arc::clone(&ctx);
-
-            respond(http_request, session_id, ctx_arc)
-        }),
-    )
+    core::http::server_v2::start(&address, move |request, mut response_writer| {
+        let ctx_arc = Arc::clone(&ctx);
+        let session_id = write_session_id(&request, &mut response_writer);
+        respond(ctx_arc, session_id, request, response_writer)
+    })
     .await
     .unwrap();
 }
 
 async fn respond(
-    http_request: HttpRequest,
-    session_id: SessionId,
     ctx: Arc<ctx::Ctx>,
-) -> HttpResponse {
-    let route = route::Route::decode(&http_request.url.path);
+    session_id: SessionId,
+    request: HttpRequest,
+    mut response_writer: HttpResponseWriter,
+) -> Result<(), std::io::Error> {
+    let route: route::Route = route::Route::decode(&request.url.path);
 
     let req = Req {
         session_id,
-        params: http_request.to_params(),
+        params: request.to_params(),
     };
 
     log_info!(ctx.logger, "{:?} {:?}", route, req);
 
     let res = respond::respond(&ctx, &req, &route).await;
 
-    let res_with_root = if http_request.headers.contains_key("hx-request") {
+    let res_with_root = if request.headers.contains_key("hx-request") {
         res
     } else if matches!(res.variant, ResVariant::Html(_)) {
         res.no_cache()
@@ -70,9 +68,7 @@ async fn respond(
         res
     };
 
-    let mut http_response = res_with_root.to_http_response();
-
-    http_response.compress_gzip();
-
-    http_response
+    res_with_root
+        .write_http_response(&mut response_writer)
+        .await
 }
