@@ -70,7 +70,7 @@ impl BackButton {
             .class("size-16 flex items-center justify-center")
             .aria_label("go back")
             .map(|elem| match self.route {
-                Some(route) => elem.root_push_route(route),
+                Some(route) => elem.hx_push_root_route(route),
                 None => elem,
             })
             .child(icon::back_arrow("size-6"))
@@ -101,7 +101,7 @@ impl CancelButton {
             .class("size-16 flex items-center justify-center shrink-0")
             .class("disabled:opacity-80 disabled:cursor-not-allowed")
             .map(|elem| match self.route {
-                Some(route) => elem.root_push_route(route),
+                Some(route) => elem.hx_push_root_route(route),
                 None => elem,
             })
             .aria_label("cancel")

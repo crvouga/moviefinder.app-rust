@@ -11,25 +11,25 @@ fn root_selector() -> String {
 }
 
 impl Elem {
-    pub fn root_swap(self) -> Self {
+    pub fn hx_swap_root(self) -> Self {
         self.hx_target(&root_selector()).hx_swap_inner_html()
     }
 
-    pub fn root_swap_route(self, route: Route) -> Self {
-        self.root_swap().hx_get(&route.encode())
+    pub fn hx_swap_root_route(self, route: Route) -> Self {
+        self.hx_swap_root().hx_get(&route.encode())
     }
 
-    pub fn root_push_route(self, route: Route) -> Self {
-        self.root_swap_route(route).hx_push_url()
+    pub fn hx_push_root_route(self, route: Route) -> Self {
+        self.hx_swap_root_route(route).hx_push_url()
     }
 }
 
 impl Res {
-    pub fn root_redirect(route: Route) -> Self {
+    pub fn redirect_root(route: Route) -> Self {
         Res::redirect(route.encode().to_string(), root_selector())
     }
 
-    pub fn root_retarget(self) -> Self {
+    pub fn hx_retarget_root(self) -> Self {
         self.hx_retarget(&root_selector()).hx_reswap("innerHTML")
     }
 }

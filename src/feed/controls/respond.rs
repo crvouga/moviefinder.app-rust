@@ -1,8 +1,7 @@
-use super::{ctx::Ctx, form_state::FormState, route::Route, view_model::ViewModel};
+use super::{ctx::Ctx, route::Route, view_model::ViewModel};
 use crate::{
     core::{
         html::*,
-        htmx::hx::HxHeaders,
         params::Params,
         ui::{
             self,
@@ -33,14 +32,18 @@ fn index_selector() -> String {
 
 pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
     match route {
-        Route::IndexLoad => view_screen_load_index(&feed_id)
-            .res()
-            .root_retarget()
-            .cache(),
+        Route::IndexLoad => {
+            let res = view_screen_load_index(&feed_id)
+                .res()
+                .hx_retarget_root()
+                .cache();
+
+            res
+        }
 
         Route::Index => {
             let model = ViewModel::load(ctx, feed_id, "").await;
-            view_screen_index(&model).res().root_retarget()
+            view_screen_index(&model).res().hx_retarget_root()
         }
 
         Route::ClickedSave => {
@@ -54,7 +57,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            Res::root_redirect(to_back_route(feed_new.feed_id))
+            Res::redirect_root(to_back_route(feed_new.feed_id))
         }
 
         Route::ClickedTag { tag } => {
@@ -110,7 +113,7 @@ fn view_section_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .hx_loading_disabled()
                 .hx_loading_path(loading_path)
                 .hx_abort(&index_selector())
-                .root_push_route(to_back_route(feed_id.clone()))
+                .hx_push_root_route(to_back_route(feed_id.clone()))
                 .class("h-full pr-5 place-items-center")
                 .class("hidden peer-placeholder-shown:grid")
                 .child(icon::x_mark("size-6")),
@@ -122,7 +125,7 @@ fn view_screen_load_index(feed_id: &FeedId) -> Elem {
         .child(view_section_search_bar(&feed_id, ""))
         .child(
             spinner_page::view()
-                .root_swap_route(route::Route::Feed(feed::route::Route::Controls {
+                .hx_swap_root_route(route::Route::Feed(feed::route::Route::Controls {
                     feed_id: feed_id.clone(),
                     child: Route::Index,
                 }))
@@ -166,7 +169,7 @@ fn view_section_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .color(Color::Gray)
                 .loading_disabled_path(&loading_path)
                 .view()
-                .root_push_route(to_back_route(feed_id.clone()))
+                .hx_push_root_route(to_back_route(feed_id.clone()))
                 .type_("button")
                 .class("flex-1")
                 .hx_abort(&index_selector()),
