@@ -73,6 +73,8 @@ impl Root {
                 style().css_htmx_loading_states(),
                 script().src_swiper().defer(),
                 script().js_image_element(),
+                // 
+                script().src_datastar().defer(),
             ])
         )
         .child(

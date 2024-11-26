@@ -100,7 +100,7 @@ async fn respond_index(ctx: &Ctx, req: &Req, feed_id: &FeedId) -> Res {
         initial_feed_items,
     };
 
-    view_feed(&model).res()
+    view_index(&model).res()
 }
 
 async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
@@ -228,7 +228,7 @@ fn view_tags(model: &ViewModel) -> Elem {
         )
 }
 
-fn view_feed(model: &ViewModel) -> Elem {
+fn view_index(model: &ViewModel) -> Elem {
     view_root()
         .child(view_top_bar(&model))
         .child(view_swiper(&model))
@@ -248,6 +248,10 @@ fn view_swiper(model: &ViewModel) -> Elem {
         .swiper_slides_per_view("1")
         .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
         .hx_trigger("swiperslidechange from:swiper-container")
+        .data_on("swiperslidechange", "console.log('hello')")
+        .data_on("swiperslidechange", "$feed_index = evt.detail.slides[evt.detail.activeIndex].getAttribute('data-feed-index')")
+        .data_on_then_post("swiperslidechange",route::Route::Feed(Route::ChangedSlide { feed_id: model.feed.feed_id.clone() }).encode().as_str())
+        
         .hx_swap_none()
         .hx_post(
             route::Route::Feed(Route::ChangedSlide {

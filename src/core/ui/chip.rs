@@ -71,8 +71,7 @@ impl Chip {
             .map(|e| {
                 match self.image {
                     None => e,
-                    Some(image_src) => 
-                    if image_src.trim().is_empty() {
+                    Some(image_src) => if image_src.trim().is_empty() {
                         e
                     } else {
                         e.child(
