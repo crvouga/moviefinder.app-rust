@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use crate::core::html::Elem;
 use crate::core::htmx::hx::HxHeaders;
 use crate::core::http::header::SetHeader;
-use crate::core::http::response::HttpResponse;
 use crate::core::http::response_writer::HttpResponseWriter;
 
 #[derive(Debug, Default, Clone)]
@@ -70,14 +69,6 @@ impl Res {
         }
     }
 
-    pub fn to_http_response(self) -> HttpResponse {
-        let mut http_response: HttpResponse = self.variant.into();
-
-        http_response.headers.extend(self.headers);
-
-        http_response
-    }
-
     pub fn cache(mut self) -> Self {
         self.set_header("Cache-Control", "public, max-age=31536000, immutable");
         self
@@ -130,27 +121,5 @@ impl HxHeaders for HttpResponseWriter {}
 impl Elem {
     pub fn res(self) -> Res {
         Res::html(self)
-    }
-}
-
-impl From<ResVariant> for HttpResponse {
-    fn from(res_variant: ResVariant) -> Self {
-        match res_variant {
-            ResVariant::Empty => HttpResponse::new(204),
-
-            ResVariant::Html(body) => HttpResponse::new(200).body(body.render().into_bytes()),
-
-            ResVariant::Redirect { location, target } => {
-                let mut response = HttpResponse::new(302);
-                response.hx_redirect(&location, &target);
-                response
-            }
-
-            ResVariant::Content { body, content_type } => {
-                let mut response = HttpResponse::new(200).body(body);
-                response.set_header("Content-Type", &content_type);
-                response
-            }
-        }
     }
 }

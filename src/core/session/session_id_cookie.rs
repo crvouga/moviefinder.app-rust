@@ -1,3 +1,4 @@
+use super::session_id::SessionId;
 use crate::core::http::{
     header::SetHeader,
     request::HttpRequest,
@@ -5,25 +6,7 @@ use crate::core::http::{
     response_writer::HttpResponseWriter,
 };
 
-use super::session_id::SessionId;
-
-const SESSION_ID_COOKIE_NAME: &str = "session_id";
-
-fn new_session_cookie(session_id: String) -> HttpResponseCookie {
-    HttpResponseCookie {
-        domain: None,
-        expires: None,
-        path: Some("/".to_string()),
-        http_only: true,
-        secure: false,
-        max_age: Some(31536000),
-        name: SESSION_ID_COOKIE_NAME.to_string(),
-        value: session_id,
-        same_site: Some(SameSite::Strict),
-    }
-}
-
-pub fn write_session_id(
+pub fn read_write_session_id_cookie(
     request: &HttpRequest,
     response_writer: &mut HttpResponseWriter,
 ) -> SessionId {
@@ -42,4 +25,20 @@ pub fn write_session_id(
     }
 
     session_id
+}
+
+const SESSION_ID_COOKIE_NAME: &str = "session_id";
+
+fn new_session_cookie(session_id: String) -> HttpResponseCookie {
+    HttpResponseCookie {
+        domain: None,
+        expires: None,
+        path: Some("/".to_string()),
+        http_only: true,
+        secure: false,
+        max_age: Some(31536000),
+        name: SESSION_ID_COOKIE_NAME.to_string(),
+        value: session_id,
+        same_site: Some(SameSite::Strict),
+    }
 }

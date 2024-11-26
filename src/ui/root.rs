@@ -77,6 +77,7 @@ impl Root {
                 script().js_image_element(),
                 // 
                 script().src_datastar().defer(),
+                style().child_unsafe_text("* { font-family: 'Inter', sans-serif; }")
             ])
         )
         .child(

@@ -1,42 +1,34 @@
 use super::form_data::FormData;
 use super::method::HttpMethod;
 use super::request::HttpRequest;
-use super::response::HttpResponse;
+use super::response_writer::HttpResponseWriter;
 use crate::core::params::Params;
 use crate::core::url::query_params::QueryParams;
 use crate::core::url::Url;
 use crate::core::url_encoded;
 use std::collections::HashMap;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::AsyncReadExt;
 use tokio::net::{TcpListener, TcpStream};
 
 pub async fn start<F, Fut>(address: &str, handle_request: F) -> Result<(), std::io::Error>
 where
-    F: Fn(HttpRequest) -> Fut + Send + Sync + 'static + Clone,
-    Fut: std::future::Future<Output = HttpResponse> + Send + 'static,
+    F: Fn(HttpRequest, HttpResponseWriter) -> Fut + Send + Sync + 'static + Clone,
+    Fut: std::future::Future<Output = Result<(), std::io::Error>> + Send + 'static,
 {
-    let bind = TcpListener::bind(address).await;
-
-    let listener = match bind {
-        Ok(listener) => listener,
-        Err(err) => return Err(err),
-    };
+    let listener = TcpListener::bind(address).await?;
 
     loop {
-        let accepted = listener.accept().await;
-        let (stream, _) = match accepted {
-            Ok(accepted) => accepted,
-            Err(_) => continue,
-        };
+        let (stream, _) = listener.accept().await?;
         let handle_request = handle_request.clone();
-        tokio::spawn(handle_connection(stream, handle_request));
+
+        tokio::spawn(async move { handle_connection(stream, handle_request).await });
     }
 }
 
 async fn handle_connection<F, Fut>(mut stream: TcpStream, handle_request: F)
 where
-    F: Fn(HttpRequest) -> Fut + Send + Sync + 'static,
-    Fut: std::future::Future<Output = HttpResponse> + Send + 'static,
+    F: Fn(HttpRequest, HttpResponseWriter) -> Fut + Send + Sync + 'static,
+    Fut: std::future::Future<Output = Result<(), std::io::Error>> + Send + 'static,
 {
     let buffer = read_http_request(&mut stream).await;
 
@@ -58,6 +50,7 @@ where
     let form_data = parse_form_data(&headers, &body);
     let query_params_string = path.split_once('?').map(|(_, query)| query).unwrap_or("");
     let query_params = QueryParams::from_string(query_params_string);
+
     let request = HttpRequest {
         method,
         url: Url {
@@ -70,12 +63,11 @@ where
         body,
         form_data,
     };
-    let response = handle_request(request).await;
 
-    let response_bytes = response.to_http_bytes();
+    let response_writer = HttpResponseWriter::new(stream);
 
-    if let Ok(()) = stream.write_all(&response_bytes).await {
-        let _ = stream.flush().await;
+    if let Err(_) = handle_request(request, response_writer).await {
+        //
     }
 }
 
@@ -141,6 +133,7 @@ fn parse_form_data(headers: &HashMap<String, String>, body: &Vec<u8>) -> FormDat
 
     FormData::from_string(&decoded_body)
 }
+
 fn is_form_data_request(headers: &HashMap<String, String>) -> bool {
     headers
         .get("content-type")
