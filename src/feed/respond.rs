@@ -2,7 +2,7 @@ use super::{controls, ctx::Ctx, feed_::Feed, feed_id::FeedId, feed_item::FeedIte
 use crate::{
     core::{
         html::*,
-        http::response_writer::HttpResponseWriter,
+        http::{response_writer::HttpResponseWriter, server_sent_event::sse},
         params::Params,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image},
@@ -22,7 +22,11 @@ pub async fn respond(
 ) -> Res {
     match route {
         Route::Default => {
-            response_writer.merge_fragment(view_default_loading()).await;
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_default_loading())
+                .send(response_writer)
+                .await;
 
             let maybe_feed_id = ctx
                 .feed_session_mapping_db
@@ -36,8 +40,10 @@ pub async fn respond(
                 feed_id: feed_id.clone(),
             });
 
-            response_writer
-                .execute_script_replace_url(index_route.encode().as_str())
+            sse()
+                .event_execute_script()
+                .data_script_replace_url(index_route.encode().as_str())
+                .send(response_writer)
                 .await;
 
             respond_index(response_writer, ctx, req, &feed_id).await
@@ -46,7 +52,12 @@ pub async fn respond(
         Route::Index { feed_id } => respond_index(response_writer, ctx, req, feed_id).await,
 
         Route::ChangedSlide { feed_id } => {
-            response_writer.merge_fragment(div()).await;
+            sse()
+                .event_merge_fragments()
+                .data_fragments(div())
+                .send(response_writer)
+                .await;
+
             let maybe_slide_index = req
                 .params
                 .get_first("feed_index")
@@ -81,13 +92,17 @@ pub async fn respond(
                 ..feed
             };
 
-            let got = get_feed_items(ctx, &feed_with_new_index).await;
+            let feed_items = get_feed_items(ctx, &feed_with_new_index)
+                .await
+                .unwrap_or_default();
 
-            match got {
-                Err(err) => ui::error::page(&err).res(),
+            sse()
+                .event_merge_fragments()
+                .data_fragments(div())
+                .send(response_writer)
+                .await;
 
-                Ok(feed_items) => view_swiper_slides(feed_id, &feed_items).res(),
-            }
+            view_swiper_slides(feed_id, &feed_items).res()
         }
 
         Route::Controls(child) => controls::respond::respond(&ctx.controls, req, child).await,
@@ -100,8 +115,10 @@ async fn respond_index(
     req: &Req,
     feed_id: &FeedId,
 ) -> Res {
-    response_writer
-        .merge_fragment(view_index_loading(&feed_id))
+    sse()
+        .event_merge_fragments()
+        .data_fragments(view_index_loading(&feed_id))
+        .send(response_writer)
         .await;
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
@@ -115,7 +132,11 @@ async fn respond_index(
         initial_feed_items,
     };
 
-    response_writer.merge_fragment(view_index(&model)).await;
+    sse()
+        .event_merge_fragments()
+        .data_fragments(view_index(&model))
+        .send(response_writer)
+        .await;
 
     Res::empty()
 }

@@ -1,6 +1,9 @@
 use super::route::Route;
 use crate::{
-    core::{html::*, http::response_writer::HttpResponseWriter},
+    core::{
+        html::*,
+        http::{response_writer::HttpResponseWriter, server_sent_event::sse},
+    },
     res::Res,
     ui::{bottom_bar, root::ROOT_ID},
 };
@@ -8,7 +11,11 @@ use crate::{
 pub async fn respond(response_writer: &mut HttpResponseWriter, route: &Route) -> Res {
     match route {
         Route::Index => {
-            response_writer.merge_fragment(view_index_login_cta()).await;
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_index_login_cta())
+                .send(response_writer)
+                .await;
 
             Res::empty()
         }

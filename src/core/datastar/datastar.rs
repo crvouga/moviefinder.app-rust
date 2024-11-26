@@ -1,4 +1,4 @@
-use crate::core::{html::Elem, http::response_writer::HttpResponseWriter};
+use crate::core::{html::Elem, http::server_sent_event::ServerSentEvent};
 
 pub fn js_get(url: &str) -> String {
     format!("$get('{}')", url)
@@ -103,35 +103,33 @@ impl Elem {
     }
 }
 
-fn fragments(elem: Elem) -> String {
-    let rendered = elem.render();
-    format!("fragments {}\n\n", rendered.replace("\n", ""))
-}
-
-fn script(script: &str) -> String {
-    format!("script {}\n\n", script)
-}
-
-impl HttpResponseWriter {
-    pub async fn merge_fragment(&mut self, elem: Elem) {
-        let _ = self
-            .write_sse_event("datastar-merge-fragments", vec![&fragments(elem)])
-            .await;
+impl ServerSentEvent {
+    pub fn event_merge_fragments(&mut self) -> &mut Self {
+        self.event("datastar-merge-fragments")
     }
 
-    pub async fn execute_script(&mut self, script_str: &str) {
-        let _ = self
-            .write_sse_event("datastar-execute-script", vec![&script(script_str)])
-            .await;
+    pub fn data_fragments(&mut self, elem: Elem) -> &mut Self {
+        let rendered = elem.render();
+        let data = format!("fragments {}\n\n", rendered.replace("\n", ""));
+        self.data(&data)
     }
 
-    pub async fn execute_script_push_url(&mut self, url: &str) {
+    pub fn event_execute_script(&mut self) -> &mut Self {
+        self.event("datastar-execute-script")
+    }
+
+    pub fn data_script(&mut self, script: &str) -> &mut Self {
+        let data = format!("script {}\n\n", script);
+        self.data(&data)
+    }
+
+    pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {
         let push_url_script = format!("window.history.pushState(null, '', '{}');", url);
-        self.execute_script(&push_url_script).await;
+        self.data_script(&push_url_script)
     }
 
-    pub async fn execute_script_replace_url(&mut self, url: &str) {
+    pub fn data_script_replace_url(&mut self, url: &str) -> &mut Self {
         let replace_url_script = format!("window.history.replaceState(null, '', '{}');", url);
-        self.execute_script(&replace_url_script).await;
+        self.data_script(&replace_url_script)
     }
 }

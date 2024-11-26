@@ -29,3 +29,36 @@ impl HttpResponseWriter {
         Ok(())
     }
 }
+
+pub struct ServerSentEvent {
+    event: String,
+    data: Vec<String>,
+}
+
+pub fn sse() -> ServerSentEvent {
+    ServerSentEvent::new()
+}
+
+impl ServerSentEvent {
+    pub fn new() -> ServerSentEvent {
+        ServerSentEvent {
+            event: String::new(),
+            data: Vec::new(),
+        }
+    }
+    pub fn event(&mut self, event: &str) -> &mut Self {
+        self.event = event.to_string();
+        self
+    }
+
+    pub fn data(&mut self, data: &str) -> &mut Self {
+        self.data.push(data.to_string());
+        self
+    }
+
+    pub async fn send(&mut self, response_writer: &mut HttpResponseWriter) {
+        let _ = response_writer
+            .write_sse_event(&self.event, self.data.iter().map(|s| s.as_str()).collect())
+            .await;
+    }
+}
