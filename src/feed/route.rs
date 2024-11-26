@@ -25,8 +25,5 @@ pub enum Route {
         feed_id: FeedId,
     },
 
-    Controls {
-        feed_id: FeedId,
-        child: controls::route::Route,
-    },
+    Controls(controls::route::Route),
 }

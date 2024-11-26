@@ -84,9 +84,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
             }
         }
 
-        Route::Controls { feed_id, child } => {
-            controls::respond::respond(&ctx.controls, req, feed_id, child).await
-        }
+        Route::Controls(child) => controls::respond::respond(&ctx.controls, req, child).await,
     }
 }
 
@@ -153,10 +151,11 @@ fn view_top_bar_root() -> Elem {
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root()
-        .hx_push_root_route(route::Route::Feed(Route::Controls {
-            feed_id: feed_id.clone(),
-            child: controls::route::Route::IndexLoad,
-        }))
+        .hx_push_root_route(route::Route::Feed(Route::Controls(
+            controls::route::Route::IndexLoad {
+                feed_id: feed_id.clone(),
+            },
+        )))
         .hx_abort(&index_selector())
 }
 

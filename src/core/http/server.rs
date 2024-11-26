@@ -72,7 +72,11 @@ where
     };
     let response = handle_request(request).await;
 
-    send_response(&mut stream, response).await;
+    let response_bytes = response.to_http_bytes();
+
+    if let Ok(()) = stream.write_all(&response_bytes).await {
+        let _ = stream.flush().await;
+    }
 }
 
 async fn read_http_request(stream: &mut TcpStream) -> Vec<u8> {
@@ -185,13 +189,6 @@ async fn parse_body(
     }
 
     body
-}
-
-async fn send_response(stream: &mut TcpStream, response: HttpResponse) {
-    let response_bytes = response.to_http_bytes(); // Use `to_http_bytes` for binary-safe response
-    if let Ok(()) = stream.write_all(&response_bytes).await {
-        let _ = stream.flush().await;
-    }
 }
 
 fn find_subsequence(haystack: &[u8], needle: &[u8]) -> Option<usize> {

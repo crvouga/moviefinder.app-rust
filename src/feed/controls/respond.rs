@@ -30,9 +30,9 @@ fn index_selector() -> String {
     format!("#{}", INDEX_ID)
 }
 
-pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> Res {
+pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
     match route {
-        Route::IndexLoad => {
+        Route::IndexLoad { feed_id } => {
             let res = view_screen_load_index(&feed_id)
                 .res()
                 .hx_retarget_root()
@@ -41,12 +41,13 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
             res
         }
 
-        Route::Index => {
+        Route::Index { feed_id } => {
             let model = ViewModel::load(ctx, feed_id, "").await;
+
             view_screen_index(&model).res().hx_retarget_root()
         }
 
-        Route::ClickedSave => {
+        Route::ClickedSave { feed_id } => {
             let model = ViewModel::load(ctx, feed_id, "").await;
 
             let feed_new = Feed {
@@ -60,7 +61,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
             Res::redirect_root(to_back_route(feed_new.feed_id))
         }
 
-        Route::ClickedTag { tag } => {
+        Route::ClickedTag { feed_id, tag } => {
             let model = ViewModel::load(ctx, feed_id, "").await;
 
             let form_state_new = model.form_state.toggle(tag);
@@ -70,7 +71,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
             Res::empty()
         }
 
-        Route::InputtedSearch => {
+        Route::InputtedSearch { feed_id } => {
             let default = "".to_string();
 
             let search_input = req.params.get_first(SEARCH_NAME).unwrap_or(&default);
@@ -80,7 +81,7 @@ pub async fn respond(ctx: &Ctx, req: &Req, feed_id: &FeedId, route: &Route) -> R
             view_section_tags(&model).res()
         }
 
-        Route::ClickedGoBack => Res::empty(),
+        Route::ClickedGoBack { feed_id: _ } => Res::empty(),
     }
 }
 
@@ -95,10 +96,9 @@ fn view_root() -> Elem {
 fn view_section_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
     ui::search_bar::SearchBar::new()
         .inputted_search_path(
-            &route::Route::Feed(feed::route::Route::Controls {
+            &route::Route::Feed(feed::route::Route::Controls(Route::InputtedSearch {
                 feed_id: feed_id.clone(),
-                child: Route::InputtedSearch,
-            })
+            }))
             .encode(),
         )
         .inputted_search_target(&tags_selector())
@@ -125,10 +125,11 @@ fn view_screen_load_index(feed_id: &FeedId) -> Elem {
         .child(view_section_search_bar(&feed_id, ""))
         .child(
             spinner_page::view()
-                .hx_swap_root_route(route::Route::Feed(feed::route::Route::Controls {
-                    feed_id: feed_id.clone(),
-                    child: Route::Index,
-                }))
+                .hx_swap_root_route(route::Route::Feed(feed::route::Route::Controls(
+                    Route::Index {
+                        feed_id: feed_id.clone(),
+                    },
+                )))
                 .hx_trigger_load()
                 .id(INDEX_ID),
         )
@@ -136,10 +137,9 @@ fn view_screen_load_index(feed_id: &FeedId) -> Elem {
 }
 
 fn view_screen_index(model: &ViewModel) -> Elem {
-    let clicked_save_path = route::Route::Feed(feed::route::Route::Controls {
+    let clicked_save_path = route::Route::Feed(feed::route::Route::Controls(Route::ClickedSave {
         feed_id: model.feed.feed_id.clone(),
-        child: Route::ClickedSave,
-    })
+    }))
     .encode();
 
     view_root()
@@ -221,12 +221,10 @@ fn view_tag_chips_frag(model: &ViewModel) -> Elem {
                     .hx_swap_none()
                     .hx_include_this()
                     .hx_post(
-                        &route::Route::Feed(feed::route::Route::Controls {
+                        &route::Route::Feed(feed::route::Route::Controls(Route::ClickedTag {
                             feed_id: model.feed.feed_id.clone(),
-                            child: Route::ClickedTag {
-                                tag: feed_tag.clone(),
-                            },
-                        })
+                            tag: feed_tag.clone(),
+                        }))
                         .encode(),
                     )
             })
