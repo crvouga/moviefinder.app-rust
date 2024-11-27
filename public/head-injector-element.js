@@ -4,17 +4,28 @@ class HeadInjector extends HTMLElement {
   connectedCallback() {
     while (this.firstChild) {
       const child = this.firstChild.cloneNode(true);
-      if (child instanceof Element && child.tagName === "SCRIPT") {
-        if (!this.isDuplicateScript(child)) {
-          this.executeScript(child);
-        }
-      } else if (child instanceof Element && !this.isDuplicateElement(child)) {
-        document.head.appendChild(child);
-      }
       this.removeChild(this.firstChild);
+
+      if (!(child instanceof Element)) {
+        continue;
+      }
+
+      if (child.tagName === "SCRIPT" && !this.isDuplicateScript(child)) {
+        this.executeScript(child);
+        continue;
+      }
+
+      if (!this.isDuplicateElement(child)) {
+        document.head.appendChild(child);
+        continue;
+      }
     }
   }
 
+  /**
+   * @param {Element} script
+   * @returns {void}
+   */
   executeScript(script) {
     const newScript = document.createElement("script");
 
@@ -29,6 +40,10 @@ class HeadInjector extends HTMLElement {
     document.head.appendChild(newScript);
   }
 
+  /**
+   * @param {Element} script
+   * @returns {boolean}
+   */
   isDuplicateScript(script) {
     const existingScripts = Array.from(
       document.head.querySelectorAll("script")

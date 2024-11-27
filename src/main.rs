@@ -1,15 +1,12 @@
 use core::{
-    http::{
-        request::Request, response_writer::ResponseWriter, server_sent_event::sse,
-        set_header::SetHeader,
-    },
+    http::{request::Request, response_writer::ResponseWriter, server_sent_event::sse},
     mime_type::mime_type,
 };
 use ctx::Ctx;
 use env::Env;
 use route::Route;
 use std::sync::Arc;
-use ui::root::{self};
+use ui::root;
 
 mod account;
 mod core;
@@ -62,20 +59,26 @@ async fn respond(
     match (route, r.is_datastar_request()) {
         (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
-        (Some(route), false) => response_root(route, &mut w).await,
+        (Some(route), false) => response_root(route, &r, &mut w).await,
 
         (None, true) => respond_fallback(&ctx, &r, &mut w).await,
 
         (None, false) => match resolve_public_asset(&r.url.path).await {
-            Some(file_path) => response_public(&file_path, &mut w).await,
-            None => response_root(Route::Feed(feed::route::Route::Default), &mut w).await,
+            Some(file_path) => response_public(&file_path, &r, &mut w).await,
+            None => response_root(Route::Feed(feed::route::Route::Default), &r, &mut w).await,
         },
     }
 }
 
-async fn response_root(route: Route, w: &mut ResponseWriter) -> Result<(), std::io::Error> {
-    let html: &String = &root::Root::new(route).view().render();
-    w.html(html).await
+async fn response_root(
+    route: Route,
+    r: &Request,
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
+    let html: &String = &root::Root::new(route).view().render_with_doctype();
+
+    w.content("text/html", r.to_accept_encoding(), html.as_bytes())
+        .await
 }
 
 async fn resolve_public_asset(path: &str) -> Option<String> {
@@ -96,15 +99,22 @@ async fn resolve_public_asset(path: &str) -> Option<String> {
     None
 }
 
-async fn response_public(file_path: &str, w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+async fn response_public(
+    file_path: &str,
+    r: &Request,
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
     if let Ok(mut file) = tokio::fs::File::open(file_path).await {
         let mut buffer = Vec::new();
         tokio::io::AsyncReadExt::read_to_end(&mut file, &mut buffer).await?;
-
-        let mime_type = mime_type::from_path(file_path);
-        w.set_header("Content-Type", mime_type);
-
-        w.write_body(&buffer).await
+        let content_type = mime_type::from_path(file_path);
+        println!(
+            "file_path {:?} r.to_accept_encoding() {:?}",
+            file_path,
+            r.to_accept_encoding()
+        );
+        w.content(content_type, r.to_accept_encoding(), &buffer)
+            .await
     } else {
         w.write_body("404".as_bytes()).await
     }

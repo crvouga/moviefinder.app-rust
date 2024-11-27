@@ -83,6 +83,14 @@ impl Elem {
         self.attr_unsafe("onload", value)
     }
 
+    pub fn media(self, value: &str) -> Self {
+        self.attr("media", value)
+    }
+
+    pub fn media_print(self) -> Self {
+        self.media("print")
+    }
+
     pub fn checked(self, checked: bool) -> Self {
         if checked {
             self.attr("checked", "true")

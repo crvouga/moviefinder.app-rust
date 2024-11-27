@@ -1,4 +1,5 @@
 pub mod client;
+pub mod compress;
 pub mod content;
 pub mod content_encoding;
 pub mod form_data;

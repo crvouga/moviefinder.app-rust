@@ -53,7 +53,7 @@ impl Request {
 
     pub fn to_accept_encoding(&self) -> Vec<ContentEncoding> {
         self.headers
-            .get("Accept-Encoding")
+            .get("accept-encoding")
             .unwrap_or(&"".to_string())
             .split(",")
             .map(ContentEncoding::from_str)
