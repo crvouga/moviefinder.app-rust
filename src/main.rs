@@ -108,11 +108,7 @@ async fn response_public(
         let mut buffer = Vec::new();
         tokio::io::AsyncReadExt::read_to_end(&mut file, &mut buffer).await?;
         let content_type = mime_type::from_path(file_path);
-        println!(
-            "file_path {:?} r.to_accept_encoding() {:?}",
-            file_path,
-            r.to_accept_encoding()
-        );
+        w.set_long_term_cache();
         w.content(content_type, r.to_accept_encoding(), &buffer)
             .await
     } else {

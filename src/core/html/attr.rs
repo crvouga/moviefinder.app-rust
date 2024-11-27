@@ -27,6 +27,11 @@ impl Elem {
 
         self
     }
+
+    pub fn style(self, value: &str) -> Self {
+        self.attr("style", value)
+    }
+
     pub fn class_list(self, class_names: &[&str]) -> Self {
         self.class(&class_names.join(" "))
     }

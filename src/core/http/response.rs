@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use std::io::Write;
 
 use super::content_encoding::ContentEncoding;
-use super::set_header::SetHeader;
 use super::request::Request;
+use super::set_header::SetHeader;
 
 #[derive(Debug, Clone)]
 pub struct Response {
