@@ -1,14 +1,17 @@
-use crate::{core::http::response_writer::ResponseWriter, ctx::Ctx, req::Req};
+use crate::{
+    core::http::{request::Request, response_writer::ResponseWriter},
+    ctx::Ctx,
+};
 
 use super::{details, route::Route};
 
 pub async fn respond(
     ctx: &Ctx,
-    req: &Req,
+    r: &Request,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Details(route) => details::respond::respond(ctx, req, route, w).await,
+        Route::Details(route) => details::respond::respond(ctx, r, route, w).await,
     }
 }

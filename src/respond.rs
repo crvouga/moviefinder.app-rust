@@ -1,14 +1,14 @@
-use crate::account;
-use crate::core::http::response_writer::ResponseWriter;
-use crate::ctx;
-use crate::feed;
-use crate::media;
-use crate::req::Req;
-use crate::route::Route;
+use crate::{
+    account,
+    core::http::{request::Request, response_writer::ResponseWriter},
+    ctx::Ctx,
+    feed, media,
+    route::Route,
+};
 
 pub async fn respond(
-    ctx: &ctx::Ctx,
-    r: &Req,
+    ctx: &Ctx,
+    r: &Request,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {

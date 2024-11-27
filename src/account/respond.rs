@@ -2,16 +2,15 @@ use super::route::Route;
 use crate::{
     core::{
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
+        http::{request::Request, response_writer::ResponseWriter, server_sent_event::sse},
     },
     ctx::Ctx,
-    req::Req,
     ui::bottom_bar,
 };
 
 pub async fn respond(
     _ctx: &Ctx,
-    _r: &Req,
+    _r: &Request,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {

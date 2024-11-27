@@ -8,18 +8,17 @@ use crate::{
         url::Url,
     },
     log_info,
-    req::Req,
 };
 
 use image::{self, imageops::FilterType};
 
 use super::{ctx::Ctx, route::Route};
 
-pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Result<(), std::io::Error> {
+pub async fn response(ctx: &Ctx, route: &Route, req: &Request) -> Result<(), std::io::Error> {
     match route {
         Route::Resize => {
             let width = req
-                .params
+                .params()
                 .get_first("width")
                 .unwrap_or(&"".to_string())
                 .parse::<u32>()
@@ -31,7 +30,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Result<(), std::io:
             }
 
             let height = req
-                .params
+                .params()
                 .get_first("height")
                 .unwrap_or(&"".to_string())
                 .parse::<u32>()
@@ -43,13 +42,8 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Result<(), std::io:
             }
 
             let src_empty = String::new();
-
-            let src = req
-                .params
-                .get_first("src")
-                .to_owned()
-                .unwrap_or(&src_empty)
-                .trim();
+            let params = req.params();
+            let src = params.get_first("src").unwrap_or(&src_empty).trim();
 
             if src.is_empty() {
                 log_info!(ctx.logger, "Src is empty");
@@ -83,12 +77,6 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Result<(), std::io:
                     return Ok(());
                 }
             };
-
-            log_info!(
-                ctx.logger,
-                "Response: {:?}",
-                response.clone().to_body_string()
-            );
 
             let image = image::load_from_memory(&response.body);
 

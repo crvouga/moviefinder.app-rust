@@ -2,20 +2,19 @@ use super::{controls, ctx::Ctx, feed_::Feed, feed_id::FeedId, feed_item::FeedIte
 use crate::{
     core::{
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
+        http::{request::Request, response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image},
     },
     media::{self, media_db::interface::MediaQuery, media_id::MediaId},
-    req::Req,
     route,
     ui::{bottom_bar, top_bar},
 };
 
 pub async fn respond(
     ctx: &Ctx,
-    r: &Req,
+    r: &Request,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
@@ -29,7 +28,7 @@ pub async fn respond(
 
             let maybe_feed_id = ctx
                 .feed_session_mapping_db
-                .get(r.session_id.clone())
+                .get(r.session_id().clone())
                 .await
                 .unwrap_or(None);
 
@@ -58,7 +57,7 @@ pub async fn respond(
                 .await?;
 
             let maybe_slide_index = r
-                .params
+                .params()
                 .get_first("feed_index")
                 .and_then(|s| s.parse::<usize>().ok());
 
@@ -75,7 +74,7 @@ pub async fn respond(
                 ..feed
             };
 
-            put_feed(ctx, &r.session_id, &feed_new).await;
+            put_feed(ctx, &r.session_id(), &feed_new).await;
 
             Ok(())
         }
@@ -111,7 +110,7 @@ pub async fn respond(
 
 async fn respond_index(
     ctx: &Ctx,
-    r: &Req,
+    r: &Request,
     _route: &Route,
     w: &mut ResponseWriter,
     feed_id: &FeedId,
@@ -124,7 +123,7 @@ async fn respond_index(
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-    put_feed(ctx, &r.session_id, &feed).await;
+    put_feed(ctx, &r.session_id(), &feed).await;
 
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 

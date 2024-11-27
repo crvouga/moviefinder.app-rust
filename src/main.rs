@@ -1,6 +1,5 @@
-use core::http::{request::Request, response_writer::ResponseWriter, set_header::SetHeader};
+use core::http::{request::Request, response_writer::ResponseWriter};
 use env::Env;
-use req::Req;
 use std::sync::Arc;
 use ui::root::{self};
 
@@ -49,14 +48,15 @@ async fn respond(
         return w.html(html).await;
     }
 
-    let req = Req {
-        session_id: r.session_id(),
-        params: r.params(),
-    };
+    log_info!(
+        ctx.logger,
+        "{:?} session_id={:?} params={:?}",
+        route,
+        r.session_id(),
+        r.params()
+    );
 
-    log_info!(ctx.logger, "{:?} {:?}", route, req);
-
-    respond::respond(&ctx, &req, &route, &mut w).await;
+    respond::respond(&ctx, &r, &route, &mut w).await;
 
     Ok(())
 }

@@ -2,10 +2,7 @@ use super::{ctx::Ctx, route::Route, view_model::ViewModel};
 use crate::{
     core::{
         html::*,
-        http::{
-            response_writer::{self, ResponseWriter},
-            server_sent_event::sse,
-        },
+        http::{request::Request, response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
         ui::{
             self,
@@ -16,7 +13,6 @@ use crate::{
         },
     },
     feed::{self, feed_::Feed, feed_id::FeedId},
-    req::Req,
     route,
 };
 
@@ -35,7 +31,7 @@ fn index_selector() -> String {
 
 pub async fn respond(
     ctx: &Ctx,
-    req: &Req,
+    r: &Request,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
@@ -85,7 +81,9 @@ pub async fn respond(
         Route::InputtedSearch { feed_id } => {
             let default = "".to_string();
 
-            let search_input = req.params.get_first(SEARCH_NAME).unwrap_or(&default);
+            let params = r.params();
+
+            let search_input = params.get_first(SEARCH_NAME).unwrap_or(&default);
 
             let model = ViewModel::load(ctx, feed_id, search_input).await;
 
