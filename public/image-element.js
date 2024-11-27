@@ -1,3 +1,5 @@
+// @ts-check
+
 class ImageElement extends HTMLElement {
   constructor() {
     super();

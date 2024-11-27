@@ -355,10 +355,10 @@ fn view_swiper_slide_content(feed_item: &FeedItem) -> Elem {
             .child(
                 Image::new()
                     .view()
+                    .src(media.poster.to_highest_res())
                     .class("w-full h-full object-cover")
                     .width("100%")
                     .height("100%")
-                    .src(media.poster.to_highest_res())
                     .alt(media.title.as_str()),
             ),
     }

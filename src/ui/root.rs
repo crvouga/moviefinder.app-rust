@@ -48,8 +48,7 @@ impl Root {
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
                 link().rel("stylesheet").href("./output.css"),
                 link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
-                script().src_swiper().defer(),
-                script().src_image_element(),
+                script().src_head_injector(),
                 script().src_datastar().defer(),
                 script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());")
             ])
