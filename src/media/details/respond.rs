@@ -1,28 +1,33 @@
 use crate::{
     core::{
         html::*,
-        http::{response_writer::HttpResponseWriter, server_sent_event::sse},
+        http::{response_writer::ResponseWriter, server_sent_event::sse},
         query::{Query, QueryFilter, QueryOp},
         ui::{self, image::Image},
     },
     ctx::Ctx,
     feed,
     media::{media_::Media, media_db::interface::MediaQueryField},
-    res::Res,
+    req::Req,
     route,
     ui::top_bar::TopBar,
 };
 
 use super::route::Route;
 
-pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route: &Route) -> Res {
+pub async fn respond(
+    ctx: &Ctx,
+    _req: &Req,
+    route: &Route,
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
     match route {
         Route::Index { media_id } => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_index_loading())
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
             let query = Query {
                 limit: 1,
@@ -42,9 +47,9 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route:
                     sse()
                         .event_merge_fragments()
                         .data_fragments(ui::error::page(&err).id_root())
-                        .send(response_writer)
-                        .await;
-                    return Res::empty();
+                        .send(w)
+                        .await?;
+                    return Ok(());
                 }
             };
 
@@ -54,9 +59,9 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route:
                     sse()
                         .event_merge_fragments()
                         .data_fragments(ui::error::page("Media not found").id_root())
-                        .send(response_writer)
-                        .await;
-                    return Res::empty();
+                        .send(w)
+                        .await?;
+                    return Ok(());
                 }
             };
 
@@ -64,10 +69,10 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route:
                 .event_merge_fragments()
                 .data_merge_mode_outer()
                 .data_fragments(view_index(&media))
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
-            Res::empty()
+            Ok(())
         }
     }
 }

@@ -1,7 +1,7 @@
 pub mod client;
+pub mod content;
 pub mod content_encoding;
 pub mod form_data;
-pub mod header;
 pub mod method;
 pub mod request;
 pub mod response;
@@ -9,3 +9,4 @@ pub mod response_cookie;
 pub mod response_writer;
 pub mod server;
 pub mod server_sent_event;
+pub mod set_header;

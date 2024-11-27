@@ -1,6 +1,5 @@
 use crate::{
-    core::{html::*, htmx::hx::HxHeaders, tmdb_api::TMDB_IMAGE_BASE_URL, ui},
-    res::Res,
+    core::{html::*, tmdb_api::TMDB_IMAGE_BASE_URL, ui},
     route::Route,
 };
 
@@ -28,18 +27,6 @@ impl Elem {
     }
 }
 
-impl Res {
-    pub fn redirect_root(route: Route) -> Self {
-        Res::redirect(route.encode().to_string(), root_selector())
-    }
-
-    pub fn hx_retarget_root(mut self) -> Self {
-        self.hx_retarget(&root_selector());
-        self.hx_reswap("innerHTML");
-        self
-    }
-}
-
 pub struct Root {
     children: Vec<Elem>,
     route: Route,
@@ -51,11 +38,6 @@ impl Root {
             children: vec![],
             route,
         }
-    }
-
-    pub fn children(mut self, children: Vec<Elem>) -> Self {
-        self.children = children;
-        self
     }
 
     pub fn view(self) -> Elem {
@@ -84,10 +66,7 @@ impl Root {
                 // 
                 script().src_datastar().defer(),
                 script().child_unsafe_text(r#"
-                window.addEventListener('popstate', function () {
-                    console.log('popstate');
-                    location.reload();
-                });
+                    window.addEventListener('popstate', location.reload);
                 "#)
             ])
         )

@@ -3,24 +3,21 @@ use std::{collections::HashMap, io::Cursor};
 use crate::{
     core::{
         html::{div, img, script, Elem},
-        http::{method::HttpMethod, request::HttpRequest},
+        http::{method::Method, request::Request},
         params::Params,
         url::Url,
     },
     log_info,
     req::Req,
-    res::Res,
-    route,
 };
 
 use image::{self, imageops::FilterType};
 
 use super::{ctx::Ctx, route::Route};
 
-pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
+pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Result<(), std::io::Error> {
     match route {
         Route::Resize => {
-            let fallback = Res::content("image/jpeg", vec![]);
             let width = req
                 .params
                 .get_first("width")
@@ -30,7 +27,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
 
             if width == 0 {
                 log_info!(ctx.logger, "Width is 0");
-                return fallback;
+                return Ok(());
             }
 
             let height = req
@@ -42,7 +39,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
 
             if height == 0 {
                 log_info!(ctx.logger, "Height is 0");
-                return fallback;
+                return Ok(());
             }
 
             let src_empty = String::new();
@@ -56,7 +53,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
 
             if src.is_empty() {
                 log_info!(ctx.logger, "Src is empty");
-                return fallback;
+                return Ok(());
             }
 
             let mut headers = HashMap::new();
@@ -66,13 +63,13 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 "https://www.themoviedb.org/".to_string(),
             );
 
-            let request = HttpRequest {
+            let request = Request {
                 url: Url::from_str(src).unwrap_or_default(),
                 body: vec![],
                 cookies: Default::default(),
                 form_data: Default::default(),
                 headers,
-                method: HttpMethod::Get,
+                method: Method::Get,
             };
 
             log_info!(ctx.logger, "Request: {:?}", request);
@@ -83,7 +80,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 Ok(response) => response,
                 Err(err) => {
                     log_info!(ctx.logger, "Error sending request {}", err);
-                    return fallback;
+                    return Ok(());
                 }
             };
 
@@ -99,7 +96,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 Ok(image) => image,
                 Err(err) => {
                     log_info!(ctx.logger, "Error loading image {}", err);
-                    return fallback;
+                    return Ok(());
                 }
             };
 
@@ -114,7 +111,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: Req) -> Res {
                 )
                 .unwrap_or(());
 
-            Res::content("image/jpeg", buffer)
+            Ok(())
         }
     }
 }
@@ -170,12 +167,7 @@ impl ResizableImage {
         LoadingImage::new()
             .view()
             .id("resizable-image")
-            .hx_post(&route::Route::ResizableImage(Route::Resize).encode())
-            .hx_trigger_intersect()
             .attr("data-src", &self.src) // Store the image source
-            .hx_vals("js:{ ...getVals(event) }")
-            .hx_target_this()
-            .hx_swap_outer_html()
             .child(script().child_unsafe_text(
                 r#"
                 function getVals(event) {

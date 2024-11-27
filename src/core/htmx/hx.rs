@@ -3,7 +3,7 @@
 use crate::core::{
     css,
     html::Elem,
-    http::{header::SetHeader, response::HttpResponse},
+    http::{set_header::SetHeader, response::Response},
 };
 use serde::{Deserialize, Serialize};
 
@@ -201,7 +201,7 @@ pub trait HxHeaders: SetHeader + Sized {
     }
 }
 
-impl HxHeaders for HttpResponse {}
+impl HxHeaders for Response {}
 
 fn ensure_leading_slash(path: &str) -> String {
     if path.starts_with('/') {

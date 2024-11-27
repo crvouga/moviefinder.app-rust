@@ -1,7 +1,7 @@
 use super::form_data::FormData;
-use super::method::HttpMethod;
-use super::request::HttpRequest;
-use super::response_writer::HttpResponseWriter;
+use super::method::Method;
+use super::request::Request;
+use super::response_writer::ResponseWriter;
 use crate::core::params::Params;
 use crate::core::url::query_params::QueryParams;
 use crate::core::url::Url;
@@ -12,7 +12,7 @@ use tokio::net::{TcpListener, TcpStream};
 
 pub async fn start<F, Fut>(address: &str, handle_request: F) -> Result<(), std::io::Error>
 where
-    F: Fn(HttpRequest, HttpResponseWriter) -> Fut + Send + Sync + 'static + Clone,
+    F: Fn(Request, ResponseWriter) -> Fut + Send + Sync + 'static + Clone,
     Fut: std::future::Future<Output = Result<(), std::io::Error>> + Send + 'static,
 {
     let listener = TcpListener::bind(address).await?;
@@ -27,7 +27,7 @@ where
 
 async fn handle_connection<F, Fut>(mut stream: TcpStream, handle_request: F)
 where
-    F: Fn(HttpRequest, HttpResponseWriter) -> Fut + Send + Sync + 'static,
+    F: Fn(Request, ResponseWriter) -> Fut + Send + Sync + 'static,
     Fut: std::future::Future<Output = Result<(), std::io::Error>> + Send + 'static,
 {
     let buffer = read_http_request(&mut stream).await;
@@ -51,7 +51,7 @@ where
     let query_params_string = path.split_once('?').map(|(_, query)| query).unwrap_or("");
     let query_params = QueryParams::from_string(query_params_string);
 
-    let request = HttpRequest {
+    let request = Request {
         method,
         url: Url {
             path,
@@ -64,7 +64,7 @@ where
         form_data,
     };
 
-    let response_writer = HttpResponseWriter::new(stream);
+    let response_writer = ResponseWriter::new(stream);
 
     if let Err(_) = handle_request(request, response_writer).await {
         //
@@ -101,9 +101,9 @@ fn split_request_lines(request_string: &str) -> Vec<&str> {
     request_string.split("\r\n").collect()
 }
 
-fn parse_request_line(request_line: &str) -> (HttpMethod, String) {
+fn parse_request_line(request_line: &str) -> (Method, String) {
     let mut parts = request_line.split_whitespace();
-    let method = HttpMethod::from_string(parts.next().unwrap_or(""));
+    let method = Method::from_string(parts.next().unwrap_or(""));
     let path = parts.next().unwrap_or("/").to_string();
     (method, path)
 }

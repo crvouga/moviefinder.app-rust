@@ -2,34 +2,26 @@ use super::route::Route;
 use crate::{
     core::{
         html::*,
-        http::{response_writer::HttpResponseWriter, server_sent_event::sse},
+        http::{response_writer::ResponseWriter, server_sent_event::sse},
     },
-    res::Res,
+    ctx::Ctx,
+    req::Req,
     ui::bottom_bar,
 };
 
-pub async fn respond(response_writer: &mut HttpResponseWriter, route: &Route) -> Res {
+pub async fn respond(
+    _ctx: &Ctx,
+    _r: &Req,
+    route: &Route,
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
     match route {
         Route::Index => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_index_login_cta())
-                .send(response_writer)
-                .await;
-
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_index_login_cta())
-                .send(response_writer)
-                .await;
-
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_index_login_cta())
-                .send(response_writer)
-                .await;
-
-            Res::empty()
+                .send(w)
+                .await
         }
     }
 }

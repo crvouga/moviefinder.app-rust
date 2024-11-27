@@ -1,8 +1,8 @@
-use crate::core::http::{client::HttpClient, form_data::FormData, request::HttpRequest};
+use crate::core::http::{client::HttpClient, form_data::FormData, request::Request};
 use std::{collections::HashMap, sync::Arc};
 
 use super::{
-    http::method::HttpMethod,
+    http::method::Method,
     params::Params,
     url::{query_params::QueryParams, Url},
 };
@@ -35,17 +35,17 @@ pub const TMDB_HOST: &str = "api.themoviedb.org";
 pub const TMDB_IMAGE_BASE_URL: &str = "https://image.tmdb.org";
 
 impl TmdbApi {
-    pub fn to_get_request(self: &TmdbApi, path: &str, query_params: QueryParams) -> HttpRequest {
-        self.to_request(HttpMethod::Get, path, query_params)
+    pub fn to_get_request(self: &TmdbApi, path: &str, query_params: QueryParams) -> Request {
+        self.to_request(Method::Get, path, query_params)
     }
 
     pub fn to_request(
         self: &TmdbApi,
-        method: HttpMethod,
+        method: Method,
         path: &str,
         query_params: QueryParams,
-    ) -> HttpRequest {
-        HttpRequest {
+    ) -> Request {
+        Request {
             headers: self.to_base_headers(),
             url: Url {
                 host: TMDB_HOST.to_string(),

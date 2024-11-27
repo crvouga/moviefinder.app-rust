@@ -6,8 +6,8 @@ use tokio::net::TcpStream;
 
 use crate::core::logger::interface::Logger;
 
-use super::request::HttpRequest;
-use super::response::HttpResponse;
+use super::request::Request;
+use super::response::Response;
 
 pub struct HttpClient {
     simulate_latency: Option<Duration>,
@@ -27,7 +27,7 @@ impl HttpClient {
         self
     }
 
-    pub async fn send(&self, request: HttpRequest) -> tokio::io::Result<HttpResponse> {
+    pub async fn send(&self, request: Request) -> tokio::io::Result<Response> {
         if let Some(dur) = self.simulate_latency {
             tokio::time::sleep(dur).await;
         }
@@ -43,7 +43,7 @@ impl HttpClient {
 
         let response_string: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer);
 
-        let response = HttpResponse::from_http_string(&response_string);
+        let response = Response::from_http_string(&response_string);
 
         Ok(response)
     }

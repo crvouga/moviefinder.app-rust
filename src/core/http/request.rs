@@ -1,4 +1,4 @@
-use super::{content_encoding::ContentEncoding, form_data::FormData, method::HttpMethod};
+use super::{content_encoding::ContentEncoding, form_data::FormData, method::Method};
 use crate::core::{
     params::{Params, ParamsHashMap},
     url::Url,
@@ -6,16 +6,16 @@ use crate::core::{
 use std::collections::HashMap;
 
 #[derive(Debug)]
-pub struct HttpRequest {
+pub struct Request {
     pub url: Url,
-    pub method: HttpMethod,
+    pub method: Method,
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
     pub form_data: FormData,
     pub body: Vec<u8>,
 }
 
-impl HttpRequest {
+impl Request {
     pub fn to_http_string(&self) -> String {
         let mut headers_string = String::new();
         for (key, value) in &self.headers {
@@ -44,9 +44,9 @@ impl HttpRequest {
         )
     }
 
-    pub fn to_params(&self) -> ParamsHashMap {
+    pub fn params(&self) -> ParamsHashMap {
         match self.method {
-            HttpMethod::Get => self.url.query_params.params.clone(),
+            Method::Get => self.url.query_params.params.clone(),
             _ => self.form_data.params.clone(),
         }
     }

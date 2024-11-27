@@ -3,19 +3,19 @@ use std::collections::HashMap;
 use std::io::Write;
 
 use super::content_encoding::ContentEncoding;
-use super::header::SetHeader;
-use super::request::HttpRequest;
+use super::set_header::SetHeader;
+use super::request::Request;
 
 #[derive(Debug, Clone)]
-pub struct HttpResponse {
+pub struct Response {
     pub status_code: u16,
     pub body: Vec<u8>,
     pub headers: HashMap<String, String>,
 }
 
-impl HttpResponse {
-    pub fn new(status_code: u16) -> HttpResponse {
-        HttpResponse {
+impl Response {
+    pub fn new(status_code: u16) -> Response {
+        Response {
             status_code,
             body: Vec::new(),
             headers: HashMap::new(),
@@ -95,7 +95,7 @@ impl HttpResponse {
             }
         }
 
-        HttpResponse {
+        Response {
             status_code,
             body,
             headers,
@@ -112,7 +112,7 @@ impl HttpResponse {
         }
     }
 
-    pub fn compress(&mut self, request: &HttpRequest) {
+    pub fn compress(&mut self, request: &Request) {
         for encoding in request.to_accept_encoding() {
             match encoding {
                 ContentEncoding::Gzip => {
@@ -143,7 +143,7 @@ impl HttpResponse {
     }
 }
 
-impl SetHeader for HttpResponse {
+impl SetHeader for Response {
     fn set_header(&mut self, key: &str, value: &str) -> &Self {
         self.headers.insert(key.to_string(), value.to_string());
         self

@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub enum HttpMethod {
+pub enum Method {
     Get,
     Post,
     Put,
@@ -11,43 +11,43 @@ pub enum HttpMethod {
     Trace,
 }
 
-impl HttpMethod {
+impl Method {
     pub fn from_string(method: &str) -> Self {
         let cleaned = method.trim().to_uppercase();
         if cleaned.contains("GET") {
-            HttpMethod::Get
+            Method::Get
         } else if cleaned.contains("POST") {
-            HttpMethod::Post
+            Method::Post
         } else if cleaned.contains("PUT") {
-            HttpMethod::Put
+            Method::Put
         } else if cleaned.contains("DELETE") {
-            HttpMethod::Delete
+            Method::Delete
         } else if cleaned.contains("PATCH") {
-            HttpMethod::Patch
+            Method::Patch
         } else if cleaned.contains("OPTIONS") {
-            HttpMethod::Options
+            Method::Options
         } else if cleaned.contains("HEAD") {
-            HttpMethod::Head
+            Method::Head
         } else if cleaned.contains("CONNECT") {
-            HttpMethod::Connect
+            Method::Connect
         } else if cleaned.contains("TRACE") {
-            HttpMethod::Trace
+            Method::Trace
         } else {
-            HttpMethod::Get
+            Method::Get
         }
     }
 
     pub fn to_string(&self) -> String {
         match self {
-            HttpMethod::Get => "GET".to_string(),
-            HttpMethod::Post => "POST".to_string(),
-            HttpMethod::Put => "PUT".to_string(),
-            HttpMethod::Delete => "DELETE".to_string(),
-            HttpMethod::Patch => "PATCH".to_string(),
-            HttpMethod::Options => "OPTIONS".to_string(),
-            HttpMethod::Head => "HEAD".to_string(),
-            HttpMethod::Connect => "CONNECT".to_string(),
-            HttpMethod::Trace => "TRACE".to_string(),
+            Method::Get => "GET".to_string(),
+            Method::Post => "POST".to_string(),
+            Method::Put => "PUT".to_string(),
+            Method::Delete => "DELETE".to_string(),
+            Method::Patch => "PATCH".to_string(),
+            Method::Options => "OPTIONS".to_string(),
+            Method::Head => "HEAD".to_string(),
+            Method::Connect => "CONNECT".to_string(),
+            Method::Trace => "TRACE".to_string(),
         }
     }
 }

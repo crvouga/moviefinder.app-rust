@@ -3,7 +3,7 @@ use crate::{
     core::{
         html::*,
         http::{
-            response_writer::{self, HttpResponseWriter},
+            response_writer::{self, ResponseWriter},
             server_sent_event::sse,
         },
         params::Params,
@@ -17,7 +17,6 @@ use crate::{
     },
     feed::{self, feed_::Feed, feed_id::FeedId},
     req::Req,
-    res::Res,
     route,
 };
 
@@ -35,28 +34,28 @@ fn index_selector() -> String {
 }
 
 pub async fn respond(
-    response_writer: &mut HttpResponseWriter,
     ctx: &Ctx,
     req: &Req,
     route: &Route,
-) -> Res {
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
     match route {
         Route::Index { feed_id } => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_index_loading(&feed_id))
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
             let model = ViewModel::load(ctx, feed_id, "").await;
 
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_index(&model))
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
-            Res::empty()
+            Ok(())
         }
 
         Route::ClickedSave { feed_id } => {
@@ -70,17 +69,17 @@ pub async fn respond(
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            Res::redirect_root(to_back_route(feed_new.feed_id))
+            Ok(())
         }
 
         Route::ClickedTag { feed_id, tag } => {
-            let model = ViewModel::load(ctx, feed_id, "").await;
+            let model: ViewModel = ViewModel::load(ctx, feed_id, "").await;
 
             let form_state_new = model.form_state.toggle(tag);
 
             ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
 
-            Res::empty()
+            Ok(())
         }
 
         Route::InputtedSearch { feed_id } => {
@@ -90,10 +89,12 @@ pub async fn respond(
 
             let model = ViewModel::load(ctx, feed_id, search_input).await;
 
-            view_section_tags(&model).res()
+            let _ = view_section_tags(&model);
+
+            Ok(())
         }
 
-        Route::ClickedGoBack { feed_id: _ } => Res::empty(),
+        Route::ClickedGoBack { feed_id: _ } => Ok(()),
     }
 }
 

@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Debug, Default, Clone)]
-pub struct HttpResponseCookie {
+pub struct ResponseCookie {
     pub name: String,
     pub value: String,
     pub domain: Option<String>,
@@ -20,7 +20,7 @@ pub enum SameSite {
     None,
 }
 
-impl fmt::Display for HttpResponseCookie {
+impl fmt::Display for ResponseCookie {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}={}", self.name, self.value)?;
 

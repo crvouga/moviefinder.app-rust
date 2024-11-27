@@ -2,35 +2,34 @@ use super::{controls, ctx::Ctx, feed_::Feed, feed_id::FeedId, feed_item::FeedIte
 use crate::{
     core::{
         html::*,
-        http::{response_writer::HttpResponseWriter, server_sent_event::sse},
+        http::{response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image},
     },
     media::{self, media_db::interface::MediaQuery, media_id::MediaId},
     req::Req,
-    res::Res,
     route,
     ui::{bottom_bar, top_bar},
 };
 
 pub async fn respond(
-    response_writer: &mut HttpResponseWriter,
     ctx: &Ctx,
-    req: &Req,
+    r: &Req,
     route: &Route,
-) -> Res {
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
     match route {
         Route::Default => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_default_loading())
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
             let maybe_feed_id = ctx
                 .feed_session_mapping_db
-                .get(req.session_id.clone())
+                .get(r.session_id.clone())
                 .await
                 .unwrap_or(None);
 
@@ -43,28 +42,28 @@ pub async fn respond(
             sse()
                 .event_execute_script()
                 .data_script_replace_url(index_route.encode().as_str())
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
-            respond_index(response_writer, ctx, req, &feed_id).await
+            respond_index(ctx, r, route, w, &feed_id).await
         }
 
-        Route::Index { feed_id } => respond_index(response_writer, ctx, req, feed_id).await,
+        Route::Index { feed_id } => respond_index(ctx, r, route, w, feed_id).await,
 
         Route::ChangedSlide { feed_id } => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(div())
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
-            let maybe_slide_index = req
+            let maybe_slide_index = r
                 .params
                 .get_first("feed_index")
                 .and_then(|s| s.parse::<usize>().ok());
 
             let slide_index_new = match maybe_slide_index {
-                None => return Res::empty(),
+                None => return Ok(()),
 
                 Some(slide_index_new) => slide_index_new,
             };
@@ -76,9 +75,9 @@ pub async fn respond(
                 ..feed
             };
 
-            put_feed(ctx, &req.session_id, &feed_new).await;
+            put_feed(ctx, &r.session_id, &feed_new).await;
 
-            Res::empty()
+            Ok(())
         }
 
         Route::LoadMore {
@@ -92,40 +91,40 @@ pub async fn respond(
                 ..feed
             };
 
-            let feed_items = get_feed_items(ctx, &feed_with_new_index)
+            let _feed_items = get_feed_items(ctx, &feed_with_new_index)
                 .await
                 .unwrap_or_default();
 
             sse()
                 .event_merge_fragments()
                 .data_fragments(div())
-                .send(response_writer)
-                .await;
+                .send(w)
+                .await?;
 
-            view_swiper_slides(feed_id, &feed_items).res()
+            // view_swiper_slides(feed_id, &feed_items).res()
+            Ok(())
         }
 
-        Route::Controls(child) => {
-            controls::respond::respond(response_writer, &ctx.controls, req, child).await
-        }
+        Route::Controls(child) => controls::respond::respond(&ctx.controls, r, child, w).await,
     }
 }
 
 async fn respond_index(
-    response_writer: &mut HttpResponseWriter,
     ctx: &Ctx,
-    req: &Req,
+    r: &Req,
+    _route: &Route,
+    w: &mut ResponseWriter,
     feed_id: &FeedId,
-) -> Res {
+) -> Result<(), std::io::Error> {
     sse()
         .event_merge_fragments()
         .data_fragments(view_index_loading(&feed_id))
-        .send(response_writer)
-        .await;
+        .send(w)
+        .await?;
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-    put_feed(ctx, &req.session_id, &feed).await;
+    put_feed(ctx, &r.session_id, &feed).await;
 
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 
@@ -137,10 +136,10 @@ async fn respond_index(
     sse()
         .event_merge_fragments()
         .data_fragments(view_index(&model))
-        .send(response_writer)
-        .await;
+        .send(w)
+        .await?;
 
-    Res::empty()
+    Ok(())
 }
 
 async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {

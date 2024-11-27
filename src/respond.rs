@@ -1,41 +1,32 @@
 use crate::account;
-use crate::core::http::response_writer::HttpResponseWriter;
+use crate::core::http::response_writer::ResponseWriter;
 use crate::ctx;
 use crate::feed;
 use crate::media;
 use crate::req::Req;
-use crate::res::Res;
 use crate::route::Route;
-use crate::ui::resizable_image;
 
 pub async fn respond(
-    response_writer: &mut HttpResponseWriter,
     ctx: &ctx::Ctx,
-    req: &Req,
+    r: &Req,
     route: &Route,
-) -> Res {
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
     match route {
-        Route::Feed(route) => feed::respond::respond(response_writer, &ctx.feed, req, route).await,
+        Route::Feed(route) => feed::respond::respond(&ctx.feed, r, route, w).await,
 
-        Route::Account(route) => account::respond::respond(response_writer, route).await,
+        Route::Account(route) => account::respond::respond(&ctx, r, &route, w).await,
 
-        Route::Media(route) => media::respond::respond(response_writer, &ctx, route).await,
+        Route::Media(route) => media::respond::respond(&ctx, r, route, w).await,
 
-        Route::ResizableImage(route) => {
-            resizable_image::respond::response(&ctx.resizable_image, route, req.clone()).await
-        }
+        Route::Favicon => Ok(()),
 
-        Route::Favicon => Res::empty(),
+        Route::RobotsTxt => w.text("User-agent: *\nDisallow:").await,
 
-        Route::RobotsTxt => Res::content("text", "User-agent: *\nDisallow:".as_bytes().to_vec()),
-
-        Route::OutputCss => {
-            response_writer.css(include_bytes!("./output.css")).await;
-            Res::empty()
-        }
+        Route::OutputCss => w.css(include_bytes!("./output.css")).await,
 
         Route::Unknown(_route) => {
-            account::respond::respond(response_writer, &account::route::Route::Index).await
+            feed::respond::respond(&ctx.feed, r, &feed::route::Route::Default, w).await
         }
     }
 }

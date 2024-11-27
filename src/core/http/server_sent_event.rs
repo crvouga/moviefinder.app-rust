@@ -1,7 +1,39 @@
-use super::{header::SetHeader, response_writer::HttpResponseWriter};
+use super::{response_writer::ResponseWriter, set_header::SetHeader};
 use tokio::io::AsyncWriteExt;
 
-impl HttpResponseWriter {
+pub struct ServerSentEvent {
+    event: String,
+    data: Vec<String>,
+}
+
+pub fn sse() -> ServerSentEvent {
+    ServerSentEvent::new()
+}
+
+impl ServerSentEvent {
+    pub fn new() -> ServerSentEvent {
+        ServerSentEvent {
+            event: String::new(),
+            data: Vec::new(),
+        }
+    }
+    pub fn event(&mut self, event: &str) -> &mut Self {
+        self.event = event.to_string();
+        self
+    }
+
+    pub fn data(&mut self, data: &str) -> &mut Self {
+        self.data.push(data.to_string());
+        self
+    }
+
+    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+        w.write_sse_event(&self.event, self.data.iter().map(|s| s.as_str()).collect())
+            .await
+    }
+}
+
+impl ResponseWriter {
     pub async fn write_sse_event(
         &mut self,
         event: &str,
@@ -24,45 +56,8 @@ impl HttpResponseWriter {
 
         sse_message.push_str("\n");
 
-        println!("sse_message:\n{}", sse_message);
-
         self.stream.write_all(sse_message.as_bytes()).await?;
         self.stream.flush().await?;
         Ok(())
-    }
-}
-
-pub struct ServerSentEvent {
-    event: String,
-    // id: String,
-    data: Vec<String>,
-}
-
-pub fn sse() -> ServerSentEvent {
-    ServerSentEvent::new()
-}
-
-impl ServerSentEvent {
-    pub fn new() -> ServerSentEvent {
-        ServerSentEvent {
-            event: String::new(),
-            // id: String::new(),
-            data: Vec::new(),
-        }
-    }
-    pub fn event(&mut self, event: &str) -> &mut Self {
-        self.event = event.to_string();
-        self
-    }
-
-    pub fn data(&mut self, data: &str) -> &mut Self {
-        self.data.push(data.to_string());
-        self
-    }
-
-    pub async fn send(&mut self, response_writer: &mut HttpResponseWriter) {
-        let _ = response_writer
-            .write_sse_event(&self.event, self.data.iter().map(|s| s.as_str()).collect())
-            .await;
     }
 }

@@ -2,15 +2,15 @@ use std::collections::HashMap;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
-use super::header::SetHeader;
+use super::set_header::SetHeader;
 
-pub struct HttpResponseWriter {
+pub struct ResponseWriter {
     pub stream: TcpStream,
     pub headers_sent: bool,
     pub initial_headers: HashMap<String, String>,
 }
 
-impl HttpResponseWriter {
+impl ResponseWriter {
     pub fn new(stream: TcpStream) -> Self {
         Self {
             stream,
@@ -61,7 +61,7 @@ impl HttpResponseWriter {
     }
 }
 
-impl SetHeader for HttpResponseWriter {
+impl SetHeader for ResponseWriter {
     fn set_header(&mut self, key: &str, value: &str) -> &Self {
         self.initial_headers
             .insert(key.to_string(), value.to_string());
