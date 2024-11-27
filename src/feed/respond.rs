@@ -331,7 +331,7 @@ fn view_swiper_slide_load_more(feed_id: &FeedId, start_feed_index: usize) -> Ele
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {
     route::Route::Media(media::route::Route::Details(
-        media::details::route::Route::IndexLoad {
+        media::details::route::Route::Index {
             media_id: media_id.clone(),
         },
     ))
@@ -351,7 +351,7 @@ fn view_swiper_slide_content(feed_item: &FeedItem) -> Elem {
             feed_index: _,
         } => button()
             .class("w-full h-full")
-            .hx_push_root_route(to_media_details_route(&media.media_id))
+            .data_on_click_push_get(&to_media_details_route(&media.media_id).encode())
             .aria_label("open media details")
             .child(
                 Image::new()

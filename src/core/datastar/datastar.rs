@@ -108,6 +108,14 @@ impl ServerSentEvent {
         self.event("datastar-merge-fragments")
     }
 
+    pub fn data_merge_mode(&mut self, mode: &str) -> &mut Self {
+        self.data(&format!("mergeMode {}", mode))
+    }
+
+    pub fn data_merge_mode_outer(&mut self) -> &mut Self {
+        self.data_merge_mode("outer")
+    }
+
     pub fn data_fragments(&mut self, elem: Elem) -> &mut Self {
         let rendered = elem.render();
         let data = format!("fragments {}\n\n", rendered.replace("\n", ""));
@@ -119,7 +127,7 @@ impl ServerSentEvent {
     }
 
     pub fn data_script(&mut self, script: &str) -> &mut Self {
-        let data = format!("script {}\n\n", script);
+        let data = format!("script {}", script);
         self.data(&data)
     }
 

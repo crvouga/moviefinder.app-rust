@@ -1,24 +1,29 @@
 use crate::{
     core::{
         html::*,
+        http::{response_writer::HttpResponseWriter, server_sent_event::sse},
         query::{Query, QueryFilter, QueryOp},
         ui::{self, image::Image},
     },
     ctx::Ctx,
     feed,
-    media::{self, media_::Media, media_db::interface::MediaQueryField, media_id::MediaId},
+    media::{media_::Media, media_db::interface::MediaQueryField},
     res::Res,
     route,
-    ui::top_bar::TopBar,
+    ui::{root::ROOT_ID, top_bar::TopBar},
 };
 
 use super::route::Route;
 
-pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
+pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route: &Route) -> Res {
     match route {
-        Route::IndexLoad { media_id } => view_index_load(media_id).res().cache(),
-
         Route::Index { media_id } => {
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_index_loading())
+                .send(response_writer)
+                .await;
+
             let query = Query {
                 limit: 1,
                 offset: 0,
@@ -33,15 +38,36 @@ pub async fn respond(ctx: &Ctx, route: &Route) -> Res {
 
             let result = match queried {
                 Ok(result) => result,
-                Err(err) => return ui::error::page(&err).res(),
+                Err(err) => {
+                    sse()
+                        .event_merge_fragments()
+                        .data_fragments(ui::error::page(&err).id(ROOT_ID))
+                        .send(response_writer)
+                        .await;
+                    return Res::empty();
+                }
             };
 
             let media = match result.items.into_iter().next() {
                 Some(media) => media,
-                None => return ui::error::page("Media not found").res(),
+                None => {
+                    sse()
+                        .event_merge_fragments()
+                        .data_fragments(ui::error::page("Media not found").id(ROOT_ID))
+                        .send(response_writer)
+                        .await;
+                    return Res::empty();
+                }
             };
 
-            view_index(&media).res()
+            sse()
+                .event_merge_fragments()
+                .data_merge_mode_outer()
+                .data_fragments(view_index(&media))
+                .send(response_writer)
+                .await;
+
+            Res::empty()
         }
     }
 }
@@ -55,11 +81,17 @@ fn index_selector() -> String {
 struct Layout {
     children: Vec<Elem>,
     media: Option<Media>,
+    loading: bool,
 }
 
 impl Layout {
     pub fn new() -> Self {
         Layout::default()
+    }
+
+    pub fn loading(mut self) -> Self {
+        self.loading = true;
+        self
     }
 
     pub fn child(mut self, child: Elem) -> Self {
@@ -81,8 +113,8 @@ impl Layout {
             .map_or(" ", |m| m.media_backdrop.to_highest_res());
 
         div()
+            .id(ROOT_ID)
             .class("flex flex-col")
-            .id(INDEX_ID)
             .child(
                 TopBar::default()
                     .back_button(route::Route::Feed(feed::route::Route::Default))
@@ -108,16 +140,10 @@ impl Layout {
     }
 }
 
-fn view_index_load(media_id: &MediaId) -> Elem {
+fn view_index_loading() -> Elem {
     Layout::new()
         .child(ui::icon::spinner("animate-spin size-16"))
         .view()
-        .hx_swap_root_route(route::Route::Media(media::route::Route::Details(
-            media::details::route::Route::Index {
-                media_id: media_id.clone(),
-            },
-        )))
-        .hx_trigger_load()
 }
 
 fn view_index(media: &Media) -> Elem {

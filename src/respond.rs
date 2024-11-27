@@ -19,7 +19,7 @@ pub async fn respond(
 
         Route::Account(route) => account::respond::respond(response_writer, route).await,
 
-        Route::Media(route) => media::respond::respond(&ctx, route).await,
+        Route::Media(route) => media::respond::respond(response_writer, &ctx, route).await,
 
         Route::ResizableImage(route) => {
             resizable_image::respond::response(&ctx.resizable_image, route, req.clone()).await
