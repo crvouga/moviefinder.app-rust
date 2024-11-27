@@ -66,7 +66,7 @@ function onEvent(name, evt) {
 
 impl Elem {
     pub fn js_htmx_preserve_state(self) -> Self {
-        self.child_unsafe_text(SCRIPT)
+        self.child_text_unsafe(SCRIPT)
     }
 
     pub fn hx_ext_preserve_state(self) -> Self {

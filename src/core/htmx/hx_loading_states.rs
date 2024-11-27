@@ -12,7 +12,7 @@ impl Elem {
     }
 
     pub fn css_htmx_loading_states(self) -> Self {
-        self.child_unsafe_text(HX_LOADING_STATES_STYLE)
+        self.child_text_unsafe(HX_LOADING_STATES_STYLE)
     }
 
     pub fn hx_ext_loading_states(self) -> Self {

@@ -11,15 +11,12 @@ impl Elem {
     pub fn render_with_indent(&self, indent_level: usize) -> String {
         let indent = "\t".repeat(indent_level);
         match self {
-            Elem::Element {
+            Elem::Tag {
                 tag_name,
-                attrs_safe,
-                attrs_unsafe,
+                attrs,
                 children,
             } => {
-                let attrs_safe_str = render_attrs_safe(attrs_safe);
-                let attrs_unsafe_str = render_attrs_unsafe(attrs_unsafe);
-                let attrs = format!("{}{}", attrs_safe_str, attrs_unsafe_str);
+                let attrs = render_attrs(attrs);
                 if children.is_empty() {
                     format!("{}<{}{}></{}>\n", indent, tag_name, attrs, tag_name)
                 } else {
@@ -30,9 +27,8 @@ impl Elem {
                     )
                 }
             }
-            Elem::Fragment(children) => render_children(children, indent_level),
-            Elem::Safe(content) => format!("{}{}\n", indent, escape(content)),
-            Elem::Unsafe(content) => format!("{}{}\n", indent, content),
+            Elem::Frag(children) => render_children(children, indent_level),
+            Elem::Text(content) => format!("{}{}\n", indent, content),
         }
     }
 }
@@ -45,20 +41,7 @@ fn render_children(children: &[Elem], indent_level: usize) -> String {
         .join("")
 }
 
-fn render_attrs_safe(attrs: &HashMap<String, String>) -> String {
-    render_attrs(attrs, RenderAttrBehavior::Safe)
-}
-
-fn render_attrs_unsafe(attrs: &HashMap<String, String>) -> String {
-    render_attrs(attrs, RenderAttrBehavior::Unsafe)
-}
-
-enum RenderAttrBehavior {
-    Safe,
-    Unsafe,
-}
-
-fn render_attrs(attrs: &HashMap<String, String>, behavior: RenderAttrBehavior) -> String {
+fn render_attrs(attrs: &HashMap<String, String>) -> String {
     attrs
         .iter()
         .filter_map(|(name, value)| {
@@ -66,24 +49,11 @@ fn render_attrs(attrs: &HashMap<String, String>, behavior: RenderAttrBehavior) -
             if name_cleaned.is_empty() {
                 None
             } else {
-                let value_final = match behavior {
-                    RenderAttrBehavior::Safe => escape(value),
-                    RenderAttrBehavior::Unsafe => value.to_string(),
-                };
-                Some(format!(" {}=\"{}\"", name_cleaned, value_final))
+                Some(format!(" {}=\"{}\"", name_cleaned, value))
             }
         })
         .collect::<Vec<String>>()
         .join("")
-}
-
-fn escape(content: &str) -> String {
-    content
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("\"", "&quot;")
-        .replace("'", "&#39;")
 }
 
 fn append_doc_type(html: &str) -> String {

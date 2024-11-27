@@ -3,7 +3,7 @@
 use crate::core::{
     css,
     html::Elem,
-    http::{set_header::SetHeader, response::Response},
+    http::{response::Response, set_header::SetHeader},
 };
 use serde::{Deserialize, Serialize};
 
@@ -13,8 +13,8 @@ impl Elem {
     }
 
     pub fn hx_trigger(mut self, value: &str) -> Self {
-        if let Elem::Element {
-            attrs_unsafe: ref mut attributes,
+        if let Elem::Tag {
+            attrs: ref mut attributes,
             ..
         } = self
         {
@@ -104,8 +104,8 @@ impl Elem {
 
     /// https://htmx.org/attributes/hx-ext/
     pub fn hx_ext(mut self, value: &str) -> Self {
-        if let Elem::Element {
-            attrs_unsafe: ref mut attributes,
+        if let Elem::Tag {
+            attrs: ref mut attributes,
             ..
         } = self
         {

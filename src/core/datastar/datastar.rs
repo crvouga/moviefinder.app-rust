@@ -29,8 +29,8 @@ impl Elem {
     }
 
     pub fn data_on(mut self, event: &str, value: &str) -> Self {
-        if let Elem::Element {
-            attrs_unsafe: ref mut attributes,
+        if let Elem::Tag {
+            attrs: ref mut attributes,
             ..
         } = self
         {
@@ -50,8 +50,8 @@ impl Elem {
     }
 
     pub fn data_intersects(mut self, event: &str, value: &str) -> Self {
-        if let Elem::Element {
-            attrs_unsafe: ref mut attributes,
+        if let Elem::Tag {
+            attrs: ref mut attributes,
             ..
         } = self
         {

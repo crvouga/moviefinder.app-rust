@@ -156,7 +156,7 @@ impl ResizableImage {
             .view()
             .id("resizable-image")
             .attr("data-src", &self.src) // Store the image source
-            .child(script().child_unsafe_text(
+            .child(script().child_text_unsafe(
                 r#"
                 function getVals(event) {
                     const el = document.getElementById('resizable-image');

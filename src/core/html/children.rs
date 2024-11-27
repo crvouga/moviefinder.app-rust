@@ -1,51 +1,36 @@
-use super::Elem;
+use super::{escape::escape, Elem};
 
 impl Elem {
     pub fn child_text(self, value: &str) -> Self {
-        self.child(Elem::Safe(value.to_string()))
+        self.child(Elem::Text(escape(value)))
     }
 
-    pub fn child_unsafe_text(self, value: &str) -> Self {
-        self.child(Elem::Unsafe(value.to_string()))
-    }
-
-    pub fn child(mut self, child: Elem) -> Self {
-        match self {
-            Elem::Element {
-                tag_name: _,
-                attrs_safe: _,
-                attrs_unsafe: _,
-                ref mut children,
-            } => {
-                children.push(child);
-            }
-            Elem::Fragment(ref mut children) => {
-                children.push(child);
-            }
-            Elem::Safe(_) | Elem::Unsafe(_) => (),
-        }
-        self
+    pub fn child_text_unsafe(self, value: &str) -> Self {
+        self.child(Elem::Text(value.to_string()))
     }
 
     pub fn children(mut self, children: Vec<Elem>) -> Self {
         match self {
-            Elem::Element {
+            Elem::Tag {
                 tag_name: _,
-                attrs_safe: _,
-                attrs_unsafe: _,
+                attrs: _,
                 children: ref mut children_prev,
             } => {
                 for child_new in children {
                     children_prev.push(child_new);
                 }
             }
-            Elem::Fragment(ref mut children_prev) => {
+            Elem::Frag(ref mut children_prev) => {
                 for child_new in children {
                     children_prev.push(child_new);
                 }
             }
-            Elem::Safe(_) | Elem::Unsafe(_) => (),
+            Elem::Text(_) => (),
         }
         self
+    }
+
+    pub fn child(self, child: Elem) -> Self {
+        self.children(vec![child])
     }
 }

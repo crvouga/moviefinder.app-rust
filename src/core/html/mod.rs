@@ -2,19 +2,18 @@ use std::collections::HashMap;
 
 pub mod attr;
 pub mod children;
+mod escape;
 pub mod render;
 
 #[derive(Clone, Debug)]
 pub enum Elem {
-    Element {
+    Tag {
         tag_name: String,
-        attrs_safe: HashMap<String, String>,
-        attrs_unsafe: HashMap<String, String>,
+        attrs: HashMap<String, String>,
         children: Vec<Elem>,
     },
-    Fragment(Vec<Elem>),
-    Safe(String),
-    Unsafe(String),
+    Frag(Vec<Elem>),
+    Text(String),
 }
 
 impl Elem {
@@ -23,7 +22,7 @@ impl Elem {
     }
 
     pub fn tag_name(mut self, tag_name_new: &str) -> Self {
-        if let Elem::Element {
+        if let Elem::Tag {
             ref mut tag_name, ..
         } = self
         {
@@ -39,18 +38,17 @@ impl Elem {
 }
 
 pub fn unsafe_html(content: &str) -> Elem {
-    Elem::Unsafe(content.to_string())
+    Elem::Text(content.to_string())
 }
 
 pub fn frag() -> Elem {
-    Elem::Fragment(vec![])
+    Elem::Frag(vec![])
 }
 
 pub fn elem(tag_name: &str) -> Elem {
-    Elem::Element {
+    Elem::Tag {
         tag_name: tag_name.to_string(),
-        attrs_safe: HashMap::new(),
-        attrs_unsafe: HashMap::new(),
+        attrs: HashMap::new(),
         children: vec![],
     }
 }

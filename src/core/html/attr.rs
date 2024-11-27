@@ -1,34 +1,20 @@
-use super::Elem;
+use super::{escape::escape, Elem};
 
 impl Elem {
-    pub fn attr(mut self, name: &str, value: &str) -> Self {
-        if let Elem::Element {
-            ref mut attrs_safe, ..
-        } = self
-        {
-            attrs_safe.insert(name.to_string(), value.to_string());
+    pub fn attr_unsafe(mut self, name: &str, value: &str) -> Self {
+        if let Elem::Tag { ref mut attrs, .. } = self {
+            attrs.insert(name.to_string(), value.to_string());
         }
         self
     }
 
-    pub fn attr_unsafe(mut self, name: &str, value: &str) -> Self {
-        if let Elem::Element {
-            ref mut attrs_unsafe,
-            ..
-        } = self
-        {
-            attrs_unsafe.insert(name.to_string(), value.to_string());
-        }
-        self
+    pub fn attr(self, name: &str, value: &str) -> Self {
+        self.attr_unsafe(name, &escape(value))
     }
 
     pub fn class(mut self, value: &str) -> Self {
-        if let Elem::Element {
-            attrs_safe: ref mut attributes,
-            ..
-        } = self
-        {
-            let class_existing = attributes.get("class").map_or("", |attr| attr.as_str());
+        if let Elem::Tag { ref mut attrs, .. } = self {
+            let class_existing = attrs.get("class").map_or("", |attr| attr.as_str());
 
             let class_new = if class_existing.is_empty() {
                 value.trim().to_string()
@@ -36,7 +22,7 @@ impl Elem {
                 format!("{} {}", class_existing, value).trim().to_string()
             };
 
-            attributes.insert("class".to_string(), class_new);
+            attrs.insert("class".to_string(), class_new);
         }
 
         self
