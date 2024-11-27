@@ -1,6 +1,3 @@
-use crate::core::html::*;
-
-const IMAGE_ELEMENT_SCRIPT: &str = r#"
 class ImageElement extends HTMLElement {
   constructor() {
     super();
@@ -8,43 +5,43 @@ class ImageElement extends HTMLElement {
 
     const style = document.createElement("style");
     style.textContent = `
-        :host {
-          display: block;
-          width: 100%;
-          height: 100%;
-          position: relative;
-          overflow: hidden;
-          box-sizing: content-box;
-        }
-          
-        .skeleton {
-          width: 100%;
-          height: 100%;
-          animation: pulse 1.5s infinite ease-in-out;
-          background-color: #323232;
-          box-sizing: content-box;
-        }
-  
-        @keyframes pulse {
-          0% {
+    :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        box-sizing: content-box;
+    }
+        
+    .skeleton {
+        width: 100%;
+        height: 100%;
+        animation: pulse 1.5s infinite ease-in-out;
+        background-color: #323232;
+        box-sizing: content-box;
+    }
+
+    @keyframes pulse {
+        0% {
             opacity: 1;
-          }
-          50% {
+        }
+        50% {
             opacity: 0.8;
-          }
-          100% {
+        }
+        100% {
             opacity: 1;
-          }
         }
-  
-        .image {
-          display: none;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          box-sizing: content-box;
-        }
-      `;
+    }
+
+    .image {
+        display: none;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        box-sizing: content-box;
+    }
+    `;
 
     this.skeleton = document.createElement("div");
     this.skeleton.className = "skeleton";
@@ -87,22 +84,3 @@ class ImageElement extends HTMLElement {
 }
 
 customElements.define("image-element", ImageElement);
-"#;
-
-pub struct Image {}
-
-impl Image {
-    pub fn new() -> Self {
-        Self {}
-    }
-
-    pub fn view(self) -> Elem {
-        elem("image-element")
-    }
-}
-
-impl Elem {
-    pub fn src_image_element(self) -> Self {
-        self.src("./image-element.js")
-    }
-}
