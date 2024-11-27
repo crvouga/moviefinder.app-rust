@@ -119,8 +119,7 @@ impl Layout {
                 TopBar::default()
                     .back_button(route::Route::Feed(feed::route::Route::Default))
                     .title(top_bar_title)
-                    .view()
-                    .hx_abort(&index_selector()),
+                    .view(),
             )
             .child(
                 div()
