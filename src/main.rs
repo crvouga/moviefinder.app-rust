@@ -17,7 +17,6 @@ mod fixture;
 mod key_value_db;
 mod media;
 mod person;
-mod req;
 mod respond;
 mod route;
 mod ui;
@@ -28,35 +27,29 @@ async fn main() {
 
     let address = format!("0.0.0.0:{}", env.port);
 
-    let ctx = Arc::new(ctx::Ctx::new(&env).await.unwrap());
+    let ctx = Arc::new(Ctx::new(&env).await.unwrap());
 
     log_info!(ctx.logger, "Starting server on http://{}", address);
 
-    core::http::server::start(&address, move |r, mut w| {
-        let ctx_arc = Arc::clone(&ctx);
-        r.write_session_id_cookie(&mut w);
-        respond(ctx_arc, r, w)
-    })
-    .await
-    .unwrap();
+    core::http::server::start(&address, move |r, w| respond(ctx.clone(), r, w))
+        .await
+        .unwrap();
 }
 
-async fn respond(
-    ctx: Arc<ctx::Ctx>,
-    r: Request,
-    mut w: ResponseWriter,
-) -> Result<(), std::io::Error> {
-    let route = r.route();
+async fn respond(ctx: Arc<Ctx>, r: Request, mut w: ResponseWriter) -> Result<(), std::io::Error> {
+    r.write_session_id_cookie(&mut w);
+
+    let maybe_route = r.route();
 
     log_info!(
         ctx.logger,
         "{:?} session_id={:?} params={:?}",
-        route,
+        maybe_route,
         r.session_id(),
         r.params()
     );
 
-    match (route, r.is_datastar_request()) {
+    match (maybe_route, r.is_datastar_request()) {
         (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
         (Some(route), false) => response_root(route, &r, &mut w).await,

@@ -56,7 +56,7 @@ where
         url: Url {
             path,
             query_params,
-            host: "".to_string(),
+            host: headers.get("host").unwrap_or(&"".to_string()).to_string(),
         },
         headers,
         cookies,
