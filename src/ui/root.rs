@@ -1,5 +1,5 @@
 use crate::{
-    core::{html::*, tmdb_api::TMDB_IMAGE_BASE_URL, ui},
+    core::{html::*, tmdb_api::TMDB_IMAGE_BASE_URL},
     route::Route,
 };
 
@@ -59,9 +59,7 @@ impl Root {
             .style("background-color: #000;")
             .child(
                 div().class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col").child(
-                    ui::spinner_page::view()
-                    .id_root()
-                    .data_on_load_get(&self.route.encode())
+                    div().id_root().data_on_load_get(&self.route.encode())
                 )
             )
         )
