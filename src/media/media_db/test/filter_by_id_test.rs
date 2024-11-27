@@ -21,7 +21,7 @@ mod filter_by_id_test {
             };
             let result = f.media_db.query(query).await;
             let first = result.unwrap().items.into_iter().next().unwrap();
-            assert_eq!(first.media_id, media_id);
+            assert_eq!(first.id, media_id);
         }
     }
 }

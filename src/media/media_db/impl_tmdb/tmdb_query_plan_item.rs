@@ -69,7 +69,7 @@ impl TmdbQueryPlanItem {
                     .into_iter()
                     .flat_map(|res| res.results.unwrap_or_default())
                     .map(|result| Media::from((tmdb_config, result)))
-                    .filter(|media| seen.insert(media.media_id.clone()))
+                    .filter(|media| seen.insert(media.id.clone()))
                     .skip(offset)
                     .take(params.limit.clone())
                     .collect();
@@ -211,20 +211,20 @@ fn partition_results<T, E>(results: Vec<Result<T, E>>) -> Result<Vec<T>, Vec<E>>
 impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
     fn from((config, result): (&TmdbConfig, DiscoverMovieResult)) -> Self {
         Media {
-            media_id: MediaId::new(result.id.unwrap_or(0.0).to_string()),
-            media_backdrop: config
+            id: MediaId::new(result.id.unwrap_or(0.0).to_string()),
+            backdrop: config
                 .to_backdrop_image_set(result.backdrop_path.unwrap_or("".to_string()).as_str()),
-            media_description: result.overview.unwrap_or("".to_string()),
-            media_genre_ids: result
+            description: result.overview.unwrap_or("".to_string()),
+            genre_ids: result
                 .genre_ids
                 .unwrap_or(vec![])
                 .iter()
                 .map(|id| GenreId::new(id.to_string()))
                 .collect(),
-            media_popularity: result.popularity.unwrap_or(0.0),
-            media_poster: config
+            popularity: result.popularity.unwrap_or(0.0),
+            poster: config
                 .to_poster_image_set(result.poster_path.unwrap_or("".to_string()).as_str()),
-            media_title: result.title.unwrap_or("".to_string()),
+            title: result.title.unwrap_or("".to_string()),
             media_type: MediaType::Movie,
         }
     }

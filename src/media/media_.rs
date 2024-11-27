@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::genre::genre_id::GenreId;
 use super::media_id::MediaId;
 use super::media_type::MediaType;
@@ -5,25 +7,27 @@ use crate::core::image_set::ImageSet;
 
 #[derive(Debug, Clone)]
 pub struct Media {
-    pub media_id: MediaId,
-    pub media_title: String,
-    pub media_description: String,
+    pub id: MediaId,
+    pub title: String,
+    pub description: String,
     pub media_type: MediaType,
-    pub media_genre_ids: Vec<GenreId>,
-    pub media_poster: ImageSet,
-    pub media_backdrop: ImageSet,
-    pub media_popularity: f64,
+    pub genre_ids: HashSet<GenreId>,
+    pub poster: ImageSet,
+    pub backdrop: ImageSet,
+    pub popularity: f64,
 }
 
 pub fn random() -> Media {
+    let mut genre_ids = HashSet::new();
+    genre_ids.insert(GenreId::new("random".to_string()));
     Media {
-        media_id: MediaId::new("random".to_string()),
-        media_title: "random".to_string(),
-        media_description: "random".to_string(),
+        id: MediaId::new("random".to_string()),
+        title: "random".to_string(),
+        description: "random".to_string(),
         media_type: MediaType::random(),
-        media_genre_ids: vec![GenreId::new("random".to_string())],
-        media_poster: ImageSet::empty(),
-        media_backdrop: ImageSet::empty(),
-        media_popularity: 0.0,
+        genre_ids,
+        poster: ImageSet::empty(),
+        backdrop: ImageSet::empty(),
+        popularity: 0.0,
     }
 }

@@ -74,20 +74,20 @@ pub struct MovieDetails {
 impl From<(&TmdbConfig, MovieDetails)> for Media {
     fn from((config, result): (&TmdbConfig, MovieDetails)) -> Self {
         Media {
-            media_id: MediaId::new(result.id.to_string()),
-            media_backdrop: config
+            id: MediaId::new(result.id.to_string()),
+            backdrop: config
                 .to_backdrop_image_set(result.backdrop_path.unwrap_or("".to_string()).as_str()),
-            media_description: result.overview.unwrap_or("".to_string()),
-            media_genre_ids: result
+            description: result.overview.unwrap_or("".to_string()),
+            genre_ids: result
                 .genres
                 .unwrap_or(vec![])
                 .iter()
                 .map(|genre| GenreId::new(genre.id.to_string()))
                 .collect(),
-            media_popularity: result.popularity.unwrap_or(0.0),
-            media_poster: config
+            popularity: result.popularity.unwrap_or(0.0),
+            poster: config
                 .to_poster_image_set(result.poster_path.unwrap_or("".to_string()).as_str()),
-            media_title: result.title.unwrap_or("".to_string()),
+            title: result.title.unwrap_or("".to_string()),
             media_type: MediaType::Movie,
         }
     }

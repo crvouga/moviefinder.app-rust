@@ -350,7 +350,7 @@ fn view_swiper_slide_content(feed_item: &FeedItem) -> Elem {
             feed_index: _,
         } => button()
             .class("w-full h-full")
-            .data_on_click_push_then_get(&to_media_details_route(&media.media_id).encode())
+            .data_on_click_push_then_get(&to_media_details_route(&media.id).encode())
             .aria_label("open media details")
             .child(
                 Image::new()
@@ -358,8 +358,8 @@ fn view_swiper_slide_content(feed_item: &FeedItem) -> Elem {
                     .class("w-full h-full object-cover")
                     .width("100%")
                     .height("100%")
-                    .src(media.media_poster.to_highest_res())
-                    .alt(media.media_title.as_str()),
+                    .src(media.poster.to_highest_res())
+                    .alt(media.title.as_str()),
             ),
     }
 }

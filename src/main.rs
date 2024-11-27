@@ -1,5 +1,6 @@
 use core::http::{request::Request, response_writer::ResponseWriter};
 use env::Env;
+use route::Route;
 use std::sync::Arc;
 use ui::root::{self};
 
@@ -41,24 +42,26 @@ async fn respond(
     r: Request,
     mut w: ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let route: route::Route = route::Route::decode(&r.url.path);
-
     if is_html_request(&r) && !is_fragment_request(&r) {
-        let html = &root::Root::new(route).view().render();
+        let html = &root::Root::new(r.route()).view().render();
         return w.html(html).await;
     }
 
     log_info!(
         ctx.logger,
         "{:?} session_id={:?} params={:?}",
-        route,
+        r.route(),
         r.session_id(),
         r.params()
     );
 
-    respond::respond(&ctx, &r, &route, &mut w).await;
+    respond::respond(&ctx, &r, &r.route(), &mut w).await
+}
 
-    Ok(())
+impl Request {
+    pub fn route(&self) -> Route {
+        Route::decode(&self.url.path)
+    }
 }
 
 fn is_html_request(request: &Request) -> bool {

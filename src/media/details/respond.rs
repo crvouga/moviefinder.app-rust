@@ -98,12 +98,12 @@ impl Layout {
     }
 
     pub fn view(self) -> Elem {
-        let top_bar_title = self.media.as_ref().map_or("", |m| &m.media_title);
+        let top_bar_title = self.media.as_ref().map_or("", |m| &m.title);
 
         let image_src = self
             .media
             .as_ref()
-            .map_or(" ", |m| m.media_backdrop.to_highest_res());
+            .map_or(" ", |m| m.backdrop.to_highest_res());
 
         div()
             .id_root()
@@ -152,10 +152,10 @@ fn view_index(media: &Media) -> Elem {
 
 fn view_title(media: &Media) -> Elem {
     p().class("text-3xl font-bold text-center px-6")
-        .child_text(&media.media_title)
+        .child_text(&media.title)
 }
 
 fn view_description(media: &Media) -> Elem {
     p().class("text-base text-opacity font-normal text-center px-6")
-        .child_text(&media.media_description)
+        .child_text(&media.description)
 }

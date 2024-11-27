@@ -20,11 +20,8 @@ mod deduplicated_test {
                 })
                 .await
                 .unwrap();
-            let media_ids: Vec<MediaId> = queried
-                .items
-                .iter()
-                .map(|media| media.media_id.clone())
-                .collect();
+            let media_ids: Vec<MediaId> =
+                queried.items.iter().map(|media| media.id.clone()).collect();
 
             let media_id_frequencies = media_ids.clone().frequencies();
 
@@ -56,7 +53,7 @@ mod deduplicated_test {
             let media_ids = queried
                 .items
                 .iter()
-                .map(|media| media.media_id.clone())
+                .map(|media| media.id.clone())
                 .collect::<Vec<MediaId>>();
             let media_id_frequencies = media_ids.clone().frequencies();
 

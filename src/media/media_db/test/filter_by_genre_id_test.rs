@@ -29,7 +29,7 @@ mod filter_by_genre_id_test {
             assert!(queried
                 .items
                 .into_iter()
-                .all(|item| item.media_genre_ids.contains(&genre_id)));
+                .all(|item| item.genre_ids.contains(&genre_id)));
         }
     }
 
@@ -63,8 +63,8 @@ mod filter_by_genre_id_test {
             assert!(queried
                 .items
                 .into_iter()
-                .all(|item| item.media_genre_ids.contains(&genre_id_a)
-                    && item.media_genre_ids.contains(&genre_id_b)));
+                .all(|item| item.genre_ids.contains(&genre_id_a)
+                    && item.genre_ids.contains(&genre_id_b)));
         }
     }
 
@@ -98,8 +98,8 @@ mod filter_by_genre_id_test {
             assert!(queried
                 .items
                 .into_iter()
-                .all(|item| item.media_genre_ids.contains(&genre_id_a)
-                    || item.media_genre_ids.contains(&genre_id_b)));
+                .all(|item| item.genre_ids.contains(&genre_id_a)
+                    || item.genre_ids.contains(&genre_id_b)));
         }
     }
 }
