@@ -96,10 +96,10 @@ impl Root {
                 .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
                 .child(
                     div().class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col").child(
-                        div()
+                        ui::spinner_page::view()
                         .id_root()
                         .children(self.children)
-                        .child(ui::spinner_page::view().data_on_load_get(&self.route.encode()))
+                        .data_on_load_get(&self.route.encode())
                     )
                 )
         )

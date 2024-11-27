@@ -22,6 +22,8 @@ impl HttpResponseWriter {
             sse_message.push_str(&format!("data: {}\n", d));
         }
 
+        sse_message.push_str("\n");
+
         println!("sse_message:\n{}", sse_message);
 
         self.stream.write_all(sse_message.as_bytes()).await?;
@@ -32,6 +34,7 @@ impl HttpResponseWriter {
 
 pub struct ServerSentEvent {
     event: String,
+    // id: String,
     data: Vec<String>,
 }
 
@@ -43,6 +46,7 @@ impl ServerSentEvent {
     pub fn new() -> ServerSentEvent {
         ServerSentEvent {
             event: String::new(),
+            // id: String::new(),
             data: Vec::new(),
         }
     }

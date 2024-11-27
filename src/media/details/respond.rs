@@ -72,26 +72,15 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route:
     }
 }
 
-const INDEX_ID: &str = "media-details";
-fn index_selector() -> String {
-    format!("#{}", INDEX_ID)
-}
-
 #[derive(Default)]
 struct Layout {
     children: Vec<Elem>,
     media: Option<Media>,
-    loading: bool,
 }
 
 impl Layout {
     pub fn new() -> Self {
         Layout::default()
-    }
-
-    pub fn loading(mut self) -> Self {
-        self.loading = true;
-        self
     }
 
     pub fn child(mut self, child: Elem) -> Self {
@@ -141,7 +130,7 @@ impl Layout {
 
 fn view_index_loading() -> Elem {
     Layout::new()
-        .child(ui::icon::spinner("animate-spin size-16"))
+        // .child(ui::icon::spinner("animate-spin size-16"))
         .view()
 }
 

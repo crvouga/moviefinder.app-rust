@@ -118,7 +118,7 @@ impl ServerSentEvent {
 
     pub fn data_fragments(&mut self, elem: Elem) -> &mut Self {
         let rendered = elem.render();
-        let data = format!("fragments {}\n\n", rendered.replace("\n", ""));
+        let data = format!("fragments {}", rendered.replace("\n", ""));
         self.data(&data)
     }
 
@@ -132,7 +132,7 @@ impl ServerSentEvent {
     }
 
     pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {
-        let push_url_script = format!("window.history.pushState(null, '', '{}');", url);
+        let push_url_script: String = format!("window.history.pushState(null, '', '{}');", url);
         self.data_script(&push_url_script)
     }
 

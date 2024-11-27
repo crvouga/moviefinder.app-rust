@@ -17,6 +17,18 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, route: &Route) ->
                 .send(response_writer)
                 .await;
 
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_index_login_cta())
+                .send(response_writer)
+                .await;
+
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_index_login_cta())
+                .send(response_writer)
+                .await;
+
             Res::empty()
         }
     }
