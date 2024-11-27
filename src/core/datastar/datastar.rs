@@ -1,4 +1,7 @@
-use crate::core::{html::Elem, http::server_sent_event::ServerSentEvent};
+use crate::core::{
+    html::Elem,
+    http::{request::Request, server_sent_event::ServerSentEvent},
+};
 
 pub fn js_get(url: &str) -> String {
     format!("$get('{}')", url)
@@ -132,12 +135,20 @@ impl ServerSentEvent {
     }
 
     pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {
-        let push_url_script: String = format!("window.history.pushState(null, '', '{}');", url);
-        self.data_script(&push_url_script)
+        let script: String = format!("window.history.pushState(null, '', '{}');", url);
+        self.data_script(&script)
     }
 
     pub fn data_script_replace_url(&mut self, url: &str) -> &mut Self {
-        let replace_url_script = format!("window.history.replaceState(null, '', '{}');", url);
-        self.data_script(&replace_url_script)
+        let script = format!("window.history.replaceState(null, '', '{}');", url);
+        self.data_script(&script)
+    }
+}
+
+impl Request {
+    pub fn is_datastar_request(self: &Self) -> bool {
+        let fallback = "".to_string();
+        let header_value = self.headers.get("datastar-request").unwrap_or(&fallback);
+        header_value == "true"
     }
 }

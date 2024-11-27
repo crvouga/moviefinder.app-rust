@@ -1,4 +1,8 @@
-use crate::{account, core::human_friendly_base64, feed, media, ui::resizable_image};
+use crate::{
+    account,
+    core::{http::request::Request, human_friendly_base64},
+    feed, media,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -6,10 +10,6 @@ pub enum Route {
     Feed(feed::route::Route),
     Account(account::route::Route),
     Media(media::route::Route),
-    Unknown(String),
-    Favicon,
-    RobotsTxt,
-    OutputCss,
 }
 
 impl Route {
@@ -17,16 +17,13 @@ impl Route {
         human_friendly_base64::encode(self.clone())
     }
 
-    pub fn decode(encoded: &str) -> Route {
-        match encoded {
-            "/favicon.ico" => Route::Favicon,
-            "/robots.txt" => Route::RobotsTxt,
-            "/output.css" => Route::OutputCss,
-            _ => {
-                let decoded = human_friendly_base64::decode(encoded);
+    pub fn decode(encoded: &str) -> Option<Route> {
+        human_friendly_base64::decode(encoded).unwrap_or(None)
+    }
+}
 
-                decoded.unwrap_or(Route::Unknown(encoded.to_string()))
-            }
-        }
+impl Request {
+    pub fn route(&self) -> Option<Route> {
+        Route::decode(&self.url.path)
     }
 }

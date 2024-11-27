@@ -3,4 +3,4 @@ target
 .clj-kondo
 .env
 tailwindcss
-src/output.css
+public/output.css

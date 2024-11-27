@@ -28,16 +28,12 @@ impl Elem {
 }
 
 pub struct Root {
-    children: Vec<Elem>,
     route: Route,
 }
 
 impl Root {
     pub fn new(route: Route) -> Self {
-        Self {
-            children: vec![],
-            route,
-        }
+        Self { route }
     }
 
     pub fn view(self) -> Elem {
@@ -50,24 +46,12 @@ impl Root {
                 title().child_text("moviefinder.app"),
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
-                // link().rel("preconnect").href("https://fonts.googleapis.com"),
-                // link().rel("preconnect").href("https://fonts.gstatic.com").crossorigin(),
-                // link().href("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap").rel("stylesheet"),
                 link().rel("stylesheet").href("./output.css"),
                 link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
-                // meta().name("htmx-config").content(r#"{"historyCacheSize": 0, "refreshOnHistoryMiss": true}"#),
-                // style().child_unsafe_text(include_str!("../output.css")),
-                // script().src_htmx().defer(),
-                // script().src_htmx_loading_states().defer(),
-                // script().js_htmx_preserve_state(),
-                // style().css_htmx_loading_states(),
                 script().src_swiper().defer(),
                 script().js_image_element(),
-                // 
                 script().src_datastar().defer(),
-                script().child_unsafe_text(r#"
-                    window.addEventListener('popstate', location.reload);
-                "#)
+                script().child_unsafe_text("window.addEventListener('popstate', () => location.reload());")
             ])
         )
         .child(
@@ -77,7 +61,6 @@ impl Root {
                     div().class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col").child(
                         ui::spinner_page::view()
                         .id_root()
-                        .children(self.children)
                         .data_on_load_get(&self.route.encode())
                     )
                 )

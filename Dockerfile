@@ -11,7 +11,7 @@ RUN apt-get update \
 
 COPY . .
 
-RUN tailwindcss -i ./src/input.css -o ./src/output.css --minify
+RUN tailwindcss -i ./public/input.css -o ./public/output.css --minify
 
 RUN cargo build --release
 

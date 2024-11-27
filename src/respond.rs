@@ -5,7 +5,6 @@ use crate::{
     feed, media,
     route::Route,
 };
-
 pub async fn respond(
     ctx: &Ctx,
     r: &Request,
@@ -18,15 +17,5 @@ pub async fn respond(
         Route::Account(route) => account::respond::respond(&ctx, r, &route, w).await,
 
         Route::Media(route) => media::respond::respond(&ctx, r, route, w).await,
-
-        Route::Favicon => Ok(()),
-
-        Route::RobotsTxt => w.text("User-agent: *\nDisallow:").await,
-
-        Route::OutputCss => w.css(include_bytes!("./output.css")).await,
-
-        Route::Unknown(_route) => {
-            feed::respond::respond(&ctx.feed, r, &feed::route::Route::Default, w).await
-        }
     }
 }
