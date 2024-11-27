@@ -5,7 +5,7 @@ use crate::{
         http::{response_writer::HttpResponseWriter, server_sent_event::sse},
     },
     res::Res,
-    ui::{bottom_bar, root::ROOT_ID},
+    ui::bottom_bar,
 };
 
 pub async fn respond(response_writer: &mut HttpResponseWriter, route: &Route) -> Res {
@@ -24,7 +24,7 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, route: &Route) ->
 
 pub fn view_index_login_cta() -> Elem {
     div()
-        .id(ROOT_ID)
+        .id_root()
         .class("w-full flex-1 flex items-center justify-center flex-col")
         .child(div().class("flex-1").child_text("Account"))
         .child(bottom_bar::view(bottom_bar::Active::Account, &""))

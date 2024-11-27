@@ -4,13 +4,17 @@ use crate::{
     route::Route,
 };
 
-pub const ROOT_ID: &str = "root";
+const ROOT_ID: &str = "root";
 
 fn root_selector() -> String {
     format!("#{}", ROOT_ID)
 }
 
 impl Elem {
+    pub fn id_root(self) -> Self {
+        self.id(ROOT_ID)
+    }
+
     pub fn hx_swap_root(self) -> Self {
         self.hx_target(&root_selector()).hx_swap_inner_html()
     }
@@ -93,7 +97,7 @@ impl Root {
                 .child(
                     div().class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col").child(
                         div()
-                        .id(ROOT_ID)
+                        .id_root()
                         .children(self.children)
                         .child(ui::spinner_page::view().data_on_load_get(&self.route.encode()))
                     )

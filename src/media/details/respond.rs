@@ -10,7 +10,7 @@ use crate::{
     media::{media_::Media, media_db::interface::MediaQueryField},
     res::Res,
     route,
-    ui::{root::ROOT_ID, top_bar::TopBar},
+    ui::top_bar::TopBar,
 };
 
 use super::route::Route;
@@ -41,7 +41,7 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route:
                 Err(err) => {
                     sse()
                         .event_merge_fragments()
-                        .data_fragments(ui::error::page(&err).id(ROOT_ID))
+                        .data_fragments(ui::error::page(&err).id_root())
                         .send(response_writer)
                         .await;
                     return Res::empty();
@@ -53,7 +53,7 @@ pub async fn respond(response_writer: &mut HttpResponseWriter, ctx: &Ctx, route:
                 None => {
                     sse()
                         .event_merge_fragments()
-                        .data_fragments(ui::error::page("Media not found").id(ROOT_ID))
+                        .data_fragments(ui::error::page("Media not found").id_root())
                         .send(response_writer)
                         .await;
                     return Res::empty();
@@ -113,7 +113,7 @@ impl Layout {
             .map_or(" ", |m| m.media_backdrop.to_highest_res());
 
         div()
-            .id(ROOT_ID)
+            .id_root()
             .class("flex flex-col")
             .child(
                 TopBar::default()

@@ -11,7 +11,7 @@ use crate::{
     req::Req,
     res::Res,
     route,
-    ui::{bottom_bar, root::ROOT_ID, top_bar},
+    ui::{bottom_bar, top_bar},
 };
 
 pub async fn respond(
@@ -206,7 +206,7 @@ fn view_top_bar(model: &ViewModel) -> Elem {
 fn view_root() -> Elem {
     div()
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
-        .id(ROOT_ID)
+        .id_root()
 }
 
 fn view_empty_slide() -> Elem {
