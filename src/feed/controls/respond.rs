@@ -2,6 +2,10 @@ use super::{ctx::Ctx, route::Route, view_model::ViewModel};
 use crate::{
     core::{
         html::*,
+        http::{
+            response_writer::{self, HttpResponseWriter},
+            server_sent_event::sse,
+        },
         params::Params,
         ui::{
             self,
@@ -30,21 +34,29 @@ fn index_selector() -> String {
     format!("#{}", INDEX_ID)
 }
 
-pub async fn respond(ctx: &Ctx, req: &Req, route: &Route) -> Res {
+pub async fn respond(
+    response_writer: &mut HttpResponseWriter,
+    ctx: &Ctx,
+    req: &Req,
+    route: &Route,
+) -> Res {
     match route {
-        Route::IndexLoad { feed_id } => {
-            let res = view_screen_load_index(&feed_id)
-                .res()
-                .hx_retarget_root()
-                .cache();
-
-            res
-        }
-
         Route::Index { feed_id } => {
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_index_loading(&feed_id))
+                .send(response_writer)
+                .await;
+
             let model = ViewModel::load(ctx, feed_id, "").await;
 
-            view_screen_index(&model).res().hx_retarget_root()
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_index(&model))
+                .send(response_writer)
+                .await;
+
+            Res::empty()
         }
 
         Route::ClickedSave { feed_id } => {
@@ -90,7 +102,9 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
 }
 
 fn view_root() -> Elem {
-    div().class("w-full h-full flex flex-col overflow-hidden relative")
+    div()
+        .id_root()
+        .class("w-full h-full flex flex-col overflow-hidden relative")
 }
 
 fn view_section_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
@@ -120,7 +134,7 @@ fn view_section_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
         )
 }
 
-fn view_screen_load_index(feed_id: &FeedId) -> Elem {
+fn view_index_loading(feed_id: &FeedId) -> Elem {
     view_root()
         .child(view_section_search_bar(&feed_id, ""))
         .child(
@@ -136,7 +150,7 @@ fn view_screen_load_index(feed_id: &FeedId) -> Elem {
         .child(view_section_bottom_bar(&feed_id, ""))
 }
 
-fn view_screen_index(model: &ViewModel) -> Elem {
+fn view_index(model: &ViewModel) -> Elem {
     let clicked_save_path = route::Route::Feed(feed::route::Route::Controls(Route::ClickedSave {
         feed_id: model.feed.feed_id.clone(),
     }))
@@ -149,7 +163,7 @@ fn view_screen_index(model: &ViewModel) -> Elem {
         ))
         .child(
             form()
-                .class("w-full flex-1 flex flex-col overflow-hidden relative")
+                .class("m-0 w-full flex-1 flex flex-col overflow-hidden relative")
                 .hx_post(&clicked_save_path)
                 .hx_swap_none()
                 .child(view_section_tags(model))
@@ -169,7 +183,7 @@ fn view_section_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .color(Color::Gray)
                 .loading_disabled_path(&loading_path)
                 .view()
-                .hx_push_root_route(to_back_route(feed_id.clone()))
+                .data_on_click_push_then_get(&to_back_route(feed_id.clone()).encode())
                 .type_("button")
                 .class("flex-1")
                 .hx_abort(&index_selector()),

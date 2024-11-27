@@ -87,7 +87,7 @@ impl Elem {
         self.data_on_click(&js_get(url))
     }
 
-    pub fn data_on_click_push_get(self, url: &str) -> Self {
+    pub fn data_on_click_push_then_get(self, url: &str) -> Self {
         let push_url_script = format!("window.history.pushState(null, '', '{}')", url);
         let get_script = js_get(url);
         let script = format!("{}; {}", push_url_script, get_script);

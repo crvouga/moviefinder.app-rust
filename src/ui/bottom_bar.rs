@@ -22,7 +22,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .icon(ui::icon::home("size-6"))
                     .active(active == Active::Home)
                     .view()
-                    .data_on_click_push_get(
+                    .data_on_click_push_then_get(
                         &route::Route::Feed(feed::route::Route::Default).encode(),
                     ),
             )
@@ -32,7 +32,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .icon(ui::icon::user_circle("size-6"))
                     .active(active == Active::Account)
                     .view()
-                    .data_on_click_push_get(
+                    .data_on_click_push_then_get(
                         &route::Route::Account(account::route::Route::Index).encode(),
                     ),
             ),

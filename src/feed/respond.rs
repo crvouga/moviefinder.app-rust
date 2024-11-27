@@ -105,7 +105,9 @@ pub async fn respond(
             view_swiper_slides(feed_id, &feed_items).res()
         }
 
-        Route::Controls(child) => controls::respond::respond(&ctx.controls, req, child).await,
+        Route::Controls(child) => {
+            controls::respond::respond(response_writer, &ctx.controls, req, child).await
+        }
     }
 }
 
@@ -188,13 +190,12 @@ fn view_top_bar_root() -> Elem {
 }
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
-    view_top_bar_root()
-        .hx_push_root_route(route::Route::Feed(Route::Controls(
-            controls::route::Route::IndexLoad {
-                feed_id: feed_id.clone(),
-            },
-        )))
-        .hx_abort(&index_selector())
+    view_top_bar_root().data_on_click_push_then_get(
+        &route::Route::Feed(Route::Controls(controls::route::Route::Index {
+            feed_id: feed_id.clone(),
+        }))
+        .encode(),
+    )
 }
 
 fn view_top_bar(model: &ViewModel) -> Elem {
@@ -351,7 +352,7 @@ fn view_swiper_slide_content(feed_item: &FeedItem) -> Elem {
             feed_index: _,
         } => button()
             .class("w-full h-full")
-            .data_on_click_push_get(&to_media_details_route(&media.media_id).encode())
+            .data_on_click_push_then_get(&to_media_details_route(&media.media_id).encode())
             .aria_label("open media details")
             .child(
                 Image::new()
