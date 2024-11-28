@@ -1,8 +1,9 @@
-use super::{feed_id::FeedId, feed_tag::FeedTag};
 use crate::{
     core::query::QueryFilter,
     media::media_db::interface::{MediaQuery, MediaQueryField},
 };
+
+use super::{feed_id::FeedId, feed_tag::FeedTag};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -11,21 +12,18 @@ pub struct Feed {
     pub start_index: usize,
     pub tags: Vec<FeedTag>,
 }
-
-const LIMIT: usize = 3;
-
-impl From<&Feed> for MediaQuery {
-    fn from(feed: &Feed) -> MediaQuery {
-        let filters: Vec<QueryFilter<MediaQueryField>> = feed
+impl Feed {
+    pub fn to_media_query(self: &Self, limit: usize) -> MediaQuery {
+        let filters = self
             .clone()
             .tags
             .into_iter()
             .map(|feed_tag| feed_tag.into())
-            .collect();
+            .collect::<Vec<QueryFilter<MediaQueryField>>>();
 
         MediaQuery {
-            offset: feed.start_index,
-            limit: LIMIT,
+            limit,
+            offset: self.start_index,
             filter: QueryFilter::And(filters),
         }
     }

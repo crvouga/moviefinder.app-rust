@@ -5,7 +5,6 @@ pub mod db_conn_sql;
 pub mod env;
 pub mod env_stage;
 pub mod html;
-pub mod htmx;
 pub mod http;
 pub mod human_friendly_base64;
 pub mod image_set;

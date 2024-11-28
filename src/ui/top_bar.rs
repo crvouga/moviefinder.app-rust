@@ -100,21 +100,13 @@ impl CancelButton {
         button()
             .class("size-16 flex items-center justify-center shrink-0")
             .class("disabled:opacity-80 disabled:cursor-not-allowed")
-            .map(|elem| match self.route {
-                Some(route) => elem.hx_push_root_route(route),
-                None => elem,
-            })
+            // .map(|elem| match self.route {
+            //     Some(route) => elem.hx_push_root_route(route),
+            //     None => elem,
+            // })
             .aria_label("cancel")
             .tab_index(0)
             .child(icon::x_mark("size-8"))
-            .map(|elem| {
-                if let Some(loading_disabled_path) = self.loading_disabled_path {
-                    elem.hx_loading_disabled()
-                        .hx_loading_path(&loading_disabled_path)
-                } else {
-                    elem
-                }
-            })
     }
 }
 

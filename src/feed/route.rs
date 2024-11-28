@@ -10,9 +10,9 @@ pub enum Route {
         feed_id: FeedId,
     },
 
-    LoadMore {
+    ScrolledToBottom {
         feed_id: FeedId,
-        start_feed_index: usize,
+        bottom_feed_index: usize,
     },
 
     ChangedSlide {

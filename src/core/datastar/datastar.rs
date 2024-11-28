@@ -11,6 +11,10 @@ pub fn js_post(url: &str) -> String {
     format!("$post('{}', this)", url)
 }
 
+pub fn js_patch(url: &str) -> String {
+    format!("$patch('{}', this)", url)
+}
+
 impl Elem {
     pub fn src_datastar(self) -> Self {
         self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
@@ -49,7 +53,7 @@ impl Elem {
         self
     }
 
-    pub fn data_intersects(mut self, event: &str, value: &str) -> Self {
+    pub fn data_intersects(mut self, value: &str) -> Self {
         if let Elem::Tag {
             attrs: ref mut attributes,
             ..
@@ -71,11 +75,15 @@ impl Elem {
     }
 
     pub fn data_intersects_get(self, url: &str) -> Self {
-        self.data_intersects("get", &js_get(url))
+        self.data_intersects(&js_get(url))
     }
 
     pub fn data_on_then_post(self, event: &str, url: &str) -> Self {
         self.data_on(event, &js_post(url))
+    }
+
+    pub fn data_on_then_patch(self, event: &str, url: &str) -> Self {
+        self.data_on(event, &js_patch(url))
     }
 
     pub fn data_on_click(self, value: &str) -> Self {

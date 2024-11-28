@@ -13,18 +13,6 @@ impl Elem {
     pub fn id_root(self) -> Self {
         self.id(ROOT_ID)
     }
-
-    pub fn hx_swap_root(self) -> Self {
-        self.hx_target(&root_selector()).hx_swap_inner_html()
-    }
-
-    pub fn hx_swap_root_route(self, route: Route) -> Self {
-        self.hx_swap_root().hx_get(&route.encode())
-    }
-
-    pub fn hx_push_root_route(self, route: Route) -> Self {
-        self.hx_swap_root_route(route).hx_push_url()
-    }
 }
 
 pub struct Root {

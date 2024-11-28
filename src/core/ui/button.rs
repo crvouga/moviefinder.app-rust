@@ -40,20 +40,20 @@ impl Button {
         .class("enabled:hover:opacity-80 enabled:active:opacity-60")
         .class("disabled:opacity-80 disabled:cursor-not-allowed")
         .class(&self.color.to_class())
-        .map(|elem| {
-            if let Some(loading_path) = self.loading_path {
-                elem.hx_loading_path(&loading_path).hx_loading_aria_busy().hx_loading_disabled()
-            } else {
-                elem
-            }
-        })
-        .map(|elem| {
-            if let Some(loading_disabled_path) = self.loading_disabled_path {
-                elem.hx_loading_disabled().hx_loading_path(&loading_disabled_path)
-            } else {
-                elem
-            }
-        })
+        // .map(|elem| {
+        //     if let Some(loading_path) = self.loading_path {
+        //         elem.hx_loading_path(&loading_path).hx_loading_aria_busy().hx_loading_disabled()
+        //     } else {
+        //         elem
+        //     }
+        // })
+        // .map(|elem| {
+        //     if let Some(loading_disabled_path) = self.loading_disabled_path {
+        //         elem.hx_loading_disabled().hx_loading_path(&loading_disabled_path)
+        //     } else {
+        //         elem
+        //     }
+        // })
         .child(
             div()
                 .class("absolute inset-0 flex items-center justify-center opacity-0 group-aria-busy:opacity-100")

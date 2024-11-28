@@ -123,10 +123,6 @@ fn view_section_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .type_("button")
                 .tab_index(0)
                 .aria_label("close")
-                .hx_loading_disabled()
-                .hx_loading_path(loading_path)
-                .hx_abort(&index_selector())
-                .hx_push_root_route(to_back_route(feed_id.clone()))
                 .class("h-full pr-5 place-items-center")
                 .class("hidden peer-placeholder-shown:grid")
                 .child(icon::x_mark("size-6")),
@@ -136,16 +132,7 @@ fn view_section_search_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
 fn view_index_loading(feed_id: &FeedId) -> Elem {
     view_root()
         .child(view_section_search_bar(&feed_id, ""))
-        .child(
-            spinner_page::view()
-                .hx_swap_root_route(route::Route::Feed(feed::route::Route::Controls(
-                    Route::Index {
-                        feed_id: feed_id.clone(),
-                    },
-                )))
-                .hx_trigger_load()
-                .id(INDEX_ID),
-        )
+        .child(spinner_page::view().id(INDEX_ID))
         .child(view_section_bottom_bar(&feed_id, ""))
 }
 
@@ -163,8 +150,6 @@ fn view_index(model: &ViewModel) -> Elem {
         .child(
             form()
                 .class("m-0 w-full flex-1 flex flex-col overflow-hidden relative")
-                .hx_post(&clicked_save_path)
-                .hx_swap_none()
                 .child(view_section_tags(model))
                 .child(view_section_bottom_bar(
                     &model.feed.feed_id,
@@ -184,8 +169,7 @@ fn view_section_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .view()
                 .data_on_click_push_then_get(&to_back_route(feed_id.clone()).encode())
                 .type_("button")
-                .class("flex-1")
-                .hx_abort(&index_selector()),
+                .class("flex-1"),
         )
         .child(
             Button::new()
@@ -230,16 +214,6 @@ fn view_tag_chips_frag(model: &ViewModel) -> Elem {
                     .disabled(false)
                     .name(FEED_TAG_ID_NAME)
                     .view()
-                    .hx_trigger_click()
-                    .hx_swap_none()
-                    .hx_include_this()
-                    .hx_post(
-                        &route::Route::Feed(feed::route::Route::Controls(Route::ClickedTag {
-                            feed_id: model.feed.feed_id.clone(),
-                            tag: feed_tag.clone(),
-                        }))
-                        .encode(),
-                    )
             })
             .collect::<Vec<Elem>>(),
     )
