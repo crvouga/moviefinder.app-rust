@@ -4,13 +4,16 @@ use super::{content_type::ContentType, json_data::JsonData, method::Method, requ
 
 impl Request {
     pub fn params(&self) -> ParamsHashMap {
-        match (self.method.clone(), self.content_type()) {
-            (Method::Get, _) => self.url.query_params.params.clone(),
-            (Method::Post, ContentType::ApplicationJson) => {
-                let body_string = String::from_utf8_lossy(&self.body).to_string();
-                JsonData::from_string(&body_string).params
-            }
-            (_, _) => self.form_data.params.clone(),
+        match self.method.clone() {
+            Method::Get => self.url.query_params.params.clone(),
+            Method::Post | Method::Patch | Method::Put => match self.content_type() {
+                ContentType::ApplicationJson => {
+                    let body_string = String::from_utf8_lossy(&self.body).to_string();
+                    JsonData::from_string(&body_string).params
+                }
+                _ => self.form_data.params.clone(),
+            },
+            _ => self.form_data.params.clone(),
         }
     }
 }

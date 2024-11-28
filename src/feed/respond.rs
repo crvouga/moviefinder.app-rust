@@ -56,6 +56,8 @@ pub async fn respond(
                 .get_first("feedIndex")
                 .and_then(|s| s.parse::<usize>().ok());
 
+            println!("maybe_slide_index: {:?}", maybe_slide_index);
+
             let slide_index_new = match maybe_slide_index {
                 None => return Ok(()),
 
