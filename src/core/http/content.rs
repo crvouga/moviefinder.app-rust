@@ -1,6 +1,9 @@
 use super::{
-    content_encoding::ContentEncoding, response_writer::ResponseWriter, set_header::SetHeader,
+    content_encoding::ContentEncoding, request::Request, response_writer::ResponseWriter,
+    set_header::SetHeader,
 };
+
+impl Request {}
 
 impl ResponseWriter {
     pub async fn content(

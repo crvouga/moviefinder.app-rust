@@ -58,9 +58,11 @@ impl Root {
             .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
             .style("background-color: #000;")
             .child(
-                div().class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col").child(
-                    div().id_root().data_on_load_get(&self.route.encode())
-                )
+                div()
+                    .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col")
+                    .child(
+                        div().id_root().data_on_load_get(&self.route.encode())
+                    )
             )
         )
     }

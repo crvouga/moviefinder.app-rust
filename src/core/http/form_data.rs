@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::core::params::{Params, ParamsHashMap};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
@@ -9,12 +11,6 @@ impl Params for FormData {
     fn empty() -> Self {
         FormData {
             params: ParamsHashMap::empty(),
-        }
-    }
-
-    fn from_string(string: &str) -> Self {
-        FormData {
-            params: ParamsHashMap::from_string(string),
         }
     }
 
@@ -37,6 +33,28 @@ impl Params for FormData {
     }
 
     fn to_string(&self) -> String {
-        self.params.to_string()
+        self.params
+            .0
+            .iter()
+            .flat_map(|(key, values)| values.iter().map(move |value| format!("{}={}", key, value)))
+            .collect::<Vec<String>>()
+            .join("&")
+    }
+
+    fn from_string(string: &str) -> Self {
+        let mut map = HashMap::new();
+        for pair in string.split('&') {
+            let mut parts = pair.split('=');
+            let key: String = parts.next().unwrap_or("").to_string();
+            if key.is_empty() {
+                continue;
+            }
+            let value = parts.next().unwrap_or("").to_string();
+            map.entry(key).or_insert_with(Vec::new).push(value);
+        }
+
+        FormData {
+            params: ParamsHashMap(map),
+        }
     }
 }

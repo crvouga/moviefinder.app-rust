@@ -1,11 +1,8 @@
 use super::{content_encoding::ContentEncoding, form_data::FormData, method::Method};
-use crate::core::{
-    params::{Params, ParamsHashMap},
-    url::Url,
-};
+use crate::core::{params::Params, url::Url};
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Request {
     pub url: Url,
     pub method: Method,
@@ -42,13 +39,6 @@ impl Request {
             path_with_query_params,
             headers_string
         )
-    }
-
-    pub fn params(&self) -> ParamsHashMap {
-        match self.method {
-            Method::Get => self.url.query_params.params.clone(),
-            _ => self.form_data.params.clone(),
-        }
     }
 
     pub fn to_accept_encoding(&self) -> Vec<ContentEncoding> {

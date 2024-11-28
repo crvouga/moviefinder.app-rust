@@ -3,7 +3,7 @@ use std::{collections::HashMap, io::Cursor};
 use crate::{
     core::{
         html::{div, img, script, Elem},
-        http::{method::Method, request::Request},
+        http::{method::Method, request::Request, response_writer::ResponseWriter},
         params::Params,
         url::Url,
     },
@@ -14,10 +14,15 @@ use image::{self, imageops::FilterType};
 
 use super::{ctx::Ctx, route::Route};
 
-pub async fn response(ctx: &Ctx, route: &Route, req: &Request) -> Result<(), std::io::Error> {
+pub async fn respond(
+    ctx: &Ctx,
+    r: &Request,
+    route: &Route,
+    w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
     match route {
         Route::Resize => {
-            let width = req
+            let width = r
                 .params()
                 .get_first("width")
                 .unwrap_or(&"".to_string())
@@ -29,7 +34,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: &Request) -> Result<(), std
                 return Ok(());
             }
 
-            let height = req
+            let height = r
                 .params()
                 .get_first("height")
                 .unwrap_or(&"".to_string())
@@ -42,7 +47,7 @@ pub async fn response(ctx: &Ctx, route: &Route, req: &Request) -> Result<(), std
             }
 
             let src_empty = String::new();
-            let params = req.params();
+            let params = r.params();
             let src = params.get_first("src").unwrap_or(&src_empty).trim();
 
             if src.is_empty() {

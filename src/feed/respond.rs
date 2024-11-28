@@ -50,15 +50,9 @@ pub async fn respond(
         Route::Index { feed_id } => respond_index(ctx, r, route, w, feed_id).await,
 
         Route::ChangedSlide { feed_id } => {
-            sse()
-                .event_merge_fragments()
-                .data_fragments(div())
-                .send(w)
-                .await?;
-
             let maybe_slide_index = r
                 .params()
-                .get_first("feed_index")
+                .get_first("feedIndex")
                 .and_then(|s| s.parse::<usize>().ok());
 
             let slide_index_new = match maybe_slide_index {
@@ -167,7 +161,8 @@ async fn put_feed(ctx: &Ctx, session_id: &SessionId, feed: &Feed) {
     let put_session_mapping_fut = ctx
         .feed_session_mapping_db
         .put(session_id.clone(), feed.feed_id.clone());
-    let _ = tokio::join!(put_feed_fut, put_session_mapping_fut);
+
+    let _results = tokio::join!(put_feed_fut, put_session_mapping_fut);
 }
 
 struct ViewModel {

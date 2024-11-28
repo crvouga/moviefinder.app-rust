@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::core::{
     params::{Params, ParamsHashMap},
     url_encoded,
@@ -12,12 +14,6 @@ impl Params for QueryParams {
     fn empty() -> Self {
         QueryParams {
             params: ParamsHashMap::empty(),
-        }
-    }
-
-    fn from_string(string: &str) -> Self {
-        QueryParams {
-            params: ParamsHashMap::from_string(string),
         }
     }
 
@@ -50,5 +46,22 @@ impl Params for QueryParams {
             })
             .collect::<Vec<String>>()
             .join("&")
+    }
+
+    fn from_string(string: &str) -> Self {
+        let mut map = HashMap::new();
+        for pair in string.split('&') {
+            let mut parts = pair.split('=');
+            let key: String = parts.next().unwrap_or("").to_string();
+            if key.is_empty() {
+                continue;
+            }
+            let value = parts.next().unwrap_or("").to_string();
+            map.entry(key).or_insert_with(Vec::new).push(value);
+        }
+
+        QueryParams {
+            params: ParamsHashMap(map),
+        }
     }
 }

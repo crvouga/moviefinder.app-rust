@@ -49,7 +49,7 @@ async fn respond(ctx: Arc<Ctx>, r: Request, mut w: ResponseWriter) -> Result<(),
         r.params()
     );
 
-    match (maybe_route, r.is_datastar_request()) {
+    let result = match (maybe_route, r.is_datastar_request()) {
         (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
         (Some(route), false) => response_root(route, &r, &mut w).await,
@@ -60,7 +60,11 @@ async fn respond(ctx: Arc<Ctx>, r: Request, mut w: ResponseWriter) -> Result<(),
             Some(file_path) => response_public(&file_path, &r, &mut w).await,
             None => response_root(Route::Feed(feed::route::Route::Default), &r, &mut w).await,
         },
-    }
+    };
+
+    w.end().await?;
+
+    result
 }
 
 async fn response_root(

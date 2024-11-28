@@ -2,7 +2,7 @@ use super::params::Params;
 
 pub mod query_params;
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct Url {
     pub host: String,
     pub path: String,
