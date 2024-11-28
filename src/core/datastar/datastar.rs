@@ -127,6 +127,18 @@ impl ServerSentEvent {
         self.data_merge_mode("outer")
     }
 
+    pub fn data_merge_mode_before(&mut self) -> &mut Self {
+        self.data_merge_mode("before")
+    }
+
+    pub fn data_selector(&mut self, selector: &str) -> &mut Self {
+        self.data(&format!("selector {}", selector))
+    }
+
+    pub fn data_selector_id(&mut self, id: &str) -> &mut Self {
+        self.data_selector(&format!("#{}", id))
+    }
+
     pub fn data_fragments(&mut self, elem: Elem) -> &mut Self {
         let rendered = elem.render();
         let data = format!("fragments {}", rendered.replace("\n", ""));

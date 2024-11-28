@@ -1,6 +1,7 @@
 use super::{response_writer::ResponseWriter, set_header::SetHeader};
 use tokio::io::AsyncWriteExt;
 
+#[derive(Debug, Clone)]
 pub struct ServerSentEvent {
     event: String,
     data: Vec<String>,
@@ -31,6 +32,11 @@ impl ServerSentEvent {
         w.write_sse_event(&self.event, self.data.iter().map(|s| s.as_str()).collect())
             .await
     }
+
+    pub fn println(&mut self) -> &mut Self {
+        println!("ServerSentEvent: {:?}", self);
+        self
+    }
 }
 
 impl ResponseWriter {
@@ -55,6 +61,8 @@ impl ResponseWriter {
         }
 
         sse_message.push_str("\n");
+
+        println!("sse_message:\n{}", sse_message);
 
         self.stream.write_all(sse_message.as_bytes()).await?;
         self.stream.flush().await?;

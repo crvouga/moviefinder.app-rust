@@ -10,7 +10,7 @@ pub enum Route {
         feed_id: FeedId,
     },
 
-    ScrolledToBottom {
+    IntersectedBottom {
         feed_id: FeedId,
         bottom_feed_index: usize,
     },

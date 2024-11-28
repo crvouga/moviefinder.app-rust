@@ -4,15 +4,10 @@ use crate::{
         html::*,
         http::{request::Request, response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
-        query::QueryFilter,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image},
     },
-    media::{
-        self,
-        media_db::interface::{MediaQuery, MediaQueryField},
-        media_id::MediaId,
-    },
+    media::{self, media_id::MediaId},
     route,
     ui::{bottom_bar, top_bar},
 };
@@ -78,28 +73,31 @@ pub async fn respond(
             Ok(())
         }
 
-        Route::ScrolledToBottom {
+        Route::IntersectedBottom {
             feed_id,
-            bottom_feed_index: start_feed_index,
+            bottom_feed_index,
         } => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_with_new_index = Feed {
-                start_index: *start_feed_index,
+                start_index: *bottom_feed_index + 1,
                 ..feed
             };
 
-            let _feed_items = get_feed_items(ctx, &feed_with_new_index)
+            let feed_items = get_feed_items(ctx, &feed_with_new_index)
                 .await
                 .unwrap_or_default();
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(div())
-                .send(w)
-                .await?;
+            for feed_item in feed_items {
+                sse()
+                    .event_merge_fragments()
+                    .data_selector_id(BOTTOM_ID)
+                    .data_merge_mode_before()
+                    .data_fragments(view_slide(&feed_item))
+                    .send(w)
+                    .await?;
+            }
 
-            // view_swiper_slides(feed_id, &feed_items).res()
             Ok(())
         }
 
@@ -140,7 +138,7 @@ async fn respond_index(
     Ok(())
 }
 
-const LIMIT: usize = 10;
+const LIMIT: usize = 3;
 
 async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
     let query = feed.to_media_query(LIMIT);
@@ -211,7 +209,7 @@ fn view_root() -> Elem {
         .id_root()
 }
 
-fn view_empty_slide() -> Elem {
+fn view_slide_content_empty() -> Elem {
     Image::new()
         .view()
         .src(" ")
@@ -221,14 +219,14 @@ fn view_empty_slide() -> Elem {
 fn view_index_loading(feed_id: &FeedId) -> Elem {
     view_root()
         .child(view_top_bar_link_root(&feed_id).child(view_open_controls_button()))
-        .child(view_empty_slide())
+        .child(view_slide_content_empty())
         .child(view_bottom_bar())
 }
 
 fn view_default_loading() -> Elem {
     view_root()
         .child(view_top_bar_root().child(view_open_controls_button()))
-        .child(view_empty_slide())
+        .child(view_slide_content_empty())
         .child(view_bottom_bar())
 }
 
@@ -283,7 +281,7 @@ fn view_swiper(model: &ViewModel) -> Elem {
         .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
         .data_on("swiperslidechange", "$feedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
         .data_on_then_patch("swiperslidechange",route::Route::Feed(Route::ChangedSlide { feed_id: model.feed.feed_id.clone() }).encode().as_str())
-        .child(view_swiper_slides(&model.feed.feed_id, &model.initial_feed_items))
+        .child(view_slides(&model.feed.feed_id, &model.initial_feed_items))
 }
 
 fn view_swiper_empty() -> Elem {
@@ -297,26 +295,21 @@ fn view_swiper_empty() -> Elem {
         )
 }
 
-fn view_swiper_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
+fn view_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
     frag()
-        .children(
-            feed_items
-                .iter()
-                .map(view_swiper_slide)
-                .collect::<Vec<Elem>>(),
-        )
+        .children(feed_items.iter().map(view_slide).collect::<Vec<Elem>>())
         .child(
             feed_items
                 .iter()
                 .last()
                 .map(|last_feed_item| {
-                    view_swiper_slide_load_more(feed_id, last_feed_item.to_feed_index() + 1)
+                    view_slide_content_bottom(feed_id, last_feed_item.to_feed_index() + 1)
                 })
                 .unwrap_or(frag()),
         )
 }
 
-fn view_swiper_slide_root() -> Elem {
+fn view_slide_root() -> Elem {
     ui::swiper::slide()
         .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative")
 }
@@ -327,17 +320,20 @@ impl Elem {
     }
 }
 
-fn view_swiper_slide_load_more(feed_id: &FeedId, bottom_feed_index: usize) -> Elem {
-    view_swiper_slide_root()
+const BOTTOM_ID: &str = "load-more";
+
+fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem {
+    view_slide_root()
+        .id(BOTTOM_ID)
         .data_feed_index(bottom_feed_index)
         .data_intersects_get(
-            &route::Route::Feed(Route::ScrolledToBottom {
+            &route::Route::Feed(Route::IntersectedBottom {
                 feed_id: feed_id.clone(),
                 bottom_feed_index,
             })
             .encode(),
         )
-        .child(view_empty_slide())
+        .child(view_slide_content_empty())
 }
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {
@@ -348,13 +344,13 @@ fn to_media_details_route(media_id: &MediaId) -> route::Route {
     ))
 }
 
-fn view_swiper_slide(feed_item: &FeedItem) -> Elem {
-    view_swiper_slide_root()
+fn view_slide(feed_item: &FeedItem) -> Elem {
+    view_slide_root()
         .data_feed_index(feed_item.to_feed_index())
-        .child(view_swiper_slide_content(feed_item))
+        .child(view_slide_content(feed_item))
 }
 
-fn view_swiper_slide_content(feed_item: &FeedItem) -> Elem {
+fn view_slide_content(feed_item: &FeedItem) -> Elem {
     match feed_item {
         FeedItem::Media {
             media,
