@@ -1,3 +1,6 @@
+check: #
+  cargo check
+
 run: #
   npx kill-port 8000 && npx concurrently "just tw-watch" "just watch"
 

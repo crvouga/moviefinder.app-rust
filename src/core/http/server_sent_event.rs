@@ -62,7 +62,7 @@ impl ResponseWriter {
 
         sse_message.push_str("\n");
 
-        println!("sse_message:\n{}", sse_message);
+        // println!("sse_message:\n{}", sse_message);
 
         self.stream.write_all(sse_message.as_bytes()).await?;
         self.stream.flush().await?;

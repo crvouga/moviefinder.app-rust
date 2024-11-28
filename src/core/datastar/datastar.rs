@@ -1,6 +1,10 @@
+use std::time::Duration;
+
 use crate::core::{
     html::Elem,
-    http::{request::Request, server_sent_event::ServerSentEvent},
+    http::{json_data::JsonData, request::Request, server_sent_event::ServerSentEvent},
+    params::{Params, ParamsHashMap},
+    url_encoded,
 };
 
 pub fn js_get(url: &str) -> String {
@@ -24,12 +28,24 @@ impl Elem {
         self.attr_unsafe("data-model", value)
     }
 
+    pub fn data_ref(self, value: &str) -> Self {
+        self.attr_unsafe("data-ref", value)
+    }
+
     pub fn data_store(self, value: &str) -> Self {
         self.attr_unsafe("data-store", value)
     }
 
     pub fn data_text(self, value: &str) -> Self {
         self.attr_unsafe("data-text", value)
+    }
+
+    pub fn data_indicator(self, value: &str) -> Self {
+        self.attr_unsafe("data-indicator", value)
+    }
+
+    pub fn data_bind(self, attr: &str, value: &str) -> Self {
+        self.attr_unsafe(&format!("data-bind-{}", attr), value)
     }
 
     pub fn data_on(mut self, event: &str, value: &str) -> Self {
@@ -92,6 +108,24 @@ impl Elem {
 
     pub fn data_on_load(self, value: &str) -> Self {
         self.data_on("load", value)
+    }
+
+    pub fn data_on_input(self, value: &str) -> Self {
+        self.data_on("input", value)
+    }
+
+    pub fn data_on_input_get(self, url: &str) -> Self {
+        self.data_on_input(&js_get(url))
+    }
+
+    pub fn data_on_input_debounce(self, duration: Duration, value: &str) -> Self {
+        let ms = duration.as_millis();
+
+        self.data_on(&format!("input.debounce_{}ms", ms), value)
+    }
+
+    pub fn data_on_input_debounce_get(self, duration: Duration, url: &str) -> Self {
+        self.data_on_input_debounce(duration, &js_get(url))
     }
 
     pub fn data_on_click_get(self, url: &str) -> Self {
@@ -170,5 +204,16 @@ impl Request {
         let fallback = "".to_string();
         let header_value = self.headers.get("datastar-request").unwrap_or(&fallback);
         header_value == "true"
+    }
+
+    pub fn datastar_params(self: &Self) -> ParamsHashMap {
+        let datastar_params = self.url.query_params.get_first("datastar");
+
+        if let Some(urlencoded_json) = datastar_params {
+            let json = url_encoded::decode(urlencoded_json);
+            JsonData::from_string(&json).params
+        } else {
+            self.params()
+        }
     }
 }

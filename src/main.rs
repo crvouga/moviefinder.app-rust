@@ -4,6 +4,7 @@ use core::{
 };
 use ctx::Ctx;
 use env::Env;
+use req::Req;
 use route::Route;
 use std::sync::Arc;
 use ui::root;
@@ -17,6 +18,7 @@ mod fixture;
 mod key_value_db;
 mod media;
 mod person;
+mod req;
 mod respond;
 mod route;
 mod ui;
@@ -36,29 +38,38 @@ async fn main() {
         .unwrap();
 }
 
-async fn respond(ctx: Arc<Ctx>, r: Request, mut w: ResponseWriter) -> Result<(), std::io::Error> {
-    r.write_session_id_cookie(&mut w);
+async fn respond(
+    ctx: Arc<Ctx>,
+    request: Request,
+    mut w: ResponseWriter,
+) -> Result<(), std::io::Error> {
+    request.write_session_id_cookie(&mut w);
 
-    let maybe_route = r.route();
+    let maybe_route = request.route();
+
+    let r = Req {
+        params: request.datastar_params(),
+        session_id: request.session_id(),
+    };
 
     log_info!(
         ctx.logger,
         "{:?} session_id={:?} params={:?}",
         maybe_route,
-        r.session_id(),
-        r.params()
+        r.session_id,
+        r.params
     );
 
-    let result = match (maybe_route, r.is_datastar_request()) {
+    let result = match (maybe_route, request.is_datastar_request()) {
         (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
-        (Some(route), false) => response_root(route, &r, &mut w).await,
+        (Some(route), false) => response_root(route, &request, &mut w).await,
 
         (None, true) => respond_fallback(&ctx, &r, &mut w).await,
 
-        (None, false) => match resolve_public_asset(&r.url.path).await {
-            Some(file_path) => response_public(&file_path, &r, &mut w).await,
-            None => response_root(Route::Feed(feed::route::Route::Default), &r, &mut w).await,
+        (None, false) => match resolve_public_asset(&request.url.path).await {
+            Some(file_path) => response_public(&file_path, &request, &mut w).await,
+            None => response_root(Route::Feed(feed::route::Route::Default), &request, &mut w).await,
         },
     };
 
@@ -115,7 +126,7 @@ async fn response_public(
 
 async fn respond_fallback(
     ctx: &Ctx,
-    r: &Request,
+    r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     let fallback = feed::route::Route::Default;

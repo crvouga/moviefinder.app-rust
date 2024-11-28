@@ -1,13 +1,14 @@
 use crate::{
     core::{
         html::*,
-        http::{request::Request, response_writer::ResponseWriter, server_sent_event::sse},
+        http::{response_writer::ResponseWriter, server_sent_event::sse},
         query::{Query, QueryFilter, QueryOp},
         ui::{self, image::Image},
     },
     ctx::Ctx,
     feed,
     media::{media_::Media, media_db::interface::MediaQueryField},
+    req::Req,
     route,
     ui::top_bar::TopBar,
 };
@@ -16,7 +17,7 @@ use super::route::Route;
 
 pub async fn respond(
     ctx: &Ctx,
-    _r: &Request,
+    _r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {

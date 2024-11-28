@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::core::{
     html::*,
     ui::icon::{self, spinner},
@@ -5,10 +7,11 @@ use crate::core::{
 
 #[derive(Debug, Clone, Default)]
 pub struct SearchBar {
-    inputted_search_path: String,
-    inputted_search_target: String,
-    input_search_id: String,
+    search_url: String,
+    search_results_id: String,
+    input_id: String,
     input_search_name: String,
+    input_model: String,
 }
 
 impl SearchBar {
@@ -16,40 +19,53 @@ impl SearchBar {
         Self::default()
     }
 
-    pub fn inputted_search_path(mut self, inputted_search_path: &str) -> Self {
-        self.inputted_search_path = inputted_search_path.to_string();
+    pub fn input_model(mut self, value: &str) -> Self {
+        self.input_model = value.to_string();
         self
     }
 
-    pub fn inputted_search_target(mut self, inputted_search_target: &str) -> Self {
-        self.inputted_search_target = inputted_search_target.to_string();
+    pub fn search_url(mut self, value: &str) -> Self {
+        self.search_url = value.to_string();
         self
     }
 
-    pub fn input_search_id(mut self, input_search_id: &str) -> Self {
-        self.input_search_id = input_search_id.to_string();
+    pub fn search_results_id(mut self, value: &str) -> Self {
+        self.search_results_id = value.to_string();
         self
     }
 
-    pub fn input_search_name(mut self, input_search_name: &str) -> Self {
+    pub fn input_id(mut self, value: &str) -> Self {
+        self.input_id = value.to_string();
+        self
+    }
+
+    pub fn input_name(mut self, input_search_name: &str) -> Self {
         self.input_search_name = input_search_name.to_string();
         self
     }
 
     pub fn view(&self) -> Elem {
         label()
+            .data_on_input_debounce_get(Duration::from_millis(250), &self.search_url)
+            // .data_indicator("fetching")
+            // .data(|a| a.on().input().debounce(500).js_get(&self.search_url).js("console.log('hello')"))
             .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
             .child(
                 div()
-                    .class("h-full grid place-items-center pl-4 pr-2")
-                    .child(icon::magnifying_glass("size-6")),
+                .class("h-full grid place-items-center pl-4 pr-2")
+                .child(icon::magnifying_glass("size-6")),
             )
+            
             .child(
                 input()
-                    .id(&self.input_search_id)
+                    .id(&self.input_id)
                     .class("flex-1 h-full bg-transparent peer outline-none")
+                    .data_model(&self.input_model)
                     .type_("text")
                     .name(&self.input_search_name)
+                    .data_on("clear", "evt.target.value = ''")
+                    .data_on("clear", "evt?.target?.focus()")
+
                     .placeholder("Search"),
             )
             .child(
@@ -61,10 +77,11 @@ impl SearchBar {
                 button()
                     .type_("button")
                     .tab_index(0)
+                    .data_on_click("evt?.target?.parentNode?.querySelector?.('input')?.dispatchEvent(new Event('clear'))")
                     .aria_label("clear search")
                     .class("h-full pr-5 place-items-center")
                     .class("grid peer-placeholder-shown:hidden")
-                    .child(icon::x_circle_mark("size-6")),
+                    .child(icon::x_circle_mark("size-6 pointer-events-none")),
             )
     }
 }
