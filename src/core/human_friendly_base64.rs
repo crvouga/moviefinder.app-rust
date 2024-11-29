@@ -41,28 +41,22 @@ fn remove_leading_slash(path: &str) -> String {
 }
 
 pub fn to_human_friendly_str<T: Serialize>(route: T) -> String {
-    let serialized = serde_json::to_string(&route).unwrap_or("".to_owned());
+    let serialized = serde_json::to_string(&route).unwrap_or_default();
 
-    let mut human_friendly = serialized
-        .replace(r#"""#, "")
-        .replace(":", ".")
-        .replace("{", "")
-        .replace("}", "")
-        .replace(",", ".")
-        .replace(" ", "")
-        .replace("/", ".")
-        .split(".")
-        .filter(|s| {
-            if s.starts_with('[') && s.ends_with(']') {
-                let content = &s[1..s.len() - 1];
-                content.len() > 0 && content.len() < 50
-            } else {
-                s.len() > 0 && s.len() < 20
-            }
+    let keys = serde_json::from_str::<serde_json::Value>(&serialized)
+        .ok()
+        .and_then(|value| match value {
+            serde_json::Value::Object(map) => Some(
+                map.keys()
+                    .filter(|key| key.len() > 0 && key.len() < 20)
+                    .cloned()
+                    .collect::<Vec<String>>(),
+            ),
+            _ => None,
         })
-        .collect::<Vec<&str>>()
-        .join(".");
+        .unwrap_or_default();
 
+    let mut human_friendly = keys.join(".");
     human_friendly.truncate(100);
 
     human_friendly

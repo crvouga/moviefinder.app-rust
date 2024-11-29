@@ -153,6 +153,22 @@ impl ServerSentEvent {
         self.event("datastar-merge-fragments")
     }
 
+    pub fn event_merge_signals(&mut self) -> &mut Self {
+        self.event("datastar-merge-signals")
+    }
+
+    pub fn data_signals(&mut self, value: &str) -> &mut Self {
+        self.data(&format!("signals {}", value))
+    }
+
+    pub fn data_only_if_missing(&mut self, value: bool) -> &mut Self {
+        if value {
+            self.data("onlyIfMissing true")
+        } else {
+            self.data("onlyIfMissing false")
+        }
+    }
+
     pub fn data_merge_mode(&mut self, mode: &str) -> &mut Self {
         self.data(&format!("mergeMode {}", mode))
     }

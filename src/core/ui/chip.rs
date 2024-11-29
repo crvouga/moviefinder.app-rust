@@ -9,11 +9,18 @@ pub struct Chip {
     pub disabled: bool,
     pub size: ChipSize,
     pub image: Option<String>,
+    pub input_model: String,
+    pub bind_checked: String,
 }
 
 impl Chip {
     pub fn id(mut self, id: &str) -> Self {
         self.id = id.to_string();
+        self
+    }
+
+    pub fn input_model(mut self, input_model: &str) -> Self {
+        self.input_model = input_model.to_string();
         self
     }
 
@@ -34,6 +41,11 @@ impl Chip {
 
     pub fn checked(mut self, checked: bool) -> Self {
         self.checked = checked;
+        self
+    }
+
+    pub fn bind_checked(mut self, value: &str) -> Self {
+        self.bind_checked = value.to_string();
         self
     }
 
@@ -59,6 +71,13 @@ impl Chip {
             .checked(self.checked)
             .disabled(self.disabled)
             .on_click("event.stopPropagation()")
+            .map(|e| {
+                if self.bind_checked.len() > 0 {
+                    e.data_bind("checked", &self.bind_checked)
+                } else {
+                    e
+                }
+            })
         )
         .child(
             label()

@@ -18,8 +18,6 @@ use crate::{
     route,
 };
 
-const FEED_TAG_ID_NAME: &str = "feed_tag_id";
-
 pub async fn respond(
     ctx: &Ctx,
     r: &Req,
@@ -39,6 +37,23 @@ pub async fn respond(
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_index(&model))
+                .send(w)
+                .await?;
+
+            let signal_selected_tag_ids = model
+                .form_state
+                .tags
+                .iter()
+                .map(|t| format!("'{}'", t.encode()))
+                .collect::<Vec<String>>()
+                .join(",");
+
+            sse()
+                .event_merge_signals()
+                .data_signals(&format!(
+                    "{{signalSelectedTagIds: [{}]}}",
+                    signal_selected_tag_ids
+                ))
                 .send(w)
                 .await?;
 
@@ -100,7 +115,8 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
 fn view_root() -> Elem {
     div()
         .id_root()
-        .data_store("{signalInputValue: ''}")
+        .data_store("{signalInputValue: '', signalSelectedTagIds: []}")
+        .child(code().child(pre().data_text("JSON.stringify(ctx.store(),null,2)")))
         .class("w-full h-full flex flex-col overflow-hidden relative")
 }
 
@@ -145,7 +161,7 @@ fn view_index(model: &ViewModel) -> Elem {
     view_root()
         .child(view_search_input(&model.feed.feed_id, &clicked_save_path))
         .child(
-            form()
+            div()
                 .class("m-0 w-full flex-1 flex flex-col overflow-hidden relative")
                 .child(view_search_results(model))
                 .child(view_section_bottom_bar(
@@ -195,6 +211,10 @@ fn view_search_results_content(model: &ViewModel) -> Elem {
     }
 
     div()
+        .data_on(
+            "change",
+            "let v = evt.target.value; $signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : $signalSelectedTagIds.concat(v)",
+        )
         .class("flex flex-row items-start justify-start flex-wrap gap-2")
         .child(view_search_results_frag(&model))
 }
@@ -208,9 +228,10 @@ fn view_search_results_frag(model: &ViewModel) -> Elem {
                 feed_tag
                     .chip()
                     .size(ChipSize::Large)
-                    .checked(model.form_state.tags.contains(feed_tag))
-                    .disabled(false)
-                    .name(FEED_TAG_ID_NAME)
+                    .bind_checked(&format!(
+                        "$signalSelectedTagIds.includes('{}')",
+                        feed_tag.encode()
+                    ))
                     .view()
             })
             .collect::<Vec<Elem>>(),

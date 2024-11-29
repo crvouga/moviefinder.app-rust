@@ -46,16 +46,14 @@ impl SearchBar {
 
     pub fn view(&self) -> Elem {
         label()
-            .data_on_input_debounce_get(Duration::from_millis(250), &self.search_url)
-            // .data_indicator("fetching")
             // .data(|a| a.on().input().debounce(500).js_get(&self.search_url).js("console.log('hello')"))
             .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
+            .data_bind("aria-busy", "$signalFetching")
             .child(
                 div()
-                .class("h-full grid place-items-center pl-4 pr-2")
-                .child(icon::magnifying_glass("size-6")),
+                    .class("h-full grid place-items-center pl-4 pr-2")
+                    .child(icon::magnifying_glass("size-6")),
             )
-            
             .child(
                 input()
                     .id(&self.input_id)
@@ -65,7 +63,8 @@ impl SearchBar {
                     .name(&self.input_search_name)
                     .data_on("clear", "evt.target.value = ''")
                     .data_on("clear", "evt?.target?.focus()")
-
+                    .data_on_input_debounce_get(Duration::from_millis(250), &self.search_url)
+                    .data_indicator("signalFetching")
                     .placeholder("Search"),
             )
             .child(
@@ -77,7 +76,8 @@ impl SearchBar {
                 button()
                     .type_("button")
                     .tab_index(0)
-                    .data_on_click("evt?.target?.parentNode?.querySelector?.('input')?.dispatchEvent(new Event('clear'))")
+                    // .data_on_click("evt?.target?.parentNode?.querySelector?.('input')?.dispatchEvent(new Event('clear'))")
+                    .data_on_click(&format!("${} = ''", self.input_model))
                     .aria_label("clear search")
                     .class("h-full pr-5 place-items-center")
                     .class("grid peer-placeholder-shown:hidden")
