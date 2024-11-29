@@ -36,6 +36,22 @@ impl Elem {
         self.attr_unsafe("data-store", value)
     }
 
+    pub fn data_persist(self, value: &str) -> Self {
+        self.attr_unsafe("data-persist", value)
+    }
+
+    pub fn data_on_store_change(self, value: &str) -> Self {
+        self.attr_unsafe("data-on-store-change", value)
+    }
+
+    pub fn data_class(self, value: &str) -> Self {
+        self.attr_unsafe("data-class", value)
+    }
+
+    pub fn data_on_store_change_patch(self, url: &str) -> Self {
+        self.attr_unsafe("data-on-store-change", &js_patch(url))
+    }
+
     pub fn data_text(self, value: &str) -> Self {
         self.attr_unsafe("data-text", value)
     }
@@ -46,6 +62,14 @@ impl Elem {
 
     pub fn data_bind(self, attr: &str, value: &str) -> Self {
         self.attr_unsafe(&format!("data-bind-{}", attr), value)
+    }
+
+    pub fn data_show(self, value: &str) -> Self {
+        self.attr_unsafe("data-show", value)
+    }
+
+    pub fn data_computed(self, name: &str, value: &str) -> Self {
+        self.attr_unsafe(&format!("data-computed-{}", name), value)
     }
 
     pub fn data_on(mut self, event: &str, value: &str) -> Self {

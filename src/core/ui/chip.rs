@@ -11,6 +11,7 @@ pub struct Chip {
     pub image: Option<String>,
     pub input_model: String,
     pub bind_checked: String,
+    pub signal_checked: String,
 }
 
 impl Chip {
@@ -49,6 +50,11 @@ impl Chip {
         self
     }
 
+    pub fn signal_checked(mut self, value: &str) -> Self {
+        self.signal_checked = value.to_string();
+        self
+    }
+
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -83,7 +89,15 @@ impl Chip {
             label()
             .for_(&self.id)
             .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 border border-neutral-800 text-white cursor-pointer select-none truncate whitespace-nowrap")
-            .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
+            // .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
+            .map(|e| {
+                if self.signal_checked.len() > 0 {
+                    e.data_class(&format!("{{'bg-white font-bold text-black': {}}}", &self.signal_checked))
+                } else {
+                    e
+                }
+            })
+            
             .class(&self.size.to_text_size())
             .class(&self.size.to_h())
             .tab_index(0)
