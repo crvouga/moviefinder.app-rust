@@ -34,18 +34,6 @@ pub async fn respond(
 
             let model = ViewModel::load(ctx, feed_id, "").await;
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_selected(&model))
-                .send(w)
-                .await?;
-
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_unselected(&model))
-                .send(w)
-                .await?;
-
             let signal_selected_tag_ids = model
                 .form_state
                 .tags
@@ -60,6 +48,18 @@ pub async fn respond(
                     "{{signalSelectedTagIds: [{}]}}",
                     signal_selected_tag_ids
                 ))
+                .send(w)
+                .await?;
+
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_selected(&model))
+                .send(w)
+                .await?;
+
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_unselected(&model))
                 .send(w)
                 .await?;
 
@@ -329,14 +329,6 @@ fn view_screen(feed_id: &FeedId) -> Elem {
         .child(view_unselected_loading())
         .child(view_bottom_bar(&feed_id))
 }
-
-// fn view_screen(model: &ViewModel) -> Elem {
-//     view_root(&model.feed.feed_id)
-//         .child(view_selected(&model))
-//         .child(view_search_input(&model.feed.feed_id))
-//         .child(view_unselected(model))
-//         .child(view_bottom_bar(&model.feed.feed_id))
-// }
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
     div()
