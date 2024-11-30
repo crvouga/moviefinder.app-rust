@@ -10,14 +10,15 @@ use crate::{
 };
 
 fn to_screen_id(child_id: &str) -> String {
-    let child_id = child_id.trim();
-    let prefix = "account";
+    return child_id.to_string();
+    // let child_id = child_id.trim();
+    // let prefix = "account";
 
-    if child_id.is_empty() {
-        prefix.to_string()
-    } else {
-        format!("{}-{}", prefix, child_id)
-    }
+    // if child_id.is_empty() {
+    //     prefix.to_string()
+    // } else {
+    //     format!("{}-{}", prefix, child_id)
+    // }
 }
 
 pub async fn respond(
@@ -41,5 +42,5 @@ pub fn view_index_login_cta() -> Elem {
         .id(&to_screen_id(""))
         .class("w-full flex-1 flex items-center justify-center flex-col")
         .child(div().class("flex-1").child_text("Account"))
-        .child(bottom_bar::view(bottom_bar::Active::Account, &""))
+        .child(bottom_bar::view(bottom_bar::Active::Account))
 }

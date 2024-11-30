@@ -1,6 +1,7 @@
 use super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags, route::Route};
 use crate::{
     core::{
+        datastar::datastar::BuilderShared,
         html::*,
         http::{response_writer::ResponseWriter, server_sent_event::sse},
         session::session_id::SessionId,
@@ -21,20 +22,21 @@ pub struct ViewModel {
     pub initial_feed_items: Vec<FeedItem>,
 }
 
-pub fn to_screen_id(feed_id: Option<&FeedId>, child_id: &str) -> String {
-    let feed_id = feed_id.map_or("feed", |s| s.as_str());
-    let child_id = child_id.trim();
-    let prefix = "feed";
+pub fn to_screen_id(_feed_id: Option<&FeedId>, child_id: &str) -> String {
+    return child_id.to_string();
+    // let feed_id = feed_id.map_or("feed", |s| s.as_str());
+    // let child_id = child_id.trim();
+    // let prefix = "feed";
 
-    if feed_id.is_empty() && child_id.is_empty() {
-        prefix.to_string()
-    } else if feed_id.is_empty() {
-        format!("{}-{}", prefix, child_id)
-    } else if child_id.is_empty() {
-        format!("{}-{}", prefix, feed_id)
-    } else {
-        format!("{}-{}-{}", prefix, feed_id, child_id)
-    }
+    // if feed_id.is_empty() && child_id.is_empty() {
+    //     prefix.to_string()
+    // } else if feed_id.is_empty() {
+    //     format!("{}-{}", prefix, child_id)
+    // } else if child_id.is_empty() {
+    //     format!("{}-{}", prefix, feed_id)
+    // } else {
+    //     format!("{}-{}-{}", prefix, feed_id, child_id)
+    // }
 }
 
 pub async fn respond_screen(
@@ -139,12 +141,16 @@ fn view_top_bar_loading(feed_id: Option<&FeedId>) -> Elem {
 }
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
-    view_top_bar_root(Some(feed_id)).data_on_click_push_then_get(
-        &route::Route::Feed(Route::Tags(feed_tags::route::Route::Screen {
-            feed_id: feed_id.clone(),
-        }))
-        .encode(),
-    )
+    view_top_bar_root(Some(feed_id)).on(|b| {
+        b.click()
+            .push_then_get(
+                &route::Route::Feed(Route::Tags(feed_tags::route::Route::Screen {
+                    feed_id: feed_id.clone(),
+                }))
+                .encode(),
+            )
+            .b()
+    })
 }
 
 fn view_top_bar_loading_with_link(feed_id: &FeedId) -> Elem {
@@ -207,7 +213,7 @@ fn view_tags(model: &ViewModel) -> Elem {
 }
 
 fn view_bottom_bar(feed_id: Option<&FeedId>) -> Elem {
-    bottom_bar::view(bottom_bar::Active::Home, "").id(&to_screen_id(feed_id, "bottom-bar"))
+    bottom_bar::view(bottom_bar::Active::Home).id(&to_screen_id(feed_id, "bottom-bar"))
 }
 
 fn view_swiper_root(feed_id: Option<&FeedId>) -> Elem {
@@ -232,8 +238,10 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
         .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
-        .data_on("swiperslidechange", "$signalFeedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
-        .data_on_then_patch("swiperslidechange",route::Route::Feed(Route::ChangedSlide { feed_id: model.feed_id.clone() }).encode().as_str())
+        .on(|b| b
+                .e("swiperslidechange")
+                .js("$signalFeedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
+                .patch(&route::Route::Feed(Route::ChangedSlide { feed_id: model.feed_id.clone() }).encode()).b())
         .child(view_slides(&model.feed_id, &model.initial_feed_items))
 }
 
@@ -279,13 +287,17 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
     view_slide_root()
         .id(BOTTOM_ID)
         .data_feed_index(bottom_feed_index)
-        .data_intersects_get(
-            &route::Route::Feed(Route::IntersectedBottom {
-                feed_id: feed_id.clone(),
-                bottom_feed_index,
-            })
-            .encode(),
-        )
+        .on(|b| {
+            b.intersects()
+                .get(
+                    &route::Route::Feed(Route::IntersectedBottom {
+                        feed_id: feed_id.clone(),
+                        bottom_feed_index,
+                    })
+                    .encode(),
+                )
+                .b()
+        })
         .child(view_slide_content_loading())
 }
 
@@ -309,8 +321,12 @@ fn view_slide_content(feed_item: &FeedItem) -> Elem {
             media,
             feed_index: _,
         } => button()
-            .class("w-full h-full")
-            .data_on_click_push_then_get(&to_media_details_route(&media.id).encode())
+            .class("w-full h-full m-0 p-0")
+            .on(|b| {
+                b.click()
+                    .push_then_get(&to_media_details_route(&media.id).encode())
+                    .b()
+            })
             .aria_label("open media details")
             .child(
                 Image::new()

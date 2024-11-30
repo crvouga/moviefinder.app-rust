@@ -2,7 +2,7 @@ check: #
   cargo check
 
 run: #
-  npx kill-port 8000 && npx concurrently "just tw-watch" "just watch"
+  npx kill-port 8000 && just watch
 
 watch: #
   cargo watch -x run
@@ -24,6 +24,12 @@ test: #
 
 cloc: #
   npx cloc src
+
+tw4-setup-macos-x86: #
+  curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.0-beta.1/tailwindcss-macos-x64 && chmod +x tailwindcss-macos-x64 && mv tailwindcss-macos-x64 tailwindcss
+
+tw4-setup-macos-arm64: #
+  curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.0-beta.1/tailwindcss-macos-arm64 && chmod +x tailwindcss-macos-arm64 && mv tailwindcss-macos-arm64 tailwindcss
 
 tw-setup-macos-x86: #
   curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-x64 && chmod +x tailwindcss-macos-x64 && mv tailwindcss-macos-x64 tailwindcss

@@ -1,7 +1,12 @@
 use crate::core::html::*;
 
+const BASE_CLASS: &str = "text-inherit";
+
 fn add_class(html: &str, class: &str) -> Elem {
-    let replaced: String = html.replace("ATTRS", &format!("class=\"{}\"", class));
+    let replaced: String = html.replace(
+        "ATTRS",
+        &format!("class=\"{} {}\"", BASE_CLASS, class.trim()),
+    );
     unsafe_html(&replaced)
 }
 

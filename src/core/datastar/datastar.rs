@@ -19,6 +19,215 @@ pub fn js_patch(url: &str) -> String {
     format!("$patch('{}', this)", url)
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct Builder {}
+
+#[derive(Debug, Clone)]
+pub enum BuilderVariant {
+    On(BuilderOn),
+    Intersects(BuilderIntersects),
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct BuilderOn {
+    event: String,
+    modifiers: Vec<String>,
+    actions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct BuilderIntersects {
+    event: String,
+    modifiers: Vec<String>,
+    actions: Vec<String>,
+}
+
+pub trait BuilderShared {
+    fn to_attr_key_string(&self) -> String;
+    fn to_attr_value_string(&self) -> String;
+    fn b(&self) -> BuilderVariant;
+}
+
+impl BuilderShared for BuilderVariant {
+    fn to_attr_key_string(&self) -> String {
+        match self {
+            BuilderVariant::On(b) => b.to_attr_key_string(),
+            BuilderVariant::Intersects(b) => b.to_attr_key_string(),
+        }
+    }
+
+    fn to_attr_value_string(&self) -> String {
+        match self {
+            BuilderVariant::On(b) => b.to_attr_value_string(),
+            BuilderVariant::Intersects(b) => b.to_attr_value_string(),
+        }
+    }
+
+    fn b(&self) -> BuilderVariant {
+        self.clone()
+    }
+}
+
+impl Builder {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn e(self, event: &str) -> BuilderOn {
+        BuilderOn::new(event)
+    }
+
+    pub fn input(self) -> BuilderOn {
+        self.e("input")
+    }
+
+    pub fn click(self) -> BuilderOn {
+        self.e("click")
+    }
+
+    pub fn load(self) -> BuilderOn {
+        self.e("load")
+    }
+
+    pub fn store_changed(self) -> BuilderOn {
+        self.e("store-changed")
+    }
+
+    pub fn raf(self) -> BuilderOn {
+        self.e("raf")
+    }
+
+    pub fn intersects(self) -> BuilderIntersects {
+        BuilderIntersects::new()
+    }
+}
+
+impl BuilderIntersects {
+    pub fn new() -> Self {
+        Self {
+            event: "intersects".to_string(),
+            modifiers: vec![],
+            actions: vec![],
+        }
+    }
+
+    pub fn get(mut self, url: &str) -> Self {
+        self.actions.push(js_get(url));
+        self
+    }
+}
+
+impl BuilderShared for BuilderIntersects {
+    fn to_attr_key_string(&self) -> String {
+        let modifiers_str = self.modifiers.join(".");
+        let attr_str = if modifiers_str.is_empty() {
+            self.event.clone()
+        } else {
+            format!("{}.{}", self.event, modifiers_str)
+        };
+        format!("data-on-{}", attr_str)
+    }
+
+    fn to_attr_value_string(&self) -> String {
+        self.actions.join("; ")
+    }
+
+    fn b(&self) -> BuilderVariant {
+        BuilderVariant::Intersects(self.clone())
+    }
+}
+
+impl BuilderOn {
+    pub fn new(event: &str) -> Self {
+        Self {
+            event: event.to_string(),
+            modifiers: vec![],
+            actions: vec![],
+        }
+    }
+    pub fn debounce(mut self, duration: Duration) -> Self {
+        self.modifiers
+            .push(format!("debounce_{}ms", duration.as_millis()));
+        self
+    }
+
+    pub fn once(mut self) -> Self {
+        self.modifiers.push("once".to_string());
+        self
+    }
+
+    pub fn passive(mut self) -> Self {
+        self.modifiers.push("passive".to_string());
+        self
+    }
+
+    pub fn capture(mut self) -> Self {
+        self.modifiers.push("capture".to_string());
+        self
+    }
+
+    pub fn throttle(mut self, duration: Duration) -> Self {
+        self.modifiers
+            .push(format!("throttle_{}ms", duration.as_millis()));
+        self
+    }
+
+    pub fn window(mut self) -> Self {
+        self.modifiers.push("window".to_string());
+        self
+    }
+
+    pub fn get(mut self, url: &str) -> Self {
+        self.actions.push(js_get(url));
+        self
+    }
+
+    pub fn patch(mut self, url: &str) -> Self {
+        self.actions.push(js_patch(url));
+        self
+    }
+
+    pub fn post(mut self, url: &str) -> Self {
+        self.actions.push(js_post(url));
+        self
+    }
+
+    pub fn js(mut self, script: &str) -> Self {
+        self.actions.push(script.to_string());
+        self
+    }
+
+    pub fn push_url(mut self, url: &str) -> Self {
+        self.actions
+            .push(format!("window.history.pushState(null, '', '{}');", url));
+        self
+    }
+
+    pub fn push_then_get(self, url: &str) -> Self {
+        self.push_url(url).get(url)
+    }
+}
+
+impl BuilderShared for BuilderOn {
+    fn to_attr_key_string(&self) -> String {
+        let modifiers_str = self.modifiers.join(".");
+        let attr_str = if modifiers_str.is_empty() {
+            self.event.clone()
+        } else {
+            format!("{}.{}", self.event, modifiers_str)
+        };
+        format!("data-on-{}", attr_str)
+    }
+
+    fn to_attr_value_string(&self) -> String {
+        self.actions.join("; ")
+    }
+
+    fn b(&self) -> BuilderVariant {
+        BuilderVariant::On(self.clone())
+    }
+}
+
 impl Elem {
     pub fn src_datastar(self) -> Self {
         self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
@@ -36,37 +245,22 @@ impl Elem {
         self.attr_unsafe("data-store", value)
     }
 
+    pub fn on(self, b: impl FnOnce(Builder) -> BuilderVariant) -> Self {
+        let event = Builder::new();
+        let modifiers = b(event);
+
+        let key = modifiers.to_attr_key_string();
+        let value = modifiers.to_attr_value_string();
+
+        self.attr_unsafe(&key, &value)
+    }
+
     pub fn data_persist(self, value: &str) -> Self {
         self.attr_unsafe("data-persist", value)
     }
 
-    pub fn data_on_store_change(mut self, value: &str) -> Self {
-        if let Elem::Tag {
-            attrs: ref mut attributes,
-            ..
-        } = self
-        {
-            let key = "data-on-store-change";
-            let existing = attributes.get(key).map_or("", |attr| attr.as_str());
-
-            let new = if existing.is_empty() {
-                value.trim().to_string()
-            } else {
-                format!("{}; {}", existing, value).trim().to_string()
-            };
-
-            attributes.insert(key.to_string(), new);
-        }
-
-        self
-    }
-
     pub fn data_class(self, value: &str) -> Self {
         self.attr_unsafe("data-class", value)
-    }
-
-    pub fn data_on_store_change_patch(self, url: &str) -> Self {
-        self.data_on_store_change(&js_patch(url))
     }
 
     pub fn data_text(self, value: &str) -> Self {
@@ -87,113 +281,6 @@ impl Elem {
 
     pub fn data_computed(self, name: &str, value: &str) -> Self {
         self.attr_unsafe(&format!("data-computed-{}", name), value)
-    }
-
-    pub fn data_on(mut self, event: &str, value: &str) -> Self {
-        if let Elem::Tag {
-            attrs: ref mut attributes,
-            ..
-        } = self
-        {
-            let key = &format!("data-on-{}", event);
-            let existing = attributes.get(key).map_or("", |attr| attr.as_str());
-
-            let new = if existing.is_empty() {
-                value.trim().to_string()
-            } else {
-                format!("{}; {}", existing, value).trim().to_string()
-            };
-
-            attributes.insert(key.to_string(), new);
-        }
-
-        self
-    }
-
-    pub fn data_intersects(mut self, value: &str) -> Self {
-        if let Elem::Tag {
-            attrs: ref mut attributes,
-            ..
-        } = self
-        {
-            let key = "data-intersects";
-            let existing = attributes.get(key).map_or("", |attr| attr.as_str());
-
-            let new = if existing.is_empty() {
-                value.trim().to_string()
-            } else {
-                format!("{}; {}", existing, value).trim().to_string()
-            };
-
-            attributes.insert(key.to_string(), new);
-        }
-
-        self
-    }
-
-    pub fn data_intersects_get(self, url: &str) -> Self {
-        self.data_intersects(&js_get(url))
-    }
-
-    pub fn data_on_then_post(self, event: &str, url: &str) -> Self {
-        self.data_on(event, &js_post(url))
-    }
-
-    pub fn data_on_then_patch(self, event: &str, url: &str) -> Self {
-        self.data_on(event, &js_patch(url))
-    }
-
-    pub fn data_on_click(self, value: &str) -> Self {
-        self.data_on("click", value)
-    }
-
-    pub fn data_on_load(self, value: &str) -> Self {
-        self.data_on("load", value)
-    }
-
-    pub fn data_on_input(self, value: &str) -> Self {
-        self.data_on("input", value)
-    }
-
-    pub fn data_on_input_get(self, url: &str) -> Self {
-        self.data_on_input(&js_get(url))
-    }
-
-    pub fn data_on_input_debounce(self, duration: Duration, value: &str) -> Self {
-        let ms = duration.as_millis();
-
-        self.data_on(&format!("input.debounce_{}ms", ms), value)
-    }
-
-    pub fn data_on_input_debounce_get(self, duration: Duration, url: &str) -> Self {
-        self.data_on_input_debounce(duration, &js_get(url))
-    }
-
-    pub fn data_on_click_get(self, url: &str) -> Self {
-        self.data_on_click(&js_get(url))
-    }
-
-    pub fn data_on_click_push_then_get(self, url: &str) -> Self {
-        let push_url_script = format!("window.history.pushState(null, '', '{}')", url);
-        let get_script = js_get(url);
-        let script = format!("{}; {}", push_url_script, get_script);
-        self.data_on_click(&script)
-    }
-
-    pub fn data_on_patch(self, event: &str, url: &str) -> Self {
-        self.data_on(event, &&js_patch(url))
-    }
-
-    pub fn data_on_load_get(self, url: &str) -> Self {
-        self.data_on_load(&js_get(url))
-    }
-
-    pub fn data_on_click_post(self, url: &str) -> Self {
-        self.data_on_click(&format!("$post('{}', this)", url))
-    }
-
-    pub fn data_on_click_patch(self, url: &str) -> Self {
-        self.data_on_click(&js_patch(url))
     }
 
     pub fn child_debug_store(self) -> Self {

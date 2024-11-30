@@ -1,5 +1,5 @@
 use crate::{
-    core::{html::*, ui::icon},
+    core::{datastar::datastar::BuilderShared, html::*, ui::icon},
     route::Route,
 };
 
@@ -70,7 +70,7 @@ impl BackButton {
             .class("size-16 flex items-center justify-center")
             .aria_label("go back")
             .map(|elem| match self.route {
-                Some(route) => elem.data_on_click_push_then_get(&route.encode()),
+                Some(route) => elem.on(|b| b.click().push_then_get(&route.encode()).b()),
                 None => elem,
             })
             .child(icon::back_arrow("size-6"))

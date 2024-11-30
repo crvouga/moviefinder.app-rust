@@ -40,7 +40,7 @@ impl BottomButton {
                     if self.active {
                         "text-blue-500"
                     } else {
-                        "text-white"
+                        ""
                     },
                 ]
         ).child(

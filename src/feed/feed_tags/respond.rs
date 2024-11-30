@@ -1,6 +1,7 @@
 use super::{form_state::FormState, route::Route, view_model::ViewModel};
 use crate::{
     core::{
+        datastar::datastar::BuilderShared,
         html::*,
         http::{response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
@@ -8,6 +9,7 @@ use crate::{
             self,
             button::{Button, Color},
             chip::ChipSize,
+            icon::spinner,
             search_bar::SearchBar,
             spinner_page,
         },
@@ -18,20 +20,21 @@ use crate::{
     route,
 };
 
-pub fn to_screen_id(feed_id: &FeedId, child_id: &str) -> String {
-    let feed_id = feed_id.as_str().trim();
-    let child_id = child_id.trim();
-    let prefix = "feed-tags";
+pub fn to_screen_id(_feed_id: &FeedId, child_id: &str) -> String {
+    return child_id.to_string();
+    // let feed_id = feed_id.as_str().trim();
+    // let child_id = child_id.trim();
+    // let prefix = "feed-tags";
 
-    if feed_id.is_empty() && child_id.is_empty() {
-        prefix.to_string()
-    } else if feed_id.is_empty() {
-        format!("{}-{}", prefix, child_id)
-    } else if child_id.is_empty() {
-        format!("{}-{}", prefix, feed_id)
-    } else {
-        format!("{}-{}-{}", prefix, feed_id, child_id)
-    }
+    // if feed_id.is_empty() && child_id.is_empty() {
+    //     prefix.to_string()
+    // } else if feed_id.is_empty() {
+    //     format!("{}-{}", prefix, child_id)
+    // } else if child_id.is_empty() {
+    //     format!("{}-{}", prefix, feed_id)
+    // } else {
+    //     format!("{}-{}-{}", prefix, feed_id, child_id)
+    // }
 }
 pub async fn respond(
     ctx: &Ctx,
@@ -251,16 +254,12 @@ fn js_signal_is_checked(tag: &FeedTag) -> String {
 }
 
 impl Elem {
-    fn data_toggle_clicked_tag(self) -> Self {
-        self.data_on(
-            "clicked-tag",
-            "let v = evt.target.id.toLowerCase(); $signalSelectedTagIds = $signalSelectedTagIds.includes(v.toLowerCase()) ? $signalSelectedTagIds.filter(v_ => v_.toLowerCase() !== v.toLowerCase()) : [...$signalSelectedTagIds, v.toLowerCase()]",
-        )
-    }
     fn data_on_clicked_tag(self) -> Self {
-        self.data_on_click(
-            "evt.target.dispatchEvent(new CustomEvent('clicked-tag', { bubbles: true }))",
-        )
+        self.on(|b| {
+            b.click()
+                .js("evt.target.dispatchEvent(new CustomEvent('clicked-tag', { bubbles: true }))")
+                .b()
+        })
     }
 }
 
@@ -300,18 +299,22 @@ fn view_selected(model: &ViewModel) -> Elem {
         .child(
             button()
                 .data_show("($signalSelectedTagIds).length > 0")
-                .data_on_click("$signalSelectedTagIds = []")
-                .data_on_click_patch(&route(Route::ClickedClear {
-                    feed_id: model.feed.feed_id.clone(),
-                }))
+                .on(|b| {
+                    b.click()
+                        .js("$signalSelectedTagIds = []")
+                        .patch(&route(Route::ClickedClear {
+                            feed_id: model.feed.feed_id.clone(),
+                        }))
+                        .b()
+                })
                 .class("underline text-secondary p-2")
                 .child_text("Clear"),
         )
     // .child(
     //     div()
-    //         .class("px-1 flex gap-1 text-secondary")
+    //         .class("px-1 flex gap-1")
     //         .data_show("$signalIsUpatingSelected")
-    //         .child(spinner("size-5 animate-spin")), // .child_text("Loading..."),
+    //         .child(spinner("size-6 animate-spin")), // .child_text("Loading..."),
     // )
 }
 
@@ -325,16 +328,15 @@ fn view_screen(feed_id: &FeedId) -> Elem {
                 signalSelectedTagIds: [],
             }"#,
         )
-        .data_on_store_change("window.ctx = ctx")
-        // .child_debug_store()
-        .data_toggle_clicked_tag()
-        .data_indicator("signalIsUpatingSelected")
-        .data_on_patch(
-            "clicked-tag",
-            &route(Route::ClickedTag {
-                feed_id: feed_id.clone(),
-            }),
+        .on(|b| b
+            .e("clicked-tag")
+            .js("let v = evt.target.id.toLowerCase().trim()")
+            .js("$signalSelectedTagIds = $signalSelectedTagIds.map(v => v.toLowerCase().trim())")
+            .js("$signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]")
+            .patch(&route(Route::ClickedTag {feed_id: feed_id.clone()}))
+            .b()
         )
+        .data_indicator("signalIsUpatingSelected")
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .child(view_selected_loading(feed_id))
         .child(view_search_input(feed_id))
@@ -351,7 +353,11 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .label("Cancel")
                 .color(Color::Gray)
                 .view()
-                .data_on_click_push_then_get(&to_back_route(feed_id.clone()).encode())
+                .on(|b| {
+                    b.click()
+                        .push_then_get(&to_back_route(feed_id.clone()).encode())
+                        .b()
+                })
                 .type_("button")
                 .class("flex-1"),
         )
@@ -361,9 +367,13 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .color(ui::button::Color::Primary)
                 .indicator("signalIsSaving")
                 .view()
-                .data_on_click_post(&route(Route::ClickedSave {
-                    feed_id: feed_id.clone(),
-                }))
+                .on(|b| {
+                    b.click()
+                        .get(&route(Route::ClickedSave {
+                            feed_id: feed_id.clone(),
+                        }))
+                        .b()
+                })
                 .id("save-button")
                 .class("flex-1"),
         )

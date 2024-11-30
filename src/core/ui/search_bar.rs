@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use crate::core::{
+    datastar::datastar::BuilderShared,
     html::*,
     ui::icon::{self, spinner},
 };
@@ -49,7 +50,6 @@ impl SearchBar {
 
     pub fn view(&self) -> Elem {
         label()
-            // .data(|a| a.on().input().debounce(500).js_get(&self.search_url).js("console.log('hello')"))
             .class("w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
             .data_bind("aria-busy", "$signalFetching")
             .child(
@@ -64,9 +64,18 @@ impl SearchBar {
                     .data_model(&self.input_model)
                     .type_("text")
                     .name(&self.input_search_name)
-                    .data_on("clear", "evt.target.value = ''")
-                    .data_on("clear", "evt?.target?.focus()")
-                    .data_on_input_debounce_get(Duration::from_millis(250), &self.search_url)
+                    .on(|b| {
+                        b.e("clear")
+                            .js("evt.target.value = ''")
+                            .js("evt?.target?.focus()")
+                            .b()
+                    })
+                    .on(|b| {
+                        b.input()
+                            .debounce(Duration::from_millis(250))
+                            .get(&self.search_url)
+                            .b()
+                    })
                     .data_indicator("signalFetching")
                     .placeholder(&self.placeholder),
             )
@@ -79,8 +88,8 @@ impl SearchBar {
                 button()
                     .type_("button")
                     .tab_index(0)
+                    .on(|b| b.click().js(&format!("${} = ''", self.input_model)).b())
                     // .data_on_click("evt?.target?.parentNode?.querySelector?.('input')?.dispatchEvent(new Event('clear'))")
-                    .data_on_click(&format!("${} = ''", self.input_model))
                     .aria_label("clear search")
                     .class("h-full pr-5 place-items-center")
                     .class("grid peer-placeholder-shown:hidden")
