@@ -16,7 +16,7 @@ use crate::{
 pub const LIMIT: usize = 3;
 
 pub struct ViewModel {
-    pub feed: Feed,
+    pub feed_id: FeedId,
     pub initial_feed_items: Vec<FeedItem>,
 }
 
@@ -56,7 +56,7 @@ pub async fn respond_populate_screen(
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 
     let model: ViewModel = ViewModel {
-        feed: feed.clone(),
+        feed_id: feed.feed_id.clone(),
         initial_feed_items,
     };
 
