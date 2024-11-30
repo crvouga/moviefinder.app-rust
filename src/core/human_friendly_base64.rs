@@ -61,7 +61,7 @@ pub fn to_human_friendly_str<T: Serialize>(route: T) -> String {
             }
         })
         .collect::<Vec<&str>>()
-        .join(".");
+        .join("-");
 
     human_friendly.truncate(100);
 
