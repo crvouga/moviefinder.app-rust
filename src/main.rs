@@ -50,6 +50,7 @@ async fn respond(
     let r = Req {
         params: request.datastar_params(),
         session_id: request.session_id(),
+        path: request.url.path.clone(),
     };
 
     log_info!(

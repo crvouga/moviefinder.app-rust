@@ -43,6 +43,47 @@ impl Elem {
     pub fn button(self) -> Self {
         self.tag_name("button")
     }
+
+    pub fn recursively_map_attrs(mut self, f: impl Fn(String, String) -> (String, String)) -> Self {
+        let mut stack = vec![self.clone()];
+
+        while let Some(elem) = stack.pop() {
+            match elem {
+                Elem::Tag {
+                    tag_name,
+                    attrs,
+                    mut children,
+                } => {
+                    let mapped_attrs: HashMap<String, String> = attrs
+                        .into_iter()
+                        .map(|(name, value)| f(name, value))
+                        .collect();
+
+                    for child in children.drain(..) {
+                        stack.push(child);
+                    }
+
+                    self = Elem::Tag {
+                        tag_name,
+                        attrs: mapped_attrs,
+                        children,
+                    };
+                }
+                Elem::Frag(mut children) => {
+                    for child in children.drain(..) {
+                        stack.push(child);
+                    }
+
+                    self = Elem::Frag(children);
+                }
+                _ => {
+                    self = elem;
+                }
+            }
+        }
+
+        self
+    }
 }
 
 pub fn unsafe_html(content: &str) -> Elem {

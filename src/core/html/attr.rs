@@ -60,6 +60,13 @@ impl Elem {
         self.attr("id", id)
     }
 
+    pub fn namespace_children_ids(self, namepsace: &str) -> Self {
+        self.recursively_map_attrs(|key, value| match key.to_lowercase().as_str() {
+            "id" => (key.to_string(), format!("{}_{}", namepsace, value)),
+            _ => (key.to_string(), value.to_string()),
+        })
+    }
+
     pub fn name(self, name: &str) -> Self {
         self.attr("name", name)
     }

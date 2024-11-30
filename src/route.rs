@@ -14,11 +14,11 @@ pub enum Route {
 
 impl Route {
     pub fn encode(&self) -> String {
-        human_friendly_base64::encode(self.clone())
+        human_friendly_base64::encode(self)
     }
 
     pub fn decode(encoded: &str) -> Option<Route> {
-        human_friendly_base64::decode(encoded).unwrap_or(None)
+        human_friendly_base64::decode(encoded).ok()
     }
 }
 

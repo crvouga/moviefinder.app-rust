@@ -1,13 +1,18 @@
 use crate::{
-    core::{html::*, tmdb_api::TMDB_IMAGE_BASE_URL},
+    core::{
+        html::*,
+        http::{
+            response_writer::ResponseWriter,
+            server_sent_event::{sse, ServerSentEvent},
+        },
+        params::Params,
+        tmdb_api::TMDB_IMAGE_BASE_URL,
+    },
+    req::Req,
     route::Route,
 };
 
 const ROOT_ID: &str = "root";
-
-fn root_selector() -> String {
-    format!("#{}", ROOT_ID)
-}
 
 impl Elem {
     pub fn id_root(self) -> Self {
@@ -17,6 +22,30 @@ impl Elem {
 
 pub struct Root {
     route: Route,
+}
+
+impl ServerSentEvent {
+    pub async fn send_screen(
+        &self,
+        r: &Req,
+        w: &mut ResponseWriter,
+        screen: Elem,
+    ) -> Result<(), std::io::Error> {
+        let loaded_paths = r
+            .params
+            .get_all("signalLoadedPaths")
+            .map_or(vec![], |s| s.to_owned());
+
+        println!("loaded_paths: {:?}", loaded_paths);
+
+        sse()
+            .event_merge_fragments()
+            .data_selector_id(ROOT_ID)
+            .data_merge_mode_before()
+            .data_fragments(screen)
+            .send(w)
+            .await
+    }
 }
 
 impl Root {
@@ -58,6 +87,23 @@ impl Root {
             body()
             .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
             .style("background-color: #000;")
+            .data_store("{signalPath: '', signalLoadedPaths: []}")
+            .data_on_store_change("window.ctx = ctx;")
+            .child(
+                script().child_text_unsafe(
+                    r#"
+                    function onChange() {
+                        if(typeof window.ctx === 'undefined') {
+                            return;
+                        }
+                        ctx.store().signalPath.value = location.pathname;
+                    }
+                    window.addEventListener('popstate', onChange);
+                    window.addEventListener('load', onChange);
+                    window.addEventListener('DOMContentLoaded', onChange);                    
+                    "#
+                )
+            )
             // .child_debug_store()
             .child(
                 div()
