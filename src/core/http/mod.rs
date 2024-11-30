@@ -15,3 +15,4 @@ pub mod response_writer;
 pub mod server;
 pub mod server_sent_event;
 pub mod set_header;
+pub mod status_code;

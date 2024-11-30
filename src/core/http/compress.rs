@@ -7,12 +7,8 @@ use super::response_writer::ResponseWriter;
 use super::set_header::SetHeader;
 
 impl ResponseWriter {
-    pub async fn write_body_with_compression(
-        &mut self,
-        content_encodings: Vec<ContentEncoding>,
-        body: &[u8],
-    ) -> Result<(), std::io::Error> {
-        for encoding in content_encodings {
+    pub async fn write_body_with_compression(&mut self, body: &[u8]) -> Result<(), std::io::Error> {
+        for encoding in &self.content_encodings {
             match encoding {
                 ContentEncoding::Gzip => {
                     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());

@@ -96,13 +96,12 @@ async fn respond(
 
 async fn response_root(
     route: Route,
-    r: &Request,
+    _r: &Request,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     let html: &String = &root::Root::new(route).view().render_with_doctype();
 
-    w.content("text/html", r.to_accept_encoding(), html.as_bytes())
-        .await
+    w.content("text/html", html.as_bytes()).await
 }
 
 async fn resolve_public_asset(path: &str) -> Option<String> {
@@ -125,16 +124,14 @@ async fn resolve_public_asset(path: &str) -> Option<String> {
 
 async fn response_public(
     file_path: &str,
-    r: &Request,
+    _r: &Request,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     if let Ok(mut file) = tokio::fs::File::open(file_path).await {
         let mut buffer = Vec::new();
         tokio::io::AsyncReadExt::read_to_end(&mut file, &mut buffer).await?;
         let content_type = mime_type::from_path(file_path);
-        // w.set_long_term_cache();
-        w.content(content_type, r.to_accept_encoding(), &buffer)
-            .await
+        w.content(content_type, &buffer).await
     } else {
         w.write_body("404".as_bytes()).await
     }

@@ -53,7 +53,7 @@ where
 
     let path_without_query = path.split_once('?').map(|(path, _)| path).unwrap_or(&path);
 
-    let request = Request {
+    let r = Request {
         method,
         url: Url {
             path: path_without_query.to_owned(),
@@ -66,9 +66,11 @@ where
         form_data,
     };
 
-    let response_writer = ResponseWriter::new(stream);
+    let mut w = ResponseWriter::new(stream);
 
-    if let Err(_) = handle_request(request, response_writer).await {
+    w.content_encoding(r.to_accept_encoding());
+
+    if let Err(_) = handle_request(r, w).await {
         //
     }
 }

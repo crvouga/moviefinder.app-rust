@@ -2,13 +2,16 @@ use std::collections::HashMap;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
+use super::content_encoding::ContentEncoding;
 use super::set_header::SetHeader;
+use super::status_code;
 
 pub struct ResponseWriter {
     pub stream: TcpStream,
     pub headers_sent: bool,
     pub initial_headers: HashMap<String, String>,
     pub status_code: u16,
+    pub content_encodings: Vec<ContentEncoding>,
 }
 
 impl ResponseWriter {
@@ -18,6 +21,7 @@ impl ResponseWriter {
             stream,
             headers_sent: false,
             initial_headers: HashMap::new(),
+            content_encodings: Vec::new(),
         }
     }
 
@@ -26,20 +30,17 @@ impl ResponseWriter {
         self
     }
 
+    pub fn content_encoding(&mut self, content_encoding: Vec<ContentEncoding>) -> &Self {
+        self.content_encodings = content_encoding;
+        self
+    }
+
     pub async fn write_headers(&mut self) -> Result<(), std::io::Error> {
         if self.headers_sent {
             return Ok(());
         }
 
-        let reason_phrase = match self.status_code {
-            200 => "OK",
-            301 => "Moved Permanently",
-            302 => "Found",
-            400 => "Bad Request",
-            404 => "Not Found",
-            500 => "Internal Server Error",
-            _ => "Unknown",
-        };
+        let reason_phrase = status_code::to_reason(self.status_code);
 
         let mut header_string = format!("HTTP/1.1 {} {}\r\n", self.status_code, reason_phrase);
 
