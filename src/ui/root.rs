@@ -30,6 +30,7 @@ impl ServerSentEvent {
     ) -> Result<(), std::io::Error> {
         sse()
             .event_merge_fragments()
+            .data_merge_mode_outer()
             .data_fragments(screen.id(ID_ROOT))
             .send(w)
             .await?;

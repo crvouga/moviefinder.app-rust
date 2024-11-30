@@ -78,6 +78,7 @@ impl Chip {
                             .class(&self.size.to_h())
                             .class("shrink-0 aspect-square object-cover rounded-full overflow-hidden bg-neutral-700 border-neutral-800 pointer-events-none")
                             .src(&image_src)
+                            .alt(&format!("{} image", &self.label))
                         )
                     }
                 }
