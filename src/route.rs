@@ -18,20 +18,20 @@ fn remove_leading_slash(s: &str) -> &str {
 
 impl Route {
     pub fn encode(&self) -> String {
-        // human_friendly_base64::encode(self)
-        let json = serde_json::to_string(self).ok().unwrap_or("".to_string());
+        human_friendly_base64::encode(self)
+        // let json = serde_json::to_string(self).ok().unwrap_or("".to_string());
 
-        base32::encode(base32::Alphabet::Crockford, json.as_bytes())
+        // base32::encode(base32::Alphabet::Crockford, json.as_bytes())
     }
 
     pub fn decode(encoded: &str) -> Option<Route> {
-        // human_friendly_base64::decode(encoded).ok()
+        human_friendly_base64::decode(encoded).ok()
 
-        let encoded = base32::decode(base32::Alphabet::Crockford, remove_leading_slash(encoded))?;
+        // let encoded = base32::decode(base32::Alphabet::Crockford, remove_leading_slash(encoded))?;
 
-        let json = String::from_utf8(encoded).ok()?;
+        // let json = String::from_utf8(encoded).ok()?;
 
-        serde_json::from_str(&json).ok()
+        // serde_json::from_str(&json).ok()
     }
 }
 

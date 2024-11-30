@@ -44,6 +44,10 @@ impl Elem {
         self.tag_name("button")
     }
 
+    pub fn a(self) -> Self {
+        self.tag_name("a")
+    }
+
     pub fn recursively_map_attrs(mut self, f: impl Fn(String, String) -> (String, String)) -> Self {
         let mut stack = vec![self.clone()];
 
