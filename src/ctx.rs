@@ -8,26 +8,31 @@ use crate::{
         tmdb_api::{self, TmdbApi},
     },
     env::Env,
-    feed,
+    feed::{
+        self, feed_db::interface::FeedDb, feed_session_mapping_db::interface::FeedSessionMappingDb,
+        feed_tag_db::interface::FeedTagDb,
+    },
     key_value_db::{self, interface::KeyValueDb},
     media::{
         genre::genre_db::{self, interface::GenreDb},
         media_db::{self, interface::MediaDb},
     },
     person::person_db::{self, interface::PersonDb},
-    ui::resizable_image,
 };
 
 pub struct Ctx {
     pub key_value_db: Arc<dyn KeyValueDb>,
     pub db_conn_sql: Arc<ImplPostgres>,
+    pub http_client: Arc<HttpClient>,
     pub media_db: Arc<dyn MediaDb>,
     pub tmdb_api: Arc<TmdbApi>,
     pub genre_db: Arc<dyn GenreDb>,
     pub person_db: Arc<dyn PersonDb>,
     pub logger: Arc<dyn Logger>,
-    pub feed: feed::ctx::Ctx,
-    pub resizable_image: resizable_image::ctx::Ctx,
+    pub feed_db: Arc<dyn FeedDb>,
+    pub feed_tags_db: Arc<dyn FeedTagDb>,
+    pub feed_session_mapping_db: Arc<dyn FeedSessionMappingDb>,
+    pub feed_controls_form_state_db: Arc<feed::controls::form_state_db::FormStateDb>,
 }
 
 impl Ctx {
@@ -72,27 +77,38 @@ impl Ctx {
             tmdb_api.clone(),
         ));
 
-        let feed = feed::ctx::Ctx::new(
-            media_db.clone(),
-            person_db.clone(),
+        let feed_db = Arc::new(feed::feed_db::impl_key_value_db::ImplKeyValueDb::new(
             key_value_db.clone(),
+        ));
+
+        let feed_tags_db = Arc::new(feed::feed_tag_db::impl_::Impl_::new(
             genre_db.clone(),
-            logger.clone(),
+            person_db.clone(),
+        ));
+
+        let feed_session_mapping_db = Arc::new(
+            feed::feed_session_mapping_db::impl_key_value_db::ImplKeyValueDb::new(
+                key_value_db.clone(),
+            ),
         );
 
-        let resizable_image =
-            resizable_image::ctx::Ctx::new(http_client.clone(), logger.clone()).await;
+        let feed_controls_form_state_db = Arc::new(
+            feed::controls::form_state_db::FormStateDb::new(logger.clone(), key_value_db.clone()),
+        );
 
         Ok(Ctx {
-            resizable_image,
             logger,
-            genre_db,
-            person_db,
+            http_client,
+            key_value_db,
             db_conn_sql,
             tmdb_api,
+            genre_db,
+            person_db,
             media_db,
-            key_value_db,
-            feed,
+            feed_db,
+            feed_tags_db,
+            feed_session_mapping_db,
+            feed_controls_form_state_db,
         })
     }
 }

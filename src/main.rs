@@ -135,5 +135,5 @@ async fn respond_fallback(
         .data_script_push_url(&Route::Feed(fallback).encode())
         .send(w)
         .await?;
-    feed::respond::respond(&ctx.feed, r, &feed::route::Route::Default, w).await
+    feed::respond::respond(&ctx, r, &feed::route::Route::Default, w).await
 }

@@ -197,11 +197,7 @@ impl Elem {
     }
 
     pub fn child_debug_store(self) -> Self {
-        self.child(
-            code()
-                .class("overflow-hidden")
-                .child(pre().data_text("JSON.stringify(ctx.store(), null, 2)")),
-        )
+        self.child(code().child(pre().data_text("JSON.stringify(ctx.store(), null, 2)")))
     }
 }
 

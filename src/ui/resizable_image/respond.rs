@@ -7,12 +7,13 @@ use crate::{
         params::Params,
         url::Url,
     },
+    ctx::Ctx,
     log_info,
 };
 
 use image::{self, imageops::FilterType};
 
-use super::{ctx::Ctx, route::Route};
+use super::route::Route;
 
 pub async fn respond(
     ctx: &Ctx,

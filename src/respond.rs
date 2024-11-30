@@ -9,7 +9,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Feed(route) => feed::respond::respond(&ctx.feed, r, route, w).await,
+        Route::Feed(route) => feed::respond::respond(&ctx, r, route, w).await,
 
         Route::Account(route) => account::respond::respond(&ctx, r, &route, w).await,
 

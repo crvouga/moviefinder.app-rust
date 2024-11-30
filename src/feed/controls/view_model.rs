@@ -1,9 +1,10 @@
-use super::{ctx::Ctx, form_state::FormState};
+use super::form_state::FormState;
 use crate::{
     core::{
         pagination::Paginated,
         query::{Query, QueryFilter, QueryOp},
     },
+    ctx::Ctx,
     feed::{
         feed_::Feed, feed_id::FeedId, feed_tag::FeedTag, feed_tag_db::interface::FeedTagQueryField,
     },
@@ -72,7 +73,7 @@ impl ViewModel {
         let feed_tags: Vec<FeedTag> = match search_input {
             "" => {
                 let mut feed_tags: Vec<FeedTag> = ctx
-                    .feed_tag_db
+                    .feed_tags_db
                     .query(Query {
                         offset: 0,
                         limit: 100,
@@ -91,7 +92,7 @@ impl ViewModel {
             }
             _ => {
                 let feed_tags = ctx
-                    .feed_tag_db
+                    .feed_tags_db
                     .query(Query {
                         offset: 0,
                         limit: 100,

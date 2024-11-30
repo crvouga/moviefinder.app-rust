@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::feed::{feed_::Feed, feed_id::FeedId, feed_tag::FeedTag};
-
-use super::ctx::Ctx;
+use crate::{
+    ctx::Ctx,
+    feed::{feed_::Feed, feed_id::FeedId, feed_tag::FeedTag},
+};
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct FormState {
@@ -21,7 +22,11 @@ impl FormState {
     pub async fn load(ctx: &Ctx, feed: &Feed) -> Self {
         let feed_id = feed.feed_id.clone();
 
-        let maybe_form_state = ctx.form_state_db.get(&feed_id).await.unwrap_or(None);
+        let maybe_form_state = ctx
+            .feed_controls_form_state_db
+            .get(&feed_id)
+            .await
+            .unwrap_or(None);
 
         let mut form_state = maybe_form_state.unwrap_or(Self::new(feed));
         form_state.feed_id = feed_id;

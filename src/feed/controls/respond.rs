@@ -1,4 +1,4 @@
-use super::{ctx::Ctx, form_state::FormState, route::Route, view_model::ViewModel};
+use super::{form_state::FormState, route::Route, view_model::ViewModel};
 use crate::{
     core::{
         html::*,
@@ -8,12 +8,12 @@ use crate::{
             self,
             button::{Button, Color},
             chip::ChipSize,
-            icon::spinner,
             search_bar::SearchBar,
             spinner_page,
         },
     },
-    feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag},
+    ctx::Ctx,
+    feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag, shared::respond_index},
     req::Req,
     route,
 };
@@ -28,7 +28,7 @@ pub async fn respond(
         Route::Index { feed_id } => {
             sse()
                 .event_merge_fragments()
-                .data_fragments(view_screen_loading(&feed_id))
+                .data_fragments(view_screen(&feed_id))
                 .send(w)
                 .await?;
 
@@ -36,7 +36,13 @@ pub async fn respond(
 
             sse()
                 .event_merge_fragments()
-                .data_fragments(view_screen(&model))
+                .data_fragments(view_selected(&model))
+                .send(w)
+                .await?;
+
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_unselected(&model))
                 .send(w)
                 .await?;
 
@@ -75,9 +81,19 @@ pub async fn respond(
 
             sse()
                 .event_execute_script()
-                .data_script_redirect(back)
+                .data_script_push_url(back)
                 .send(w)
-                .await
+                .await?;
+
+            sse()
+                .event_merge_signals()
+                .data_signals("{signalIsSaving: false}")
+                .send(w)
+                .await?;
+
+            respond_index(ctx, r, w, feed_id).await?;
+
+            Ok(())
         }
 
         Route::ClickedTag { feed_id } => {
@@ -110,7 +126,10 @@ pub async fn respond(
                 .send(w)
                 .await?;
 
-            ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
+            ctx.feed_controls_form_state_db
+                .put(&form_state_new)
+                .await
+                .unwrap_or(());
 
             Ok(())
         }
@@ -163,7 +182,10 @@ pub async fn respond(
                 .send(w)
                 .await?;
 
-            ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
+            ctx.feed_controls_form_state_db
+                .put(&form_state_new)
+                .await
+                .unwrap_or(());
 
             Ok(())
         }
@@ -255,6 +277,10 @@ fn view_selected_root() -> Elem {
     )
 }
 
+fn view_selected_loading() -> Elem {
+    view_selected_root().child(div().class("text-muted").child_text("Loading..."))
+}
+
 fn view_selected(model: &ViewModel) -> Elem {
     view_selected_root()
         .child(
@@ -296,21 +322,21 @@ fn view_selected(model: &ViewModel) -> Elem {
     // )
 }
 
-fn view_screen_loading(feed_id: &FeedId) -> Elem {
+fn view_screen(feed_id: &FeedId) -> Elem {
     view_root(&feed_id)
-        .child(view_selected_root())
+        .child(view_selected_loading())
         .child(view_search_input(&feed_id))
-        .child(spinner_page::view())
+        .child(view_unselected_loading())
         .child(view_bottom_bar(&feed_id))
 }
 
-fn view_screen(model: &ViewModel) -> Elem {
-    view_root(&model.feed.feed_id)
-        .child(view_selected(&model))
-        .child(view_search_input(&model.feed.feed_id))
-        .child(view_unselected(model))
-        .child(view_bottom_bar(&model.feed.feed_id))
-}
+// fn view_screen(model: &ViewModel) -> Elem {
+//     view_root(&model.feed.feed_id)
+//         .child(view_selected(&model))
+//         .child(view_search_input(&model.feed.feed_id))
+//         .child(view_unselected(model))
+//         .child(view_bottom_bar(&model.feed.feed_id))
+// }
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
     div()
@@ -328,7 +354,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
             Button::new()
                 .label("Save")
                 .color(ui::button::Color::Primary)
-                .indicator("isSaving")
+                .indicator("signalIsSaving")
                 .view()
                 .data_on_click_post(&route(Route::ClickedSave {
                     feed_id: feed_id.clone(),
@@ -338,11 +364,18 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
         )
 }
 
-fn view_unselected(model: &ViewModel) -> Elem {
+fn view_unselected_root() -> Elem {
     div()
         .id("unselected-tags")
         .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto")
-        .child(view_search_results_content(&model))
+}
+
+fn view_unselected_loading() -> Elem {
+    view_unselected_root().child(spinner_page::view())
+}
+
+fn view_unselected(model: &ViewModel) -> Elem {
+    view_unselected_root().child(view_search_results_content(&model))
 }
 
 fn view_search_results_content(model: &ViewModel) -> Elem {
