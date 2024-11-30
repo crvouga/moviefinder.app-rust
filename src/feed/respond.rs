@@ -1,6 +1,6 @@
 use super::{
-    controls,
     feed_::Feed,
+    feed_tags,
     route::Route,
     shared::{get_feed_items, respond_index, view_default_loading, view_slide, BOTTOM_ID},
 };
@@ -106,6 +106,6 @@ pub async fn respond(
             Ok(())
         }
 
-        Route::Controls(child) => controls::respond::respond(&ctx, r, child, w).await,
+        Route::Controls(child) => feed_tags::respond::respond(&ctx, r, child, w).await,
     }
 }

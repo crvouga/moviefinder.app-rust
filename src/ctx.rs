@@ -32,7 +32,7 @@ pub struct Ctx {
     pub feed_db: Arc<dyn FeedDb>,
     pub feed_tags_db: Arc<dyn FeedTagDb>,
     pub feed_session_mapping_db: Arc<dyn FeedSessionMappingDb>,
-    pub feed_controls_form_state_db: Arc<feed::controls::form_state_db::FormStateDb>,
+    pub feed_tags_form_state_db: Arc<feed::feed_tags::form_state_db::FormStateDb>,
 }
 
 impl Ctx {
@@ -92,9 +92,10 @@ impl Ctx {
             ),
         );
 
-        let feed_controls_form_state_db = Arc::new(
-            feed::controls::form_state_db::FormStateDb::new(logger.clone(), key_value_db.clone()),
-        );
+        let feed_tags_form_state_db = Arc::new(feed::feed_tags::form_state_db::FormStateDb::new(
+            logger.clone(),
+            key_value_db.clone(),
+        ));
 
         Ok(Ctx {
             logger,
@@ -108,7 +109,7 @@ impl Ctx {
             feed_db,
             feed_tags_db,
             feed_session_mapping_db,
-            feed_controls_form_state_db,
+            feed_tags_form_state_db,
         })
     }
 }

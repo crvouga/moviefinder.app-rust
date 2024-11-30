@@ -3,8 +3,8 @@ mod tests {
 
     use crate::{
         feed::{
-            controls::{form_state::FormState, form_state_db::FormStateDb},
             feed_::Feed,
+            feed_tags::{form_state::FormState, form_state_db::FormStateDb},
         },
         fixture::BaseFixture,
     };

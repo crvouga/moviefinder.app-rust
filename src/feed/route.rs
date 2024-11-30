@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{controls, feed_id::FeedId};
+use super::{feed_id::FeedId, feed_tags};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
@@ -19,5 +19,5 @@ pub enum Route {
         feed_id: FeedId,
     },
 
-    Controls(controls::route::Route),
+    Controls(feed_tags::route::Route),
 }

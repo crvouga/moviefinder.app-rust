@@ -1,4 +1,3 @@
-pub mod controls;
 pub mod feed_;
 pub mod feed_db;
 pub mod feed_id;
@@ -6,6 +5,7 @@ pub mod feed_item;
 pub mod feed_session_mapping_db;
 pub mod feed_tag;
 pub mod feed_tag_db;
+pub mod feed_tags;
 pub mod respond;
 pub mod route;
 mod shared;

@@ -23,7 +23,7 @@ impl FormState {
         let feed_id = feed.feed_id.clone();
 
         let maybe_form_state = ctx
-            .feed_controls_form_state_db
+            .feed_tags_form_state_db
             .get(&feed_id)
             .await
             .unwrap_or(None);

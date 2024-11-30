@@ -126,7 +126,7 @@ pub async fn respond(
                 .send(w)
                 .await?;
 
-            ctx.feed_controls_form_state_db
+            ctx.feed_tags_form_state_db
                 .put(&form_state_new)
                 .await
                 .unwrap_or(());
@@ -182,7 +182,7 @@ pub async fn respond(
                 .send(w)
                 .await?;
 
-            ctx.feed_controls_form_state_db
+            ctx.feed_tags_form_state_db
                 .put(&form_state_new)
                 .await
                 .unwrap_or(());
