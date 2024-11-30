@@ -17,6 +17,7 @@ pub const LIMIT: usize = 3;
 
 pub struct ViewModel {
     pub feed_id: FeedId,
+    pub feed: Feed,
     pub initial_feed_items: Vec<FeedItem>,
 }
 
@@ -57,6 +58,7 @@ pub async fn respond_populate_screen(
 
     let model: ViewModel = ViewModel {
         feed_id: feed.feed_id.clone(),
+        feed,
         initial_feed_items,
     };
 
@@ -131,7 +133,7 @@ fn view_top_bar_loading_with_link(feed_id: &FeedId) -> Elem {
 }
 
 fn view_top_bar(model: &ViewModel) -> Elem {
-    view_top_bar_link_root(&model.feed.feed_id)
+    view_top_bar_link_root(&model.feed_id)
         .child(view_tags(&model))
         .child(view_open_controls_button())
 }
@@ -210,8 +212,8 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .swiper_slides_per_view("1")
         .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
         .data_on("swiperslidechange", "$signalFeedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
-        .data_on_then_patch("swiperslidechange",route::Route::Feed(Route::ChangedSlide { feed_id: model.feed.feed_id.clone() }).encode().as_str())
-        .child(view_slides(&model.feed.feed_id, &model.initial_feed_items))
+        .data_on_then_patch("swiperslidechange",route::Route::Feed(Route::ChangedSlide { feed_id: model.feed_id.clone() }).encode().as_str())
+        .child(view_slides(&model.feed_id, &model.initial_feed_items))
 }
 
 fn view_swiper_empty() -> Elem {
