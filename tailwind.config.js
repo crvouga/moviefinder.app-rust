@@ -6,7 +6,11 @@ module.exports = {
       borderColor: {
         DEFAULT: "#3f3f46",
       },
+      textColor: {
+        secondary: "#d4d4d8",
+      },
     },
   },
+
   plugins: [],
 };

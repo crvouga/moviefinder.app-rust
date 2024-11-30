@@ -27,7 +27,7 @@ pub async fn respond(
         Route::Index { feed_id } => {
             sse()
                 .event_merge_fragments()
-                .data_fragments(view_index_loading(&feed_id))
+                .data_fragments(view_screen_loading(&feed_id))
                 .send(w)
                 .await?;
 
@@ -35,7 +35,7 @@ pub async fn respond(
 
             sse()
                 .event_merge_fragments()
-                .data_fragments(view_index(&model))
+                .data_fragments(view_screen(&model))
                 .send(w)
                 .await?;
 
@@ -143,8 +143,36 @@ pub async fn respond(
                 .await
         }
 
+        Route::ClickedClear { feed_id } => {
+            let model = ViewModel::load(ctx, feed_id, "").await;
+
+            let form_state_new = FormState {
+                feed_id: model.feed.feed_id.clone(),
+                tags: vec![],
+            };
+
+            let model_new = ViewModel {
+                form_state: form_state_new.clone(),
+                ..model
+            };
+
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_selected(&model_new))
+                .send(w)
+                .await?;
+
+            ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
+
+            Ok(())
+        }
+
         Route::ClickedGoBack { feed_id: _ } => Ok(()),
     }
+}
+
+fn route(route: Route) -> String {
+    route::Route::Feed(feed::route::Route::Controls(route)).encode()
 }
 
 impl Req {
@@ -168,37 +196,27 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
 fn view_root(feed_id: &FeedId) -> Elem {
     div()
         .id_root()
-        .data_store("{signalInputValue: '', signalSelectedTagIds: []}")
+        .data_store("{signalInputValue: '', signalUnselectedTagIds: [],  signalSelectedTagIds: []}")
         .data_on_store_change("window.ctx = ctx")
         // .child_debug_store()
         .data_toggle_clicked_tag()
         .data_on_patch(
             "clicked-tag",
-            &route::Route::Feed(feed::route::Route::Controls(Route::ClickedTag {
+            &route(Route::ClickedTag {
                 feed_id: feed_id.clone(),
-            }))
-            .encode(),
+            }),
         )
         .class("w-full h-full flex flex-col overflow-hidden relative")
 }
 
 fn view_search_input(feed_id: &FeedId) -> Elem {
     SearchBar::new()
-        .search_url(
-            &route::Route::Feed(feed::route::Route::Controls(Route::InputtedSearch {
-                feed_id: feed_id.clone(),
-            }))
-            .encode(),
-        )
+        .search_url(&route(Route::InputtedSearch {
+            feed_id: feed_id.clone(),
+        }))
         .input_id("search-input")
         .input_model("signalInputValue")
         .view()
-}
-
-fn view_selected_root() -> Elem {
-    div().id("selected-tags").class(
-        "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-20 flex-wrap border-b",
-    )
 }
 
 fn js_signal_is_checked(tag: &FeedTag) -> String {
@@ -222,25 +240,48 @@ impl Elem {
     }
 }
 
-fn view_selected(model: &ViewModel) -> Elem {
-    view_selected_root().children(
-        model
-            .to_all_tags()
-            .iter()
-            .map(|tag| {
-                tag.chip()
-                    .size(ChipSize::Small)
-                    .id(&tag.encode().to_lowercase())
-                    .signal_checked(&js_signal_is_checked(tag))
-                    .view()
-                    .data_show(&js_signal_is_checked(tag))
-                    .data_on_clicked_tag()
-            })
-            .collect::<Vec<Elem>>(),
+fn view_selected_root() -> Elem {
+    div().id("selected-tags").class(
+        "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-20 flex-wrap border-b",
     )
 }
 
-fn view_index_loading(feed_id: &FeedId) -> Elem {
+fn view_selected(model: &ViewModel) -> Elem {
+    view_selected_root()
+        .child(
+            div()
+                .data_show("($signalSelectedTagIds).length === 0")
+                .class("text-secondary")
+                .child_text("No tags selected"),
+        )
+        .children(
+            model
+                .to_all_tags()
+                .iter()
+                .map(|tag| {
+                    tag.chip()
+                        .size(ChipSize::Small)
+                        .id(&tag.encode().to_lowercase())
+                        .signal_checked(&js_signal_is_checked(tag))
+                        .view()
+                        .data_show(&js_signal_is_checked(tag))
+                        .data_on_clicked_tag()
+                })
+                .collect::<Vec<Elem>>(),
+        )
+        .child(
+            button()
+                .data_show("($signalSelectedTagIds).length > 0")
+                .data_on_click("$signalSelectedTagIds = []")
+                .data_on_click_patch(&route(Route::ClickedClear {
+                    feed_id: model.feed.feed_id.clone(),
+                }))
+                .class("underline text-secondary p-2")
+                .child_text("Clear"),
+        )
+}
+
+fn view_screen_loading(feed_id: &FeedId) -> Elem {
     view_root(&feed_id)
         .child(view_selected_root())
         .child(view_search_input(&feed_id))
@@ -248,7 +289,7 @@ fn view_index_loading(feed_id: &FeedId) -> Elem {
         .child(view_bottom_bar(&feed_id))
 }
 
-fn view_index(model: &ViewModel) -> Elem {
+fn view_screen(model: &ViewModel) -> Elem {
     view_root(&model.feed.feed_id)
         .child(view_selected(&model))
         .child(view_search_input(&model.feed.feed_id))
@@ -274,12 +315,9 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .color(ui::button::Color::Primary)
                 .indicator("isSaving")
                 .view()
-                .data_on_click_post(
-                    &route::Route::Feed(feed::route::Route::Controls(Route::ClickedSave {
-                        feed_id: feed_id.clone(),
-                    }))
-                    .encode(),
-                )
+                .data_on_click_post(&route(Route::ClickedSave {
+                    feed_id: feed_id.clone(),
+                }))
                 .id("save-button")
                 .class("flex-1"),
         )

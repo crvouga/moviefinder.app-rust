@@ -192,6 +192,10 @@ impl Elem {
         self.data_on_click(&format!("$post('{}', this)", url))
     }
 
+    pub fn data_on_click_patch(self, url: &str) -> Self {
+        self.data_on_click(&js_patch(url))
+    }
+
     pub fn child_debug_store(self) -> Self {
         self.child(
             code()

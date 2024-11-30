@@ -9,4 +9,5 @@ pub enum Route {
     InputtedSearch { feed_id: FeedId },
     ClickedGoBack { feed_id: FeedId },
     ClickedTag { feed_id: FeedId },
+    ClickedClear { feed_id: FeedId },
 }
