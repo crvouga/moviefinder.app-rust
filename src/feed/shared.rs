@@ -93,7 +93,7 @@ fn view_top_bar_root() -> Elem {
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root().data_on_click_push_then_get(
-        &route::Route::Feed(Route::Controls(feed_tags::route::Route::Index {
+        &route::Route::Feed(Route::Tags(feed_tags::route::Route::Screen {
             feed_id: feed_id.clone(),
         }))
         .encode(),
@@ -244,7 +244,7 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {
     route::Route::Media(media::route::Route::Details(
-        media::details::route::Route::Index {
+        media::details::route::Route::Screen {
             media_id: media_id.clone(),
         },
     ))

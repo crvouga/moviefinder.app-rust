@@ -16,7 +16,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Index => {
+        Route::Screen => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_index_login_cta())

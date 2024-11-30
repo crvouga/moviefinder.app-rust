@@ -22,7 +22,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Index { media_id } => {
+        Route::Screen { media_id } => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_index_loading())
@@ -111,7 +111,7 @@ impl Layout {
             .class("flex flex-col")
             .child(
                 TopBar::default()
-                    .back_button(route::Route::Feed(feed::route::Route::Default))
+                    .back_button(route::Route::Feed(feed::route::Route::DefaultScreen))
                     .title(top_bar_title)
                     .view(),
             )

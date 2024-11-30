@@ -74,19 +74,19 @@ mod tests {
 
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
     enum Route {
-        Index,
+        Screen,
         Child(ChildRoute),
         Unknown,
     }
 
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
     enum ChildRoute {
-        Index,
+        Screen,
     }
 
     #[test]
     fn test_encode_decode_route() {
-        let route = Route::Index;
+        let route = Route::Screen;
         let encoded = encode(&route);
         let decoded: Route = decode(&encoded).unwrap();
         assert_eq!(decoded, route);
@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn test_encode_then_decode_route() {
-        let route = Route::Child(ChildRoute::Index);
+        let route = Route::Child(ChildRoute::Screen);
         let encoded = encode(&route);
         let decoded: Route = decode(&encoded).unwrap();
         assert_eq!(decoded, route);
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn test_decode_with_leading_slash() {
-        let route = Route::Child(ChildRoute::Index);
+        let route = Route::Child(ChildRoute::Screen);
         let encoded = encode(&route);
         let encoded_with_leading_slash = format!("/{}", encoded);
         let decoded: Route = decode(&encoded_with_leading_slash).unwrap();
@@ -118,7 +118,7 @@ mod tests {
 
     #[test]
     fn test_to_human_friendly_str() {
-        let route = Route::Index;
+        let route = Route::Screen;
         assert_eq!(
             core::human_friendly_base64::to_human_friendly_str(route),
             "Index"
@@ -127,7 +127,7 @@ mod tests {
 
     #[test]
     fn test_to_human_friendly_str_child() {
-        let route = Route::Child(ChildRoute::Index);
+        let route = Route::Child(ChildRoute::Screen);
         assert_eq!(
             core::human_friendly_base64::to_human_friendly_str(route),
             "Child.Index"

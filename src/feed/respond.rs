@@ -22,7 +22,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Default => {
+        Route::DefaultScreen => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_default_loading())
@@ -37,7 +37,7 @@ pub async fn respond(
 
             let feed_id = maybe_feed_id.unwrap_or_default();
 
-            let index_route = route::Route::Feed(Route::Index {
+            let index_route = route::Route::Feed(Route::Screen {
                 feed_id: feed_id.clone(),
             });
 
@@ -50,7 +50,7 @@ pub async fn respond(
             respond_index(ctx, r, w, &feed_id).await
         }
 
-        Route::Index { feed_id } => respond_index(ctx, r, w, feed_id).await,
+        Route::Screen { feed_id } => respond_index(ctx, r, w, feed_id).await,
 
         Route::ChangedSlide { feed_id } => {
             let maybe_slide_index = r
@@ -106,6 +106,6 @@ pub async fn respond(
             Ok(())
         }
 
-        Route::Controls(child) => feed_tags::respond::respond(&ctx, r, child, w).await,
+        Route::Tags(child) => feed_tags::respond::respond(&ctx, r, child, w).await,
     }
 }

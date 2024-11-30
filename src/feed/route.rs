@@ -4,9 +4,9 @@ use super::{feed_id::FeedId, feed_tags};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
-    Default,
+    DefaultScreen,
 
-    Index {
+    Screen {
         feed_id: FeedId,
     },
 
@@ -19,5 +19,5 @@ pub enum Route {
         feed_id: FeedId,
     },
 
-    Controls(feed_tags::route::Route),
+    Tags(feed_tags::route::Route),
 }

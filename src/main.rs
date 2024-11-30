@@ -69,7 +69,14 @@ async fn respond(
 
         (None, false) => match resolve_public_asset(&request.url.path).await {
             Some(file_path) => response_public(&file_path, &request, &mut w).await,
-            None => response_root(Route::Feed(feed::route::Route::Default), &request, &mut w).await,
+            None => {
+                response_root(
+                    Route::Feed(feed::route::Route::DefaultScreen),
+                    &request,
+                    &mut w,
+                )
+                .await
+            }
         },
     };
 
@@ -129,11 +136,11 @@ async fn respond_fallback(
     r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let fallback = feed::route::Route::Default;
+    let fallback = feed::route::Route::DefaultScreen;
     sse()
         .event_execute_script()
         .data_script_push_url(&Route::Feed(fallback).encode())
         .send(w)
         .await?;
-    feed::respond::respond(&ctx, r, &feed::route::Route::Default, w).await
+    feed::respond::respond(&ctx, r, &feed::route::Route::DefaultScreen, w).await
 }

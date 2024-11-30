@@ -23,7 +23,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .active(active == Active::Home)
                     .view()
                     .data_on_click_push_then_get(
-                        &route::Route::Feed(feed::route::Route::Default).encode(),
+                        &route::Route::Feed(feed::route::Route::DefaultScreen).encode(),
                     ),
             )
             .child(
@@ -33,7 +33,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .active(active == Active::Account)
                     .view()
                     .data_on_click_push_then_get(
-                        &route::Route::Account(account::route::Route::Index).encode(),
+                        &route::Route::Account(account::route::Route::Screen).encode(),
                     ),
             ),
     )

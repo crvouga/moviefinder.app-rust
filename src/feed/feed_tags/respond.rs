@@ -25,7 +25,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Index { feed_id } => {
+        Route::Screen { feed_id } => {
             sse()
                 .event_merge_fragments()
                 .data_fragments(view_screen(&feed_id))
@@ -195,7 +195,7 @@ pub async fn respond(
 }
 
 fn route(route: Route) -> String {
-    route::Route::Feed(feed::route::Route::Controls(route)).encode()
+    route::Route::Feed(feed::route::Route::Tags(route)).encode()
 }
 
 impl Req {
@@ -213,7 +213,7 @@ impl Req {
 }
 
 fn to_back_route(feed_id: FeedId) -> route::Route {
-    route::Route::Feed(feed::route::Route::Index { feed_id })
+    route::Route::Feed(feed::route::Route::Screen { feed_id })
 }
 
 fn view_root(feed_id: &FeedId) -> Elem {
