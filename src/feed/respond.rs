@@ -2,7 +2,7 @@ use super::{
     feed_::Feed,
     feed_tags,
     route::Route,
-    shared::{get_feed_items, respond_index, view_default_loading, view_slide, BOTTOM_ID},
+    shared::{get_feed_items, respond_populate_screen, view_screen, view_slide, BOTTOM_ID},
 };
 use crate::{
     core::{
@@ -22,10 +22,10 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::DefaultScreen => {
+        Route::ScreenDefault => {
             sse()
                 .event_merge_fragments()
-                .data_fragments(view_default_loading())
+                .data_fragments(view_screen())
                 .send(w)
                 .await?;
 
@@ -47,18 +47,24 @@ pub async fn respond(
                 .send(w)
                 .await?;
 
-            respond_index(ctx, r, w, &feed_id).await
+            respond_populate_screen(ctx, r, w, &feed_id).await
         }
 
-        Route::Screen { feed_id } => respond_index(ctx, r, w, feed_id).await,
+        Route::Screen { feed_id } => {
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_screen())
+                .send(w)
+                .await?;
+
+            respond_populate_screen(ctx, r, w, feed_id).await
+        }
 
         Route::ChangedSlide { feed_id } => {
             let maybe_slide_index = r
                 .params
                 .get_first("signalFeedIndex")
                 .and_then(|s| s.parse::<usize>().ok());
-
-            println!("maybe_slide_index: {:?}", maybe_slide_index);
 
             let slide_index_new = match maybe_slide_index {
                 None => return Ok(()),

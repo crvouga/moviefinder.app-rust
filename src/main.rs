@@ -71,7 +71,7 @@ async fn respond(
             Some(file_path) => response_public(&file_path, &request, &mut w).await,
             None => {
                 response_root(
-                    Route::Feed(feed::route::Route::DefaultScreen),
+                    Route::Feed(feed::route::Route::ScreenDefault),
                     &request,
                     &mut w,
                 )
@@ -136,11 +136,11 @@ async fn respond_fallback(
     r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let fallback = feed::route::Route::DefaultScreen;
+    let fallback = feed::route::Route::ScreenDefault;
     sse()
         .event_execute_script()
         .data_script_push_url(&Route::Feed(fallback).encode())
         .send(w)
         .await?;
-    feed::respond::respond(&ctx, r, &feed::route::Route::DefaultScreen, w).await
+    feed::respond::respond(&ctx, r, &feed::route::Route::ScreenDefault, w).await
 }

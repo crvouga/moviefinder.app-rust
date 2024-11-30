@@ -4,7 +4,7 @@ use super::{feed_id::FeedId, feed_tags};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
-    DefaultScreen,
+    ScreenDefault,
 
     Screen {
         feed_id: FeedId,

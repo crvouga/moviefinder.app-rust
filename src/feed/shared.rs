@@ -20,7 +20,7 @@ pub struct ViewModel {
     pub initial_feed_items: Vec<FeedItem>,
 }
 
-pub async fn respond_index(
+pub async fn respond_screen(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
@@ -28,7 +28,24 @@ pub async fn respond_index(
 ) -> Result<(), std::io::Error> {
     sse()
         .event_merge_fragments()
-        .data_fragments(view_index_loading(&feed_id))
+        .data_fragments(view_screen())
+        .send(w)
+        .await?;
+
+    respond_populate_screen(ctx, r, w, feed_id).await?;
+
+    Ok(())
+}
+
+pub async fn respond_populate_screen(
+    ctx: &Ctx,
+    r: &Req,
+    w: &mut ResponseWriter,
+    feed_id: &FeedId,
+) -> Result<(), std::io::Error> {
+    sse()
+        .event_merge_fragments()
+        .data_fragments(view_top_bar_loading_with_link(&feed_id))
         .send(w)
         .await?;
 
@@ -45,8 +62,13 @@ pub async fn respond_index(
 
     sse()
         .event_merge_fragments()
-        // .data_merge_mode_outer()
-        .data_fragments(view_index(&model))
+        .data_fragments(view_top_bar(&model))
+        .send(w)
+        .await?;
+
+    sse()
+        .event_merge_fragments()
+        .data_fragments(view_swiper(&model))
         .send(w)
         .await?;
 
@@ -91,6 +113,10 @@ fn view_top_bar_root() -> Elem {
         .id("top-bar")
 }
 
+fn view_top_bar_loading() -> Elem {
+    view_top_bar_root().child(view_open_controls_button())
+}
+
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root().data_on_click_push_then_get(
         &route::Route::Feed(Route::Tags(feed_tags::route::Route::Screen {
@@ -100,37 +126,30 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     )
 }
 
+fn view_top_bar_loading_with_link(feed_id: &FeedId) -> Elem {
+    view_top_bar_link_root(&feed_id).child(view_open_controls_button())
+}
+
 fn view_top_bar(model: &ViewModel) -> Elem {
     view_top_bar_link_root(&model.feed.feed_id)
         .child(view_tags(&model))
         .child(view_open_controls_button())
 }
 
-fn view_slide_content_empty() -> Elem {
+fn view_slide_content_loading() -> Elem {
     Image::new()
         .view()
         .src(" ")
         .class("w-full h-full object-cover")
 }
 
-fn view_root() -> Elem {
+pub fn view_screen() -> Elem {
     div()
         .id_root()
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
         .data_store("{signalFeedIndex: 0, signalTrue: true}")
-}
-
-fn view_index_loading(feed_id: &FeedId) -> Elem {
-    view_root()
-        .child(view_top_bar_link_root(&feed_id).child(view_open_controls_button()))
-        .child(view_slide_content_empty())
-        .child(view_bottom_bar())
-}
-
-pub fn view_default_loading() -> Elem {
-    view_root()
-        .child(view_top_bar_root().child(view_open_controls_button()))
-        .child(view_slide_content_empty())
+        .child(view_top_bar_loading())
+        .child(view_swiper_loading())
         .child(view_bottom_bar())
 }
 
@@ -166,25 +185,30 @@ fn view_tags(model: &ViewModel) -> Elem {
         )
 }
 
-fn view_index(model: &ViewModel) -> Elem {
-    view_root()
-        .child(view_top_bar(&model))
-        .child(view_swiper(&model))
-        .child(view_bottom_bar())
-}
-
 fn view_bottom_bar() -> Elem {
     bottom_bar::view(bottom_bar::Active::Home, "")
 }
 
+fn view_swiper_root() -> Elem {
+    div().class("w-full flex-1 overflow-hidden").id("swiper")
+}
+
+fn view_swiper_loading() -> Elem {
+    view_swiper_root().child(view_slide_content_loading())
+}
+
 fn view_swiper(model: &ViewModel) -> Elem {
+    view_swiper_root().child(view_swiper_container(&model))
+}
+
+fn view_swiper_container(model: &ViewModel) -> Elem {
     if model.initial_feed_items.len() == 0 {
         return view_swiper_empty();
     }
     ui::swiper::container()
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
-        .class("flex-1 flex flex-col w-full items-center justify-center overflow-hidden")
+        .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
         .data_on("swiperslidechange", "$signalFeedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
         .data_on_then_patch("swiperslidechange",route::Route::Feed(Route::ChangedSlide { feed_id: model.feed.feed_id.clone() }).encode().as_str())
         .child(view_slides(&model.feed.feed_id, &model.initial_feed_items))
@@ -239,7 +263,7 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
             })
             .encode(),
         )
-        .child(view_slide_content_empty())
+        .child(view_slide_content_loading())
 }
 
 fn to_media_details_route(media_id: &MediaId) -> route::Route {

@@ -23,7 +23,7 @@ pub fn view(active: Active, abort_selector: &str) -> Elem {
                     .active(active == Active::Home)
                     .view()
                     .data_on_click_push_then_get(
-                        &route::Route::Feed(feed::route::Route::DefaultScreen).encode(),
+                        &route::Route::Feed(feed::route::Route::ScreenDefault).encode(),
                     ),
             )
             .child(
