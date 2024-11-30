@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::{
-        human_friendly_base64,
+        base32, base64, human_friendly_base64,
         query::{QueryFilter, QueryOp},
         ui::chip::{Chip, ChipSize},
     },
@@ -63,11 +63,13 @@ impl FeedTag {
     }
 
     pub fn encode(&self) -> String {
-        human_friendly_base64::encode(self)
+        let json = serde_json::to_string(&self).unwrap_or("".to_owned());
+        base32::encode(base32::Alphabet::Crockford, &json.as_bytes())
     }
 
     pub fn decode(encoded: &str) -> Option<Self> {
-        human_friendly_base64::decode(encoded).ok()
+        let json = String::from_utf8(base32::decode(base32::Alphabet::Crockford, encoded)?).ok()?;
+        serde_json::from_str(&json).ok()
     }
 }
 

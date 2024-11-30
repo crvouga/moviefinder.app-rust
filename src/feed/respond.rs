@@ -201,7 +201,7 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
 
 fn view_top_bar(model: &ViewModel) -> Elem {
     view_top_bar_link_root(&model.feed.feed_id)
-        .child(view_tags(&model))
+        // .child(view_tags(&model))
         .child(view_open_controls_button())
 }
 
@@ -252,13 +252,7 @@ fn view_tags(model: &ViewModel) -> Elem {
                 .feed
                 .tags
                 .iter()
-                .map(|tag| {
-                    tag.chip()
-                        .disabled(true)
-                        .checked(true)
-                        .size(ChipSize::Small)
-                        .view()
-                })
+                .map(|tag| tag.chip().disabled(true).size(ChipSize::Small).view())
                 .collect::<Vec<Elem>>(),
         )
 }

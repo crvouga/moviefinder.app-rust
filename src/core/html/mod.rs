@@ -21,6 +21,14 @@ impl Elem {
         f(self)
     }
 
+    pub fn when(self, condition: bool, f: impl FnOnce(Elem) -> Elem) -> Elem {
+        if condition {
+            f(self)
+        } else {
+            self
+        }
+    }
+
     pub fn tag_name(mut self, tag_name_new: &str) -> Self {
         if let Elem::Tag {
             ref mut tag_name, ..

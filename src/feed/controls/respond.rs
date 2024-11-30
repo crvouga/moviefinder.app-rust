@@ -2,7 +2,7 @@ use super::{ctx::Ctx, form_state::FormState, route::Route, view_model::ViewModel
 use crate::{
     core::{
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
+        http::{response_writer::ResponseWriter, server_sent_event::sse, set_header::SetHeader},
         params::Params,
         ui::{
             self,
@@ -44,7 +44,7 @@ pub async fn respond(
                 .form_state
                 .tags
                 .iter()
-                .map(|t| format!("'{}'", t.encode()))
+                .map(|t| format!("'{}'", t.encode().to_lowercase()))
                 .collect::<Vec<String>>()
                 .join(",");
 
@@ -63,8 +63,6 @@ pub async fn respond(
         Route::ClickedSave { feed_id } => {
             let model = ViewModel::load(ctx, feed_id, "").await;
 
-            let view = view_index(&model);
-
             let feed_new = Feed {
                 start_index: 0,
                 tags: model.form_state.tags,
@@ -73,11 +71,9 @@ pub async fn respond(
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view)
-                .send(w)
-                .await
+            w.set_header("location", &to_back_route(feed_id.clone()).encode());
+            w.status_code(301);
+            w.end().await
         }
 
         Route::ClickedTag { feed_id, tag } => {
@@ -89,21 +85,18 @@ pub async fn respond(
 
             sse()
                 .event_merge_fragments()
-                .data_fragments(view_selected(&model))
+                .data_fragments(view_index(&model))
                 .send(w)
                 .await
         }
 
         Route::StoreChanged { feed_id } => {
-            let model = ViewModel::load(ctx, feed_id, "").await;
+            let selected_tags_new = r.to_selected_tags();
 
-            let signal_selected_tag_ids = r.params.get_all("signalSelectedTagIds");
+            let signal_input_value = r.params.get_first("signalInputValue");
 
-            let selected_tags_new = signal_selected_tag_ids
-                .unwrap_or(&vec![])
-                .iter()
-                .filter_map(|tag| FeedTag::decode(tag))
-                .collect::<Vec<FeedTag>>();
+            let model =
+                ViewModel::load(ctx, feed_id, signal_input_value.unwrap_or(&"".to_string())).await;
 
             let form_state_new = FormState {
                 feed_id: model.feed.feed_id.clone(),
@@ -121,6 +114,12 @@ pub async fn respond(
                 .send(w)
                 .await?;
 
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_unselected(&model_new))
+                .send(w)
+                .await?;
+
             ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
 
             Ok(())
@@ -133,14 +132,43 @@ pub async fn respond(
 
             let model = ViewModel::load(ctx, feed_id, search_input).await;
 
+            let selected_tags_new = r.to_selected_tags();
+            let model_new = ViewModel {
+                form_state: FormState {
+                    tags: selected_tags_new,
+                    ..model.form_state
+                },
+                ..model
+            };
+
             sse()
                 .event_merge_fragments()
-                .data_fragments(view_search_results(&model))
+                .data_fragments(view_unselected(&model_new))
+                .send(w)
+                .await?;
+
+            sse()
+                .event_merge_fragments()
+                .data_fragments(view_selected(&model_new))
                 .send(w)
                 .await
         }
 
         Route::ClickedGoBack { feed_id: _ } => Ok(()),
+    }
+}
+
+impl Req {
+    pub fn to_selected_tags(&self) -> Vec<FeedTag> {
+        let signal_selected_tag_ids = self.params.get_all("signalSelectedTagIds");
+
+        let selected_tags = signal_selected_tag_ids
+            .unwrap_or(&vec![])
+            .iter()
+            .filter_map(|tag| FeedTag::decode(tag))
+            .collect::<Vec<FeedTag>>();
+
+        selected_tags
     }
 }
 
@@ -152,24 +180,17 @@ fn view_root(feed_id: &FeedId) -> Elem {
     div()
         .id_root()
         .data_store("{signalInputValue: '', signalSelectedTagIds: []}")
-        .data_persist("")
-        .data_on_store_change_patch(
-            &route::Route::Feed(feed::route::Route::Controls(Route::StoreChanged {
+        .data_on_store_change("window.ctx = ctx")
+        // .child(code().child(pre().data_text("JSON.stringify(ctx.store(),null,2)")))
+        .data_on(
+            "clicked-tag",
+            "let v = evt.target.id.toLowerCase(); $signalSelectedTagIds = $signalSelectedTagIds.includes(v.toLowerCase()) ? $signalSelectedTagIds.filter(v_ => v_.toLowerCase() !== v.toLowerCase()) : [...$signalSelectedTagIds, v.toLowerCase()]",
+        )
+        .data_on_patch("clicked-tag",&route::Route::Feed(feed::route::Route::Controls(Route::StoreChanged  {
                 feed_id: feed_id.clone(),
             }))
-            .encode(),
-        )
-        .child(code().child(pre().data_text("JSON.stringify(ctx.store(),null,2)")))
+            .encode() )
         .class("w-full h-full flex flex-col overflow-hidden relative")
-}
-
-impl Elem {
-    fn data_on_change_toggle_selected(self) -> Self {
-        self.data_on(
-            "change",
-            "let v = evt.target.value; $signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]",
-        )
-    }
 }
 
 fn view_search_input(feed_id: &FeedId) -> Elem {
@@ -189,31 +210,41 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
 
 fn view_selected_root() -> Elem {
     div().id("selected-tags").class(
-        "flex-none flex flex-row items-center justify-start p-4 gap-2 h-16 overflow-y-hidden border-b",
+        "flex-none flex flex-row items-center justify-start p-4 gap-2 h-16 overflow-y-hidden overflow-x-auto border-b",
     )
 }
 
 fn js_signal_is_checked(tag: &FeedTag) -> String {
-    format!("$signalSelectedTagIds.includes('{}')", tag.encode())
+    format!(
+        "$signalSelectedTagIds.includes('{}')",
+        tag.encode().to_lowercase()
+    )
+}
+
+impl Elem {
+    pub fn data_on_clicked_tag(self) -> Self {
+        self.data_on_click(
+            "evt.target.dispatchEvent(new CustomEvent('clicked-tag', { bubbles: true }))",
+        )
+    }
 }
 
 fn view_selected(model: &ViewModel) -> Elem {
-    view_selected_root()
-        .data_on_change_toggle_selected()
-        .children(
-            model
-                .form_state
-                .tags
-                .iter()
-                .map(|tag| {
-                    tag.chip()
-                        .size(ChipSize::Small)
-                        .bind_checked(&js_signal_is_checked(tag))
-                        .view()
-                        .data_show(&js_signal_is_checked(tag))
-                })
-                .collect::<Vec<Elem>>(),
-        )
+    view_selected_root().children(
+        model
+            .to_all_tags()
+            .iter()
+            .map(|tag| {
+                tag.chip()
+                    .size(ChipSize::Small)
+                    .id(&tag.encode().to_lowercase())
+                    .signal_checked(&js_signal_is_checked(tag))
+                    .view()
+                    .data_show(&js_signal_is_checked(tag))
+                    .data_on_clicked_tag()
+            })
+            .collect::<Vec<Elem>>(),
+    )
 }
 
 fn view_close_button() -> Elem {
@@ -243,7 +274,7 @@ fn view_index(model: &ViewModel) -> Elem {
     view_root(&model.feed.feed_id)
         .child(view_selected(&model))
         .child(view_search_input(&model.feed.feed_id))
-        .child(view_search_results(model))
+        .child(view_unselected(model))
         .child(view_bottom_bar(&model.feed.feed_id, &clicked_save_path))
 }
 
@@ -266,13 +297,19 @@ fn view_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                 .color(ui::button::Color::Primary)
                 .loading_path(&loading_path)
                 .view()
+                .data_on_click_post(
+                    &route::Route::Feed(feed::route::Route::Controls(Route::ClickedSave {
+                        feed_id: feed_id.clone(),
+                    }))
+                    .encode(),
+                )
                 .class("flex-1"),
         )
 }
 
 const SEARCH_RESULTS_ID: &str = "search-results";
 
-fn view_search_results(model: &ViewModel) -> Elem {
+fn view_unselected(model: &ViewModel) -> Elem {
     div()
         .id(SEARCH_RESULTS_ID)
         .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto")
@@ -287,7 +324,6 @@ fn view_search_results_content(model: &ViewModel) -> Elem {
     }
 
     div()
-        .data_on_change_toggle_selected()
         .class("flex flex-row items-start justify-start flex-wrap gap-2")
         .child(view_search_results_frag(&model))
 }
@@ -298,18 +334,13 @@ fn view_search_results_frag(model: &ViewModel) -> Elem {
             .to_tags()
             .iter()
             .map(|feed_tag| {
-                div()
-                    .data_computed("checked", &js_signal_is_checked(feed_tag))
-                    .child(
-                        feed_tag
-                            .chip()
-                            .size(ChipSize::Large)
-                            .checked(false)
-                            // .bind_checked(&js_signal_is_checked(feed_tag))
-                            .signal_checked("$checked")
-                            .view()
-                            .child(div().data_text("$checked")),
-                    )
+                feed_tag
+                    .chip()
+                    .size(ChipSize::Large)
+                    .id(&feed_tag.encode())
+                    .signal_checked(&js_signal_is_checked(feed_tag))
+                    .view()
+                    .data_on_clicked_tag()
             })
             .collect::<Vec<Elem>>(),
     )

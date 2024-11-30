@@ -40,8 +40,25 @@ impl Elem {
         self.attr_unsafe("data-persist", value)
     }
 
-    pub fn data_on_store_change(self, value: &str) -> Self {
-        self.attr_unsafe("data-on-store-change", value)
+    pub fn data_on_store_change(mut self, value: &str) -> Self {
+        if let Elem::Tag {
+            attrs: ref mut attributes,
+            ..
+        } = self
+        {
+            let key = "data-on-store-change";
+            let existing = attributes.get(key).map_or("", |attr| attr.as_str());
+
+            let new = if existing.is_empty() {
+                value.trim().to_string()
+            } else {
+                format!("{}; {}", existing, value).trim().to_string()
+            };
+
+            attributes.insert(key.to_string(), new);
+        }
+
+        self
     }
 
     pub fn data_class(self, value: &str) -> Self {
@@ -49,7 +66,7 @@ impl Elem {
     }
 
     pub fn data_on_store_change_patch(self, url: &str) -> Self {
-        self.attr_unsafe("data-on-store-change", &js_patch(url))
+        self.data_on_store_change(&js_patch(url))
     }
 
     pub fn data_text(self, value: &str) -> Self {
@@ -161,6 +178,10 @@ impl Elem {
         let get_script = js_get(url);
         let script = format!("{}; {}", push_url_script, get_script);
         self.data_on_click(&script)
+    }
+
+    pub fn data_on_patch(self, event: &str, url: &str) -> Self {
+        self.data_on(event, &&js_patch(url))
     }
 
     pub fn data_on_load_get(self, url: &str) -> Self {

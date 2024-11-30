@@ -8,21 +8,40 @@ pub struct ResponseWriter {
     pub stream: TcpStream,
     pub headers_sent: bool,
     pub initial_headers: HashMap<String, String>,
+    pub status_code: u16,
 }
 
 impl ResponseWriter {
     pub fn new(stream: TcpStream) -> Self {
         Self {
+            status_code: 200,
             stream,
             headers_sent: false,
             initial_headers: HashMap::new(),
         }
     }
 
+    pub fn status_code(&mut self, status_code: u16) -> &Self {
+        self.status_code = status_code;
+        self
+    }
+
     pub async fn write_headers(&mut self) -> Result<(), std::io::Error> {
         if self.headers_sent {
             return Ok(());
         }
+
+        let reason_phrase = match self.status_code {
+            200 => "OK",
+            301 => "Moved Permanently",
+            302 => "Found",
+            400 => "Bad Request",
+            404 => "Not Found",
+            500 => "Internal Server Error",
+            _ => "Unknown",
+        };
+
+        let mut header_string = format!("HTTP/1.1 {} {}\r\n", self.status_code, reason_phrase);
 
         let headers = if self.initial_headers.is_empty() {
             let mut default_headers = HashMap::new();
@@ -32,7 +51,6 @@ impl ResponseWriter {
             self.initial_headers.clone()
         };
 
-        let mut header_string = "HTTP/1.1 200 OK\r\n".to_string();
         for (key, value) in headers {
             header_string.push_str(&format!("{}: {}\r\n", key, value));
         }

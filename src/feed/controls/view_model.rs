@@ -47,6 +47,15 @@ impl ViewModel {
         tags
     }
 
+    pub fn to_all_tags(&self) -> Vec<FeedTag> {
+        let mut all_tags = self.tags.clone();
+        let mut form_state_tags = self.form_state.tags.clone();
+        all_tags.append(&mut form_state_tags);
+        all_tags.sort();
+        all_tags.dedup();
+        all_tags
+    }
+
     pub async fn load(ctx: &Ctx, feed_id: &FeedId, search_input: &str) -> Self {
         let feed: Feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
         let form_state = FormState::load(ctx, &feed).await;

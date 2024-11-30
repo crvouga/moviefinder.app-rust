@@ -10,18 +10,17 @@ pub struct Chip {
     pub size: ChipSize,
     pub image: Option<String>,
     pub input_model: String,
-    pub bind_checked: String,
     pub signal_checked: String,
 }
 
 impl Chip {
-    pub fn id(mut self, id: &str) -> Self {
-        self.id = id.to_string();
+    pub fn signal_checked(mut self, value: &str) -> Self {
+        self.signal_checked = value.to_string();
         self
     }
 
-    pub fn input_model(mut self, input_model: &str) -> Self {
-        self.input_model = input_model.to_string();
+    pub fn id(mut self, id: &str) -> Self {
+        self.id = id.to_string();
         self
     }
 
@@ -40,21 +39,6 @@ impl Chip {
         self
     }
 
-    pub fn checked(mut self, checked: bool) -> Self {
-        self.checked = checked;
-        self
-    }
-
-    pub fn bind_checked(mut self, value: &str) -> Self {
-        self.bind_checked = value.to_string();
-        self
-    }
-
-    pub fn signal_checked(mut self, value: &str) -> Self {
-        self.signal_checked = value.to_string();
-        self
-    }
-
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self
@@ -66,41 +50,17 @@ impl Chip {
     }
 
     pub fn view(self) -> Elem {
-        div()
-        .child(
-            input()
-            .class("hidden peer")
-            .type_("checkbox")
-            .id(&self.id)
-            .name(&self.name)
-            .value(&self.id)
-            .checked(self.checked)
-            .disabled(self.disabled)
-            .on_click("event.stopPropagation()")
-            .map(|e| {
-                if self.bind_checked.len() > 0 {
-                    e.data_bind("checked", &self.bind_checked)
-                } else {
-                    e
-                }
-            })
-        )
-        .child(
-            label()
-            .for_(&self.id)
-            .class("flex items-center justify-center rounded-full font-bold w-fit bg-neutral-800 border border-neutral-800 text-white cursor-pointer select-none truncate whitespace-nowrap")
-            // .class("peer-checked:bg-white peer-checked:font-bold peer-checked:text-black enabled:active:opacity-80")
-            .map(|e| {
-                if self.signal_checked.len() > 0 {
-                    e.data_class(&format!("{{'bg-white font-bold text-black': {}}}", &self.signal_checked))
-                } else {
-                    e
-                }
-            })
-            
+        let id = self.id.clone().to_lowercase();
+        let signal_selected = format!("({})", &self.signal_checked);
+        let dollar_signal_selected = format!("{}", signal_selected);
+        let signal_not_selected = format!("!{}", signal_selected);
+        let dollar_signal_not_selected = format!("{}", signal_not_selected);
+        button()
+            .id(&id)
+            .class("shrink-0 flex items-center justify-center font-bold rounded-full w-fit border border-neutral-800 cursor-pointer select-none truncate whitespace-nowrap bg-white")
+            .data_class(&format!("{{'bg-white text-black active:opacity-80': {}, 'bg-neutral-800 text-white': {}}}", dollar_signal_selected, dollar_signal_not_selected))
             .class(&self.size.to_text_size())
             .class(&self.size.to_h())
-            .tab_index(0)
             .map(|e| {
                 match self.image {
                     None => e,
@@ -118,11 +78,11 @@ impl Chip {
             })
             .child(
                 div()
+                .class("pointer-events-none")
                 .class(&self.size.to_py())
                 .class(&self.size.to_px())
                 .child_text(&self.label)
             )
-        )
     }
 }
 
