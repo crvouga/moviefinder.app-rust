@@ -38,6 +38,10 @@ async fn main() {
         .unwrap();
 }
 
+fn remove_leading_slash(s: &str) -> &str {
+    s.strip_prefix('/').unwrap_or(s)
+}
+
 async fn respond(
     ctx: Arc<Ctx>,
     request: Request,
@@ -50,8 +54,12 @@ async fn respond(
     let r = Req {
         params: request.datastar_params(),
         session_id: request.session_id(),
-        path: request.url.path.clone(),
+        path: remove_leading_slash(&request.url.path).to_owned(),
     };
+
+    if let None = maybe_route {
+        log_info!(ctx.logger, "No route found for {:?}", request.url.path);
+    }
 
     log_info!(
         ctx.logger,

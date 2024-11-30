@@ -51,10 +51,12 @@ where
     let query_params_string = path.split_once('?').map(|(_, query)| query).unwrap_or("");
     let query_params = QueryParams::from_string(query_params_string);
 
+    let path_without_query = path.split_once('?').map(|(path, _)| path).unwrap_or(&path);
+
     let request = Request {
         method,
         url: Url {
-            path,
+            path: path_without_query.to_owned(),
             query_params,
             host: headers.get("host").unwrap_or(&"".to_string()).to_string(),
         },

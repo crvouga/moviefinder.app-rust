@@ -31,20 +31,44 @@ impl ServerSentEvent {
         w: &mut ResponseWriter,
         screen: Elem,
     ) -> Result<(), std::io::Error> {
-        let loaded_paths = r
+        let loaded = r
             .params
             .get_all("signalLoadedPaths")
             .map_or(vec![], |s| s.to_owned());
 
-        println!("loaded_paths: {:?}", loaded_paths);
+        println!("loaded_paths: {:?}", loaded);
 
-        sse()
-            .event_merge_fragments()
-            .data_selector_id(ROOT_ID)
-            .data_merge_mode_before()
-            .data_fragments(screen)
-            .send(w)
-            .await
+        
+        if loaded.contains(&r.path) {
+        } else {
+            let js_add_loaded_path = format!(
+                "$signalLoadedPaths = [...$signalLoadedPaths.filter(x => x !== '{}'), '{}'];",
+                r.path, r.path
+            );
+
+            fn ensure_leading_slash(s: &str) -> String {
+                if s.starts_with('/') {
+                    s.to_owned()
+                } else {
+                    format!("/{}", s)
+                }
+            }
+            
+            sse()
+                .event_merge_fragments()
+                .data_selector_id(ROOT_ID)
+                .data_merge_mode_before()
+                .data_fragments(
+                    screen
+                        .id(&r.path)
+                        .data_show(&format!("$signalPath === '{}' ", ensure_leading_slash(&r.path)))
+                        .data_on_load(&js_add_loaded_path),
+                )
+                .send(w)
+                .await?;
+        }
+
+        Ok(())
     }
 }
 
@@ -88,19 +112,44 @@ impl Root {
             .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
             .style("background-color: #000;")
             .data_store("{signalPath: '', signalLoadedPaths: []}")
-            .data_on_store_change("window.ctx = ctx;")
+            
+            .data_on_store_change("window.ctx = ctx; console.log($signalPath)")
             .child(
                 script().child_text_unsafe(
                     r#"
-                    function onChange() {
-                        if(typeof window.ctx === 'undefined') {
-                            return;
+                    (function () {
+                        const originalPushState = history.pushState;
+                        const originalReplaceState = history.replaceState;
+
+                        function triggerCustomEvent(type) {
+                            const event = new Event(type);
+                            window.dispatchEvent(event);
                         }
-                        ctx.store().signalPath.value = location.pathname;
-                    }
-                    window.addEventListener('popstate', onChange);
-                    window.addEventListener('load', onChange);
-                    window.addEventListener('DOMContentLoaded', onChange);                    
+
+                        history.pushState = function (...args) {
+                            originalPushState.apply(this, args);
+                            triggerCustomEvent('pushstate');
+                        };
+
+                        history.replaceState = function (...args) {
+                            originalReplaceState.apply(this, args);
+                            triggerCustomEvent('replacestate');
+                        };
+
+                        function onChange() {
+                            if (typeof window.ctx === 'undefined') {
+                                return;
+                            }
+                            ctx.store().signalPath.value = location.pathname;
+                        }
+
+                        window.addEventListener('hashchange', onChange);
+                        window.addEventListener('popstate', onChange);
+                        window.addEventListener('pushstate', onChange);
+                        window.addEventListener('replacestate', onChange);
+                        window.addEventListener('load', onChange);
+                        window.addEventListener('DOMContentLoaded', onChange);
+                    })();
                     "#
                 )
             )
