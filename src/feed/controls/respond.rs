@@ -190,14 +190,14 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
             }))
             .encode(),
         )
-        .input_id("my-id")
+        .input_id("search-input")
         .input_model("signalInputValue")
         .view()
 }
 
 fn view_selected_root() -> Elem {
     div().id("selected-tags").class(
-        "flex-none flex flex-row items-center justify-start p-4 gap-2 h-16 overflow-y-hidden overflow-x-auto border-b",
+        "flex-none flex flex-row items-center justify-start p-2 gap-2 min-h-16 flex-wrap border-b",
     )
 }
 

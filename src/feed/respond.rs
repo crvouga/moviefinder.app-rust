@@ -237,7 +237,7 @@ fn view_open_controls_button() -> Elem {
         .child(
             div()
                 .class("size-16 bg-black flex items-center justify-center")
-                .child(ui::icon::adjustments_vertical("size-6")),
+                .child(ui::icon::pencil("size-6")),
         )
 }
 
@@ -289,10 +289,10 @@ fn view_swiper(model: &ViewModel) -> Elem {
 fn view_swiper_empty() -> Elem {
     div()
         .class("w-full h-full flex items-center justify-center flex-col gap-4")
-        .child(icon::magnifying_glass("size-24"))
+        .child(icon::magnifying_glass("size-16"))
         .child(
             div()
-                .class("text-3xl font-bold w-full text-center")
+                .class("text-2xl font-bold w-full text-center")
                 .child_text("No results found"),
         )
 }
