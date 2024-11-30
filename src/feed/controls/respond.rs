@@ -197,7 +197,7 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
 
 fn view_selected_root() -> Elem {
     div().id("selected-tags").class(
-        "flex-none flex flex-row items-center justify-start p-2 gap-2 min-h-16 flex-wrap border-b",
+        "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-20 flex-wrap border-b",
     )
 }
 
@@ -258,7 +258,7 @@ fn view_index(model: &ViewModel) -> Elem {
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
     div()
-        .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4")
+        .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20")
         .child(
             Button::new()
                 .label("Cancel")

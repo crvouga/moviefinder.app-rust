@@ -5,7 +5,7 @@ pub struct BottomButtons {}
 
 impl BottomButtons {
     pub fn view(self) -> Elem {
-        div().class("flex items-center justify-center w-full border-t h-16")
+        div().class("flex items-center justify-center w-full border-t h-20")
     }
 }
 

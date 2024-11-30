@@ -41,7 +41,7 @@ impl SearchBar {
     pub fn view(&self) -> Elem {
         label()
             // .data(|a| a.on().input().debounce(500).js_get(&self.search_url).js("console.log('hello')"))
-            .class("w-full h-16 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
+            .class("w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
             .data_bind("aria-busy", "$signalFetching")
             .child(
                 div()

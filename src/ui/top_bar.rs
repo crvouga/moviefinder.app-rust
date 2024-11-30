@@ -5,7 +5,7 @@ use crate::{
 
 pub fn view_root() -> Elem {
     div()
-        .class("flex items-center justify-center shrink-0 w-full border-b h-16 font-bold text-lg text-center truncate")
+        .class("flex items-center justify-center shrink-0 w-full border-b h-20 font-bold text-lg text-center truncate")
 }
 
 #[derive(Default)]

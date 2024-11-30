@@ -244,7 +244,7 @@ fn view_open_controls_button() -> Elem {
 fn view_tags(model: &ViewModel) -> Elem {
     div()
         .id("tags")
-        .class("flex flex-row gap-2 p-2 flex-1 overflow-hidden")
+        .class("flex flex-row gap-2 p-4 flex-1 overflow-hidden")
         .children(
             model
                 .feed
