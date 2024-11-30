@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use crate::{
     core::{
         html::*,
@@ -12,13 +14,7 @@ use crate::{
     route::Route,
 };
 
-const ROOT_ID: &str = "root";
-
-impl Elem {
-    pub fn id_root(self) -> Self {
-        self.id(ROOT_ID)
-    }
-}
+const ID_ROOT: &str = "root";
 
 pub struct Root {
     route: Route,
@@ -27,8 +23,25 @@ pub struct Root {
 impl ServerSentEvent {
     pub async fn send_screen(
         &self,
+        _r: &Req,
+        w: &mut ResponseWriter,
+        _screen_id: &str,
+        screen: Elem,
+    ) -> Result<(), std::io::Error> {
+        sse()
+            .event_merge_fragments()
+            .data_fragments(screen.id(ID_ROOT))
+            .send(w)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn _send_screen(
+        &self,
         r: &Req,
         w: &mut ResponseWriter,
+        screen_id: &str,
         screen: Elem,
     ) -> Result<(), std::io::Error> {
         let loaded = r
@@ -36,33 +49,28 @@ impl ServerSentEvent {
             .get_all("signalLoadedPaths")
             .map_or(vec![], |s| s.to_owned());
 
-        println!("loaded_paths: {:?}", loaded);
+        sse()
+            .event_merge_signals()
+            .data_signals(&format!("{{signalScreenId: '{}'}}", screen_id))
+            .send(w)
+            .await?;
 
-        
-        if loaded.contains(&r.path) {
-        } else {
+        if !loaded.contains(&screen_id.to_string()) {
             let js_add_loaded_path = format!(
                 "$signalLoadedPaths = [...$signalLoadedPaths.filter(x => x !== '{}'), '{}'];",
-                r.path, r.path
+                screen_id, screen_id
             );
 
-            fn ensure_leading_slash(s: &str) -> String {
-                if s.starts_with('/') {
-                    s.to_owned()
-                } else {
-                    format!("/{}", s)
-                }
-            }
-            
             sse()
                 .event_merge_fragments()
-                .data_selector_id(ROOT_ID)
+                .data_selector_id(ID_ROOT)
                 .data_merge_mode_before()
                 .data_fragments(
                     screen
-                        .id(&r.path)
-                        .data_show(&format!("$signalPath === '{}' ", ensure_leading_slash(&r.path)))
-                        .data_on_load(&js_add_loaded_path),
+                        .id(&screen_id)
+                        .data_show(&format!("$signalScreenId === '{}' ", &screen_id))
+                        .data_on_load(&js_add_loaded_path)
+                        .id(screen_id),
                 )
                 .send(w)
                 .await?;
@@ -111,9 +119,8 @@ impl Root {
             body()
             .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
             .style("background-color: #000;")
-            .data_store("{signalPath: '', signalLoadedPaths: []}")
-            
-            .data_on_store_change("window.ctx = ctx; console.log($signalPath)")
+            .data_store("{signalScreenId: '', signalPath: '', signalLoadedPaths: []}")
+            .data_on_store_change("window.ctx = ctx;")
             .child(
                 script().child_text_unsafe(
                     r#"
@@ -158,7 +165,7 @@ impl Root {
                 div()
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col")
                     .child(
-                        div().id_root().data_on_load_get(&self.route.encode())
+                        div().id(ID_ROOT).data_on_load_get(&self.route.encode())
                     )
             )
         )

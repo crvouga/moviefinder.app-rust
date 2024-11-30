@@ -7,13 +7,29 @@ use crate::{
     },
     ctx::Ctx,
     feed,
-    media::{media_::Media, media_db::interface::MediaQueryField},
+    media::{media_::Media, media_db::interface::MediaQueryField, media_id::MediaId},
     req::Req,
     route,
     ui::top_bar::TopBar,
 };
 
 use super::route::Route;
+
+fn to_screen_id(media_id: &MediaId, child_id: &str) -> String {
+    let media_id = media_id.as_str();
+    let child_id = child_id.trim();
+    let prefix = "media";
+
+    if media_id.is_empty() && child_id.is_empty() {
+        prefix.to_string()
+    } else if media_id.is_empty() {
+        format!("{}-{}", prefix, child_id)
+    } else if child_id.is_empty() {
+        format!("{}-{}", prefix, media_id)
+    } else {
+        format!("{}-{}-{}", prefix, media_id, child_id)
+    }
+}
 
 pub async fn respond(
     ctx: &Ctx,
@@ -23,13 +39,9 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Screen { media_id } => {
-            // sse()
-            //     .event_merge_fragments()
-            //     .data_fragments(view_screen(&r.path))
-            //     .send(w)
-            //     .await?;
-
-            sse().send_screen(r, w, view_screen(&r.path)).await?;
+            sse()
+                .send_screen(r, w, &to_screen_id(media_id, ""), view_screen(media_id))
+                .await?;
 
             let query = Query {
                 limit: 1,
@@ -50,21 +62,21 @@ pub async fn respond(
                     sse()
                         .event_merge_fragments()
                         .data_merge_mode_outer()
-                        .data_fragments(view_backdrop(&r.path, &media))
+                        .data_fragments(view_backdrop(&media_id, &media))
                         .send(w)
                         .await?;
 
                     sse()
                         .event_merge_fragments()
                         .data_merge_mode_outer()
-                        .data_fragments(view_top_bar(&r.path, &media))
+                        .data_fragments(view_top_bar(&media_id, &media))
                         .send(w)
                         .await?;
 
                     sse()
                         .event_merge_fragments()
                         .data_merge_mode_outer()
-                        .data_fragments(view_content(&r.path, &media))
+                        .data_fragments(view_content(&media_id, &media))
                         .send(w)
                         .await?;
                     Ok(())
@@ -75,39 +87,38 @@ pub async fn respond(
     }
 }
 
-fn view_screen(path: &str) -> Elem {
+fn view_screen(media_id: &MediaId) -> Elem {
     div()
-        .id(path)
-        .namespace_children_ids(path)
+        .id(&to_screen_id(media_id, ""))
         .class("flex flex-col")
-        .child(view_top_bar_loading(path))
+        .child(view_top_bar_loading(media_id))
         .child(
             div()
                 .class("flex flex-col gap-6 items-center")
-                .child(view_backdrop_loading(path))
-                .child(view_content_loading(path)),
+                .child(view_backdrop_loading(media_id))
+                .child(view_content_loading(media_id)),
         )
 }
 
-fn view_top_bar_root(path: &str, title: &str) -> Elem {
+fn view_top_bar_root(media_id: &MediaId, title: &str) -> Elem {
     TopBar::default()
         .back_button(route::Route::Feed(feed::route::Route::ScreenDefault))
         .title(title)
         .view()
-        .id(&format!("{}-top-bar", path))
+        .id(&to_screen_id(media_id, "top-bar"))
 }
 
-fn view_top_bar_loading(path: &str) -> Elem {
-    view_top_bar_root(path, " ")
+fn view_top_bar_loading(media_id: &MediaId) -> Elem {
+    view_top_bar_root(media_id, " ")
 }
 
-fn view_top_bar(path: &str, media: &Media) -> Elem {
-    view_top_bar_root(path, &media.title)
+fn view_top_bar(media_id: &MediaId, media: &Media) -> Elem {
+    view_top_bar_root(media_id, &media.title)
 }
 
-fn view_backdrop_root(path: &str, src: &str) -> Elem {
+fn view_backdrop_root(media_id: &MediaId, src: &str) -> Elem {
     div()
-        .id(&format!("{}-backdrop", path))
+        .id(&to_screen_id(media_id, "backdrop"))
         .class("w-full aspect-video overflow-hidden border-b")
         .child(
             Image::new()
@@ -117,26 +128,26 @@ fn view_backdrop_root(path: &str, src: &str) -> Elem {
         )
 }
 
-fn view_backdrop_loading(path: &str) -> Elem {
-    view_backdrop_root(path, " ")
+fn view_backdrop_loading(media_id: &MediaId) -> Elem {
+    view_backdrop_root(media_id, " ")
 }
 
-fn view_backdrop(path: &str, media: &Media) -> Elem {
-    view_backdrop_root(path, &media.backdrop.to_highest_res())
+fn view_backdrop(media_id: &MediaId, media: &Media) -> Elem {
+    view_backdrop_root(media_id, &media.backdrop.to_highest_res())
 }
 
-fn view_content_root(path: &str) -> Elem {
+fn view_content_root(media_id: &MediaId) -> Elem {
     div()
-        .id(&format!("{}-content", path))
+        .id(&to_screen_id(media_id, "content"))
         .class("flex flex-col gap-4 items-center")
 }
 
-fn view_content_loading(path: &str) -> Elem {
-    view_content_root(path)
+fn view_content_loading(media_id: &MediaId) -> Elem {
+    view_content_root(media_id)
 }
 
-fn view_content(path: &str, media: &Media) -> Elem {
-    view_content_root(path)
+fn view_content(media_id: &MediaId, media: &Media) -> Elem {
+    view_content_root(media_id)
         .child(view_title(media))
         .child(view_description(media))
 }

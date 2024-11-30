@@ -21,6 +21,22 @@ pub struct ViewModel {
     pub initial_feed_items: Vec<FeedItem>,
 }
 
+pub fn to_screen_id(feed_id: Option<&FeedId>, child_id: &str) -> String {
+    let feed_id = feed_id.map_or("feed", |s| s.as_str());
+    let child_id = child_id.trim();
+    let prefix = "feed";
+
+    if feed_id.is_empty() && child_id.is_empty() {
+        prefix.to_string()
+    } else if feed_id.is_empty() {
+        format!("{}-{}", prefix, child_id)
+    } else if child_id.is_empty() {
+        format!("{}-{}", prefix, feed_id)
+    } else {
+        format!("{}-{}-{}", prefix, feed_id, child_id)
+    }
+}
+
 pub async fn respond_screen(
     ctx: &Ctx,
     r: &Req,
@@ -28,9 +44,12 @@ pub async fn respond_screen(
     feed_id: &FeedId,
 ) -> Result<(), std::io::Error> {
     sse()
-        .event_merge_fragments()
-        .data_fragments(view_screen())
-        .send(w)
+        .send_screen(
+            r,
+            w,
+            &to_screen_id(Some(feed_id), ""),
+            view_screen(Some(feed_id)),
+        )
         .await?;
 
     respond_populate_screen(ctx, r, w, feed_id).await?;
@@ -107,20 +126,20 @@ pub async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, Str
     }
 }
 
-fn view_top_bar_root() -> Elem {
+fn view_top_bar_root(feed_id: Option<&FeedId>) -> Elem {
     top_bar::view_root()
         .button()
         .class("relative")
         .aria_label("open controls")
-        .id("top-bar")
+        .id(&to_screen_id(feed_id, "top-bar"))
 }
 
-fn view_top_bar_loading() -> Elem {
-    view_top_bar_root().child(view_open_controls_button())
+fn view_top_bar_loading(feed_id: Option<&FeedId>) -> Elem {
+    view_top_bar_root(feed_id).child(view_open_controls_button())
 }
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
-    view_top_bar_root().data_on_click_push_then_get(
+    view_top_bar_root(Some(feed_id)).data_on_click_push_then_get(
         &route::Route::Feed(Route::Tags(feed_tags::route::Route::Screen {
             feed_id: feed_id.clone(),
         }))
@@ -145,14 +164,14 @@ fn view_slide_content_loading() -> Elem {
         .class("w-full h-full object-cover")
 }
 
-pub fn view_screen() -> Elem {
+pub fn view_screen(feed_id: Option<&FeedId>) -> Elem {
     div()
-        .id_root()
+        .id(&to_screen_id(feed_id, ""))
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
         .data_store("{signalFeedIndex: 0, signalTrue: true}")
-        .child(view_top_bar_loading())
-        .child(view_swiper_loading())
-        .child(view_bottom_bar())
+        .child(view_top_bar_loading(feed_id))
+        .child(view_swiper_loading(feed_id))
+        .child(view_bottom_bar(feed_id))
 }
 
 fn view_open_controls_button() -> Elem {
@@ -187,20 +206,22 @@ fn view_tags(model: &ViewModel) -> Elem {
         )
 }
 
-fn view_bottom_bar() -> Elem {
-    bottom_bar::view(bottom_bar::Active::Home, "")
+fn view_bottom_bar(feed_id: Option<&FeedId>) -> Elem {
+    bottom_bar::view(bottom_bar::Active::Home, "").id(&to_screen_id(feed_id, "bottom-bar"))
 }
 
-fn view_swiper_root() -> Elem {
-    div().class("w-full flex-1 overflow-hidden").id("swiper")
+fn view_swiper_root(feed_id: Option<&FeedId>) -> Elem {
+    div()
+        .class("w-full flex-1 overflow-hidden")
+        .id(&to_screen_id(feed_id, "swiper"))
 }
 
-fn view_swiper_loading() -> Elem {
-    view_swiper_root().child(view_slide_content_loading())
+fn view_swiper_loading(feed_id: Option<&FeedId>) -> Elem {
+    view_swiper_root(feed_id).child(view_slide_content_loading())
 }
 
 fn view_swiper(model: &ViewModel) -> Elem {
-    view_swiper_root().child(view_swiper_container(&model))
+    view_swiper_root(Some(&model.feed_id)).child(view_swiper_container(&model))
 }
 
 fn view_swiper_container(model: &ViewModel) -> Elem {

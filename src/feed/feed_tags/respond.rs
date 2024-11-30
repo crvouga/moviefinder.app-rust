@@ -18,6 +18,21 @@ use crate::{
     route,
 };
 
+pub fn to_screen_id(feed_id: &FeedId, child_id: &str) -> String {
+    let feed_id = feed_id.as_str().trim();
+    let child_id = child_id.trim();
+    let prefix = "feed-tags";
+
+    if feed_id.is_empty() && child_id.is_empty() {
+        prefix.to_string()
+    } else if feed_id.is_empty() {
+        format!("{}-{}", prefix, child_id)
+    } else if child_id.is_empty() {
+        format!("{}-{}", prefix, feed_id)
+    } else {
+        format!("{}-{}-{}", prefix, feed_id, child_id)
+    }
+}
 pub async fn respond(
     ctx: &Ctx,
     r: &Req,
@@ -27,9 +42,7 @@ pub async fn respond(
     match route {
         Route::Screen { feed_id } => {
             sse()
-                .event_merge_fragments()
-                .data_fragments(view_screen(&feed_id))
-                .send(w)
+                .send_screen(r, w, &to_screen_id(feed_id, ""), view_screen(&feed_id))
                 .await?;
 
             let model = ViewModel::load(ctx, feed_id, "").await;
@@ -77,17 +90,20 @@ pub async fn respond(
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            let back = &to_back_route(feed_id.clone()).encode();
-
             sse()
-                .event_execute_script()
-                .data_script_push_url(back)
+                .event_merge_signals()
+                .data_signals("{signalIsSaving: false}")
                 .send(w)
                 .await?;
 
             sse()
-                .event_merge_signals()
-                .data_signals("{signalIsSaving: false}")
+                .event_execute_script()
+                .data_script_push_url(
+                    &route::Route::Feed(feed::route::Route::Screen {
+                        feed_id: feed_id.clone(),
+                    })
+                    .encode(),
+                )
                 .send(w)
                 .await?;
 
@@ -216,35 +232,12 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
     route::Route::Feed(feed::route::Route::Screen { feed_id })
 }
 
-fn view_root(feed_id: &FeedId) -> Elem {
-    div()
-        .id_root()
-        .data_store(
-            r#"{
-                signalInputValue: '', 
-                signalUnselectedTagIds: [],  
-                signalSelectedTagIds: [],
-            }"#,
-        )
-        .data_on_store_change("window.ctx = ctx")
-        // .child_debug_store()
-        .data_toggle_clicked_tag()
-        .data_indicator("signalIsUpatingSelected")
-        .data_on_patch(
-            "clicked-tag",
-            &route(Route::ClickedTag {
-                feed_id: feed_id.clone(),
-            }),
-        )
-        .class("w-full h-full flex flex-col overflow-hidden relative")
-}
-
 fn view_search_input(feed_id: &FeedId) -> Elem {
     SearchBar::new()
         .search_url(&route(Route::InputtedSearch {
             feed_id: feed_id.clone(),
         }))
-        .input_id("search-input")
+        .input_id(&to_screen_id(feed_id, "search-input"))
         .input_model("signalInputValue")
         .placeholder("Search tags")
         .view()
@@ -271,18 +264,18 @@ impl Elem {
     }
 }
 
-fn view_selected_root() -> Elem {
-    div().id("selected-tags").class(
+fn view_selected_root(feed_id: &FeedId) -> Elem {
+    div().id(&to_screen_id(feed_id, "selected")).class(
         "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-20 flex-wrap border-b",
     )
 }
 
-fn view_selected_loading() -> Elem {
-    view_selected_root().child(div().class("text-muted").child_text("Loading..."))
+fn view_selected_loading(feed_id: &FeedId) -> Elem {
+    view_selected_root(feed_id).child(div().class("text-muted").child_text("Loading..."))
 }
 
 fn view_selected(model: &ViewModel) -> Elem {
-    view_selected_root()
+    view_selected_root(&model.feed.feed_id)
         .child(
             div()
                 .data_show("($signalSelectedTagIds).length === 0")
@@ -323,15 +316,35 @@ fn view_selected(model: &ViewModel) -> Elem {
 }
 
 fn view_screen(feed_id: &FeedId) -> Elem {
-    view_root(&feed_id)
-        .child(view_selected_loading())
-        .child(view_search_input(&feed_id))
-        .child(view_unselected_loading())
-        .child(view_bottom_bar(&feed_id))
+    div()
+        .id(&to_screen_id(feed_id, ""))
+        .data_store(
+            r#"{
+                signalInputValue: '', 
+                signalUnselectedTagIds: [],  
+                signalSelectedTagIds: [],
+            }"#,
+        )
+        .data_on_store_change("window.ctx = ctx")
+        // .child_debug_store()
+        .data_toggle_clicked_tag()
+        .data_indicator("signalIsUpatingSelected")
+        .data_on_patch(
+            "clicked-tag",
+            &route(Route::ClickedTag {
+                feed_id: feed_id.clone(),
+            }),
+        )
+        .class("w-full h-full flex flex-col overflow-hidden relative")
+        .child(view_selected_loading(feed_id))
+        .child(view_search_input(feed_id))
+        .child(view_unselected_loading(feed_id))
+        .child(view_bottom_bar(feed_id))
 }
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
     div()
+        .id(&to_screen_id(feed_id, "bottom-bar"))
         .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20")
         .child(
             Button::new()
@@ -356,18 +369,18 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
         )
 }
 
-fn view_unselected_root() -> Elem {
+fn view_unselected_root(feed_id: &FeedId) -> Elem {
     div()
-        .id("unselected-tags")
+        .id(&to_screen_id(feed_id, "unselected"))
         .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto")
 }
 
-fn view_unselected_loading() -> Elem {
-    view_unselected_root().child(spinner_page::view())
+fn view_unselected_loading(feed_id: &FeedId) -> Elem {
+    view_unselected_root(feed_id).child(spinner_page::view())
 }
 
 fn view_unselected(model: &ViewModel) -> Elem {
-    view_unselected_root().child(view_search_results_content(&model))
+    view_unselected_root(&model.feed.feed_id).child(view_search_results_content(&model))
 }
 
 fn view_search_results_content(model: &ViewModel) -> Elem {
