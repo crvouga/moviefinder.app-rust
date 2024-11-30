@@ -8,7 +8,7 @@ module.exports = {
       },
       textColor: {
         secondary: "#d4d4d8",
-        muted: "#737373",
+        muted: "#a3a3a3",
       },
     },
   },

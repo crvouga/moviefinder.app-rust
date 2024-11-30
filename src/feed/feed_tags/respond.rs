@@ -372,7 +372,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
 fn view_unselected_root(feed_id: &FeedId) -> Elem {
     div()
         .id(&to_screen_id(feed_id, "unselected"))
-        .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto")
+        .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto overflow-x-hidden")
 }
 
 fn view_unselected_loading(feed_id: &FeedId) -> Elem {
