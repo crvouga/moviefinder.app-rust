@@ -50,15 +50,21 @@ impl Chip {
     }
 
     pub fn view(self) -> Elem {
-        let id = self.id.clone().to_lowercase();
-        let signal_selected = format!("({})", &self.signal_checked);
+        let id: String = self.id.clone().to_lowercase();
+        let signal_checked = if self.signal_checked.trim().is_empty() {
+            "true".to_string()
+        } else {
+            self.signal_checked
+        };
+        let signal_selected = format!("({})", signal_checked);
         let dollar_signal_selected = format!("{}", signal_selected);
         let signal_not_selected = format!("!{}", signal_selected);
         let dollar_signal_not_selected = format!("{}", signal_not_selected);
-        button()
+        div()
             .id(&id)
-            .class("shrink-0 flex items-center justify-center font-bold rounded-full w-fit border border-neutral-800 cursor-pointer select-none truncate whitespace-nowrap bg-white")
-            .data_class(&format!("{{'bg-white text-black active:opacity-80': {}, 'bg-neutral-800 text-white': {}}}", dollar_signal_selected, dollar_signal_not_selected))
+            .disabled(self.disabled)
+            .class("shrink-0 flex items-center justify-center font-bold rounded-full w-fit border border-neutral-800 disabled:cursor-not-allowed enabled:cursor-pointer select-none truncate whitespace-nowrap bg-white")
+            .data_class(&format!("{{'bg-white text-black enabled:active:opacity-80': {}, 'bg-neutral-800 text-white': {}}}", dollar_signal_selected, dollar_signal_not_selected))
             .class(&self.size.to_text_size())
             .class(&self.size.to_h())
             .map(|e| {

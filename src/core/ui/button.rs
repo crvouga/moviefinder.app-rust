@@ -5,8 +5,7 @@ use crate::core::html::*;
 pub struct Button {
     label: String,
     color: Color,
-    loading_path: Option<String>,
-    loading_disabled_path: Option<String>,
+    indicator: Option<String>,
 }
 
 impl Button {
@@ -24,13 +23,8 @@ impl Button {
         self
     }
 
-    pub fn loading_path(mut self, loading_path: &str) -> Self {
-        self.loading_path = Some(loading_path.to_string());
-        self
-    }
-
-    pub fn loading_disabled_path(mut self, loading_disabled_path: &str) -> Self {
-        self.loading_disabled_path = Some(loading_disabled_path.to_string());
+    pub fn indicator(mut self, value: &str) -> Self {
+        self.indicator = Some(value.to_string());
         self
     }
 
@@ -40,20 +34,13 @@ impl Button {
         .class("enabled:hover:opacity-80 enabled:active:opacity-60")
         .class("disabled:opacity-80 disabled:cursor-not-allowed")
         .class(&self.color.to_class())
-        // .map(|elem| {
-        //     if let Some(loading_path) = self.loading_path {
-        //         elem.hx_loading_path(&loading_path).hx_loading_aria_busy().hx_loading_disabled()
-        //     } else {
-        //         elem
-        //     }
-        // })
-        // .map(|elem| {
-        //     if let Some(loading_disabled_path) = self.loading_disabled_path {
-        //         elem.hx_loading_disabled().hx_loading_path(&loading_disabled_path)
-        //     } else {
-        //         elem
-        //     }
-        // })
+        .map(|e| {
+            if let Some(indicator) = self.indicator {
+            e.data_indicator(&indicator).data_bind("aria-busy", &format!("${}", indicator))
+            } else {
+                e
+            }
+        })
         .child(
             div()
                 .class("absolute inset-0 flex items-center justify-center opacity-0 group-aria-busy:opacity-100")

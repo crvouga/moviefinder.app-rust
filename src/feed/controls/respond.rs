@@ -2,13 +2,12 @@ use super::{ctx::Ctx, form_state::FormState, route::Route, view_model::ViewModel
 use crate::{
     core::{
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse, set_header::SetHeader},
+        http::{response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
         ui::{
             self,
             button::{Button, Color},
             chip::ChipSize,
-            icon::{self},
             search_bar::SearchBar,
             spinner_page,
         },
@@ -71,26 +70,16 @@ pub async fn respond(
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            w.set_header("location", &to_back_route(feed_id.clone()).encode());
-            w.status_code(301);
-            w.end().await
-        }
-
-        Route::ClickedTag { feed_id, tag } => {
-            let model = ViewModel::load(ctx, feed_id, "").await;
-
-            let form_state_new = model.clone().form_state.toggle(tag);
-
-            ctx.form_state_db.put(&form_state_new).await.unwrap_or(());
+            let back = &to_back_route(feed_id.clone()).encode();
 
             sse()
-                .event_merge_fragments()
-                .data_fragments(view_index(&model))
+                .event_execute_script()
+                .data_script_redirect(back)
                 .send(w)
                 .await
         }
 
-        Route::StoreChanged { feed_id } => {
+        Route::ClickedTag { feed_id } => {
             let selected_tags_new = r.to_selected_tags();
 
             let signal_input_value = r.params.get_first("signalInputValue");
@@ -181,15 +170,15 @@ fn view_root(feed_id: &FeedId) -> Elem {
         .id_root()
         .data_store("{signalInputValue: '', signalSelectedTagIds: []}")
         .data_on_store_change("window.ctx = ctx")
-        // .child(code().child(pre().data_text("JSON.stringify(ctx.store(),null,2)")))
-        .data_on(
+        // .child_debug_store()
+        .data_toggle_clicked_tag()
+        .data_on_patch(
             "clicked-tag",
-            "let v = evt.target.id.toLowerCase(); $signalSelectedTagIds = $signalSelectedTagIds.includes(v.toLowerCase()) ? $signalSelectedTagIds.filter(v_ => v_.toLowerCase() !== v.toLowerCase()) : [...$signalSelectedTagIds, v.toLowerCase()]",
-        )
-        .data_on_patch("clicked-tag",&route::Route::Feed(feed::route::Route::Controls(Route::StoreChanged  {
+            &route::Route::Feed(feed::route::Route::Controls(Route::ClickedTag {
                 feed_id: feed_id.clone(),
             }))
-            .encode() )
+            .encode(),
+        )
         .class("w-full h-full flex flex-col overflow-hidden relative")
 }
 
@@ -201,11 +190,9 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
             }))
             .encode(),
         )
-        .search_results_id(SEARCH_RESULTS_ID)
         .input_id("my-id")
         .input_model("signalInputValue")
         .view()
-        .child(view_close_button())
 }
 
 fn view_selected_root() -> Elem {
@@ -222,7 +209,13 @@ fn js_signal_is_checked(tag: &FeedTag) -> String {
 }
 
 impl Elem {
-    pub fn data_on_clicked_tag(self) -> Self {
+    fn data_toggle_clicked_tag(self) -> Self {
+        self.data_on(
+            "clicked-tag",
+            "let v = evt.target.id.toLowerCase(); $signalSelectedTagIds = $signalSelectedTagIds.includes(v.toLowerCase()) ? $signalSelectedTagIds.filter(v_ => v_.toLowerCase() !== v.toLowerCase()) : [...$signalSelectedTagIds, v.toLowerCase()]",
+        )
+    }
+    fn data_on_clicked_tag(self) -> Self {
         self.data_on_click(
             "evt.target.dispatchEvent(new CustomEvent('clicked-tag', { bubbles: true }))",
         )
@@ -247,45 +240,29 @@ fn view_selected(model: &ViewModel) -> Elem {
     )
 }
 
-fn view_close_button() -> Elem {
-    button()
-        .type_("button")
-        .tab_index(0)
-        .aria_label("close")
-        .class("h-full pr-5 place-items-center")
-        .class("hidden peer-placeholder-shown:grid")
-        .child(icon::x_mark("size-6"))
-}
-
 fn view_index_loading(feed_id: &FeedId) -> Elem {
     view_root(&feed_id)
         .child(view_selected_root())
         .child(view_search_input(&feed_id))
         .child(spinner_page::view())
-        .child(view_bottom_bar(&feed_id, ""))
+        .child(view_bottom_bar(&feed_id))
 }
 
 fn view_index(model: &ViewModel) -> Elem {
-    let clicked_save_path = route::Route::Feed(feed::route::Route::Controls(Route::ClickedSave {
-        feed_id: model.feed.feed_id.clone(),
-    }))
-    .encode();
-
     view_root(&model.feed.feed_id)
         .child(view_selected(&model))
         .child(view_search_input(&model.feed.feed_id))
         .child(view_unselected(model))
-        .child(view_bottom_bar(&model.feed.feed_id, &clicked_save_path))
+        .child(view_bottom_bar(&model.feed.feed_id))
 }
 
-fn view_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
+fn view_bottom_bar(feed_id: &FeedId) -> Elem {
     div()
         .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4")
         .child(
             Button::new()
                 .label("Cancel")
                 .color(Color::Gray)
-                .loading_disabled_path(&loading_path)
                 .view()
                 .data_on_click_push_then_get(&to_back_route(feed_id.clone()).encode())
                 .type_("button")
@@ -295,7 +272,7 @@ fn view_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
             Button::new()
                 .label("Save")
                 .color(ui::button::Color::Primary)
-                .loading_path(&loading_path)
+                .indicator("isSaving")
                 .view()
                 .data_on_click_post(
                     &route::Route::Feed(feed::route::Route::Controls(Route::ClickedSave {
@@ -303,15 +280,14 @@ fn view_bottom_bar(feed_id: &FeedId, loading_path: &str) -> Elem {
                     }))
                     .encode(),
                 )
+                .id("save-button")
                 .class("flex-1"),
         )
 }
 
-const SEARCH_RESULTS_ID: &str = "search-results";
-
 fn view_unselected(model: &ViewModel) -> Elem {
     div()
-        .id(SEARCH_RESULTS_ID)
+        .id("unselected-tags")
         .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto")
         .child(view_search_results_content(&model))
 }

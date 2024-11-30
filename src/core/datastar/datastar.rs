@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::core::{
-    html::Elem,
+    html::{code, pre, Elem},
     http::{json_data::JsonData, request::Request, server_sent_event::ServerSentEvent},
     params::{Params, ParamsHashMap},
     url_encoded,
@@ -191,6 +191,14 @@ impl Elem {
     pub fn data_on_click_post(self, url: &str) -> Self {
         self.data_on_click(&format!("$post('{}', this)", url))
     }
+
+    pub fn child_debug_store(self) -> Self {
+        self.child(
+            code()
+                .class("overflow-hidden")
+                .child(pre().data_text("JSON.stringify(ctx.store(), null, 2)")),
+        )
+    }
 }
 
 impl ServerSentEvent {
@@ -247,6 +255,11 @@ impl ServerSentEvent {
     pub fn data_script(&mut self, script: &str) -> &mut Self {
         let data = format!("script {}", script);
         self.data(&data)
+    }
+
+    pub fn data_script_redirect(&mut self, url: &str) -> &mut Self {
+        let script = format!("window.location = '{}'", url);
+        self.data_script(&script)
     }
 
     pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {

@@ -8,7 +8,6 @@ use crate::core::{
 #[derive(Debug, Clone, Default)]
 pub struct SearchBar {
     search_url: String,
-    search_results_id: String,
     input_id: String,
     input_search_name: String,
     input_model: String,
@@ -26,11 +25,6 @@ impl SearchBar {
 
     pub fn search_url(mut self, value: &str) -> Self {
         self.search_url = value.to_string();
-        self
-    }
-
-    pub fn search_results_id(mut self, value: &str) -> Self {
-        self.search_results_id = value.to_string();
         self
     }
 
