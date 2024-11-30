@@ -8,6 +8,7 @@ use crate::{
             self,
             button::{Button, Color},
             chip::ChipSize,
+            icon::spinner,
             search_bar::SearchBar,
             spinner_page,
         },
@@ -196,10 +197,17 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
 fn view_root(feed_id: &FeedId) -> Elem {
     div()
         .id_root()
-        .data_store("{signalInputValue: '', signalUnselectedTagIds: [],  signalSelectedTagIds: []}")
+        .data_store(
+            r#"{
+                signalInputValue: '', 
+                signalUnselectedTagIds: [],  
+                signalSelectedTagIds: [],
+            }"#,
+        )
         .data_on_store_change("window.ctx = ctx")
         // .child_debug_store()
         .data_toggle_clicked_tag()
+        .data_indicator("signalIsUpatingSelected")
         .data_on_patch(
             "clicked-tag",
             &route(Route::ClickedTag {
@@ -216,6 +224,7 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
         }))
         .input_id("search-input")
         .input_model("signalInputValue")
+        .placeholder("Search tags")
         .view()
 }
 
@@ -251,7 +260,7 @@ fn view_selected(model: &ViewModel) -> Elem {
         .child(
             div()
                 .data_show("($signalSelectedTagIds).length === 0")
-                .class("text-secondary")
+                .class("text-muted")
                 .child_text("No tags selected"),
         )
         .children(
@@ -279,6 +288,12 @@ fn view_selected(model: &ViewModel) -> Elem {
                 .class("underline text-secondary p-2")
                 .child_text("Clear"),
         )
+    // .child(
+    //     div()
+    //         .class("px-1 flex gap-1 text-secondary")
+    //         .data_show("$signalIsUpatingSelected")
+    //         .child(spinner("size-5 animate-spin")), // .child_text("Loading..."),
+    // )
 }
 
 fn view_screen_loading(feed_id: &FeedId) -> Elem {

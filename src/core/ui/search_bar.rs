@@ -11,11 +11,15 @@ pub struct SearchBar {
     input_id: String,
     input_search_name: String,
     input_model: String,
+    placeholder: String,
 }
 
 impl SearchBar {
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            placeholder: "Search".to_string(),
+            ..Self::default()
+        }
     }
 
     pub fn input_model(mut self, value: &str) -> Self {
@@ -38,6 +42,11 @@ impl SearchBar {
         self
     }
 
+    pub fn placeholder(mut self, value: &str) -> Self {
+        self.placeholder = value.to_string();
+        self
+    }
+
     pub fn view(&self) -> Elem {
         label()
             // .data(|a| a.on().input().debounce(500).js_get(&self.search_url).js("console.log('hello')"))
@@ -51,7 +60,7 @@ impl SearchBar {
             .child(
                 input()
                     .id(&self.input_id)
-                    .class("flex-1 h-full bg-transparent peer outline-none")
+                    .class("flex-1 h-full bg-transparent peer outline-none placeholder-neutral-500")
                     .data_model(&self.input_model)
                     .type_("text")
                     .name(&self.input_search_name)
@@ -59,7 +68,7 @@ impl SearchBar {
                     .data_on("clear", "evt?.target?.focus()")
                     .data_on_input_debounce_get(Duration::from_millis(250), &self.search_url)
                     .data_indicator("signalFetching")
-                    .placeholder("Search"),
+                    .placeholder(&self.placeholder),
             )
             .child(
                 div()
