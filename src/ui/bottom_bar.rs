@@ -1,5 +1,5 @@
 use crate::account;
-use crate::core::datastar::datastar::BuilderShared;
+use crate::core::datastar::datastar::Builder;
 use crate::core::html::*;
 use crate::core::ui;
 use crate::core::ui::bottom_bar_buttons::BottomButton;
@@ -23,12 +23,10 @@ pub fn view(active: Active) -> Elem {
                     .icon(ui::icon::home("size-6"))
                     .active(active == Active::Home)
                     .view()
-                    .on(|b| {
-                        b.click()
-                            .push_then_get(
-                                &route::Route::Feed(feed::route::Route::ScreenDefault).encode(),
-                            )
-                            .b()
+                    .data_on(|b| {
+                        b.click().push_then_get(
+                            &route::Route::Feed(feed::route::Route::ScreenDefault).encode(),
+                        )
                     }),
             )
             .child(
@@ -37,12 +35,10 @@ pub fn view(active: Active) -> Elem {
                     .icon(ui::icon::user_circle("size-6"))
                     .active(active == Active::Account)
                     .view()
-                    .on(|b| {
-                        b.click()
-                            .push_then_get(
-                                &route::Route::Account(account::route::Route::Screen).encode(),
-                            )
-                            .b()
+                    .data_on(|b| {
+                        b.click().push_then_get(
+                            &route::Route::Account(account::route::Route::Screen).encode(),
+                        )
                     }),
             ),
     )

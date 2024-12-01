@@ -1,7 +1,7 @@
 use super::{form_state::FormState, route::Route, view_model::ViewModel};
 use crate::{
     core::{
-        datastar::datastar::BuilderShared,
+        datastar::datastar::Builder,
         html::*,
         http::{response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
@@ -255,10 +255,9 @@ fn js_signal_is_checked(tag: &FeedTag) -> String {
 
 impl Elem {
     fn data_on_clicked_tag(self) -> Self {
-        self.on(|b| {
+        self.data_on(|b| {
             b.click()
                 .js("evt.target.dispatchEvent(new CustomEvent('clicked-tag', { bubbles: true }))")
-                .b()
         })
     }
 }
@@ -299,13 +298,12 @@ fn view_selected(model: &ViewModel) -> Elem {
         .child(
             button()
                 .data_show("($signalSelectedTagIds).length > 0")
-                .on(|b| {
+                .data_on(|b| {
                     b.click()
                         .js("$signalSelectedTagIds = []")
                         .patch(&route(Route::ClickedClear {
                             feed_id: model.feed.feed_id.clone(),
                         }))
-                        .b()
                 })
                 .class("underline text-secondary p-2")
                 .child_text("Clear"),
@@ -328,13 +326,12 @@ fn view_screen(feed_id: &FeedId) -> Elem {
                 signalSelectedTagIds: [],
             }"#,
         )
-        .on(|b| b
+        .data_on(|b| b
             .e("clicked-tag")
             .js("let v = evt.target.id.toLowerCase().trim()")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.map(v => v.toLowerCase().trim())")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]")
             .patch(&route(Route::ClickedTag {feed_id: feed_id.clone()}))
-            .b()
         )
         .data_indicator("signalIsUpatingSelected")
         .class("w-full h-full flex flex-col overflow-hidden relative")
@@ -353,10 +350,9 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .label("Cancel")
                 .color(Color::Gray)
                 .view()
-                .on(|b| {
+                .data_on(|b| {
                     b.click()
                         .push_then_get(&to_back_route(feed_id.clone()).encode())
-                        .b()
                 })
                 .type_("button")
                 .class("flex-1"),
@@ -367,12 +363,10 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .color(ui::button::Color::Primary)
                 .indicator("signalIsSaving")
                 .view()
-                .on(|b| {
-                    b.click()
-                        .get(&route(Route::ClickedSave {
-                            feed_id: feed_id.clone(),
-                        }))
-                        .b()
+                .data_on(|b| {
+                    b.click().get(&route(Route::ClickedSave {
+                        feed_id: feed_id.clone(),
+                    }))
                 })
                 .id("save-button")
                 .class("flex-1"),

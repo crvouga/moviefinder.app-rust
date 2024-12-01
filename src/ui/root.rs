@@ -2,7 +2,7 @@ use std::fmt::format;
 
 use crate::{
     core::{
-        datastar::datastar::BuilderShared,
+        datastar::datastar::Builder,
         html::*,
         http::{
             response_writer::ResponseWriter,
@@ -71,7 +71,7 @@ impl ServerSentEvent {
                     screen
                         .id(&screen_id)
                         .data_show(&format!("$signalScreenId === '{}' ", &screen_id))
-                        .on(|b| b.load().js(&js_add_loaded_path).b())
+                        .data_on(|b| b.load().js(&js_add_loaded_path))
                         .id(screen_id),
                 )
                 .send(w)
@@ -122,7 +122,7 @@ impl Root {
             .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")
             .style("background-color: #000;")
             .data_store("{signalScreenId: '', signalPath: '', signalLoadedPaths: []}")
-            .on(|b| b.store_changed().js("window.ctx = ctx;").b())
+            .data_on(|b| b.store_changed().js("window.ctx = ctx;"))
             .child(
                 script().child_text_unsafe(
                     r#"
@@ -167,7 +167,7 @@ impl Root {
                 div()
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col")
                     .child(
-                        div().id(ID_ROOT).on(|b| b.load().push_then_get(&self.route.encode()).b())
+                        div().id(ID_ROOT).data_on(|b| b.load().push_then_get(&self.route.encode()))
                     )
             )
         )

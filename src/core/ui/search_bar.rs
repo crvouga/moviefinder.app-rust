@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::core::{
-    datastar::datastar::BuilderShared,
+    datastar::datastar::Builder,
     html::*,
     ui::icon::{self, spinner},
 };
@@ -50,31 +50,30 @@ impl SearchBar {
 
     pub fn view(&self) -> Elem {
         label()
-            .class("w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden")
+            .class("w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden px-5")
             .data_bind("aria-busy", "$signalFetching")
             .child(
                 div()
-                    .class("h-full grid place-items-center pl-4 pr-2")
-                    .child(icon::magnifying_glass("size-6")),
+                    .class("h-full grid place-items-center pr-2")
+                    .child(icon::magnifying_glass("size-8")),
             )
             .child(
                 input()
                     .id(&self.input_id)
-                    .class("flex-1 h-full bg-transparent peer outline-none placeholder-neutral-500")
+                    .class("flex-1 h-full bg-transparent peer outline-none")
                     .data_model(&self.input_model)
                     .type_("text")
                     .name(&self.input_search_name)
-                    .on(|b| {
+                    .data_on(|b| {
                         b.e("clear")
                             .js("evt.target.value = ''")
                             .js("evt?.target?.focus()")
-                            .b()
+                            .js("evt?.target?.dispatchEvent(new Event('input'))")
                     })
-                    .on(|b| {
+                    .data_on(|b| {
                         b.input()
-                            .debounce(Duration::from_millis(250))
+                            .debounce(Duration::from_millis(300))
                             .get(&self.search_url)
-                            .b()
                     })
                     .data_indicator("signalFetching")
                     .placeholder(&self.placeholder),
@@ -88,12 +87,14 @@ impl SearchBar {
                 button()
                     .type_("button")
                     .tab_index(0)
-                    .on(|b| b.click().js(&format!("${} = ''", self.input_model)).b())
-                    // .data_on_click("evt?.target?.parentNode?.querySelector?.('input')?.dispatchEvent(new Event('clear'))")
+                    .data_on(|b| b
+                        .click()
+                        .js("evt?.target?.parentNode?.querySelector?.('input')?.dispatchEvent(new Event('clear'))")
+                    )
                     .aria_label("clear search")
-                    .class("h-full pr-5 place-items-center")
+                    .class("h-full place-items-center")
                     .class("grid peer-placeholder-shown:hidden")
-                    .child(icon::x_circle_mark("size-6 pointer-events-none")),
+                    .child(icon::x_mark("size-8 pointer-events-none")),
             )
     }
 }

@@ -7,6 +7,9 @@ run: #
 watch: #
   cargo watch -x run
 
+fmt: #
+  cargo fmt
+
 db-start: #
   sudo docker-compose -f ./docker-compose.dev.yml up -d
 

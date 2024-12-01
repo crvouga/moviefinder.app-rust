@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
 use crate::core::{
     html::{code, pre, Elem},
@@ -19,93 +19,48 @@ pub fn js_patch(url: &str) -> String {
     format!("$patch('{}', this)", url)
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct Builder {}
-
-#[derive(Debug, Clone)]
-pub enum BuilderVariant {
-    On(BuilderOn),
-    Intersects(BuilderIntersects),
+pub trait Builder {
+    fn attr(&self) -> (String, String);
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct BuilderOn {
-    event: String,
-    modifiers: Vec<String>,
-    actions: Vec<String>,
+pub struct DataClass {
+    classes: HashMap<String, String>,
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct BuilderIntersects {
-    event: String,
-    modifiers: Vec<String>,
-    actions: Vec<String>,
-}
-
-pub trait BuilderShared {
-    fn to_attr_key_string(&self) -> String;
-    fn to_attr_value_string(&self) -> String;
-    fn b(&self) -> BuilderVariant;
-}
-
-impl BuilderShared for BuilderVariant {
-    fn to_attr_key_string(&self) -> String {
-        match self {
-            BuilderVariant::On(b) => b.to_attr_key_string(),
-            BuilderVariant::Intersects(b) => b.to_attr_key_string(),
-        }
-    }
-
-    fn to_attr_value_string(&self) -> String {
-        match self {
-            BuilderVariant::On(b) => b.to_attr_value_string(),
-            BuilderVariant::Intersects(b) => b.to_attr_value_string(),
-        }
-    }
-
-    fn b(&self) -> BuilderVariant {
-        self.clone()
-    }
-}
-
-impl Builder {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    pub fn e(self, event: &str) -> BuilderOn {
-        BuilderOn::new(event)
-    }
-
-    pub fn input(self) -> BuilderOn {
-        self.e("input")
-    }
-
-    pub fn click(self) -> BuilderOn {
-        self.e("click")
-    }
-
-    pub fn load(self) -> BuilderOn {
-        self.e("load")
-    }
-
-    pub fn store_changed(self) -> BuilderOn {
-        self.e("store-changed")
-    }
-
-    pub fn raf(self) -> BuilderOn {
-        self.e("raf")
-    }
-
-    pub fn intersects(self) -> BuilderIntersects {
-        BuilderIntersects::new()
-    }
-}
-
-impl BuilderIntersects {
+impl DataClass {
     pub fn new() -> Self {
         Self {
-            event: "intersects".to_string(),
+            classes: HashMap::new(),
+        }
+    }
+
+    pub fn c(mut self, class: &str, signal: &str) -> Self {
+        self.classes.insert(class.to_string(), signal.to_string());
+        self
+    }
+}
+
+impl Builder for DataClass {
+    fn attr(&self) -> (String, String) {
+        let mut classes = vec![];
+        for (class, signal) in &self.classes {
+            classes.push(format!("'{}': {}", class, signal));
+        }
+        let classes_str = format!("{{{}}}", classes.join(","));
+        ("data-class".to_string(), classes_str)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct DataIntersects {
+    modifiers: Vec<String>,
+    actions: Vec<String>,
+}
+
+impl DataIntersects {
+    pub fn new() -> Self {
+        Self {
             modifiers: vec![],
             actions: vec![],
         }
@@ -117,27 +72,29 @@ impl BuilderIntersects {
     }
 }
 
-impl BuilderShared for BuilderIntersects {
-    fn to_attr_key_string(&self) -> String {
+impl Builder for DataIntersects {
+    fn attr(&self) -> (String, String) {
+        let value = self.actions.join("; ");
         let modifiers_str = self.modifiers.join(".");
+        let event = "intersects".to_string();
         let attr_str = if modifiers_str.is_empty() {
-            self.event.clone()
+            event
         } else {
-            format!("{}.{}", self.event, modifiers_str)
+            format!("{}.{}", event, modifiers_str)
         };
-        format!("data-on-{}", attr_str)
-    }
-
-    fn to_attr_value_string(&self) -> String {
-        self.actions.join("; ")
-    }
-
-    fn b(&self) -> BuilderVariant {
-        BuilderVariant::Intersects(self.clone())
+        let key = format!("data-{}", attr_str);
+        (key, value)
     }
 }
 
-impl BuilderOn {
+#[derive(Debug, Clone, Default)]
+pub struct DataOn {
+    event: String,
+    modifiers: Vec<String>,
+    actions: Vec<String>,
+}
+
+impl DataOn {
     pub fn new(event: &str) -> Self {
         Self {
             event: event.to_string(),
@@ -145,6 +102,52 @@ impl BuilderOn {
             actions: vec![],
         }
     }
+
+    pub fn e(mut self, event: &str) -> Self {
+        self.event = event.to_string();
+        self
+    }
+
+    pub fn input(self) -> Self {
+        Self {
+            event: "input".to_string(),
+            modifiers: vec![],
+            actions: vec![],
+        }
+    }
+
+    pub fn click(self) -> Self {
+        Self {
+            event: "click".to_string(),
+            modifiers: vec![],
+            actions: vec![],
+        }
+    }
+
+    pub fn load(self) -> Self {
+        Self {
+            event: "load".to_string(),
+            modifiers: vec![],
+            actions: vec![],
+        }
+    }
+
+    pub fn store_changed(self) -> Self {
+        Self {
+            event: "store-changed".to_string(),
+            modifiers: vec![],
+            actions: vec![],
+        }
+    }
+
+    pub fn raf(self) -> Self {
+        Self {
+            event: "raf".to_string(),
+            modifiers: vec![],
+            actions: vec![],
+        }
+    }
+
     pub fn debounce(mut self, duration: Duration) -> Self {
         self.modifiers
             .push(format!("debounce_{}ms", duration.as_millis()));
@@ -208,23 +211,17 @@ impl BuilderOn {
     }
 }
 
-impl BuilderShared for BuilderOn {
-    fn to_attr_key_string(&self) -> String {
+impl Builder for DataOn {
+    fn attr(&self) -> (String, String) {
         let modifiers_str = self.modifiers.join(".");
         let attr_str = if modifiers_str.is_empty() {
             self.event.clone()
         } else {
             format!("{}.{}", self.event, modifiers_str)
         };
-        format!("data-on-{}", attr_str)
-    }
-
-    fn to_attr_value_string(&self) -> String {
-        self.actions.join("; ")
-    }
-
-    fn b(&self) -> BuilderVariant {
-        BuilderVariant::On(self.clone())
+        let key = format!("data-on-{}", attr_str);
+        let value = self.actions.join("; ");
+        (key, value)
     }
 }
 
@@ -245,13 +242,15 @@ impl Elem {
         self.attr_unsafe("data-store", value)
     }
 
-    pub fn on(self, b: impl FnOnce(Builder) -> BuilderVariant) -> Self {
-        let event = Builder::new();
-        let modifiers = b(event);
+    pub fn data_on(self, b: impl FnOnce(DataOn) -> DataOn) -> Self {
+        let builder = b(DataOn::new(""));
+        let (key, value) = builder.attr();
+        self.attr_unsafe(&key, &value)
+    }
 
-        let key = modifiers.to_attr_key_string();
-        let value = modifiers.to_attr_value_string();
-
+    pub fn data_intersects(self, b: impl FnOnce(DataIntersects) -> DataIntersects) -> Self {
+        let builder = b(DataIntersects::new());
+        let (key, value) = builder.attr();
         self.attr_unsafe(&key, &value)
     }
 
@@ -259,8 +258,10 @@ impl Elem {
         self.attr_unsafe("data-persist", value)
     }
 
-    pub fn data_class(self, value: &str) -> Self {
-        self.attr_unsafe("data-class", value)
+    pub fn data_class(self, b: impl FnOnce(DataClass) -> DataClass) -> Self {
+        let builder = b(DataClass::new());
+        let (key, value) = builder.attr();
+        self.attr_unsafe(&key, &value)
     }
 
     pub fn data_text(self, value: &str) -> Self {

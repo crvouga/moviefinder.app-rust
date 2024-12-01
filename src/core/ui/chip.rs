@@ -1,4 +1,4 @@
-use crate::core::html::*;
+use crate::core::{datastar::datastar::Builder, html::*};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Chip {
@@ -64,7 +64,10 @@ impl Chip {
             .id(&id)
             .disabled(self.disabled)
             .class("shrink-0 flex items-center justify-center cursor-pointer font-bold rounded-full w-fit border border-neutral-800 disabled:cursor-not-allowed enabled:cursor-pointer select-none truncate whitespace-nowrap bg-white")
-            .data_class(&format!("{{'bg-white text-black enabled:active:opacity-80': {}, 'bg-neutral-800 text-white': {}}}", dollar_signal_selected, dollar_signal_not_selected))
+            .data_class(|c|c
+                .c("bg-white text-black enabled:active:opacity-80", &dollar_signal_selected)
+                .c("bg-neutral-800 text-white", &dollar_signal_not_selected)
+            )
             .class(&self.size.to_text_size())
             .class(&self.size.to_h())
             .map(|e| {
