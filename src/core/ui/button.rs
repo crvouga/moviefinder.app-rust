@@ -23,6 +23,11 @@ impl Button {
         self
     }
 
+    pub fn color_primary(mut self) -> Self {
+        self.color = Color::Primary;
+        self
+    }
+
     pub fn indicator(mut self, value: &str) -> Self {
         self.indicator = Some(value.to_string());
         self
