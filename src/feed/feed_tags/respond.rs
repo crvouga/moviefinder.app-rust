@@ -1,7 +1,6 @@
 use super::{form_state::FormState, route::Route, view_model::ViewModel};
 use crate::{
     core::{
-        datastar::datastar::Builder,
         html::*,
         http::{response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
@@ -179,7 +178,9 @@ pub async fn respond(
                 .event_merge_fragments()
                 .data_fragments(view_selected(&model_new))
                 .send(w)
-                .await
+                .await?;
+
+            Ok(())
         }
 
         Route::ClickedClear { feed_id } => {
@@ -237,9 +238,10 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
 
 fn view_search_input(feed_id: &FeedId) -> Elem {
     SearchBar::new()
-        .search_url(&route(Route::InputtedSearch {
+        .url(&route(Route::InputtedSearch {
             feed_id: feed_id.clone(),
         }))
+        .indicator("signalIsSearching")
         .input_id(&to_screen_id(feed_id, "search-input"))
         .input_model("signalInputValue")
         .placeholder("Search tags")
@@ -248,18 +250,9 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
 
 fn js_signal_is_checked(tag: &FeedTag) -> String {
     format!(
-        "$signalSelectedTagIds.includes('{}')",
+        "$signalSelectedTagIds.map(v => v.toLowerCase().trim()).includes('{}')",
         tag.encode().to_lowercase()
     )
-}
-
-impl Elem {
-    fn data_on_clicked_tag(self) -> Self {
-        self.data_on(|b| {
-            b.click()
-                .js("evt.target.dispatchEvent(new CustomEvent('clicked-tag', { bubbles: true }))")
-        })
-    }
 }
 
 fn view_selected_root(feed_id: &FeedId) -> Elem {
@@ -287,11 +280,10 @@ fn view_selected(model: &ViewModel) -> Elem {
                 .map(|tag| {
                     tag.chip()
                         .size(ChipSize::Small)
-                        .id(&tag.encode().to_lowercase())
                         .signal_checked(&js_signal_is_checked(tag))
                         .view()
                         .data_show(&js_signal_is_checked(tag))
-                        .data_on_clicked_tag()
+                        .data_on_clicked_tag(&tag.encode())
                 })
                 .collect::<Vec<Elem>>(),
         )
@@ -328,7 +320,7 @@ fn view_screen(feed_id: &FeedId) -> Elem {
         )
         .data_on(|b| b
             .e("clicked-tag")
-            .js("let v = evt.target.id.toLowerCase().trim()")
+            .js("const v = evt?.detail?.tagId?.toLowerCase?.()?.trim?.()")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.map(v => v.toLowerCase().trim())")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]")
             .patch(&route(Route::ClickedTag {feed_id: feed_id.clone()}))
@@ -339,6 +331,17 @@ fn view_screen(feed_id: &FeedId) -> Elem {
         .child(view_search_input(feed_id))
         .child(view_unselected_loading(feed_id))
         .child(view_bottom_bar(feed_id))
+}
+
+impl Elem {
+    fn data_on_clicked_tag(self, tag_id: &str) -> Self {
+        self.data_on(|b| {
+            b.click()
+                .js(&format!("const tagId = '{}'", tag_id))
+                .js("const e = new CustomEvent('clicked-tag', { bubbles: true, detail: { tagId } })")
+                .js("evt.target.dispatchEvent(e)")
+        })
+    }
 }
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
@@ -408,10 +411,9 @@ fn view_search_results_frag(model: &ViewModel) -> Elem {
                 feed_tag
                     .chip()
                     .size(ChipSize::Large)
-                    .id(&feed_tag.encode())
                     .signal_checked(&js_signal_is_checked(feed_tag))
                     .view()
-                    .data_on_clicked_tag()
+                    .data_on_clicked_tag(&feed_tag.encode())
             })
             .collect::<Vec<Elem>>(),
     )

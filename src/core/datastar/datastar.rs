@@ -19,6 +19,10 @@ pub fn js_patch(url: &str) -> String {
     format!("$patch('{}', this)", url)
 }
 
+pub fn dollar(value: &str) -> String {
+    format!("(${})", value)
+}
+
 pub trait Builder {
     fn attr(&self) -> (String, String);
 }
