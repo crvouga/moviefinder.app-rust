@@ -10,14 +10,14 @@ pub fn view_root() -> Elem {
 
 #[derive(Default)]
 pub struct TopBar {
-    back_route: Option<Route>,
+    back_url: Option<Route>,
     title: Option<String>,
-    cancel_route: Option<Route>,
+    cancel_url: Option<Route>,
 }
 
 impl TopBar {
     pub fn back_button(mut self, back_route: Route) -> Self {
-        self.back_route = Some(back_route);
+        self.back_url = Some(back_route);
         self
     }
 
@@ -28,7 +28,7 @@ impl TopBar {
 
     pub fn view(self) -> Elem {
         let back_button_elem = self
-            .back_route
+            .back_url
             .map_or(Empty::view(), |route| BackButton::new(route).view());
 
         let title_elem = self
@@ -36,7 +36,7 @@ impl TopBar {
             .map_or(div().class("flex-1 truncate"), |s| Title::view(&s));
 
         let cancel_button_elem = self
-            .cancel_route
+            .cancel_url
             .map_or(Empty::view(), |route| CancelButton::new(route).view());
 
         view_root()

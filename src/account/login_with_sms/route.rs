@@ -3,5 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
     ScreenPhone,
-    ScreenCode,
+    ScreenCode { phone_number: String },
+    ClickedSendCode,
+    ClickedVerifyCode,
 }

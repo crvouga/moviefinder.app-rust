@@ -177,3 +177,7 @@ pub fn input() -> Elem {
 pub fn label() -> Elem {
     elem("label")
 }
+
+pub fn span() -> Elem {
+    elem("span")
+}

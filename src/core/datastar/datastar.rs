@@ -387,8 +387,11 @@ impl ResponseWriter {
     }
 
     pub async fn send_replace_url(&mut self, url: &str) -> Result<(), std::io::Error> {
-        let script = format!("window.history.replaceState(null, '', '{}');", url);
-        self.send_script(&script).await
+        self.send_script(&js_replace_url(url)).await
+    }
+
+    pub async fn send_push_url(&mut self, url: &str) -> Result<(), std::io::Error> {
+        self.send_script(&js_push_url(url)).await
     }
 
     pub async fn send_script(&mut self, script: &str) -> Result<(), std::io::Error> {

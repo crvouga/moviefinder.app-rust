@@ -1,12 +1,20 @@
 use super::{escape::escape, Elem};
 
+pub fn text(value: &str) -> Elem {
+    Elem::Text(escape(value))
+}
+
+pub fn text_unsafe(value: &str) -> Elem {
+    Elem::Text(value.to_string())
+}
+
 impl Elem {
     pub fn child_text(self, value: &str) -> Self {
-        self.child(Elem::Text(escape(value)))
+        self.child(text(value))
     }
 
     pub fn child_text_unsafe(self, value: &str) -> Self {
-        self.child(Elem::Text(value.to_string()))
+        self.child(text_unsafe(value))
     }
 
     pub fn children(mut self, children: Vec<Elem>) -> Self {
