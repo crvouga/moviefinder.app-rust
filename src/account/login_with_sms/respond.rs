@@ -39,7 +39,7 @@ pub async fn respond(
                 .unwrap_or_default();
 
             if phone_number.is_empty() {
-                w.send_frag(view_phone_number_text_field("Phone number is required"))
+                w.send_fragment(view_phone_number_text_field("Phone number is required"))
                     .await?;
                 return Ok(());
             }

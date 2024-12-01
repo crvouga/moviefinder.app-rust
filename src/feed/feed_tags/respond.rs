@@ -54,25 +54,13 @@ pub async fn respond(
                 .collect::<Vec<String>>()
                 .join(",");
 
-            sse()
-                .event_merge_signals()
-                .data_signals(&format!(
-                    "{{signalSelectedTagIds: [{}]}}",
-                    signal_selected_tag_ids
-                ))
-                .send(w)
-                .await?;
+            let signals_new = &format!("{{signalSelectedTagIds: [{}]}}", signal_selected_tag_ids);
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_selected(&model))
-                .send(w)
-                .await?;
+            w.send_signals(signals_new).await?;
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_unselected(&model))
-                .send(w)
+            w.send_fragment(view_selected(&model)).await?;
+
+            w.send_fragment(view_unselected_loading(&model.feed.feed_id))
                 .await?;
 
             Ok(())
@@ -89,22 +77,15 @@ pub async fn respond(
 
             ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
 
-            sse()
-                .event_merge_signals()
-                .data_signals("{signalIsSaving: false}")
-                .send(w)
-                .await?;
+            w.send_signals("{signalIsSaving: false}").await?;
 
-            sse()
-                .event_execute_script()
-                .data_script_push_url(
-                    &route::Route::Feed(feed::route::Route::Screen {
-                        feed_id: feed_id.clone(),
-                    })
-                    .encode(),
-                )
-                .send(w)
-                .await?;
+            w.send_push_url(
+                &route::Route::Feed(feed::route::Route::Screen {
+                    feed_id: feed_id.clone(),
+                })
+                .encode(),
+            )
+            .await?;
 
             respond_screen(ctx, r, w, feed_id).await?;
 
@@ -129,17 +110,9 @@ pub async fn respond(
                 ..model
             };
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_selected(&model_new))
-                .send(w)
-                .await?;
+            w.send_fragment(view_selected(&model_new)).await?;
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_unselected(&model_new))
-                .send(w)
-                .await?;
+            w.send_fragment(view_unselected(&model_new)).await?;
 
             ctx.feed_tags_form_state_db
                 .put(&form_state_new)
@@ -165,17 +138,9 @@ pub async fn respond(
                 ..model
             };
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_unselected(&model_new))
-                .send(w)
-                .await?;
+            w.send_fragment(view_unselected(&model_new)).await?;
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_selected(&model_new))
-                .send(w)
-                .await?;
+            w.send_fragment(view_selected(&model_new)).await?;
 
             Ok(())
         }
@@ -193,11 +158,7 @@ pub async fn respond(
                 ..model
             };
 
-            sse()
-                .event_merge_fragments()
-                .data_fragments(view_selected(&model_new))
-                .send(w)
-                .await?;
+            w.send_fragment(view_selected(&model_new)).await?;
 
             ctx.feed_tags_form_state_db
                 .put(&form_state_new)

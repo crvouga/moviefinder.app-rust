@@ -58,7 +58,7 @@ pub async fn respond_populate_screen(
     w: &mut ResponseWriter,
     feed_id: &FeedId,
 ) -> Result<(), std::io::Error> {
-    w.send_frag(view_top_bar_loading_with_link(&feed_id))
+    w.send_fragment(view_top_bar_loading_with_link(&feed_id))
         .await?;
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
@@ -73,8 +73,8 @@ pub async fn respond_populate_screen(
         initial_feed_items,
     };
 
-    w.send_frag(view_top_bar(&model)).await?;
-    w.send_frag(view_swiper(&model)).await?;
+    w.send_fragment(view_top_bar(&model)).await?;
+    w.send_fragment(view_swiper(&model)).await?;
 
     Ok(())
 }

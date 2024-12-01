@@ -1,5 +1,5 @@
 use core::{
-    http::{request::Request, response_writer::ResponseWriter, server_sent_event::sse},
+    http::{request::Request, response_writer::ResponseWriter},
     mime_type::mime_type,
 };
 use ctx::Ctx;
@@ -143,10 +143,7 @@ async fn respond_fallback(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     let fallback = feed::route::Route::ScreenDefault;
-    sse()
-        .event_execute_script()
-        .data_script_push_url(&Route::Feed(fallback).encode())
-        .send(w)
-        .await?;
+    w.send_push_url(&Route::Feed(fallback).encode()).await?;
+
     feed::respond::respond(&ctx, r, &feed::route::Route::ScreenDefault, w).await
 }

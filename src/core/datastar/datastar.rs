@@ -378,10 +378,18 @@ impl ServerSentEvent {
 }
 
 impl ResponseWriter {
-    pub async fn send_frag(&mut self, elem: Elem) -> Result<(), std::io::Error> {
+    pub async fn send_fragment(&mut self, elem: Elem) -> Result<(), std::io::Error> {
         sse()
             .event_merge_fragments()
             .data_fragments(elem)
+            .send(self)
+            .await
+    }
+
+    pub async fn send_signals(&mut self, value: &str) -> Result<(), std::io::Error> {
+        sse()
+            .event_merge_signals()
+            .data_signals(value)
             .send(self)
             .await
     }

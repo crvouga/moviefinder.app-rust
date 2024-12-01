@@ -7,7 +7,7 @@ const ID_SCREEN: &str = "screen";
 
 impl ResponseWriter {
     pub async fn send_screen_frag(&mut self, screen: Elem) -> Result<(), std::io::Error> {
-        self.send_frag(screen.id(ID_SCREEN)).await?;
+        self.send_fragment(screen.id(ID_SCREEN)).await?;
 
         Ok(())
     }
