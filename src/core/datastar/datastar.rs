@@ -2,7 +2,12 @@ use std::{collections::HashMap, time::Duration};
 
 use crate::core::{
     html::{code, pre, Elem},
-    http::{json_data::JsonData, request::Request, server_sent_event::ServerSentEvent},
+    http::{
+        json_data::JsonData,
+        request::Request,
+        response_writer::ResponseWriter,
+        server_sent_event::{sse, ServerSentEvent},
+    },
     params::{Params, ParamsHashMap},
     url_encoded,
 };
@@ -21,6 +26,14 @@ pub fn js_patch(url: &str) -> String {
 
 pub fn dollar(value: &str) -> String {
     format!("(${})", value)
+}
+
+pub fn js_replace_url(url: &str) -> String {
+    format!("window.history.replaceState(null, '', '{}');", url)
+}
+
+pub fn js_push_url(url: &str) -> String {
+    format!("window.history.pushState(null, '', '{}');", url)
 }
 
 pub trait Builder {
@@ -360,8 +373,32 @@ impl ServerSentEvent {
     }
 
     pub fn data_script_replace_url(&mut self, url: &str) -> &mut Self {
+        self.data_script(&js_replace_url(url))
+    }
+}
+
+impl ResponseWriter {
+    pub async fn send_frag(&mut self, elem: Elem) -> Result<(), std::io::Error> {
+        sse()
+            .event_merge_fragments()
+            .data_fragments(elem)
+            .send(self)
+            .await
+    }
+
+    pub async fn send_replace_url(&mut self, url: &str) -> Result<(), std::io::Error> {
         let script = format!("window.history.replaceState(null, '', '{}');", url);
-        self.data_script(&script)
+        self.send_script(&script).await
+    }
+
+    pub async fn send_script(&mut self, script: &str) -> Result<(), std::io::Error> {
+        sse()
+            .event_execute_script()
+            .data_script(script)
+            .send(self)
+            .await?;
+
+        Ok(())
     }
 }
 

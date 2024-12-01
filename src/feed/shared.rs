@@ -45,14 +45,7 @@ pub async fn respond_screen(
     w: &mut ResponseWriter,
     feed_id: &FeedId,
 ) -> Result<(), std::io::Error> {
-    sse()
-        .send_screen(
-            r,
-            w,
-            &to_screen_id(Some(feed_id), ""),
-            view_screen(Some(feed_id)),
-        )
-        .await?;
+    w.send_screen_frag(view_screen(Some(feed_id))).await?;
 
     respond_populate_screen(ctx, r, w, feed_id).await?;
 
@@ -65,10 +58,7 @@ pub async fn respond_populate_screen(
     w: &mut ResponseWriter,
     feed_id: &FeedId,
 ) -> Result<(), std::io::Error> {
-    sse()
-        .event_merge_fragments()
-        .data_fragments(view_top_bar_loading_with_link(&feed_id))
-        .send(w)
+    w.send_frag(view_top_bar_loading_with_link(&feed_id))
         .await?;
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
@@ -77,23 +67,14 @@ pub async fn respond_populate_screen(
 
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 
-    let model: ViewModel = ViewModel {
+    let model = ViewModel {
         feed_id: feed.feed_id.clone(),
         feed,
         initial_feed_items,
     };
 
-    sse()
-        .event_merge_fragments()
-        .data_fragments(view_top_bar(&model))
-        .send(w)
-        .await?;
-
-    sse()
-        .event_merge_fragments()
-        .data_fragments(view_swiper(&model))
-        .send(w)
-        .await?;
+    w.send_frag(view_top_bar(&model)).await?;
+    w.send_frag(view_swiper(&model)).await?;
 
     Ok(())
 }

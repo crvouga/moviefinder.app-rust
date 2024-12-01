@@ -2,9 +2,7 @@ use super::{
     feed_::Feed,
     feed_tags,
     route::Route,
-    shared::{
-        get_feed_items, respond_populate_screen, to_screen_id, view_screen, view_slide, BOTTOM_ID,
-    },
+    shared::{get_feed_items, respond_populate_screen, view_screen, view_slide, BOTTOM_ID},
 };
 use crate::{
     core::{
@@ -25,9 +23,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::ScreenDefault => {
-            sse()
-                .send_screen(r, w, &to_screen_id(None, ""), view_screen(None))
-                .await?;
+            w.send_screen_frag(view_screen(None)).await?;
 
             let maybe_feed_id = ctx
                 .feed_session_mapping_db
@@ -37,42 +33,20 @@ pub async fn respond(
 
             let feed_id = maybe_feed_id.unwrap_or_default();
 
-            let index_route = route::Route::Feed(Route::Screen {
+            let feed_url = route::Route::Feed(Route::Screen {
                 feed_id: feed_id.clone(),
-            });
+            })
+            .encode();
 
-            let r = Req {
-                path: index_route.encode(),
-                ..r.clone()
-            };
+            w.send_replace_url(&feed_url).await?;
 
-            sse()
-                .event_execute_script()
-                .data_script_replace_url(index_route.encode().as_str())
-                .send(w)
-                .await?;
+            w.send_screen_frag(view_screen(Some(&feed_id))).await?;
 
-            sse()
-                .send_screen(
-                    &r,
-                    w,
-                    &to_screen_id(Some(&feed_id), ""),
-                    view_screen(Some(&feed_id)),
-                )
-                .await?;
-
-            respond_populate_screen(ctx, &r, w, &feed_id).await
+            respond_populate_screen(ctx, r, w, &feed_id).await
         }
 
         Route::Screen { feed_id } => {
-            sse()
-                .send_screen(
-                    r,
-                    w,
-                    &to_screen_id(Some(feed_id), ""),
-                    view_screen(Some(feed_id)),
-                )
-                .await?;
+            w.send_screen_frag(view_screen(Some(feed_id))).await?;
 
             respond_populate_screen(ctx, r, w, feed_id).await
         }

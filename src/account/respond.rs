@@ -32,9 +32,7 @@ pub async fn respond(
     match route {
         Route::LoginWithSms(child) => login_with_sms::respond::respond(ctx, r, child, w).await,
         Route::Screen => {
-            sse()
-                .send_screen(r, w, &to_screen_id(""), view_index_login_cta())
-                .await?;
+            w.send_screen_frag(view_index_login_cta()).await?;
             Ok(())
         }
     }

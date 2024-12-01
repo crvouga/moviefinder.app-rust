@@ -1,5 +1,5 @@
 use crate::{
-    core::{datastar::datastar::Builder, html::*, ui::icon},
+    core::{html::*, ui::icon},
     route::Route,
 };
 

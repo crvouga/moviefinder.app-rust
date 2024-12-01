@@ -1,34 +1,48 @@
 use super::route::Route;
 use crate::{
-    core::{
-        html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
-    },
+    account,
+    core::{html::*, http::response_writer::ResponseWriter},
     ctx::Ctx,
     req::Req,
+    route,
+    ui::top_bar::TopBar,
 };
 
 pub async fn respond(
     _ctx: &Ctx,
-    r: &Req,
+    _r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
         Route::ScreenPhone => {
-            sse().send_screen(r, w, "", view_screen_phone()).await?;
+            w.send_screen_frag(view_screen_phone()).await?;
+
             Ok(())
         }
 
         Route::ScreenCode => {
-            sse().send_screen(r, w, "", view_screen_code()).await?;
+            w.send_screen_frag(view_screen_code()).await?;
+
             Ok(())
         }
     }
 }
 
 pub fn view_screen_phone() -> Elem {
-    div().child_text("phone")
+    div()
+        .id("phone")
+        .class("w-full h-full flex flex-col")
+        .data_store("{ phone: '' }")
+        .child(
+            TopBar::default()
+                .title("Login with phone")
+                .back_button(route::Route::Account(account::route::Route::Screen))
+                .view(),
+        )
+        .child(
+            div().class("flex-1 p-4"), // .child(TextField::)
+        )
 }
 
 pub fn view_screen_code() -> Elem {

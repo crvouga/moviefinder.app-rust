@@ -1,5 +1,4 @@
 use super::{response_writer::ResponseWriter, set_header::SetHeader};
-use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, Clone)]
 pub struct ServerSentEvent {
