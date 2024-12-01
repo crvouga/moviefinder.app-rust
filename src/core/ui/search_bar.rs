@@ -91,7 +91,6 @@ impl SearchBar {
                     .data_on(|b| {
                         b.click()
                             .js("evt.target.parentNode.querySelector('input').dispatchEvent(new Event('clear'))")
-                            
                     })
                     .aria_label("clear search")
                     .class("h-full place-items-center")

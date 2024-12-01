@@ -1,8 +1,5 @@
-use std::fmt::format;
-
 use crate::{
     core::{
-        datastar::datastar::Builder,
         html::*,
         http::{
             response_writer::ResponseWriter,

@@ -8,7 +8,6 @@ use crate::{
             self,
             button::{Button, Color},
             chip::ChipSize,
-            icon::spinner,
             search_bar::SearchBar,
             spinner_page,
         },
