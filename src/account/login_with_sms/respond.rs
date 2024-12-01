@@ -112,6 +112,7 @@ impl ViewModel {
                             .placeholder("Enter phone number")
                             .input(|e| e.data_model("phoneNumber"))
                             .view()
+                            .type_("tel")
                             .id("phone_number"),
                     )
                     .child(
@@ -152,7 +153,8 @@ impl ViewModel {
                             .placeholder("Enter code")
                             .input(|e| e.data_model("code"))
                             .view()
-                            .id("phone_number"),
+                            .type_("tel")
+                            .id("code"),
                     )
                     .child(
                         div().class("pt-3 w-full").child(
