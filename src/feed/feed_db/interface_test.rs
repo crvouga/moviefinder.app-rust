@@ -35,9 +35,9 @@ mod tests {
             let put = f.feed_db.put(feed.clone()).await;
             let after = f.feed_db.get(feed.feed_id.clone()).await;
 
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(feed)));
+            assert_eq!(before.unwrap(), None);
+            assert_eq!(put.unwrap(), ());
+            assert_eq!(after.unwrap(), Some(feed));
         }
     }
 }

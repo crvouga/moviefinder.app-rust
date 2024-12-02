@@ -68,9 +68,9 @@ mod tests {
             let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
             let after = f.key_value_db.get(&item.id).await;
 
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(item_serialized)));
+            assert_eq!(before.unwrap(), None);
+            assert_eq!(put.unwrap(), ());
+            assert_eq!(after.unwrap(), Some(item_serialized));
         }
     }
 
@@ -97,12 +97,12 @@ mod tests {
                 .await;
             let after_update = f.key_value_db.get(&updated_item.id).await;
 
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(item_serialized.clone())));
-            assert_eq!(before_update, Ok(Some(item_serialized)));
-            assert_eq!(put_update, Ok(()));
-            assert_eq!(after_update, Ok(Some(updated_item_serialized)));
+            assert_eq!(before.unwrap(), None);
+            assert_eq!(put.unwrap(), ());
+            assert_eq!(after.unwrap(), Some(item_serialized.clone()));
+            assert_eq!(before_update.unwrap(), Some(item_serialized));
+            assert_eq!(put_update.unwrap(), ());
+            assert_eq!(after_update.unwrap(), Some(updated_item_serialized));
         }
     }
 
@@ -116,15 +116,15 @@ mod tests {
             let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
             let after = f.key_value_db.get(&item.id).await;
 
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(item_serialized.clone())));
+            assert_eq!(before.unwrap(), None);
+            assert_eq!(put.unwrap(), ());
+            assert_eq!(after.unwrap(), Some(item_serialized.clone()));
 
             let zap = f.key_value_db.zap(&item.id).await;
             let after_zap = f.key_value_db.get(&item.id).await;
 
-            assert_eq!(zap, Ok(()));
-            assert_eq!(after_zap, Ok(None));
+            assert_eq!(zap.unwrap(), ());
+            assert_eq!(after_zap.unwrap(), None);
         }
     }
 
@@ -138,9 +138,9 @@ mod tests {
             let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
             let after = f.key_value_db.get(&item.id).await;
 
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(item_serialized.clone())));
+            assert_eq!(before.unwrap(), None);
+            assert_eq!(put.unwrap(), ());
+            assert_eq!(after.unwrap(), Some(item_serialized.clone()));
 
             let child = f.key_value_db.child(vec!["child".to_string()]);
             let child_item = Item::random();
@@ -153,9 +153,9 @@ mod tests {
                 .await;
             let after_child = child.get(&child_item.id).await;
 
-            assert_eq!(before_child, Ok(None));
-            assert_eq!(put_child, Ok(()));
-            assert_eq!(after_child, Ok(Some(child_item_serialized)));
+            assert_eq!(before_child.unwrap(), None);
+            assert_eq!(put_child.unwrap(), ());
+            assert_eq!(after_child.unwrap(), Some(child_item_serialized));
         }
     }
 }

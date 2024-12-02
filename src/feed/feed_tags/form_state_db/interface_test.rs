@@ -39,9 +39,9 @@ mod tests {
             let put = f.form_state_db.put(&form_state).await;
             let after = f.form_state_db.get(&feed_id).await;
 
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(form_state)));
+            assert_eq!(before.unwrap(), None);
+            assert_eq!(put.unwrap(), ());
+            assert_eq!(after.unwrap(), Some(form_state));
         }
     }
 }

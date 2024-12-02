@@ -121,7 +121,7 @@ mod tests {
         let route = Route::Screen;
         assert_eq!(
             core::human_friendly_base64::to_human_friendly_str(route),
-            "Index"
+            "Screen"
         );
     }
 
@@ -130,7 +130,7 @@ mod tests {
         let route = Route::Child(ChildRoute::Screen);
         assert_eq!(
             core::human_friendly_base64::to_human_friendly_str(route),
-            "Child.Index"
+            "Child-Screen"
         );
     }
 }

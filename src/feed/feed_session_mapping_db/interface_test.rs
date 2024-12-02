@@ -42,9 +42,9 @@ mod tests {
 
             let after = f.feed_session_mapping_db.get(session_id.clone()).await;
 
-            assert_eq!(before, Ok(None));
-            assert_eq!(put, Ok(()));
-            assert_eq!(after, Ok(Some(feed_id)));
+            assert_eq!(before.unwrap(), None);
+            assert_eq!(put.unwrap(), ());
+            assert_eq!(after.unwrap(), Some(feed_id));
         }
     }
 }
