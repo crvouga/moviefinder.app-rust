@@ -4,13 +4,13 @@ mod tests {
     use crate::{
         feed::{
             feed_::Feed,
-            feed_tags::{form_state::FormState, form_state_db::FormStateDb},
+            feed_tags::{form_state::FormState, form_state_db::FeedTagsFormStateDb},
         },
         fixture::BaseFixture,
     };
 
     struct Fixture {
-        form_state_db: Box<FormStateDb>,
+        form_state_db: Box<FeedTagsFormStateDb>,
     }
 
     async fn fixtures() -> Vec<Fixture> {
@@ -19,7 +19,7 @@ mod tests {
         let base = BaseFixture::new().await;
 
         fixtures.push(Fixture {
-            form_state_db: Box::new(FormStateDb::new(
+            form_state_db: Box::new(FeedTagsFormStateDb::new(
                 base.ctx.logger.noop(),
                 base.ctx.key_value_db,
             )),

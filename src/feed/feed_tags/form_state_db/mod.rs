@@ -6,12 +6,12 @@ use std::sync::Arc;
 
 mod interface_test;
 
-pub struct FormStateDb {
+pub struct FeedTagsFormStateDb {
     key_value_db: Box<dyn KeyValueDb>,
     logger: Arc<dyn Logger>,
 }
 
-impl FormStateDb {
+impl FeedTagsFormStateDb {
     pub fn new(logger: Arc<dyn Logger>, key_value_db: Arc<dyn KeyValueDb>) -> Self {
         Self {
             logger: logger.child("form_state_db"),

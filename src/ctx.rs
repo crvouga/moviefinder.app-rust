@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
+    account::login_with_sms::verify_sms::{self, interface::VerifySms},
     core::{
         db_conn_sql::{self, impl_postgres::ImplPostgres},
         http::client::HttpClient,
@@ -10,7 +11,7 @@ use crate::{
     env::Env,
     feed::{
         self, feed_db::interface::FeedDb, feed_session_mapping_db::interface::FeedSessionMappingDb,
-        feed_tag_db::interface::FeedTagDb,
+        feed_tag_db::interface::FeedTagDb, feed_tags::form_state_db::FeedTagsFormStateDb,
     },
     key_value_db::{self, interface::KeyValueDb},
     media::{
@@ -32,7 +33,8 @@ pub struct Ctx {
     pub feed_db: Arc<dyn FeedDb>,
     pub feed_tags_db: Arc<dyn FeedTagDb>,
     pub feed_session_mapping_db: Arc<dyn FeedSessionMappingDb>,
-    pub feed_tags_form_state_db: Arc<feed::feed_tags::form_state_db::FormStateDb>,
+    pub feed_tags_form_state_db: Arc<FeedTagsFormStateDb>,
+    pub verify_sms: Arc<dyn VerifySms>,
 }
 
 impl Ctx {
@@ -92,10 +94,13 @@ impl Ctx {
             ),
         );
 
-        let feed_tags_form_state_db = Arc::new(feed::feed_tags::form_state_db::FormStateDb::new(
-            logger.clone(),
-            key_value_db.clone(),
-        ));
+        let feed_tags_form_state_db =
+            Arc::new(feed::feed_tags::form_state_db::FeedTagsFormStateDb::new(
+                logger.clone(),
+                key_value_db.clone(),
+            ));
+
+        let verify_sms = Arc::new(verify_sms::impl_fake::ImplFake::new());
 
         Ok(Ctx {
             logger,
@@ -110,6 +115,7 @@ impl Ctx {
             feed_tags_db,
             feed_session_mapping_db,
             feed_tags_form_state_db,
+            verify_sms,
         })
     }
 }

@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub async fn respond(
-    _ctx: &Ctx,
+    ctx: &Ctx,
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
@@ -33,7 +33,6 @@ pub async fn respond(
             let phone_number = r
                 .params
                 .get_first("phoneNumber")
-                .to_owned()
                 .map(|s| s.clone())
                 .unwrap_or_default();
 
@@ -63,10 +62,29 @@ pub async fn respond(
 
             w.send_screen_frag(model.view_screen()).await?;
 
+            ctx.verify_sms.send_code(&phone_number).await?;
+
             Ok(())
         }
 
-        Route::ClickedVerifyCode => Ok(()),
+        Route::ClickedVerifyCode { phone_number } => {
+            let code = r
+                .params
+                .get_first("code")
+                .map(|s| s.clone())
+                .unwrap_or_default()
+                .trim();
+
+            if code.is_empty() {
+                w.send_fragment(view_code_text_field("Code is required"))
+                    .await?;
+                return Ok(());
+            }
+
+            ctx.verify_sms.verify_code(&phone_number, code).await?;
+
+            Ok(())
+        }
     }
 }
 
@@ -110,14 +128,7 @@ impl ViewModel {
             .child(
                 div()
                     .class("flex-1 p-6 gap-6 flex flex-col")
-                    .child(
-                        TextField::default()
-                            .label("Phone number")
-                            .placeholder("Enter phone number")
-                            .input(|e| e.data_model("phoneNumber").type_("tel"))
-                            .view()
-                            .id("phone_number"),
-                    )
+                    .child(view_phone_number_text_field(""))
                     .child(
                         div().class("pt-3 w-full").child(
                             Button::default()
@@ -155,14 +166,7 @@ impl ViewModel {
                             .child(text("Enter the code send to "))
                             .child(span().class("font-bold").child(text(phone_number))),
                     )
-                    .child(
-                        TextField::default()
-                            .label("Code")
-                            .placeholder("Enter code")
-                            .input(|e| e.data_model("code").type_("tel"))
-                            .view()
-                            .id("code"),
-                    )
+                    .child(view_code_text_field(""))
                     .child(
                         div().class("pt-3 w-full").child(
                             Button::default()
@@ -170,18 +174,28 @@ impl ViewModel {
                                 .color_primary()
                                 .view()
                                 .class("w-full")
-                                .data_on(|b| b.click().post(&Route::ClickedSendCode.url())),
+                                .data_on(|b| b.click().post(&Route::ClickedVerifyCode.url())),
                         ),
                     ),
             )
     }
 }
 
+fn view_code_text_field(error: &str) -> Elem {
+    TextField::default()
+        .label("Code")
+        .placeholder("Enter code")
+        .input(|e| e.data_model("code").type_("tel"))
+        .error(error)
+        .view()
+        .id("code")
+}
+
 fn view_phone_number_text_field(error: &str) -> Elem {
     TextField::default()
         .label("Phone number")
         .placeholder("Enter phone number")
-        .input(|e| e.data_model("phoneNumber"))
+        .input(|e| e.data_model("phoneNumber").type_("tel"))
         .error(error)
         .view()
         .id("phone_number")

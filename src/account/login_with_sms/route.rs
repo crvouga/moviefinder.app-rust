@@ -5,5 +5,5 @@ pub enum Route {
     ScreenPhone,
     ScreenCode { phone_number: String },
     ClickedSendCode,
-    ClickedVerifyCode,
+    ClickedVerifyCode { phone_number: String },
 }
