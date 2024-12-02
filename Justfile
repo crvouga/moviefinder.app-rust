@@ -1,5 +1,5 @@
 check: #
-  cargo check
+  cargo check && cargo fmt
 
 run: #
   npx kill-port 8000 && just watch

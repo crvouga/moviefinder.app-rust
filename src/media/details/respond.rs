@@ -3,14 +3,13 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         query::{Query, QueryFilter, QueryOp},
-        ui::image::Image,
+        ui::{image::Image, top_bar::TopBar},
     },
     ctx::Ctx,
     feed,
     media::{media_::Media, media_db::interface::MediaQueryField},
     req::Req,
     route,
-    ui::top_bar::TopBar,
 };
 
 use super::route::Route;
@@ -83,7 +82,7 @@ impl ViewModel {
         };
 
         TopBar::default()
-            .back_button(route::Route::Feed(feed::route::Route::ScreenDefault))
+            .back_url(route::Route::Feed(feed::route::Route::ScreenDefault).encode())
             .title(title)
             .view()
             .id("top-bar")

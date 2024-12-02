@@ -1,28 +1,34 @@
-use crate::{
-    core::{html::*, ui::icon},
-    route::Route,
-};
+use crate::core::{html::*, ui::icon};
 
-pub fn view_root() -> Elem {
-    div()
-        .class("flex items-center justify-center shrink-0 w-full border-b h-20 font-bold text-lg text-center truncate")
+#[derive(Default)]
+pub struct TopBarRoot {}
+
+impl TopBarRoot {
+    pub fn view(&self) -> Elem {
+        div().class("flex items-center justify-center shrink-0 w-full border-b h-20 font-bold text-lg text-center truncate")
+    }
 }
 
 #[derive(Default)]
 pub struct TopBar {
-    back_url: Option<Route>,
+    back_url: Option<String>,
     title: Option<String>,
-    cancel_url: Option<Route>,
+    cancel_url: Option<String>,
 }
 
 impl TopBar {
-    pub fn back_button(mut self, back_route: Route) -> Self {
-        self.back_url = Some(back_route);
+    pub fn back_url(mut self, value: String) -> Self {
+        self.back_url = Some(value);
         self
     }
 
-    pub fn title(mut self, title: &str) -> Self {
-        self.title = Some(title.to_string());
+    pub fn title(mut self, value: &str) -> Self {
+        self.title = Some(value.to_string());
+        self
+    }
+
+    pub fn cancel_url(mut self, value: String) -> Self {
+        self.cancel_url = Some(value);
         self
     }
 
@@ -37,9 +43,10 @@ impl TopBar {
 
         let cancel_button_elem = self
             .cancel_url
-            .map_or(Empty::view(), |route| CancelButton::new(route).view());
+            .map_or(Empty::view(), |url| CancelButton::new(url).view());
 
-        view_root()
+        TopBarRoot::default()
+            .view()
             .child(back_button_elem)
             .child(title_elem)
             .child(cancel_button_elem)
@@ -48,29 +55,23 @@ impl TopBar {
 
 #[derive(Default)]
 pub struct BackButton {
-    loading_disabled_path: Option<String>,
-    route: Option<Route>,
+    url: Option<String>,
 }
 
 impl BackButton {
-    pub fn new(route: Route) -> Self {
+    pub fn new(url: String) -> Self {
         Self {
-            route: Some(route),
+            url: Some(url),
             ..Self::default()
         }
-    }
-
-    pub fn loading_disabled_path(mut self, loading_disabled_path: &str) -> Self {
-        self.loading_disabled_path = Some(loading_disabled_path.to_string());
-        self
     }
 
     pub fn view(self) -> Elem {
         button()
             .class("size-16 flex items-center justify-center")
             .aria_label("go back")
-            .map(|elem| match self.route {
-                Some(route) => elem.data_on(|b| b.click().push_then_get(&route.encode())),
+            .map(|elem| match self.url {
+                Some(url) => elem.data_on(|b| b.click().push_then_get(&url)),
                 None => elem,
             })
             .child(icon::back_arrow("size-6"))
@@ -79,31 +80,21 @@ impl BackButton {
 
 #[derive(Default)]
 pub struct CancelButton {
-    loading_disabled_path: Option<String>,
-    route: Option<Route>,
+    url: Option<String>,
 }
 
 impl CancelButton {
-    pub fn new(cancel_route: Route) -> Self {
+    pub fn new(url: String) -> Self {
         Self {
-            route: Some(cancel_route),
+            url: Some(url),
             ..Self::default()
         }
-    }
-
-    pub fn loading_disabled_path(mut self, loading_disabled_path: &str) -> Self {
-        self.loading_disabled_path = Some(loading_disabled_path.to_string());
-        self
     }
 
     pub fn view(self) -> Elem {
         button()
             .class("size-16 flex items-center justify-center shrink-0")
             .class("disabled:opacity-80 disabled:cursor-not-allowed")
-            // .map(|elem| match self.route {
-            //     Some(route) => elem.hx_push_root_route(route),
-            //     None => elem,
-            // })
             .aria_label("cancel")
             .tab_index(0)
             .child(icon::x_mark("size-8"))

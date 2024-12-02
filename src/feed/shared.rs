@@ -1,17 +1,16 @@
 use super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags, route::Route};
 use crate::{
     core::{
-        datastar::datastar::Builder,
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
+        http::response_writer::ResponseWriter,
         session::session_id::SessionId,
-        ui::{self, chip::ChipSize, icon, image::Image},
+        ui::{self, chip::ChipSize, icon, image::Image, top_bar::TopBarRoot},
     },
     ctx::Ctx,
     media::{self, media_id::MediaId},
     req::Req,
     route,
-    ui::{bottom_bar, top_bar},
+    ui::bottom_bar::BottomBar,
 };
 
 pub const LIMIT: usize = 3;
@@ -22,30 +21,13 @@ pub struct ViewModel {
     pub initial_feed_items: Vec<FeedItem>,
 }
 
-pub fn to_screen_id(_feed_id: Option<&FeedId>, child_id: &str) -> String {
-    return child_id.to_string();
-    // let feed_id = feed_id.map_or("feed", |s| s.as_str());
-    // let child_id = child_id.trim();
-    // let prefix = "feed";
-
-    // if feed_id.is_empty() && child_id.is_empty() {
-    //     prefix.to_string()
-    // } else if feed_id.is_empty() {
-    //     format!("{}-{}", prefix, child_id)
-    // } else if child_id.is_empty() {
-    //     format!("{}-{}", prefix, feed_id)
-    // } else {
-    //     format!("{}-{}-{}", prefix, feed_id, child_id)
-    // }
-}
-
 pub async fn respond_screen(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
     feed_id: &FeedId,
 ) -> Result<(), std::io::Error> {
-    w.send_screen_frag(view_screen(Some(feed_id))).await?;
+    w.send_screen_frag(view_screen()).await?;
 
     respond_populate_screen(ctx, r, w, feed_id).await?;
 
@@ -109,20 +91,21 @@ pub async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, Str
     }
 }
 
-fn view_top_bar_root(feed_id: Option<&FeedId>) -> Elem {
-    top_bar::view_root()
+fn view_top_bar_root() -> Elem {
+    TopBarRoot::default()
+        .view()
         .button()
         .class("relative")
         .aria_label("open controls")
-        .id(&to_screen_id(feed_id, "top-bar"))
+        .id("top-bar")
 }
 
-fn view_top_bar_loading(feed_id: Option<&FeedId>) -> Elem {
-    view_top_bar_root(feed_id).child(view_open_controls_button())
+fn view_top_bar_loading() -> Elem {
+    view_top_bar_root().child(view_open_controls_button())
 }
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
-    view_top_bar_root(Some(feed_id)).data_on(|b| {
+    view_top_bar_root().data_on(|b| {
         b.click().push_then_get(
             &route::Route::Feed(Route::Tags(feed_tags::route::Route::Screen {
                 feed_id: feed_id.clone(),
@@ -149,14 +132,14 @@ fn view_slide_content_loading() -> Elem {
         .class("w-full h-full object-cover")
 }
 
-pub fn view_screen(feed_id: Option<&FeedId>) -> Elem {
+pub fn view_screen() -> Elem {
     div()
-        .id(&to_screen_id(feed_id, ""))
+        .id("screen")
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
         .data_store("{signalFeedIndex: 0, signalTrue: true}")
-        .child(view_top_bar_loading(feed_id))
-        .child(view_swiper_loading(feed_id))
-        .child(view_bottom_bar(feed_id))
+        .child(view_top_bar_loading())
+        .child(view_swiper_loading())
+        .child(view_bottom_bar())
 }
 
 fn view_open_controls_button() -> Elem {
@@ -191,22 +174,20 @@ fn view_tags(model: &ViewModel) -> Elem {
         )
 }
 
-fn view_bottom_bar(feed_id: Option<&FeedId>) -> Elem {
-    bottom_bar::view(bottom_bar::Active::Home).id(&to_screen_id(feed_id, "bottom-bar"))
+fn view_bottom_bar() -> Elem {
+    BottomBar::default().active_home().view().id("bottom-bar")
 }
 
-fn view_swiper_root(feed_id: Option<&FeedId>) -> Elem {
-    div()
-        .class("w-full flex-1 overflow-hidden")
-        .id(&to_screen_id(feed_id, "swiper"))
+fn view_swiper_root() -> Elem {
+    div().class("w-full flex-1 overflow-hidden").id("swiper")
 }
 
-fn view_swiper_loading(feed_id: Option<&FeedId>) -> Elem {
-    view_swiper_root(feed_id).child(view_slide_content_loading())
+fn view_swiper_loading() -> Elem {
+    view_swiper_root().child(view_slide_content_loading())
 }
 
 fn view_swiper(model: &ViewModel) -> Elem {
-    view_swiper_root(Some(&model.feed_id)).child(view_swiper_container(&model))
+    view_swiper_root().child(view_swiper_container(&model))
 }
 
 fn view_swiper_container(model: &ViewModel) -> Elem {

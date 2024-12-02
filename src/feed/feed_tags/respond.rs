@@ -2,7 +2,7 @@ use super::{form_state::FormState, route::Route, view_model::ViewModel};
 use crate::{
     core::{
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
+        http::response_writer::ResponseWriter,
         params::Params,
         ui::{
             self,
@@ -18,22 +18,6 @@ use crate::{
     route,
 };
 
-pub fn to_screen_id(_feed_id: &FeedId, child_id: &str) -> String {
-    return child_id.to_string();
-    // let feed_id = feed_id.as_str().trim();
-    // let child_id = child_id.trim();
-    // let prefix = "feed-tags";
-
-    // if feed_id.is_empty() && child_id.is_empty() {
-    //     prefix.to_string()
-    // } else if feed_id.is_empty() {
-    //     format!("{}-{}", prefix, child_id)
-    // } else if child_id.is_empty() {
-    //     format!("{}-{}", prefix, feed_id)
-    // } else {
-    //     format!("{}-{}-{}", prefix, feed_id, child_id)
-    // }
-}
 pub async fn respond(
     ctx: &Ctx,
     r: &Req,
@@ -60,8 +44,7 @@ pub async fn respond(
 
             w.send_fragment(view_selected(&model)).await?;
 
-            w.send_fragment(view_unselected_loading(&model.feed.feed_id))
-                .await?;
+            w.send_fragment(view_unselected(&model)).await?;
 
             Ok(())
         }
@@ -172,8 +155,14 @@ pub async fn respond(
     }
 }
 
-fn route(route: Route) -> String {
-    route::Route::Feed(feed::route::Route::Tags(route)).encode()
+impl Route {
+    pub fn route(self) -> route::Route {
+        route::Route::Feed(feed::route::Route::Tags(self))
+    }
+
+    pub fn url(self) -> String {
+        self.route().encode()
+    }
 }
 
 impl Req {
@@ -195,14 +184,19 @@ fn to_back_route(feed_id: FeedId) -> route::Route {
 }
 
 fn view_search_input(feed_id: &FeedId) -> Elem {
-    SearchBar::new()
-        .url(&route(Route::InputtedSearch {
-            feed_id: feed_id.clone(),
-        }))
+    SearchBar::default()
+        .url(
+            &Route::InputtedSearch {
+                feed_id: feed_id.clone(),
+            }
+            .url(),
+        )
         .indicator("signalIsSearching")
-        .input_id(&to_screen_id(feed_id, "search-input"))
-        .input_model("signalInputValue")
-        .placeholder("Search tags")
+        .input(|e| {
+            e.id("search-input")
+                .data_model("signalInputValue")
+                .placeholder("Search tags")
+        })
         .view()
 }
 
@@ -213,18 +207,18 @@ fn js_signal_is_checked(tag: &FeedTag) -> String {
     )
 }
 
-fn view_selected_root(feed_id: &FeedId) -> Elem {
-    div().id(&to_screen_id(feed_id, "selected")).class(
+fn view_selected_root() -> Elem {
+    div().id("selected").class(
         "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-20 flex-wrap border-b",
     )
 }
 
-fn view_selected_loading(feed_id: &FeedId) -> Elem {
-    view_selected_root(feed_id).child(div().class("text-muted").child_text("Loading..."))
+fn view_selected_loading() -> Elem {
+    view_selected_root().child(div().class("text-muted").child_text("Loading..."))
 }
 
 fn view_selected(model: &ViewModel) -> Elem {
-    view_selected_root(&model.feed.feed_id)
+    view_selected_root()
         .child(
             div()
                 .data_show("($signalSelectedTagIds).length === 0")
@@ -249,26 +243,21 @@ fn view_selected(model: &ViewModel) -> Elem {
             button()
                 .data_show("($signalSelectedTagIds).length > 0")
                 .data_on(|b| {
-                    b.click()
-                        .js("$signalSelectedTagIds = []")
-                        .patch(&route(Route::ClickedClear {
+                    b.click().js("$signalSelectedTagIds = []").patch(
+                        &Route::ClickedClear {
                             feed_id: model.feed.feed_id.clone(),
-                        }))
+                        }
+                        .url(),
+                    )
                 })
                 .class("underline text-secondary p-2")
                 .child_text("Clear"),
         )
-    // .child(
-    //     div()
-    //         .class("px-1 flex gap-1")
-    //         .data_show("$signalIsUpatingSelected")
-    //         .child(spinner("size-6 animate-spin")), // .child_text("Loading..."),
-    // )
 }
 
 fn view_screen(feed_id: &FeedId) -> Elem {
     div()
-        .id(&to_screen_id(feed_id, ""))
+        .id("screen")
         .data_store(
             r#"{
                 signalInputValue: '', 
@@ -281,13 +270,13 @@ fn view_screen(feed_id: &FeedId) -> Elem {
             .js("const v = evt?.detail?.tagId?.toLowerCase?.()?.trim?.()")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.map(v => v.toLowerCase().trim())")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]")
-            .patch(&route(Route::ClickedTag {feed_id: feed_id.clone()}))
+            .patch(&Route::ClickedTag {feed_id: feed_id.clone()}.url())
         )
         .data_indicator("signalIsUpatingSelected")
         .class("w-full h-full flex flex-col overflow-hidden relative")
-        .child(view_selected_loading(feed_id))
+        .child(view_selected_loading())
         .child(view_search_input(feed_id))
-        .child(view_unselected_loading(feed_id))
+        .child(view_unselected_loading())
         .child(view_bottom_bar(feed_id))
 }
 
@@ -304,7 +293,7 @@ impl Elem {
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
     div()
-        .id(&to_screen_id(feed_id, "bottom-bar"))
+        .id("bottom-bar")
         .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20")
         .child(
             Button::new()
@@ -325,27 +314,30 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .indicator("signalIsSaving")
                 .view()
                 .data_on(|b| {
-                    b.click().get(&route(Route::ClickedSave {
-                        feed_id: feed_id.clone(),
-                    }))
+                    b.click().get(
+                        &(Route::ClickedSave {
+                            feed_id: feed_id.clone(),
+                        })
+                        .url(),
+                    )
                 })
                 .id("save-button")
                 .class("flex-1"),
         )
 }
 
-fn view_unselected_root(feed_id: &FeedId) -> Elem {
+fn view_unselected_root() -> Elem {
     div()
-        .id(&to_screen_id(feed_id, "unselected"))
+        .id("unselected")
         .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto overflow-x-hidden")
 }
 
-fn view_unselected_loading(feed_id: &FeedId) -> Elem {
-    view_unselected_root(feed_id).child(spinner_page::view())
+fn view_unselected_loading() -> Elem {
+    view_unselected_root().child(spinner_page::view())
 }
 
 fn view_unselected(model: &ViewModel) -> Elem {
-    view_unselected_root(&model.feed.feed_id).child(view_search_results_content(&model))
+    view_unselected_root().child(view_search_results_content(&model))
 }
 
 fn view_search_results_content(model: &ViewModel) -> Elem {

@@ -15,11 +15,11 @@ use image::{self, imageops::FilterType};
 
 use super::route::Route;
 
-pub async fn respond(
+pub async fn _respond(
     ctx: &Ctx,
     r: &Request,
     route: &Route,
-    w: &mut ResponseWriter,
+    _w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Resize => {

@@ -11,3 +11,4 @@ pub mod search_bar;
 pub mod spinner_page;
 pub mod swiper;
 pub mod text_field;
+pub mod top_bar;

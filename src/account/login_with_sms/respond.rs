@@ -7,12 +7,11 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         params::Params,
-        ui::{button::Button, text_field::TextField},
+        ui::{button::Button, text_field::TextField, top_bar::TopBar},
     },
     ctx::Ctx,
     req::Req,
     route,
-    ui::top_bar::TopBar,
 };
 
 pub async fn respond(
@@ -100,7 +99,7 @@ impl ViewModel {
             .child(
                 TopBar::default()
                     .title("Login with phone")
-                    .back_button(route::Route::Account(account::route::Route::Screen))
+                    .back_url(route::Route::Account(account::route::Route::Screen).encode())
                     .view(),
             )
             .child(
@@ -110,9 +109,8 @@ impl ViewModel {
                         TextField::default()
                             .label("Phone number")
                             .placeholder("Enter phone number")
-                            .input(|e| e.data_model("phoneNumber"))
+                            .input(|e| e.data_model("phoneNumber").type_("tel"))
                             .view()
-                            .type_("tel")
                             .id("phone_number"),
                     )
                     .child(
@@ -135,7 +133,7 @@ impl ViewModel {
             .child(
                 TopBar::default()
                     .title("Login with phone")
-                    .back_button(Route::ScreenPhone.route())
+                    .back_url(Route::ScreenPhone.url())
                     .view(),
             )
             .child(
@@ -151,9 +149,8 @@ impl ViewModel {
                         TextField::default()
                             .label("Code")
                             .placeholder("Enter code")
-                            .input(|e| e.data_model("code"))
+                            .input(|e| e.data_model("code").type_("tel"))
                             .view()
-                            .type_("tel")
                             .id("code"),
                     )
                     .child(

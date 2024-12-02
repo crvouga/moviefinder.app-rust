@@ -6,35 +6,16 @@ use crate::core::{
     ui::icon::{self, spinner},
 };
 
-#[derive(Debug, Clone, Default)]
+#[derive(Default)]
 pub struct SearchBar {
     url: String,
-    input_id: String,
-    input_model: String,
-    placeholder: String,
     indicator: String,
+    input: Option<Box<dyn Fn(Elem) -> Elem>>,
 }
 
 impl SearchBar {
-    pub fn new() -> Self {
-        Self {
-            placeholder: "Search".to_string(),
-            ..Self::default()
-        }
-    }
-
-    pub fn input_model(mut self, value: &str) -> Self {
-        self.input_model = value.to_string();
-        self
-    }
-
     pub fn url(mut self, value: &str) -> Self {
         self.url = value.to_string();
-        self
-    }
-
-    pub fn input_id(mut self, value: &str) -> Self {
-        self.input_id = value.to_string();
         self
     }
 
@@ -43,12 +24,13 @@ impl SearchBar {
         self
     }
 
-    pub fn placeholder(mut self, value: &str) -> Self {
-        self.placeholder = value.to_string();
+    pub fn input(mut self, input: impl Fn(Elem) -> Elem + 'static) -> Self {
+        self.input = Some(Box::new(input));
         self
     }
 
-    pub fn view(&self) -> Elem {
+    pub fn view(self) -> Elem {
+        let map_input = self.input.unwrap_or_else(|| Box::new(|x| x));
         label()
             .class(
                 "w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden px-5",
@@ -61,15 +43,13 @@ impl SearchBar {
             )
             .child(
                 input()
-                    .id(&self.input_id)
                     .class("flex-1 h-full bg-transparent peer outline-none")
-                    .data_model(&self.input_model)
                     .type_("text")
                     .data_indicator(&self.indicator)
                     .data_on(|b| {
                         b.e("clear")
                             .js("evt.target.focus()")
-                            .js(&format!("${} = ''", &self.input_model))
+                            .js("evt.target.value = ''")
                             .post(&self.url)
                     })
                     .data_on(|b| {
@@ -77,7 +57,7 @@ impl SearchBar {
                             .debounce(Duration::from_millis(300))
                             .post(&self.url)
                     })
-                    .placeholder(&self.placeholder),
+                    .map(map_input),
             )
             .child(
                 div()

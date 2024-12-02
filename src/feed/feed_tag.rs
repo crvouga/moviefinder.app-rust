@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::{
-        base32, base64, human_friendly_base64,
+        base32,
         query::{QueryFilter, QueryOp},
         ui::chip::{Chip, ChipSize},
     },
@@ -50,7 +50,7 @@ impl FeedTag {
             .label(&self.label())
             .size(ChipSize::Medium);
         match self {
-            FeedTag::Genre(genre) => base_chip,
+            FeedTag::Genre(_genre) => base_chip,
             FeedTag::Person(person) => base_chip.image(&person.profile.to_highest_res()),
         }
     }

@@ -2,26 +2,14 @@ use super::{login_with_sms, route::Route};
 use crate::{
     core::{
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
+        http::response_writer::ResponseWriter,
         ui::{button::Button, icon},
     },
     ctx::Ctx,
     req::Req,
     route,
-    ui::bottom_bar,
+    ui::bottom_bar::BottomBar,
 };
-
-fn to_screen_id(child_id: &str) -> String {
-    return child_id.to_string();
-    // let child_id = child_id.trim();
-    // let prefix = "account";
-
-    // if child_id.is_empty() {
-    //     prefix.to_string()
-    // } else {
-    //     format!("{}-{}", prefix, child_id)
-    // }
-}
 
 pub async fn respond(
     ctx: &Ctx,
@@ -32,19 +20,25 @@ pub async fn respond(
     match route {
         Route::LoginWithSms(child) => login_with_sms::respond::respond(ctx, r, child, w).await,
         Route::Screen => {
-            w.send_screen_frag(view_index_login_cta()).await?;
+            w.send_screen_frag(view_screen_login_cta()).await?;
             Ok(())
         }
     }
 }
 
-fn route(route: Route) -> String {
-    route::Route::Account(route).encode()
+impl Route {
+    pub fn route(self) -> route::Route {
+        route::Route::Account(self)
+    }
+
+    pub fn url(self) -> String {
+        self.route().encode()
+    }
 }
 
-pub fn view_index_login_cta() -> Elem {
+pub fn view_screen_login_cta() -> Elem {
     div()
-        .id(&to_screen_id(""))
+        .id("login-cta")
         .class("w-full flex-1 flex items-center justify-center flex-col")
         .child(
             div()
@@ -61,11 +55,12 @@ pub fn view_index_login_cta() -> Elem {
                         .color_primary()
                         .view()
                         .data_on(|b| {
-                            b.click().push_then_get(&route(Route::LoginWithSms(
-                                login_with_sms::route::Route::ScreenPhone,
-                            )))
+                            b.click().push_then_get(
+                                &Route::LoginWithSms(login_with_sms::route::Route::ScreenPhone)
+                                    .url(),
+                            )
                         }),
                 ),
         )
-        .child(bottom_bar::view(bottom_bar::Active::Account))
+        .child(BottomBar::default().active_account().view())
 }

@@ -1,45 +1,71 @@
-use crate::account;
-use crate::core::datastar::datastar::Builder;
-use crate::core::html::*;
-use crate::core::ui;
-use crate::core::ui::bottom_bar_buttons::BottomButton;
-use crate::core::ui::bottom_bar_buttons::BottomButtons;
-use crate::feed;
-use crate::route;
+use crate::{
+    account,
+    core::{
+        html::{div, Elem},
+        ui::{
+            bottom_bar_buttons::{BottomButton, BottomButtons},
+            icon,
+        },
+    },
+    feed, route,
+};
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Default)]
 pub enum Active {
+    #[default]
     Home,
     Account,
 }
 
-pub fn view(active: Active) -> Elem {
-    div().class("w-full").child(
-        BottomButtons::default()
-            .view()
-            .child(
-                BottomButton::default()
-                    .text("Home")
-                    .icon(ui::icon::home("size-6"))
-                    .active(active == Active::Home)
-                    .view()
-                    .data_on(|b| {
-                        b.click().push_then_get(
-                            &route::Route::Feed(feed::route::Route::ScreenDefault).encode(),
-                        )
-                    }),
-            )
-            .child(
-                BottomButton::default()
-                    .text("Account")
-                    .icon(ui::icon::user_circle("size-6"))
-                    .active(active == Active::Account)
-                    .view()
-                    .data_on(|b| {
-                        b.click().push_then_get(
-                            &route::Route::Account(account::route::Route::Screen).encode(),
-                        )
-                    }),
-            ),
-    )
+#[derive(Default)]
+pub struct BottomBar {
+    active: Active,
+}
+
+impl BottomBar {
+    pub fn active(mut self, value: Active) -> Self {
+        self.active = value;
+        self
+    }
+
+    pub fn active_home(mut self) -> Self {
+        self.active = Active::Home;
+        self
+    }
+
+    pub fn active_account(mut self) -> Self {
+        self.active = Active::Account;
+        self
+    }
+
+    pub fn view(self) -> Elem {
+        div().class("w-full").child(
+            BottomButtons::default()
+                .view()
+                .child(
+                    BottomButton::default()
+                        .text("Home")
+                        .icon(icon::home("size-6"))
+                        .active(self.active == Active::Home)
+                        .view()
+                        .data_on(|b| {
+                            b.click().push_then_get(
+                                &route::Route::Feed(feed::route::Route::ScreenDefault).encode(),
+                            )
+                        }),
+                )
+                .child(
+                    BottomButton::default()
+                        .text("Account")
+                        .icon(icon::user_circle("size-6"))
+                        .active(self.active == Active::Account)
+                        .view()
+                        .data_on(|b| {
+                            b.click().push_then_get(
+                                &route::Route::Account(account::route::Route::Screen).encode(),
+                            )
+                        }),
+                ),
+        )
+    }
 }
