@@ -19,9 +19,9 @@ use crate::{
     },
     person::person_db::{self, interface::PersonDb},
     user::{
-        account::account_db::{self, interface::UserAccountDb},
         login_with_sms::verify_sms::{self, interface::VerifySms},
-        profile::profile_db::{self, interface::UserProfileDb},
+        user_account::user_account_db::{self, interface::UserAccountDb},
+        user_profile::user_profile_db::{self, interface::UserProfileDb},
     },
 };
 
@@ -108,11 +108,11 @@ impl Ctx {
 
         let verify_sms = Arc::new(verify_sms::impl_fake::ImplFake::new());
 
-        let user_account_db = Arc::new(account_db::impl_key_value_db::ImplKeyValueDb::new(
+        let user_account_db = Arc::new(user_account_db::impl_key_value_db::ImplKeyValueDb::new(
             key_value_db.clone(),
         ));
 
-        let user_profile_db = Arc::new(profile_db::impl_key_value_db::ImplKeyValueDb::new(
+        let user_profile_db = Arc::new(user_profile_db::impl_key_value_db::ImplKeyValueDb::new(
             key_value_db.clone(),
         ));
 

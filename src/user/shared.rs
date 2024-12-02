@@ -5,10 +5,9 @@ use crate::{
     ctx::Ctx,
     req::Req,
     ui::bottom_bar::BottomBar,
-    user::profile::profile_::UserProfile,
 };
 
-use super::account::account_::UserAccount;
+use super::{user_account::user_account_::UserAccount, user_profile::user_profile_::UserProfile};
 
 pub async fn respond_account_screen(
     _ctx: &Ctx,

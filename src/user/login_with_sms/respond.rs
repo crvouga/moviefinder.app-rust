@@ -12,8 +12,8 @@ use crate::{
     req::Req,
     route,
     user::{
-        self, account::account_::UserAccount, profile::profile_::UserProfile,
-        shared::respond_account_screen,
+        self, shared::respond_account_screen, user_account::user_account_::UserAccount,
+        user_profile::user_profile_::UserProfile,
     },
 };
 
@@ -118,7 +118,7 @@ pub async fn respond(
                         .await?;
 
                     let account_new =
-                        existing_account.unwrap_or(UserAccount::new(phone_number.clone()));
+                        existing_account.unwrap_or(UserAccount::new(phone_number.to_string()));
 
                     let user_id = account_new.user_id.clone();
 

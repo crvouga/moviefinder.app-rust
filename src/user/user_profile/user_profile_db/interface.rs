@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::user::{profile::profile_::UserProfile, user_id::UserId};
+use crate::user::{user_id::UserId, user_profile::user_profile_::UserProfile};
 
 #[async_trait]
 pub trait UserProfileDb: Send + Sync {

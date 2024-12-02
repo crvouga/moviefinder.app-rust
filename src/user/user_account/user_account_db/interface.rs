@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::user::account::account_::UserAccount;
+use crate::user::user_account::user_account_::UserAccount;
 
 #[async_trait]
 pub trait UserAccountDb: Send + Sync {

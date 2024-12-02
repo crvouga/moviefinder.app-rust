@@ -4,7 +4,7 @@ use async_trait::async_trait;
 
 use crate::{
     key_value_db::interface::KeyValueDb,
-    user::{profile::profile_::UserProfile, user_id::UserId},
+    user::{user_id::UserId, user_profile::user_profile_::UserProfile},
 };
 
 use super::interface::UserProfileDb;

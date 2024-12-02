@@ -1,10 +1,7 @@
-use std::sync::Arc;
-
-use async_trait::async_trait;
-
-use crate::{key_value_db::interface::KeyValueDb, user::account::account_::UserAccount};
-
 use super::interface::UserAccountDb;
+use crate::{key_value_db::interface::KeyValueDb, user::user_account::user_account_::UserAccount};
+use async_trait::async_trait;
+use std::sync::Arc;
 
 pub struct ImplKeyValueDb {
     account_by_user_id: Box<dyn KeyValueDb>,
