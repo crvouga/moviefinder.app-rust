@@ -296,7 +296,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
         .id("bottom-bar")
         .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20")
         .child(
-            Button::new()
+            Button::default()
                 .label("Cancel")
                 .color(Color::Gray)
                 .view()
@@ -308,7 +308,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .class("flex-1"),
         )
         .child(
-            Button::new()
+            Button::default()
                 .label("Save")
                 .color(ui::button::Color::Primary)
                 .indicator("signalIsSaving")

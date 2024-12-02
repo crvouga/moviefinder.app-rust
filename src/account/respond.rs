@@ -50,7 +50,7 @@ pub fn view_screen_login_cta() -> Elem {
                         .child_text("Login to access your account"),
                 )
                 .child(
-                    Button::new()
+                    Button::default()
                         .label("Login")
                         .color_primary()
                         .view()

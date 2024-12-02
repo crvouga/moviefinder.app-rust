@@ -9,10 +9,6 @@ pub struct Button {
 }
 
 impl Button {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn label(mut self, label: &str) -> Self {
         self.label = label.to_string();
         self
