@@ -1,5 +1,8 @@
 use super::icon;
-use crate::core::html::{button, children::text, div, Elem};
+use crate::core::{
+    html::{button, children::text, div, Elem},
+    http::response_writer::ResponseWriter,
+};
 use std::time::Duration;
 
 #[derive(Default)]
@@ -88,4 +91,18 @@ impl Toast {
 
 fn js_timeout(duration: Duration, js: &str) -> String {
     format!("setTimeout(() => {}, {})", js, duration.as_millis())
+}
+
+impl ResponseWriter {
+    pub async fn send_toast(&mut self, toast: Toast) -> Result<(), std::io::Error> {
+        self.send_fragment(toast.view()).await
+    }
+
+    pub async fn send_toast_dark(&mut self, message: &str) -> Result<(), std::io::Error> {
+        self.send_toast(Toast::dark(message)).await
+    }
+
+    pub async fn send_toast_error(&mut self, message: &str) -> Result<(), std::io::Error> {
+        self.send_toast(Toast::error(message)).await
+    }
 }

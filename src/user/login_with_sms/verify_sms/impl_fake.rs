@@ -25,7 +25,7 @@ const SHOULD_SLEEP: bool = true;
 impl VerifySms for ImplFake {
     async fn send_code(&self, _phone_number: &str) -> Result<(), std::io::Error> {
         if SHOULD_SLEEP {
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
 
         let should_error = false;
@@ -38,7 +38,7 @@ impl VerifySms for ImplFake {
 
     async fn verify_code(&self, _phone_number: &str, code: &str) -> Result<(), VerifyCodeError> {
         if SHOULD_SLEEP {
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
         let should_error = false;
         if should_error {

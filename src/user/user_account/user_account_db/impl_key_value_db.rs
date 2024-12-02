@@ -1,7 +1,7 @@
 use super::interface::UserAccountDb;
 use crate::{
     core::unit_of_work::UnitOfWork, key_value_db::interface::KeyValueDb,
-    user::user_account::user_account_::UserAccount,
+    user::user_account::user_account_::UserAccount, user::user_id::UserId,
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -37,7 +37,14 @@ impl UserAccountDb for ImplKeyValueDb {
             None => return Ok(None),
         };
 
-        let maybe_account = self.account_by_user_id.get(&user_id).await?;
+        self.find_one_by_user_id(&UserId::new(&user_id)).await
+    }
+
+    async fn find_one_by_user_id(
+        &self,
+        user_id: &UserId,
+    ) -> Result<Option<UserAccount>, std::io::Error> {
+        let maybe_account = self.account_by_user_id.get(user_id.as_str()).await?;
 
         let account = match maybe_account {
             Some(account) => account,

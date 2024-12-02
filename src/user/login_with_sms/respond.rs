@@ -49,8 +49,7 @@ pub async fn respond(
                 }
 
                 Err(SendCodeError::Error(err)) => {
-                    w.send_fragment(Toast::error(&err.to_string()).view())
-                        .await?;
+                    w.send_toast_error(&err.to_string()).await?;
                     Ok(())
                 }
 
@@ -61,10 +60,8 @@ pub async fn respond(
 
                     w.send_screen_frag(model.view_screen()).await?;
 
-                    w.send_fragment(
-                        Toast::dark(&format!("Code sent to {}", phone_number_input)).view(),
-                    )
-                    .await?;
+                    w.send_toast_dark(&format!("Code sent to {}", phone_number_input))
+                        .await?;
 
                     let new_route = Route::ScreenCode {
                         phone_number: phone_number_input,
@@ -110,15 +107,13 @@ pub async fn respond(
                 }
 
                 Err(VerifyCodeError::Error(err)) => {
-                    w.send_fragment(Toast::error(&err.to_string()).view())
-                        .await?;
+                    w.send_toast_error(&err.to_string()).await?;
 
                     Ok(())
                 }
 
                 Ok(VerifyCodeOk { account, profile }) => {
-                    w.send_fragment(Toast::dark("Verified phone number").view())
-                        .await?;
+                    w.send_toast_dark("Logged in").await?;
 
                     let route_new = route::Route::User(user::route::Route::Screen);
 

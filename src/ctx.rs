@@ -59,7 +59,7 @@ impl Ctx {
                 .simulate_latency(env.simulate_latency),
         );
 
-        let _key_value_db = Arc::new(key_value_db::impl_cached_postgres::ImplCachedPostgres::new(
+        let key_value_db = Arc::new(key_value_db::impl_cached_postgres::ImplCachedPostgres::new(
             logger.clone(),
             db_conn_sql.clone(),
         ));
@@ -69,7 +69,7 @@ impl Ctx {
             db_conn_sql.clone(),
         ));
 
-        let key_value_db = Arc::new(key_value_db::impl_hash_map::ImplHashMap::new());
+        let _key_value_db = Arc::new(key_value_db::impl_hash_map::ImplHashMap::new());
 
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
             http_client.clone(),

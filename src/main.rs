@@ -38,10 +38,6 @@ async fn main() {
         .unwrap();
 }
 
-fn remove_leading_slash(s: &str) -> &str {
-    s.strip_prefix('/').unwrap_or(s)
-}
-
 async fn respond(
     ctx: Arc<Ctx>,
     request: Request,
@@ -71,9 +67,10 @@ async fn respond(
 
     log_info!(
         ctx.logger,
-        "{:?} session_id={:?} params={:?}",
+        "{:?} session_id={:?} user_id={:?} params={:?}",
         maybe_route,
         r.session_id,
+        r.user_id,
         r.params
     );
 

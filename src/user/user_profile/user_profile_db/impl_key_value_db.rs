@@ -30,14 +30,7 @@ impl UserProfileDb for ImplKeyValueDb {
         &self,
         user_id: &UserId,
     ) -> Result<Option<UserProfile>, std::io::Error> {
-        let maybe_user_id = self.user_id_by_username.get(user_id.as_str()).await?;
-
-        let user_id = match maybe_user_id {
-            Some(user_id) => user_id,
-            None => return Ok(None),
-        };
-
-        let maybe_profile = self.profile_by_user_id.get(&user_id).await?;
+        let maybe_profile = self.profile_by_user_id.get(&user_id.as_str()).await?;
 
         let profile = match maybe_profile {
             Some(profile) => profile,

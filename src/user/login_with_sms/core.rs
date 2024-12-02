@@ -115,6 +115,7 @@ async fn transact_new_user(
         ctx.user_session_db
             .upsert_one(uow.clone(), &session)
             .await?;
+
         Ok(())
     })
     .await?;

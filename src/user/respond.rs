@@ -1,9 +1,9 @@
-use super::{login_with_sms, route::Route};
+use super::{login_with_sms, route::Route, shared::respond_account_screen};
 use crate::{
     core::{
         html::*,
         http::response_writer::ResponseWriter,
-        ui::{button::Button, icon},
+        ui::{button::Button, icon, spinner_page},
     },
     ctx::Ctx,
     req::Req,
@@ -20,18 +20,46 @@ pub async fn respond(
     match route {
         Route::LoginWithSms(child) => login_with_sms::respond::respond(ctx, r, child, w).await,
         Route::Screen => match &r.user_id {
-            Some(_user_id) => {
-                // let account = ctx.user_account_db.find_one_by_user_id(&user_id).await?;
-                // let profile = ctx.user_profile_db.find_one_by_user_id(&user_id).await?;
-                w.send_screen_frag(view_screen_login_cta()).await?;
+            Some(user_id) => {
+                w.send_screen_frag(view_loading_screen()).await?;
+
+                let maybe_account = ctx.user_account_db.find_one_by_user_id(&user_id).await?;
+
+                let account = match maybe_account {
+                    Some(account) => account,
+                    None => {
+                        w.send_toast_dark("Account not found. Try logging in again")
+                            .await?;
+                        return respond_screen_login_cta(w).await;
+                    }
+                };
+
+                let maybe_profile = ctx.user_profile_db.find_one_by_user_id(&user_id).await?;
+
+                let profile = match maybe_profile {
+                    Some(profile) => profile,
+                    None => {
+                        w.send_toast_dark("Profile not found. Try logging in again")
+                            .await?;
+                        return respond_screen_login_cta(w).await;
+                    }
+                };
+
+                respond_account_screen(ctx, r, w, &account, &profile).await?;
+
                 Ok(())
             }
             None => {
-                w.send_screen_frag(view_screen_login_cta()).await?;
+                respond_screen_login_cta(w).await?;
                 Ok(())
             }
         },
     }
+}
+
+async fn respond_screen_login_cta(w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+    w.send_screen_frag(view_screen_login_cta()).await?;
+    Ok(())
 }
 
 impl Route {
@@ -42,6 +70,14 @@ impl Route {
     pub fn url(self) -> String {
         self.route().encode()
     }
+}
+
+pub fn view_loading_screen() -> Elem {
+    div()
+        .id("loading")
+        .class("w-full flex-1 flex items-center justify-center flex-col")
+        .child(spinner_page::view())
+        .child(BottomBar::default().active_account().view())
 }
 
 pub fn view_screen_login_cta() -> Elem {
