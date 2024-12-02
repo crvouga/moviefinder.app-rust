@@ -172,8 +172,8 @@ impl ViewModel {
     pub fn view_screen_enter_phone(&self) -> Elem {
         form()
             .class("w-full h-full flex flex-col")
-            .data_store("{ phoneNumber: '', phoneNumberError: '', sending: true }")
-            .debug_store(true)
+            .data_store("{ phoneNumber: '', phoneNumberError: '' }")
+            .debug_store(false)
             .data_on(|b| {
                 b.submit()
                     .prevent_default()
@@ -206,6 +206,7 @@ impl ViewModel {
                             Button::default()
                                 .label("Send code")
                                 .color_primary()
+                                // .indicator("isSending")
                                 .view()
                                 .class("w-full")
                                 .type_("submit"), // .data_indicator("sending"),
