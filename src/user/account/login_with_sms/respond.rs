@@ -190,8 +190,7 @@ impl ViewModel {
                                 .color_primary()
                                 .view()
                                 .class("w-full")
-                                .type_("submit")
-                                .data_indicator("sending"),
+                                .type_("submit"), // .data_indicator("sending"),
                         ),
                     ),
             )
