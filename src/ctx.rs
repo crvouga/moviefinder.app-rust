@@ -19,10 +19,8 @@ use crate::{
     },
     person::person_db::{self, interface::PersonDb},
     user::{
-        account::{
-            account_db::{self, interface::UserAccountDb},
-            login_with_sms::verify_sms::{self, interface::VerifySms},
-        },
+        account::account_db::{self, interface::UserAccountDb},
+        login_with_sms::verify_sms::{self, interface::VerifySms},
         profile::profile_db::{self, interface::UserProfileDb},
     },
 };

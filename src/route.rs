@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
     Feed(feed::route::Route),
-    Account(user::account::route::Route),
+    User(user::route::Route),
     Media(media::route::Route),
 }
 

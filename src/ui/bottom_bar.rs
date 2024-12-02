@@ -61,8 +61,7 @@ impl BottomBar {
                         .view()
                         .data_on(|b| {
                             b.click().push_then_get(
-                                &route::Route::Account(user::account::route::Route::Screen)
-                                    .encode(),
+                                &route::Route::User(user::route::Route::Screen).encode(),
                             )
                         }),
                 ),

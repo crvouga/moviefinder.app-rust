@@ -11,7 +11,7 @@ pub async fn respond(
     match route {
         Route::Feed(route) => feed::respond::respond(&ctx, r, route, w).await,
 
-        Route::Account(route) => user::account::respond::respond(&ctx, r, &route, w).await,
+        Route::User(route) => user::respond::respond(&ctx, r, &route, w).await,
 
         Route::Media(route) => media::respond::respond(&ctx, r, route, w).await,
     }

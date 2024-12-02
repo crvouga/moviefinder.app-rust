@@ -11,7 +11,10 @@ use crate::{
     ctx::Ctx,
     req::Req,
     route,
-    user::{self, account::account_::Account},
+    user::{
+        self, account::account_::UserAccount, profile::profile_::UserProfile,
+        shared::respond_account_screen,
+    },
 };
 
 pub async fn respond(
@@ -115,12 +118,27 @@ pub async fn respond(
                         .await?;
 
                     let account_new =
-                        existing_account.unwrap_or(Account::new(phone_number.clone()));
+                        existing_account.unwrap_or(UserAccount::new(phone_number.clone()));
+
+                    let user_id = account_new.user_id.clone();
 
                     ctx.user_account_db.upsert_one(&account_new).await?;
 
                     w.send_fragment(Toast::dark("Verified phone number").view())
                         .await?;
+
+                    let existing_profile =
+                        ctx.user_profile_db.find_one_by_user_id(&user_id).await?;
+
+                    let profile_new = existing_profile.unwrap_or(UserProfile::new(&user_id));
+
+                    ctx.user_profile_db.upsert_one(&profile_new).await?;
+
+                    let route_new = route::Route::User(user::route::Route::Screen);
+
+                    w.send_push_url(&route_new.encode()).await?;
+
+                    respond_account_screen(ctx, r, w, &account_new, &profile_new).await?;
 
                     Ok(())
                 }
@@ -131,7 +149,7 @@ pub async fn respond(
 
 impl Route {
     fn route(self) -> route::Route {
-        route::Route::Account(user::account::route::Route::LoginWithSms(self))
+        route::Route::User(user::route::Route::LoginWithSms(self))
     }
     fn url(self) -> String {
         self.route().encode()
@@ -164,7 +182,7 @@ impl ViewModel {
             .child(
                 TopBar::default()
                     .title("Login with phone")
-                    .back_url(route::Route::Account(user::account::route::Route::Screen).encode())
+                    .back_url(route::Route::User(user::route::Route::Screen).encode())
                     .view(),
             )
             .child(

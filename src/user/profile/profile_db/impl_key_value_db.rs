@@ -4,7 +4,7 @@ use async_trait::async_trait;
 
 use crate::{
     key_value_db::interface::KeyValueDb,
-    user::{profile::profile_::Profile, user_id::UserId},
+    user::{profile::profile_::UserProfile, user_id::UserId},
 };
 
 use super::interface::UserProfileDb;
@@ -31,7 +31,7 @@ impl UserProfileDb for ImplKeyValueDb {
     async fn find_one_by_user_id(
         &self,
         user_id: &UserId,
-    ) -> Result<Option<Profile>, std::io::Error> {
+    ) -> Result<Option<UserProfile>, std::io::Error> {
         let maybe_user_id = self.user_id_by_username.get(user_id.as_str()).await?;
 
         let user_id = match maybe_user_id {
@@ -46,13 +46,13 @@ impl UserProfileDb for ImplKeyValueDb {
             None => return Ok(None),
         };
 
-        let parsed = serde_json::from_str::<Profile>(&profile)
+        let parsed = serde_json::from_str::<UserProfile>(&profile)
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
 
         Ok(Some(parsed))
     }
 
-    async fn upsert_one(&self, profile: &Profile) -> Result<(), std::io::Error> {
+    async fn upsert_one(&self, profile: &UserProfile) -> Result<(), std::io::Error> {
         let user_id = profile.user_id.as_str().to_string();
         let username = profile.username.clone();
 
