@@ -51,10 +51,18 @@ async fn respond(
 
     let maybe_route = request.route();
 
+    let session_id = request.session_id();
+
+    let maybe_user_id = ctx
+        .user_session_db
+        .find_one_by_session_id(&session_id)
+        .await?
+        .map(|s| s.user_id);
+
     let r = Req {
         params: request.datastar_params(),
-        session_id: request.session_id(),
-        path: remove_leading_slash(&request.url.path).to_owned(),
+        session_id: session_id,
+        user_id: maybe_user_id,
     };
 
     if let None = maybe_route {

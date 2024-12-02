@@ -13,7 +13,7 @@ use crate::{
     route,
     user::{
         self, shared::respond_account_screen, user_account::user_account_::UserAccount,
-        user_profile::user_profile_::UserProfile,
+        user_profile::user_profile_::UserProfile, user_session::user_session_::UserSession,
     },
 };
 
@@ -60,9 +60,14 @@ pub async fn respond(
 
             w.send_screen_frag(model.view_screen()).await?;
 
+            w.send_fragment(Toast::dark(&format!("Code sent to {}", phone_number_input)).view())
+                .await?;
+
             let new_route = Route::ScreenCode {
                 phone_number: phone_number_input,
             };
+
+            w.send_focus("#code").await?;
 
             w.send_push_url(&new_route.url()).await?;
 
@@ -112,6 +117,10 @@ pub async fn respond(
                 }
 
                 Ok(()) => {
+                    //
+                    //
+                    //
+
                     let existing_account = ctx
                         .user_account_db
                         .find_one_by_phone_number(&phone_number)
@@ -124,15 +133,29 @@ pub async fn respond(
 
                     ctx.user_account_db.upsert_one(&account_new).await?;
 
-                    w.send_fragment(Toast::dark("Verified phone number").view())
-                        .await?;
-
                     let existing_profile =
                         ctx.user_profile_db.find_one_by_user_id(&user_id).await?;
 
                     let profile_new = existing_profile.unwrap_or(UserProfile::new(&user_id));
 
                     ctx.user_profile_db.upsert_one(&profile_new).await?;
+
+                    let existing_session = ctx
+                        .user_session_db
+                        .find_one_by_session_id(&r.session_id)
+                        .await?;
+
+                    let session_new =
+                        existing_session.unwrap_or(UserSession::new(&user_id, &r.session_id));
+
+                    ctx.user_session_db.upsert_one(&session_new).await?;
+
+                    //
+                    //
+                    //
+
+                    w.send_fragment(Toast::dark("Verified phone number").view())
+                        .await?;
 
                     let route_new = route::Route::User(user::route::Route::Screen);
 

@@ -48,10 +48,8 @@ impl Root {
             .child(
                 div()
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col relative")
+                    .child(div().id(ID_SCREEN).data_on(|b| b.load().push_then_get(&self.route.encode())))
                     .child(Toast::view_root())
-                    .child(
-                        div().id(ID_SCREEN).data_on(|b| b.load().push_then_get(&self.route.encode()))
-                    )
             )
         )
     }

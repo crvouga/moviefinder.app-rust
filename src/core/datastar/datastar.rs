@@ -480,6 +480,14 @@ impl ResponseWriter {
         self.send_script(&js_push_url(url)).await
     }
 
+    pub async fn send_focus(&mut self, selector: &str) -> Result<(), std::io::Error> {
+        sse()
+            .event_execute_script()
+            .data_script(&format!("document.querySelector('{}').focus()", selector))
+            .send(self)
+            .await
+    }
+
     pub async fn send_script(&mut self, script: &str) -> Result<(), std::io::Error> {
         sse()
             .event_execute_script()

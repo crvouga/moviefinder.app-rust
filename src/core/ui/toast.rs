@@ -55,7 +55,7 @@ impl Toast {
 
     pub fn view_root() -> Elem {
         div()
-            .class("absolute top-0 left-0 right-0 bottom-0 pointer-events-none p-6")
+            .class("absolute top-0 left-0 right-0 bottom-0 pointer-events-none p-6 flex flex-col items-center justify-start items-start z-50")
             .data_on(|b| b.e("toast-loaded").log("toaster loaded"))
             .child(div().id("toast"))
     }
@@ -66,7 +66,7 @@ impl Toast {
 
         div()
             .id("toast")
-            .class("w-full p-4 text-lg font-bold pointer-events-auto rounded shadow-xl overflow-hidden animate-slide-down items-center flex")
+            .class("w-full p-4 text-lg font-bold pointer-events-auto rounded shadow-xl overflow-hidden animate-slide-down items-center flex z-50")
             .data_on(|b|
                     b.load()
                     .js(&format!("const duration = {}", duration_ms))

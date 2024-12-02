@@ -1,8 +1,11 @@
-use crate::core::{params::ParamsHashMap, session::session_id::SessionId};
+use crate::{
+    core::{params::ParamsHashMap, session::session_id::SessionId},
+    user::user_id::UserId,
+};
 
 #[derive(Debug, Clone)]
 pub struct Req {
     pub session_id: SessionId,
+    pub user_id: Option<UserId>,
     pub params: ParamsHashMap,
-    pub path: String,
 }

@@ -22,6 +22,7 @@ use crate::{
         login_with_sms::verify_sms::{self, interface::VerifySms},
         user_account::user_account_db::{self, interface::UserAccountDb},
         user_profile::user_profile_db::{self, interface::UserProfileDb},
+        user_session::{self, user_session_db::interface::UserSessionDb},
     },
 };
 
@@ -41,6 +42,7 @@ pub struct Ctx {
     pub verify_sms: Arc<dyn VerifySms>,
     pub user_account_db: Arc<dyn UserAccountDb>,
     pub user_profile_db: Arc<dyn UserProfileDb>,
+    pub user_session_db: Arc<dyn UserSessionDb>,
 }
 
 impl Ctx {
@@ -116,6 +118,12 @@ impl Ctx {
             key_value_db.clone(),
         ));
 
+        let user_session_db = Arc::new(
+            user_session::user_session_db::impl_key_value_db::ImplKeyValueDb::new(
+                key_value_db.clone(),
+            ),
+        );
+
         Ok(Ctx {
             logger,
             http_client,
@@ -132,6 +140,7 @@ impl Ctx {
             verify_sms,
             user_account_db,
             user_profile_db,
+            user_session_db,
         })
     }
 }

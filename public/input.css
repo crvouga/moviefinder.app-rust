@@ -91,7 +91,7 @@ Scrollbar
 }
 
 .animate-slide-down {
-  animation: slide-down 0.1s ease-out;
+  animation: slide-down 0.25s ease-out;
 }
 
 @keyframes slide-up {
@@ -104,5 +104,5 @@ Scrollbar
 }
 
 .animate-slide-up {
-  animation: slide-up 0.2s ease-out forwards;
+  animation: slide-up 0.25s ease-out forwards;
 }
