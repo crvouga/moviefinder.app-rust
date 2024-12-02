@@ -23,7 +23,7 @@ impl ImplKeyValueDb {
 
 #[async_trait]
 impl FeedSessionMappingDb for ImplKeyValueDb {
-    async fn get(&self, session_id: SessionId) -> Result<Option<FeedId>, String> {
+    async fn get(&self, session_id: SessionId) -> Result<Option<FeedId>, std::io::Error> {
         match self.key_value_db.get(session_id.as_str()).await {
             Ok(Some(value)) => Ok(Some(FeedId::new(&value))),
             Ok(None) => Ok(None),
@@ -31,7 +31,7 @@ impl FeedSessionMappingDb for ImplKeyValueDb {
         }
     }
 
-    async fn put(&self, session_id: SessionId, feed_id: FeedId) -> Result<(), String> {
+    async fn put(&self, session_id: SessionId, feed_id: FeedId) -> Result<(), std::io::Error> {
         self.key_value_db
             .put(session_id.as_str(), feed_id.as_str().to_string())
             .await?;

@@ -25,20 +25,20 @@ impl ImplHashMap {
 
 #[async_trait]
 impl KeyValueDb for ImplHashMap {
-    async fn get(&self, key: &str) -> Result<Option<String>, String> {
+    async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map = self.map.read().unwrap();
         Ok(map.get(&namespaced_key).cloned())
     }
 
-    async fn put(&self, key: &str, value: String) -> Result<(), String> {
+    async fn put(&self, key: &str, value: String) -> Result<(), std::io::Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let mut map = self.map.write().unwrap();
         let _ = map.insert(namespaced_key, value);
         Ok(())
     }
 
-    async fn zap(&self, key: &str) -> Result<(), String> {
+    async fn zap(&self, key: &str) -> Result<(), std::io::Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let mut map = self.map.write().unwrap();
         let _ = map.remove(&namespaced_key);

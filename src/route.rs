@@ -1,14 +1,13 @@
 use crate::{
-    account,
     core::{http::request::Request, human_friendly_base64},
-    feed, media,
+    feed, media, user,
 };
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
     Feed(feed::route::Route),
-    Account(account::route::Route),
+    Account(user::account::route::Route),
     Media(media::route::Route),
 }
 

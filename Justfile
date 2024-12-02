@@ -2,7 +2,7 @@ check: #
   cargo check && cargo fmt
 
 run: #
-  npx kill-port 8000 && just watch
+  just tw-build && npx kill-port 8000 && just watch
 
 watch: #
   cargo watch -x run

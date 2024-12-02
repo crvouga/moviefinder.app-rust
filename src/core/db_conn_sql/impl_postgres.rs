@@ -46,9 +46,9 @@ impl ImplPostgres {
 
 #[async_trait]
 impl DbConnSql for ImplPostgres {
-    async fn query<T, F>(&self, parse_row_json: Box<F>, sql: &Sql) -> Result<Vec<T>, String>
+    async fn query<T, F>(&self, parse_row_json: Box<F>, sql: &Sql) -> Result<Vec<T>, std::io::Error>
     where
-        F: Fn(String) -> Result<T, String> + Send + Sync,
+        F: Fn(String) -> Result<T, std::io::Error> + Send + Sync,
         T: Debug,
     {
         let start = std::time::Instant::now();
@@ -63,7 +63,7 @@ impl DbConnSql for ImplPostgres {
             .client
             .query(&sql_str, &[])
             .await
-            .map_err(|err| err.to_string())?;
+            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
 
         let mut results = vec![];
 
@@ -81,7 +81,7 @@ impl DbConnSql for ImplPostgres {
     }
 }
 
-fn row_to_json(row: tokio_postgres::Row) -> Result<String, String> {
+fn row_to_json(row: tokio_postgres::Row) -> Result<String, std::io::Error> {
     let mut json_obj = serde_json::Map::new();
 
     for (idx, column) in row.columns().iter().enumerate() {
@@ -93,5 +93,6 @@ fn row_to_json(row: tokio_postgres::Row) -> Result<String, String> {
         json_obj.insert(column_name.to_string(), value);
     }
 
-    serde_json::to_string(&json_obj).map_err(|e| e.to_string())
+    serde_json::to_string(&json_obj)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
 }

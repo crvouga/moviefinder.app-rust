@@ -5,7 +5,7 @@ use std::time::Duration;
 #[derive(Default)]
 pub enum ToastVariant {
     #[default]
-    Default,
+    Dark,
     Success,
     Error,
 }
@@ -21,7 +21,7 @@ impl Default for Toast {
         Self {
             duration: Duration::from_secs(3),
             message: "".to_string(),
-            variant: ToastVariant::Default,
+            variant: ToastVariant::Dark,
         }
     }
 }
@@ -35,6 +35,14 @@ impl Toast {
     pub fn variant(mut self, variant: ToastVariant) -> Self {
         self.variant = variant;
         self
+    }
+
+    pub fn dark(message: &str) -> Self {
+        Self {
+            message: message.to_string(),
+            variant: ToastVariant::Dark,
+            ..Default::default()
+        }
     }
 
     pub fn error(message: &str) -> Self {
@@ -66,7 +74,7 @@ impl Toast {
             )
             .class(match self.variant {
                 ToastVariant::Success => "bg-green-600 text-white",
-                ToastVariant::Default => "bg-neutral-700 text-white",
+                ToastVariant::Dark => "bg-neutral-700 text-white",
                 ToastVariant::Error => "border-red-600 border bg-red-800 text-white",
             })
             .child(div().class("flex-1").child(text(&self.message)))

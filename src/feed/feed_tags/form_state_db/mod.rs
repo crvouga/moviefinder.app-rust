@@ -23,7 +23,7 @@ impl FeedTagsFormStateDb {
         }
     }
 
-    pub async fn get(&self, feed_id: &FeedId) -> Result<Option<FormState>, String> {
+    pub async fn get(&self, feed_id: &FeedId) -> Result<Option<FormState>, std::io::Error> {
         let got = self.key_value_db.get(feed_id.as_str()).await.unwrap();
 
         if got.is_none() {
@@ -37,8 +37,9 @@ impl FeedTagsFormStateDb {
         Ok(Some(parsed))
     }
 
-    pub async fn put(&self, form_state: &FormState) -> Result<(), String> {
-        let value = serde_json::to_string(&form_state).map_err(|e| e.to_string())?;
+    pub async fn put(&self, form_state: &FormState) -> Result<(), std::io::Error> {
+        let value = serde_json::to_string(&form_state)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
 
         self.key_value_db
             .put(form_state.feed_id.as_str(), value)

@@ -9,7 +9,6 @@ use route::Route;
 use std::sync::Arc;
 use ui::root;
 
-mod account;
 mod core;
 mod ctx;
 mod env;
@@ -22,6 +21,7 @@ mod req;
 mod respond;
 mod route;
 mod ui;
+mod user;
 
 #[tokio::main]
 async fn main() {

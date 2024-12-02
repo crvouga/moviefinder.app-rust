@@ -78,7 +78,7 @@ impl TextField {
                     })
                     .child(
                         input()
-                            .class("h-8 text-lg flex-1 h-full peer bg-transparent outline-none")
+                            .class("min-h-8 text-lg flex-1 h-full peer bg-transparent outline-none")
                             .type_("text")
                             .placeholder(&self.placeholder)
                             .data_on(|b| b.e("clear")

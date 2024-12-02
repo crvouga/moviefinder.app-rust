@@ -1,6 +1,6 @@
 use crate::{
-    account, core::http::response_writer::ResponseWriter, ctx::Ctx, feed, media, req::Req,
-    route::Route,
+    core::http::response_writer::ResponseWriter, ctx::Ctx, feed, media, req::Req, route::Route,
+    user,
 };
 pub async fn respond(
     ctx: &Ctx,
@@ -11,7 +11,7 @@ pub async fn respond(
     match route {
         Route::Feed(route) => feed::respond::respond(&ctx, r, route, w).await,
 
-        Route::Account(route) => account::respond::respond(&ctx, r, &route, w).await,
+        Route::Account(route) => user::account::respond::respond(&ctx, r, &route, w).await,
 
         Route::Media(route) => media::respond::respond(&ctx, r, route, w).await,
     }

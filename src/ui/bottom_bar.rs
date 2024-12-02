@@ -1,5 +1,4 @@
 use crate::{
-    account,
     core::{
         html::{div, Elem},
         ui::{
@@ -7,7 +6,7 @@ use crate::{
             icon,
         },
     },
-    feed, route,
+    feed, route, user,
 };
 
 #[derive(PartialEq, Eq, Default)]
@@ -62,7 +61,8 @@ impl BottomBar {
                         .view()
                         .data_on(|b| {
                             b.click().push_then_get(
-                                &route::Route::Account(account::route::Route::Screen).encode(),
+                                &route::Route::Account(user::account::route::Route::Screen)
+                                    .encode(),
                             )
                         }),
                 ),

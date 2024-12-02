@@ -36,13 +36,14 @@ struct Row {
     updated_at_posix: Option<i64>,
 }
 
-fn parse_row_json(json_row: String) -> Result<Row, String> {
-    serde_json::from_str(&json_row).map_err(|e| e.to_string())
+fn parse_row_json(json_row: String) -> Result<Row, std::io::Error> {
+    serde_json::from_str(&json_row)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
 }
 
 #[async_trait]
 impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
-    async fn get(&self, key: &str) -> Result<Option<String>, String> {
+    async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new("SELECT value FROM key_value WHERE key = :key");
@@ -61,7 +62,7 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
         Ok(value)
     }
 
-    async fn put(&self, key: &str, value: String) -> Result<(), String> {
+    async fn put(&self, key: &str, value: String) -> Result<(), std::io::Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new(
@@ -89,7 +90,7 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
         Ok(())
     }
 
-    async fn zap(&self, key: &str) -> Result<(), String> {
+    async fn zap(&self, key: &str) -> Result<(), std::io::Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new("DELETE FROM key_value WHERE key = :key");

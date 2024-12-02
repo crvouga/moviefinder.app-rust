@@ -15,7 +15,7 @@ impl ImplWithCache {
 
 #[async_trait]
 impl KeyValueDb for ImplWithCache {
-    async fn get(&self, key: &str) -> Result<Option<String>, String> {
+    async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
         let got_cache = self.cache.get(key).await?;
 
         if let Some(value) = &got_cache {
@@ -31,12 +31,12 @@ impl KeyValueDb for ImplWithCache {
         Ok(got_source)
     }
 
-    async fn put(&self, key: &str, value: String) -> Result<(), String> {
+    async fn put(&self, key: &str, value: String) -> Result<(), std::io::Error> {
         let _fut = self.source.put(key, value.clone());
         self.cache.put(key, value).await
     }
 
-    async fn zap(&self, key: &str) -> Result<(), String> {
+    async fn zap(&self, key: &str) -> Result<(), std::io::Error> {
         let _fut = self.source.zap(key);
         self.cache.zap(key).await
     }

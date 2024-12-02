@@ -2,7 +2,6 @@ use children::text;
 
 use super::{route::Route, verify_sms::interface::VerifyCodeError};
 use crate::{
-    account,
     core::{
         html::*,
         http::response_writer::ResponseWriter,
@@ -11,7 +10,7 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    route,
+    route, user,
 };
 
 pub async fn respond(
@@ -42,7 +41,14 @@ pub async fn respond(
                 return Ok(());
             }
 
-            let phone_number = phone_number_input.trim();
+            let sent_code = ctx.verify_sms.send_code(&phone_number_input).await;
+
+            if let Err(err) = sent_code {
+                w.send_fragment(Toast::error(&err.to_string()).view())
+                    .await?;
+
+                return Ok(());
+            }
 
             let model = ViewModel::Code {
                 phone_number: phone_number_input.clone(),
@@ -72,7 +78,7 @@ pub async fn respond(
         }
 
         Route::ClickedVerifyCode { phone_number } => {
-            let code = r
+            let code_input = r
                 .params
                 .get_first("code")
                 .map(|s| s.clone())
@@ -80,25 +86,34 @@ pub async fn respond(
                 .trim()
                 .to_string();
 
-            if code.is_empty() {
+            if code_input.is_empty() {
                 w.send_signals("{ codeError: 'Code is required' }").await?;
                 return Ok(());
             }
 
-            let verifed = ctx.verify_sms.verify_code(&phone_number, &code).await;
+            let verifed = ctx.verify_sms.verify_code(&phone_number, &code_input).await;
 
-            let error: VerifyCodeError = match verifed {
-                Ok(_) => return Ok(()),
-                Err(err) => err,
-            };
-
-            match error {
-                VerifyCodeError::WrongCode => {
+            match verifed {
+                Err(VerifyCodeError::WrongCode) => {
                     w.send_signals("{ codeError: 'Wrong code' }").await?;
+
                     Ok(())
                 }
-                VerifyCodeError::Error(err) => {
+
+                Err(VerifyCodeError::Error(err)) => {
                     w.send_fragment(Toast::error(&err.to_string()).view())
+                        .await?;
+
+                    Ok(())
+                }
+
+                Ok(()) => {
+                    // let existing_account = ctx
+                    //     .account_db
+                    //     .find_one_by_phone_number(&phone_number)
+                    //     .await?;
+
+                    w.send_fragment(Toast::dark("Verified phone number").view())
                         .await?;
 
                     Ok(())
@@ -110,7 +125,7 @@ pub async fn respond(
 
 impl Route {
     fn route(self) -> route::Route {
-        route::Route::Account(account::route::Route::LoginWithSms(self))
+        route::Route::Account(user::account::route::Route::LoginWithSms(self))
     }
     fn url(self) -> String {
         self.route().encode()
@@ -143,7 +158,7 @@ impl ViewModel {
             .child(
                 TopBar::default()
                     .title("Login with phone")
-                    .back_url(route::Route::Account(account::route::Route::Screen).encode())
+                    .back_url(route::Route::Account(user::account::route::Route::Screen).encode())
                     .view(),
             )
             .child(
