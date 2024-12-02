@@ -1,6 +1,9 @@
 use children::text;
 
-use super::{route::Route, verify_sms::interface::VerifyCodeError};
+use super::{
+    core::{self, verify_code, SendCodeError, VerifyCodeError, VerifyCodeOk},
+    route::Route,
+};
 use crate::{
     core::{
         html::*,
@@ -11,10 +14,7 @@ use crate::{
     ctx::Ctx,
     req::Req,
     route,
-    user::{
-        self, shared::respond_account_screen, user_account::user_account_::UserAccount,
-        user_profile::user_profile_::UserProfile, user_session::user_session_::UserSession,
-    },
+    user::{self, shared::respond_account_screen},
 };
 
 pub async fn respond(
@@ -39,39 +39,44 @@ pub async fn respond(
                 .map(|s| s.clone())
                 .unwrap_or_default();
 
-            if phone_number_input.is_empty() {
-                w.send_signals("{ phoneNumberError: 'Phone number is required' }")
+            let sent = core::send_code(ctx, &phone_number_input).await;
+
+            match sent {
+                Err(SendCodeError::InvalidPhoneNumber(err)) => {
+                    w.send_signals(&format!("{{ phoneNumberError: '{}' }}", err))
+                        .await?;
+                    Ok(())
+                }
+
+                Err(SendCodeError::Error(err)) => {
+                    w.send_fragment(Toast::error(&err.to_string()).view())
+                        .await?;
+                    Ok(())
+                }
+
+                Ok(()) => {
+                    let model = ViewModel::Code {
+                        phone_number: phone_number_input.clone(),
+                    };
+
+                    w.send_screen_frag(model.view_screen()).await?;
+
+                    w.send_fragment(
+                        Toast::dark(&format!("Code sent to {}", phone_number_input)).view(),
+                    )
                     .await?;
-                return Ok(());
+
+                    let new_route = Route::ScreenCode {
+                        phone_number: phone_number_input,
+                    };
+
+                    w.send_focus("#code").await?;
+
+                    w.send_push_url(&new_route.url()).await?;
+
+                    Ok(())
+                }
             }
-
-            let sent_code = ctx.verify_sms.send_code(&phone_number_input).await;
-
-            if let Err(err) = sent_code {
-                w.send_fragment(Toast::error(&err.to_string()).view())
-                    .await?;
-
-                return Ok(());
-            }
-
-            let model = ViewModel::Code {
-                phone_number: phone_number_input.clone(),
-            };
-
-            w.send_screen_frag(model.view_screen()).await?;
-
-            w.send_fragment(Toast::dark(&format!("Code sent to {}", phone_number_input)).view())
-                .await?;
-
-            let new_route = Route::ScreenCode {
-                phone_number: phone_number_input,
-            };
-
-            w.send_focus("#code").await?;
-
-            w.send_push_url(&new_route.url()).await?;
-
-            Ok(())
         }
 
         Route::ScreenCode { phone_number } => {
@@ -95,17 +100,12 @@ pub async fn respond(
                 .trim()
                 .to_string();
 
-            if code_input.is_empty() {
-                w.send_signals("{ codeError: 'Code is required' }").await?;
-                return Ok(());
-            }
+            let verified = verify_code(ctx, &r.session_id, phone_number, &code_input).await;
 
-            let verifed = ctx.verify_sms.verify_code(&phone_number, &code_input).await;
-
-            match verifed {
-                Err(VerifyCodeError::WrongCode) => {
-                    w.send_signals("{ codeError: 'Wrong code' }").await?;
-
+            match verified {
+                Err(VerifyCodeError::InvalidCode(err)) => {
+                    w.send_signals(&format!("{{ codeError: '{}' }}", err))
+                        .await?;
                     Ok(())
                 }
 
@@ -116,44 +116,7 @@ pub async fn respond(
                     Ok(())
                 }
 
-                Ok(()) => {
-                    //
-                    //
-                    //
-
-                    let existing_account = ctx
-                        .user_account_db
-                        .find_one_by_phone_number(&phone_number)
-                        .await?;
-
-                    let account_new =
-                        existing_account.unwrap_or(UserAccount::new(phone_number.to_string()));
-
-                    let user_id = account_new.user_id.clone();
-
-                    ctx.user_account_db.upsert_one(&account_new).await?;
-
-                    let existing_profile =
-                        ctx.user_profile_db.find_one_by_user_id(&user_id).await?;
-
-                    let profile_new = existing_profile.unwrap_or(UserProfile::new(&user_id));
-
-                    ctx.user_profile_db.upsert_one(&profile_new).await?;
-
-                    let existing_session = ctx
-                        .user_session_db
-                        .find_one_by_session_id(&r.session_id)
-                        .await?;
-
-                    let session_new =
-                        existing_session.unwrap_or(UserSession::new(&user_id, &r.session_id));
-
-                    ctx.user_session_db.upsert_one(&session_new).await?;
-
-                    //
-                    //
-                    //
-
+                Ok(VerifyCodeOk { account, profile }) => {
                     w.send_fragment(Toast::dark("Verified phone number").view())
                         .await?;
 
@@ -161,7 +124,7 @@ pub async fn respond(
 
                     w.send_push_url(&route_new.encode()).await?;
 
-                    respond_account_screen(ctx, r, w, &account_new, &profile_new).await?;
+                    respond_account_screen(ctx, r, w, &account, &profile).await?;
 
                     Ok(())
                 }
