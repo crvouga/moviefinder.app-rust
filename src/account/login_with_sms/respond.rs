@@ -30,25 +30,29 @@ pub async fn respond(
         }
 
         Route::ClickedSendCode => {
-            let phone_number = r
+            let phone_number_input = r
                 .params
                 .get_first("phoneNumber")
                 .map(|s| s.clone())
                 .unwrap_or_default();
 
-            if phone_number.is_empty() {
+            if phone_number_input.is_empty() {
                 w.send_signals("{ phoneNumberError: 'Phone number is required' }")
                     .await?;
                 return Ok(());
             }
 
+            let phone_number = phone_number_input.trim();
+
             let model = ViewModel::Code {
-                phone_number: phone_number.clone(),
+                phone_number: phone_number_input.clone(),
             };
 
             w.send_screen_frag(model.view_screen()).await?;
 
-            let new_route = Route::ScreenCode { phone_number };
+            let new_route = Route::ScreenCode {
+                phone_number: phone_number_input,
+            };
 
             w.send_push_url(&new_route.url()).await?;
 

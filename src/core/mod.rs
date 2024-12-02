@@ -13,6 +13,7 @@ pub mod logger;
 pub mod mime_type;
 pub mod pagination;
 pub mod params;
+pub mod phone_number;
 pub mod query;
 pub mod random;
 pub mod session;

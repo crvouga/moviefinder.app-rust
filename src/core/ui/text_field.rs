@@ -1,7 +1,9 @@
 use crate::core::{
     datastar::datastar::{js_not, signal},
-    html::{children::text, input, label, span, Elem},
+    html::{button, children::text, div, input, label, span, Elem},
 };
+
+use super::icon;
 
 #[derive(Default)]
 pub struct TextField {
@@ -62,21 +64,42 @@ impl TextField {
                     .data_class(|c| c.c("text-red-500", &signal_has_error)),
             )
             .child(
-                input()
-                    .class("text-lg w-full p-4 bg-neutral-900 border-2 rounded")
+                div()
+                    .class("p-4 bg-neutral-900 border-2 rounded w-full flex items-center gap-2")
                     .data_class(|c| {
                         c.c(
-                            "border-red-500 outline-offset-2 outline-red-500",
+                            "border-red-500 focus:border-offset-2 focus:border-red-500",
                             &signal_has_error,
                         )
                         .c(
-                            "border-neutral-700 outline-offset-2 outline-blue-500",
+                            "border-neutral-700 focus:border-offset-2 focus:border-blue-500",
                             &js_not(&signal_has_error),
                         )
                     })
-                    .type_("text")
-                    .placeholder(&self.placeholder)
-                    .map(map_input),
+                    .child(
+                        input()
+                            .class("h-8 text-lg flex-1 h-full peer bg-transparent outline-none")
+                            .type_("text")
+                            .placeholder(&self.placeholder)
+                            .data_on(|b| b.e("clear")
+                                .js("evt.target.focus()")
+                                .js("evt.target.value = ''")
+                                .js("evt.target.dispatchEvent(new Event('input'))"))
+                            .map(map_input),
+                    )
+                    .child(
+                        button()
+                            .type_("button")
+                            .tab_index(0)
+                            .data_on(|b| {
+                                b.click()
+                                    .js("evt.target.parentNode.querySelector('input').dispatchEvent(new Event('clear'))")
+                            })
+                            .aria_label("clear search")
+                            .class("h-full place-items-center")
+                            .class("grid peer-placeholder-shown:hidden")
+                            .child(icon::x_mark("size-8 pointer-events-none")),
+                    )
             )
             .child(
                 span()
