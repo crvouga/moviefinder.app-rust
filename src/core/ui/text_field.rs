@@ -65,7 +65,7 @@ impl TextField {
             )
             .child(
                 div()
-                    .class("p-4 bg-neutral-900 border-2 rounded w-full flex items-center gap-2")
+                    .class("p-4 bg-neutral-900 border-2 rounded w-full flex items-center gap-2 min-w-0 overflow-hidden")
                     .data_class(|c| {
                         c.c(
                             "border-red-500 focus:border-offset-2 focus:border-red-500",
@@ -96,7 +96,7 @@ impl TextField {
                                     .js("evt.target.parentNode.querySelector('input').dispatchEvent(new Event('clear'))")
                             })
                             .aria_label("clear search")
-                            .class("h-full place-items-center")
+                            .class("h-full place-items-center shrink-0 w-fit")
                             .class("grid peer-placeholder-shown:hidden")
                             .child(icon::x_mark("size-8 pointer-events-none")),
                     )
