@@ -19,10 +19,18 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::LoginWithSms(child) => login_with_sms::respond::respond(ctx, r, child, w).await,
-        Route::Screen => {
-            w.send_screen_frag(view_screen_login_cta()).await?;
-            Ok(())
-        }
+        Route::Screen => match &r.user_id {
+            Some(_user_id) => {
+                // let account = ctx.user_account_db.find_one_by_user_id(&user_id).await?;
+                // let profile = ctx.user_profile_db.find_one_by_user_id(&user_id).await?;
+                w.send_screen_frag(view_screen_login_cta()).await?;
+                Ok(())
+            }
+            None => {
+                w.send_screen_frag(view_screen_login_cta()).await?;
+                Ok(())
+            }
+        },
     }
 }
 
