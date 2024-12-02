@@ -93,9 +93,14 @@ impl ViewModel {
     }
 
     pub fn view_screen_phone(&self) -> Elem {
-        div()
+        form()
             .class("w-full h-full flex flex-col")
             .data_store("{ phoneNumber: '' }")
+            .data_on(|b| {
+                b.submit()
+                    .prevent_default()
+                    .post(&Route::ClickedSendCode.url())
+            })
             .child(
                 TopBar::default()
                     .title("Login with phone")
@@ -120,16 +125,21 @@ impl ViewModel {
                                 .color_primary()
                                 .view()
                                 .class("w-full")
-                                .data_on(|b| b.click().post(&Route::ClickedSendCode.url())),
+                                .type_("submit"),
                         ),
                     ),
             )
     }
 
     pub fn view_screen_code(&self, phone_number: &str) -> Elem {
-        div()
+        form()
             .class("w-full h-full flex flex-col")
             .data_store("{ code: '' }")
+            .data_on(|b| {
+                b.submit()
+                    .prevent_default()
+                    .post(&Route::ClickedSendCode.url())
+            })
             .child(
                 TopBar::default()
                     .title("Login with phone")

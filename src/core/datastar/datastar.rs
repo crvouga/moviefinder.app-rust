@@ -108,7 +108,7 @@ impl Builder for DataIntersects {
 pub struct DataOn {
     event: String,
     modifiers: Vec<String>,
-    actions: Vec<String>,
+    js: Vec<String>,
 }
 
 impl DataOn {
@@ -116,7 +116,7 @@ impl DataOn {
         Self {
             event: event.to_string(),
             modifiers: vec![],
-            actions: vec![],
+            js: vec![],
         }
     }
 
@@ -129,7 +129,7 @@ impl DataOn {
         Self {
             event: "input".to_string(),
             modifiers: vec![],
-            actions: vec![],
+            js: vec![],
         }
     }
 
@@ -137,15 +137,35 @@ impl DataOn {
         Self {
             event: "click".to_string(),
             modifiers: vec![],
-            actions: vec![],
+            js: vec![],
         }
+    }
+
+    pub fn keydown(self) -> Self {
+        Self {
+            event: "keydown".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
+
+    pub fn submit(self) -> Self {
+        Self {
+            event: "submit".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
+
+    pub fn prevent_default(mut self) -> Self {
+        self.js("evt.preventDefault()")
     }
 
     pub fn load(self) -> Self {
         Self {
             event: "load".to_string(),
             modifiers: vec![],
-            actions: vec![],
+            js: vec![],
         }
     }
 
@@ -153,7 +173,7 @@ impl DataOn {
         Self {
             event: "store-changed".to_string(),
             modifiers: vec![],
-            actions: vec![],
+            js: vec![],
         }
     }
 
@@ -161,7 +181,7 @@ impl DataOn {
         Self {
             event: "raf".to_string(),
             modifiers: vec![],
-            actions: vec![],
+            js: vec![],
         }
     }
 
@@ -198,27 +218,27 @@ impl DataOn {
     }
 
     pub fn get(mut self, url: &str) -> Self {
-        self.actions.push(js_get(url));
+        self.js.push(js_get(url));
         self
     }
 
     pub fn patch(mut self, url: &str) -> Self {
-        self.actions.push(js_patch(url));
+        self.js.push(js_patch(url));
         self
     }
 
     pub fn post(mut self, url: &str) -> Self {
-        self.actions.push(js_post(url));
+        self.js.push(js_post(url));
         self
     }
 
     pub fn js(mut self, script: &str) -> Self {
-        self.actions.push(script.to_string());
+        self.js.push(script.to_string());
         self
     }
 
     pub fn push_url(mut self, url: &str) -> Self {
-        self.actions
+        self.js
             .push(format!("window.history.pushState(null, '', '{}');", url));
         self
     }
@@ -237,7 +257,7 @@ impl Builder for DataOn {
             format!("{}.{}", self.event, modifiers_str)
         };
         let key = format!("data-on-{}", attr_str);
-        let value = self.actions.join("; ");
+        let value = self.js.join("; ");
         (key, value)
     }
 }

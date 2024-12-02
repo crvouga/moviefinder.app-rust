@@ -35,6 +35,7 @@ impl Button {
         .class("enabled:hover:opacity-80 enabled:active:opacity-60")
         .class("disabled:opacity-80 disabled:cursor-not-allowed")
         .class(&self.color.to_class())
+        .type_("button")
         .map(|e| {
             if let Some(indicator) = self.indicator {
             e.data_indicator(&indicator).data_bind("aria-busy", &format!("${}", indicator))
