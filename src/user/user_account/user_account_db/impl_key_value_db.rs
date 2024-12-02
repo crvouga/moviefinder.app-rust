@@ -1,5 +1,8 @@
 use super::interface::UserAccountDb;
-use crate::{key_value_db::interface::KeyValueDb, user::user_account::user_account_::UserAccount};
+use crate::{
+    core::unit_of_work::UnitOfWork, key_value_db::interface::KeyValueDb,
+    user::user_account::user_account_::UserAccount,
+};
 use async_trait::async_trait;
 use std::sync::Arc;
 
@@ -47,7 +50,11 @@ impl UserAccountDb for ImplKeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn upsert_one(&self, account: &UserAccount) -> Result<(), std::io::Error> {
+    async fn upsert_one(
+        &self,
+        uow: UnitOfWork,
+        account: &UserAccount,
+    ) -> Result<(), std::io::Error> {
         let user_id = account.user_id.as_str().to_string();
         let phone_number = account.phone_number.clone();
 
@@ -55,11 +62,11 @@ impl UserAccountDb for ImplKeyValueDb {
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
 
         self.account_by_user_id
-            .put(&user_id, serialized.to_string())
+            .put(uow.clone(), &user_id, serialized.to_string())
             .await?;
 
         self.user_id_by_phone_number
-            .put(&phone_number, user_id.to_string())
+            .put(uow, &phone_number, user_id.to_string())
             .await?;
 
         Ok(())

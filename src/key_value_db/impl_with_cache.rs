@@ -1,6 +1,9 @@
-use super::interface::KeyValueDb;
 use async_trait::async_trait;
 use std::sync::Arc;
+
+use crate::core::unit_of_work::UnitOfWork;
+
+use super::interface::KeyValueDb;
 
 pub struct ImplWithCache {
     source: Arc<dyn KeyValueDb>,
@@ -24,21 +27,25 @@ impl KeyValueDb for ImplWithCache {
 
         let got_source = self.source.get(key).await?;
 
+        let uow = UnitOfWork::new();
+
         if let Some(value) = &got_source {
-            self.cache.put(key, value.clone()).await?;
+            self.cache.put(uow.clone(), key, value.clone()).await?;
         }
 
         Ok(got_source)
     }
 
-    async fn put(&self, key: &str, value: String) -> Result<(), std::io::Error> {
-        let _fut = self.source.put(key, value.clone());
-        self.cache.put(key, value).await
+    async fn put(&self, uow: UnitOfWork, key: &str, value: String) -> Result<(), std::io::Error> {
+        self.source.put(uow.clone(), key, value.clone()).await?;
+        self.cache.put(uow, key, value).await?;
+        Ok(())
     }
 
-    async fn zap(&self, key: &str) -> Result<(), std::io::Error> {
-        let _fut = self.source.zap(key);
-        self.cache.zap(key).await
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), std::io::Error> {
+        self.source.zap(uow.clone(), key).await?;
+        self.cache.zap(uow, key).await?;
+        Ok(())
     }
 
     fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {

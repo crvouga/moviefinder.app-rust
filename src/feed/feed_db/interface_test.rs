@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::{
+        core::unit_of_work::UnitOfWork,
         feed::{
             feed_::Feed,
             feed_db::{impl_key_value_db, interface::FeedDb},
@@ -31,8 +32,9 @@ mod tests {
         for f in fixtures().await {
             let feed = Feed::default();
 
+            let uow = UnitOfWork::new();
             let before = f.feed_db.get(feed.feed_id.clone()).await;
-            let put = f.feed_db.put(feed.clone()).await;
+            let put = f.feed_db.put(uow, feed.clone()).await;
             let after = f.feed_db.get(feed.feed_id.clone()).await;
 
             assert_eq!(before.unwrap(), None);

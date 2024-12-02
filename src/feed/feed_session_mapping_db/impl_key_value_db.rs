@@ -1,5 +1,6 @@
 use crate::{
-    core::session::session_id::SessionId, feed::feed_id::FeedId,
+    core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
+    feed::feed_id::FeedId,
     key_value_db::interface::KeyValueDb,
 };
 use async_trait::async_trait;
@@ -31,9 +32,14 @@ impl FeedSessionMappingDb for ImplKeyValueDb {
         }
     }
 
-    async fn put(&self, session_id: SessionId, feed_id: FeedId) -> Result<(), std::io::Error> {
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        session_id: SessionId,
+        feed_id: FeedId,
+    ) -> Result<(), std::io::Error> {
         self.key_value_db
-            .put(session_id.as_str(), feed_id.as_str().to_string())
+            .put(uow, session_id.as_str(), feed_id.as_str().to_string())
             .await?;
         Ok(())
     }

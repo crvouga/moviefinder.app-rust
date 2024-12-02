@@ -161,7 +161,7 @@ impl DataOn {
         }
     }
 
-    pub fn prevent_default(mut self) -> Self {
+    pub fn prevent_default(self) -> Self {
         self.js("evt.preventDefault()")
     }
 

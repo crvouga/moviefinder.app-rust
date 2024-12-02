@@ -4,7 +4,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
 
     use crate::{
-        core::uuid,
+        core::{unit_of_work::UnitOfWork, uuid},
         fixture::BaseFixture,
         key_value_db::{
             impl_cached_postgres::ImplCachedPostgres, impl_hash_map::ImplHashMap,
@@ -61,11 +61,15 @@ mod tests {
     #[tokio::test]
     async fn test_get_and_put() {
         for f in fixtures().await {
+            let uow = UnitOfWork::new();
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
             let before = f.key_value_db.get(&item.id).await;
-            let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
+            let put = f
+                .key_value_db
+                .put(uow.clone(), &item.id, item_serialized.clone())
+                .await;
             let after = f.key_value_db.get(&item.id).await;
 
             assert_eq!(before.unwrap(), None);
@@ -77,6 +81,7 @@ mod tests {
     #[tokio::test]
     async fn test_updating_existing() {
         for f in fixtures().await {
+            let uow = UnitOfWork::new();
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
             let updated_item = Item {
@@ -87,13 +92,20 @@ mod tests {
                 serde_json::to_string(&updated_item).unwrap_or("".to_string());
 
             let before = f.key_value_db.get(&item.id).await;
-            let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
+            let put = f
+                .key_value_db
+                .put(uow.clone(), &item.id, item_serialized.clone())
+                .await;
             let after = f.key_value_db.get(&item.id).await;
 
             let before_update = f.key_value_db.get(&updated_item.id).await;
             let put_update = f
                 .key_value_db
-                .put(&updated_item.id, updated_item_serialized.clone())
+                .put(
+                    uow.clone(),
+                    &updated_item.id,
+                    updated_item_serialized.clone(),
+                )
                 .await;
             let after_update = f.key_value_db.get(&updated_item.id).await;
 
@@ -109,18 +121,22 @@ mod tests {
     #[tokio::test]
     async fn test_zap() {
         for f in fixtures().await {
+            let uow = UnitOfWork::new();
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
             let before = f.key_value_db.get(&item.id).await;
-            let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
+            let put = f
+                .key_value_db
+                .put(uow.clone(), &item.id, item_serialized.clone())
+                .await;
             let after = f.key_value_db.get(&item.id).await;
 
             assert_eq!(before.unwrap(), None);
             assert_eq!(put.unwrap(), ());
             assert_eq!(after.unwrap(), Some(item_serialized.clone()));
 
-            let zap = f.key_value_db.zap(&item.id).await;
+            let zap = f.key_value_db.zap(uow.clone(), &item.id).await;
             let after_zap = f.key_value_db.get(&item.id).await;
 
             assert_eq!(zap.unwrap(), ());
@@ -131,11 +147,15 @@ mod tests {
     #[tokio::test]
     async fn test_child() {
         for f in fixtures().await {
+            let uow = UnitOfWork::new();
             let item = Item::random();
             let item_serialized = serde_json::to_string(&item).unwrap_or("".to_string());
 
             let before = f.key_value_db.get(&item.id).await;
-            let put = f.key_value_db.put(&item.id, item_serialized.clone()).await;
+            let put = f
+                .key_value_db
+                .put(uow.clone(), &item.id, item_serialized.clone())
+                .await;
             let after = f.key_value_db.get(&item.id).await;
 
             assert_eq!(before.unwrap(), None);
@@ -149,7 +169,7 @@ mod tests {
 
             let before_child = child.get(&child_item.id).await;
             let put_child = child
-                .put(&child_item.id, child_item_serialized.clone())
+                .put(uow.clone(), &child_item.id, child_item_serialized.clone())
                 .await;
             let after_child = child.get(&child_item.id).await;
 

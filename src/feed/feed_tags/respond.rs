@@ -11,6 +11,7 @@ use crate::{
             search_bar::SearchBar,
             spinner_page,
         },
+        unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
     feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag, shared::respond_feed_screen},
@@ -58,7 +59,11 @@ pub async fn respond(
                 ..model.feed
             };
 
-            ctx.feed_db.put(feed_new.clone()).await.unwrap_or(());
+            UnitOfWork::transact(|uow| async move {
+                ctx.feed_db.put(uow.clone(), feed_new.clone()).await?;
+                Ok(())
+            })
+            .await?;
 
             w.send_signals("{signalIsSaving: false}").await?;
 
@@ -97,8 +102,10 @@ pub async fn respond(
 
             w.send_fragment(view_unselected(&model_new)).await?;
 
+            let uow = UnitOfWork::new();
+
             ctx.feed_tags_form_state_db
-                .put(&form_state_new)
+                .put(uow, &form_state_new)
                 .await
                 .unwrap_or(());
 
@@ -143,8 +150,10 @@ pub async fn respond(
 
             w.send_fragment(view_selected(&model_new)).await?;
 
+            let uow = UnitOfWork::new();
+
             ctx.feed_tags_form_state_db
-                .put(&form_state_new)
+                .put(uow, &form_state_new)
                 .await
                 .unwrap_or(());
 

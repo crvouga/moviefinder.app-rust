@@ -1,13 +1,12 @@
+use super::verify_sms::interface;
 use crate::{
-    core::session::session_id::SessionId,
+    core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
     ctx::Ctx,
     user::{
         user_account::user_account_::UserAccount, user_profile::user_profile_::UserProfile,
         user_session::user_session_::UserSession,
     },
 };
-
-use super::verify_sms::interface;
 pub enum SendCodeError {
     InvalidPhoneNumber(String),
     Error(String),
@@ -70,11 +69,6 @@ pub async fn verify_code(
 
             let user_id = account_new.user_id.clone();
 
-            ctx.user_account_db
-                .upsert_one(&account_new)
-                .await
-                .map_err(VerifyCodeError::Error)?;
-
             let existing_profile = ctx
                 .user_profile_db
                 .find_one_by_user_id(&user_id)
@@ -82,11 +76,6 @@ pub async fn verify_code(
                 .map_err(VerifyCodeError::Error)?;
 
             let profile_new = existing_profile.unwrap_or(UserProfile::new(&user_id));
-
-            ctx.user_profile_db
-                .upsert_one(&profile_new)
-                .await
-                .map_err(VerifyCodeError::Error)?;
 
             let existing_session = ctx
                 .user_session_db
@@ -96,8 +85,7 @@ pub async fn verify_code(
 
             let session_new = existing_session.unwrap_or(UserSession::new(&user_id, &session_id));
 
-            ctx.user_session_db
-                .upsert_one(&session_new)
+            transact_new_user(ctx, &account_new, &profile_new, &session_new)
                 .await
                 .map_err(VerifyCodeError::Error)?;
 
@@ -107,4 +95,29 @@ pub async fn verify_code(
             })
         }
     }
+}
+
+async fn transact_new_user(
+    ctx: &Ctx,
+    account: &UserAccount,
+    profile: &UserProfile,
+    session: &UserSession,
+) -> Result<(), std::io::Error> {
+    UnitOfWork::transact(|uow: UnitOfWork| async move {
+        ctx.user_account_db
+            .upsert_one(uow.clone(), &account)
+            .await?;
+
+        ctx.user_profile_db
+            .upsert_one(uow.clone(), &profile)
+            .await?;
+
+        ctx.user_session_db
+            .upsert_one(uow.clone(), &session)
+            .await?;
+        Ok(())
+    })
+    .await?;
+
+    Ok(())
 }

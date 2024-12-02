@@ -26,6 +26,7 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
 pub struct Ctx {
     pub key_value_db: Arc<dyn KeyValueDb>,
     pub db_conn_sql: Arc<ImplPostgres>,

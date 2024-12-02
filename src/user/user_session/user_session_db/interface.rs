@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 
 use crate::core::session::session_id::SessionId;
+use crate::core::unit_of_work::UnitOfWork;
 use crate::user::{user_id::UserId, user_session::user_session_::UserSession};
 
 #[async_trait]
@@ -13,5 +14,9 @@ pub trait UserSessionDb: Send + Sync {
         &self,
         session_id: &SessionId,
     ) -> Result<Option<UserSession>, std::io::Error>;
-    async fn upsert_one(&self, session: &UserSession) -> Result<(), std::io::Error>;
+    async fn upsert_one(
+        &self,
+        uow: UnitOfWork,
+        session: &UserSession,
+    ) -> Result<(), std::io::Error>;
 }

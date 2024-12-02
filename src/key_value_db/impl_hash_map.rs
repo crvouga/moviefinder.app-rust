@@ -2,6 +2,8 @@ use async_trait::async_trait;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
+use crate::core::unit_of_work::UnitOfWork;
+
 use super::interface::{to_namespaced_key, KeyValueDb};
 
 #[derive(Clone)]
@@ -31,17 +33,54 @@ impl KeyValueDb for ImplHashMap {
         Ok(map.get(&namespaced_key).cloned())
     }
 
-    async fn put(&self, key: &str, value: String) -> Result<(), std::io::Error> {
+    async fn put(&self, uow: UnitOfWork, key: &str, value: String) -> Result<(), std::io::Error> {
         let namespaced_key = self.to_namespaced_key(key);
-        let mut map = self.map.write().unwrap();
-        let _ = map.insert(namespaced_key, value);
+        let map_arc = Arc::clone(&self.map);
+
+        let old_value = {
+            let mut map = map_arc.write().unwrap();
+            map.insert(namespaced_key.clone(), value)
+        };
+
+        uow.register_rollback(move || {
+            let map_arc = Arc::clone(&map_arc);
+            let namespaced_key = namespaced_key.clone();
+            async move {
+                let mut map = map_arc.write().unwrap();
+                if let Some(old_value) = old_value {
+                    map.insert(namespaced_key, old_value);
+                } else {
+                    map.remove(&namespaced_key);
+                }
+                Ok(())
+            }
+        })
+        .await;
+
         Ok(())
     }
-
-    async fn zap(&self, key: &str) -> Result<(), std::io::Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), std::io::Error> {
         let namespaced_key = self.to_namespaced_key(key);
-        let mut map = self.map.write().unwrap();
-        let _ = map.remove(&namespaced_key);
+        let map_arc = Arc::clone(&self.map);
+
+        let removed_value = {
+            let mut map = map_arc.write().unwrap();
+            map.remove(&namespaced_key)
+        };
+
+        uow.register_rollback(move || {
+            let map_arc = Arc::clone(&map_arc);
+            let namespaced_key = namespaced_key.clone();
+            async move {
+                if let Some(removed_value) = removed_value {
+                    let mut map = map_arc.write().unwrap();
+                    map.insert(namespaced_key.clone(), removed_value);
+                }
+                Ok(())
+            }
+        })
+        .await;
+
         Ok(())
     }
 

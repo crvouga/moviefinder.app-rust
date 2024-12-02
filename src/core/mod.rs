@@ -22,6 +22,7 @@ pub mod sql;
 pub mod struct_ext;
 pub mod tmdb_api;
 pub mod ui;
+pub mod unit_of_work;
 pub mod url;
 pub mod url_encoded;
 pub mod uuid;

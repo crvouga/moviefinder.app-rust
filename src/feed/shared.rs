@@ -5,6 +5,7 @@ use crate::{
         http::response_writer::ResponseWriter,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image, top_bar::TopBarRoot},
+        unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
     media::{self, media_id::MediaId},
@@ -45,7 +46,7 @@ pub async fn respond_populate_screen(
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-    put_feed(ctx, &r.session_id, &feed).await;
+    transact_put_feed(ctx, &r.session_id, &feed).await?;
 
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 
@@ -61,13 +62,23 @@ pub async fn respond_populate_screen(
     Ok(())
 }
 
-pub async fn put_feed(ctx: &Ctx, session_id: &SessionId, feed: &Feed) {
-    let put_feed_fut = ctx.feed_db.put(feed.clone());
-    let put_session_mapping_fut = ctx
-        .feed_session_mapping_db
-        .put(session_id.clone(), feed.feed_id.clone());
+pub async fn transact_put_feed(
+    ctx: &Ctx,
+    session_id: &SessionId,
+    feed: &Feed,
+) -> Result<(), std::io::Error> {
+    UnitOfWork::transact(|uow| async move {
+        ctx.feed_db.put(uow.clone(), feed.clone()).await?;
 
-    let _results = tokio::join!(put_feed_fut, put_session_mapping_fut);
+        ctx.feed_session_mapping_db
+            .put(uow.clone(), session_id.clone(), feed.feed_id.clone())
+            .await?;
+
+        Ok(())
+    })
+    .await?;
+
+    Ok(())
 }
 
 pub async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {

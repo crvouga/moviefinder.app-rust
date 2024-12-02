@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use super::interface::FeedDb;
 use crate::{
+    core::unit_of_work::UnitOfWork,
     feed::{feed_::Feed, feed_id::FeedId},
     key_value_db::interface::KeyValueDb,
 };
@@ -31,11 +32,12 @@ impl FeedDb for ImplKeyValueDb {
         }
     }
 
-    async fn put(&self, feed: Feed) -> Result<(), std::io::Error> {
+    async fn put(&self, uow: UnitOfWork, feed: Feed) -> Result<(), std::io::Error> {
         let serialized = serde_json::to_string(&feed)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
+
         self.key_value_db
-            .put(feed.feed_id.as_str(), serialized)
+            .put(uow, feed.feed_id.as_str(), serialized)
             .await?;
         Ok(())
     }

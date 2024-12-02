@@ -1,7 +1,9 @@
 use super::{
     impl_hash_map::ImplHashMap, impl_postgres::ImplPostgres, impl_with_cache, interface::KeyValueDb,
 };
-use crate::core::{db_conn_sql::interface::DbConnSql, logger::interface::Logger};
+use crate::core::{
+    db_conn_sql::interface::DbConnSql, logger::interface::Logger, unit_of_work::UnitOfWork,
+};
 use async_trait::async_trait;
 use std::sync::Arc;
 
@@ -33,12 +35,12 @@ impl<T: DbConnSql> KeyValueDb for ImplCachedPostgres<T> {
         self.impl_with_cache.get(key).await
     }
 
-    async fn put(&self, key: &str, value: String) -> Result<(), std::io::Error> {
-        self.impl_with_cache.put(key, value).await
+    async fn put(&self, uow: UnitOfWork, key: &str, value: String) -> Result<(), std::io::Error> {
+        self.impl_with_cache.put(uow, key, value).await
     }
 
-    async fn zap(&self, key: &str) -> Result<(), std::io::Error> {
-        self.impl_with_cache.zap(key).await
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), std::io::Error> {
+        self.impl_with_cache.zap(uow, key).await
     }
 
     fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {

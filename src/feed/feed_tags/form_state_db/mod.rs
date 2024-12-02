@@ -1,6 +1,8 @@
 use super::form_state::FormState;
 use crate::{
-    core::logger::interface::Logger, feed::feed_id::FeedId, key_value_db::interface::KeyValueDb,
+    core::{logger::interface::Logger, unit_of_work::UnitOfWork},
+    feed::feed_id::FeedId,
+    key_value_db::interface::KeyValueDb,
 };
 use std::sync::Arc;
 
@@ -37,12 +39,12 @@ impl FeedTagsFormStateDb {
         Ok(Some(parsed))
     }
 
-    pub async fn put(&self, form_state: &FormState) -> Result<(), std::io::Error> {
+    pub async fn put(&self, uow: UnitOfWork, form_state: &FormState) -> Result<(), std::io::Error> {
         let value = serde_json::to_string(&form_state)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
 
         self.key_value_db
-            .put(form_state.feed_id.as_str(), value)
+            .put(uow, form_state.feed_id.as_str(), value)
             .await
     }
 }

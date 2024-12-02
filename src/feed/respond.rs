@@ -8,9 +8,10 @@ use crate::{
     core::{
         http::{response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
+        unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
-    feed::shared::put_feed,
+    feed::shared::transact_put_feed,
     req::Req,
     route,
 };
@@ -70,7 +71,7 @@ pub async fn respond(
                 ..feed
             };
 
-            put_feed(ctx, &r.session_id, &feed_new).await;
+            transact_put_feed(ctx, &r.session_id, &feed_new).await?;
 
             Ok(())
         }

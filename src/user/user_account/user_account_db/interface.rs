@@ -1,6 +1,5 @@
+use crate::{core::unit_of_work::UnitOfWork, user::user_account::user_account_::UserAccount};
 use async_trait::async_trait;
-
-use crate::user::user_account::user_account_::UserAccount;
 
 #[async_trait]
 pub trait UserAccountDb: Send + Sync {
@@ -14,5 +13,9 @@ pub trait UserAccountDb: Send + Sync {
     //     user_id: &UserId,
     // ) -> Result<Option<UserAccount>, std::io::Error>;
 
-    async fn upsert_one(&self, account: &UserAccount) -> Result<(), std::io::Error>;
+    async fn upsert_one(
+        &self,
+        uow: UnitOfWork,
+        account: &UserAccount,
+    ) -> Result<(), std::io::Error>;
 }

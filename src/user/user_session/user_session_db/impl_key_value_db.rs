@@ -1,5 +1,5 @@
 use crate::{
-    core::session::session_id::SessionId,
+    core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
     key_value_db::interface::KeyValueDb,
     user::{user_id::UserId, user_session::user_session_::UserSession},
 };
@@ -58,7 +58,11 @@ impl UserSessionDb for ImplKeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn upsert_one(&self, session: &UserSession) -> Result<(), std::io::Error> {
+    async fn upsert_one(
+        &self,
+        uow: UnitOfWork,
+        session: &UserSession,
+    ) -> Result<(), std::io::Error> {
         let session_id = session.session_id.as_str().to_string();
         let user_id = session.user_id.as_str().to_string();
 
@@ -66,11 +70,11 @@ impl UserSessionDb for ImplKeyValueDb {
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
 
         self.session_by_session_id
-            .put(&session_id, serialized.to_string())
+            .put(uow.clone(), &session_id, serialized.to_string())
             .await?;
 
         self.session_id_by_user_id
-            .put(&user_id, session_id.to_string())
+            .put(uow.clone(), &user_id, session_id.to_string())
             .await?;
 
         Ok(())

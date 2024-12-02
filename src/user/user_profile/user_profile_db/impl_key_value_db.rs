@@ -1,13 +1,11 @@
-use std::sync::Arc;
-
-use async_trait::async_trait;
-
+use super::interface::UserProfileDb;
 use crate::{
+    core::unit_of_work::UnitOfWork,
     key_value_db::interface::KeyValueDb,
     user::{user_id::UserId, user_profile::user_profile_::UserProfile},
 };
-
-use super::interface::UserProfileDb;
+use async_trait::async_trait;
+use std::sync::Arc;
 
 pub struct ImplKeyValueDb {
     profile_by_user_id: Box<dyn KeyValueDb>,
@@ -52,7 +50,11 @@ impl UserProfileDb for ImplKeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn upsert_one(&self, profile: &UserProfile) -> Result<(), std::io::Error> {
+    async fn upsert_one(
+        &self,
+        uow: UnitOfWork,
+        profile: &UserProfile,
+    ) -> Result<(), std::io::Error> {
         let user_id = profile.user_id.as_str().to_string();
         let username = profile.username.clone();
 
@@ -60,11 +62,11 @@ impl UserProfileDb for ImplKeyValueDb {
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
 
         self.profile_by_user_id
-            .put(&user_id, serialized.to_string())
+            .put(uow.clone(), &user_id, serialized.to_string())
             .await?;
 
         self.user_id_by_username
-            .put(&username, user_id.to_string())
+            .put(uow, &username, user_id.to_string())
             .await?;
 
         Ok(())
