@@ -1,5 +1,5 @@
 use super::icon;
-use crate::core::html::*;
+use crate::core::{datastar::datastar::signal, html::*};
 
 #[derive(Debug, Default)]
 pub struct Button {
@@ -30,15 +30,17 @@ impl Button {
     }
 
     pub fn view(self) -> Elem {
+        let signal_indicator = signal(&self.indicator.clone().unwrap_or_default());
+
         button()
         .class("group relative flex items-center justify-center gap-2 rounded px-4 py-3 text-lg font-bold text-white")
         .class("enabled:hover:opacity-80 enabled:active:opacity-60")
         .class("disabled:opacity-80 disabled:cursor-not-allowed")
         .class(&self.color.to_class())
         .type_("button")
-        .map(|e| {
+        .map(|e: Elem| {
             if let Some(indicator) = self.indicator {
-            e.data_indicator(&indicator).data_bind("aria-busy", &format!("${}", indicator))
+                e.data_indicator(&indicator).data_bind("aria-busy", &signal_indicator)
             } else {
                 e
             }

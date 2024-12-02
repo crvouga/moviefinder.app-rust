@@ -29,7 +29,7 @@ pub fn signal(value: &str) -> String {
 }
 
 pub fn js_not(value: &str) -> String {
-    format!("!{}", value)
+    format!("!({})", value)
 }
 
 pub fn js_replace_url(url: &str) -> String {

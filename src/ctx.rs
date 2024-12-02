@@ -18,7 +18,13 @@ use crate::{
         media_db::{self, interface::MediaDb},
     },
     person::person_db::{self, interface::PersonDb},
-    user::account::login_with_sms::verify_sms::{self, interface::VerifySms},
+    user::{
+        account::{
+            account_db::{self, interface::UserAccountDb},
+            login_with_sms::verify_sms::{self, interface::VerifySms},
+        },
+        profile::profile_db::{self, interface::UserProfileDb},
+    },
 };
 
 pub struct Ctx {
@@ -35,6 +41,8 @@ pub struct Ctx {
     pub feed_session_mapping_db: Arc<dyn FeedSessionMappingDb>,
     pub feed_tags_form_state_db: Arc<FeedTagsFormStateDb>,
     pub verify_sms: Arc<dyn VerifySms>,
+    pub user_account_db: Arc<dyn UserAccountDb>,
+    pub user_profile_db: Arc<dyn UserProfileDb>,
 }
 
 impl Ctx {
@@ -102,6 +110,14 @@ impl Ctx {
 
         let verify_sms = Arc::new(verify_sms::impl_fake::ImplFake::new());
 
+        let user_account_db = Arc::new(account_db::impl_key_value_db::ImplKeyValueDb::new(
+            key_value_db.clone(),
+        ));
+
+        let user_profile_db = Arc::new(profile_db::impl_key_value_db::ImplKeyValueDb::new(
+            key_value_db.clone(),
+        ));
+
         Ok(Ctx {
             logger,
             http_client,
@@ -116,6 +132,8 @@ impl Ctx {
             feed_session_mapping_db,
             feed_tags_form_state_db,
             verify_sms,
+            user_account_db,
+            user_profile_db,
         })
     }
 }

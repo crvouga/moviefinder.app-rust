@@ -19,9 +19,15 @@ impl ImplFake {
     }
 }
 
+const SHOULD_SLEEP: bool = true;
+
 #[async_trait]
 impl VerifySms for ImplFake {
     async fn send_code(&self, _phone_number: &str) -> Result<(), std::io::Error> {
+        if SHOULD_SLEEP {
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        }
+
         let should_error = false;
         if should_error {
             let err = std::io::Error::new(std::io::ErrorKind::Other, "Sending code failed");
@@ -31,6 +37,9 @@ impl VerifySms for ImplFake {
     }
 
     async fn verify_code(&self, _phone_number: &str, code: &str) -> Result<(), VerifyCodeError> {
+        if SHOULD_SLEEP {
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        }
         let should_error = false;
         if should_error {
             let err = std::io::Error::new(std::io::ErrorKind::Other, "Verifying code failed");

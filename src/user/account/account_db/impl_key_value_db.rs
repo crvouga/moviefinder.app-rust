@@ -4,7 +4,7 @@ use async_trait::async_trait;
 
 use crate::{key_value_db::interface::KeyValueDb, user::account::account_::Account};
 
-use super::interface::AccountDb;
+use super::interface::UserAccountDb;
 
 pub struct ImplKeyValueDb {
     account_by_user_id: Box<dyn KeyValueDb>,
@@ -25,7 +25,7 @@ impl ImplKeyValueDb {
 }
 
 #[async_trait]
-impl AccountDb for ImplKeyValueDb {
+impl UserAccountDb for ImplKeyValueDb {
     async fn find_one_by_phone_number(
         &self,
         phone_number: &str,

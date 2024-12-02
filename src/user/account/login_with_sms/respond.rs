@@ -10,7 +10,8 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    route, user,
+    route,
+    user::{self, account::account_::Account},
 };
 
 pub async fn respond(
@@ -108,10 +109,15 @@ pub async fn respond(
                 }
 
                 Ok(()) => {
-                    // let existing_account = ctx
-                    //     .account_db
-                    //     .find_one_by_phone_number(&phone_number)
-                    //     .await?;
+                    let existing_account = ctx
+                        .user_account_db
+                        .find_one_by_phone_number(&phone_number)
+                        .await?;
+
+                    let account_new =
+                        existing_account.unwrap_or(Account::new(phone_number.clone()));
+
+                    ctx.user_account_db.upsert_one(&account_new).await?;
 
                     w.send_fragment(Toast::dark("Verified phone number").view())
                         .await?;
@@ -182,6 +188,7 @@ impl ViewModel {
                             Button::default()
                                 .label("Send code")
                                 .color_primary()
+                                // .indicator("isSending")
                                 .view()
                                 .class("w-full")
                                 .type_("submit"),
@@ -234,8 +241,9 @@ impl ViewModel {
                     .child(
                         div().class("pt-3 w-full").child(
                             Button::default()
-                                .label("Send code")
+                                .label("Verify code")
                                 .color_primary()
+                                // .indicator("isVerifying")
                                 .view()
                                 .class("w-full")
                                 .type_("submit"),

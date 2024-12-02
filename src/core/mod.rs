@@ -14,6 +14,7 @@ pub mod mime_type;
 pub mod pagination;
 pub mod params;
 pub mod phone_number;
+pub mod posix;
 pub mod query;
 pub mod random;
 pub mod session;
