@@ -24,8 +24,12 @@ pub fn js_patch(url: &str) -> String {
     format!("$patch('{}', this)", url)
 }
 
-pub fn dollar(value: &str) -> String {
+pub fn signal(value: &str) -> String {
     format!("(${})", value)
+}
+
+pub fn js_not(value: &str) -> String {
+    format!("!{}", value)
 }
 
 pub fn js_replace_url(url: &str) -> String {
@@ -237,6 +241,11 @@ impl DataOn {
         self
     }
 
+    pub fn log(mut self, message: &str) -> Self {
+        self.js.push(format!("console.log('{}')", message));
+        self
+    }
+
     pub fn push_url(mut self, url: &str) -> Self {
         self.js
             .push(format!("window.history.pushState(null, '', '{}');", url));
@@ -321,12 +330,61 @@ impl Elem {
         self.attr_unsafe(&format!("data-computed-{}", name), value)
     }
 
-    pub fn child_debug_store(self) -> Self {
-        self.child(code().child(pre().data_text("JSON.stringify(ctx.store(), null, 2)")))
+    pub fn debug_store(self, debug: bool) -> Self {
+        if debug {
+            self.child(code().child(pre().data_text("JSON.stringify(ctx.store(), null, 2)")))
+        } else {
+            self
+        }
+    }
+}
+
+struct MergeFragment {
+    sse: ServerSentEvent,
+    fragment: Elem,
+}
+
+impl MergeFragment {
+    pub fn new(sse: ServerSentEvent, fragment: Elem) -> Self {
+        Self { fragment, sse }
+    }
+
+    pub fn fragment(&mut self, elem: Elem) -> &mut Self {
+        self.sse.data_fragments(elem);
+        self
+    }
+
+    pub fn merge_mode_outer(&mut self) -> &mut Self {
+        self.sse.data_merge_mode_outer();
+        self
+    }
+
+    pub fn merge_mode_before(&mut self) -> &mut Self {
+        self.sse.data_merge_mode_before();
+        self
+    }
+
+    pub fn selector(&mut self, selector: &str) -> &mut Self {
+        self.sse.data_selector(selector);
+        self
+    }
+
+    pub fn selector_id(&mut self, id: &str) -> &mut Self {
+        self.sse.data_selector_id(id);
+        self
+    }
+
+    pub fn only_if_missing(&mut self, value: bool) -> &mut Self {
+        self.sse.data_only_if_missing(value);
+        self
     }
 }
 
 impl ServerSentEvent {
+    pub fn fragment(self, elem: Elem) -> MergeFragment {
+        MergeFragment::new(self, elem)
+    }
+
     pub fn event_merge_fragments(&mut self) -> &mut Self {
         self.event("datastar-merge-fragments")
     }

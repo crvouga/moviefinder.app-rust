@@ -70,6 +70,7 @@ impl BackButton {
         button()
             .class("size-16 flex items-center justify-center")
             .aria_label("go back")
+            .type_("button")
             .map(|elem| match self.url {
                 Some(url) => elem.data_on(|b| b.click().push_then_get(&url)),
                 None => elem,
@@ -96,6 +97,7 @@ impl CancelButton {
             .class("size-16 flex items-center justify-center shrink-0")
             .class("disabled:opacity-80 disabled:cursor-not-allowed")
             .aria_label("cancel")
+            .type_("button")
             .tab_index(0)
             .child(icon::x_mark("size-8"))
     }

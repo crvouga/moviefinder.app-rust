@@ -1,13 +1,13 @@
 use children::text;
 
-use super::route::Route;
+use super::{route::Route, verify_sms::interface::VerifyCodeError};
 use crate::{
     account,
     core::{
         html::*,
         http::response_writer::ResponseWriter,
         params::Params,
-        ui::{button::Button, text_field::TextField, top_bar::TopBar},
+        ui::{button::Button, text_field::TextField, toast::Toast, top_bar::TopBar},
     },
     ctx::Ctx,
     req::Req,
@@ -37,7 +37,7 @@ pub async fn respond(
                 .unwrap_or_default();
 
             if phone_number.is_empty() {
-                w.send_fragment(view_phone_number_text_field("Phone number is required"))
+                w.send_signals("{ phoneNumberError: 'Phone number is required' }")
                     .await?;
                 return Ok(());
             }
@@ -73,17 +73,33 @@ pub async fn respond(
                 .get_first("code")
                 .map(|s| s.clone())
                 .unwrap_or_default()
-                .trim();
+                .trim()
+                .to_string();
 
             if code.is_empty() {
-                w.send_fragment(view_code_text_field("Code is required"))
-                    .await?;
+                w.send_signals("{ codeError: 'Code is required' }").await?;
                 return Ok(());
             }
 
-            ctx.verify_sms.verify_code(&phone_number, code).await?;
+            let verifed = ctx.verify_sms.verify_code(&phone_number, &code).await;
 
-            Ok(())
+            let error: VerifyCodeError = match verifed {
+                Ok(_) => return Ok(()),
+                Err(err) => err,
+            };
+
+            match error {
+                VerifyCodeError::WrongCode => {
+                    w.send_signals("{ codeError: 'Wrong code' }").await?;
+                    Ok(())
+                }
+                VerifyCodeError::Error(err) => {
+                    w.send_fragment(Toast::error(&err.to_string()).view())
+                        .await?;
+
+                    Ok(())
+                }
+            }
         }
     }
 }
@@ -105,15 +121,16 @@ enum ViewModel {
 impl ViewModel {
     pub fn view_screen(&self) -> Elem {
         match self {
-            ViewModel::Phone => self.view_screen_phone(),
-            ViewModel::Code { phone_number } => self.view_screen_code(phone_number),
+            ViewModel::Phone => self.view_screen_enter_phone(),
+            ViewModel::Code { phone_number } => self.view_screen_enter_code(phone_number),
         }
     }
 
-    pub fn view_screen_phone(&self) -> Elem {
+    pub fn view_screen_enter_phone(&self) -> Elem {
         form()
             .class("w-full h-full flex flex-col")
-            .data_store("{ phoneNumber: '' }")
+            .data_store("{ phoneNumber: '', phoneNumberError: '' }")
+            .debug_store(false)
             .data_on(|b| {
                 b.submit()
                     .prevent_default()
@@ -128,7 +145,19 @@ impl ViewModel {
             .child(
                 div()
                     .class("flex-1 p-6 gap-6 flex flex-col")
-                    .child(view_phone_number_text_field(""))
+                    .child(
+                        TextField::default()
+                            .label("Phone number")
+                            .placeholder("Enter phone number")
+                            .input(|e| {
+                                e.data_model("phoneNumber")
+                                    .type_("tel")
+                                    .data_on(|d| d.input().js("$phoneNumberError = ''"))
+                            })
+                            .model_error("phoneNumberError")
+                            .view()
+                            .id("phone_number"),
+                    )
                     .child(
                         div().class("pt-3 w-full").child(
                             Button::default()
@@ -142,14 +171,18 @@ impl ViewModel {
             )
     }
 
-    pub fn view_screen_code(&self, phone_number: &str) -> Elem {
+    pub fn view_screen_enter_code(&self, phone_number: &str) -> Elem {
         form()
             .class("w-full h-full flex flex-col")
-            .data_store("{ code: '' }")
+            .data_store("{ code: '', codeError: '' }")
+            .debug_store(false)
             .data_on(|b| {
-                b.submit()
-                    .prevent_default()
-                    .post(&Route::ClickedSendCode.url())
+                b.submit().prevent_default().post(
+                    &Route::ClickedVerifyCode {
+                        phone_number: phone_number.to_string(),
+                    }
+                    .url(),
+                )
             })
             .child(
                 TopBar::default()
@@ -166,7 +199,19 @@ impl ViewModel {
                             .child(text("Enter the code send to "))
                             .child(span().class("font-bold").child(text(phone_number))),
                     )
-                    .child(view_code_text_field(""))
+                    .child(
+                        TextField::default()
+                            .label("Code")
+                            .placeholder("Enter code")
+                            .input(|e| {
+                                e.data_model("code")
+                                    .type_("tel")
+                                    .data_on(|d| d.input().js("$codeError = ''"))
+                            })
+                            .model_error("codeError")
+                            .view()
+                            .id("code"),
+                    )
                     .child(
                         div().class("pt-3 w-full").child(
                             Button::default()
@@ -174,29 +219,9 @@ impl ViewModel {
                                 .color_primary()
                                 .view()
                                 .class("w-full")
-                                .data_on(|b| b.click().post(&Route::ClickedVerifyCode.url())),
+                                .type_("submit"),
                         ),
                     ),
             )
     }
-}
-
-fn view_code_text_field(error: &str) -> Elem {
-    TextField::default()
-        .label("Code")
-        .placeholder("Enter code")
-        .input(|e| e.data_model("code").type_("tel"))
-        .error(error)
-        .view()
-        .id("code")
-}
-
-fn view_phone_number_text_field(error: &str) -> Elem {
-    TextField::default()
-        .label("Phone number")
-        .placeholder("Enter phone number")
-        .input(|e| e.data_model("phoneNumber").type_("tel"))
-        .error(error)
-        .view()
-        .id("phone_number")
 }

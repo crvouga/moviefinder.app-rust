@@ -13,7 +13,7 @@ use crate::{
         },
     },
     ctx::Ctx,
-    feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag, shared::respond_screen},
+    feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag, shared::respond_feed_screen},
     req::Req,
     route,
 };
@@ -70,7 +70,7 @@ pub async fn respond(
             )
             .await?;
 
-            respond_screen(ctx, r, w, feed_id).await?;
+            respond_feed_screen(ctx, r, w, feed_id).await?;
 
             Ok(())
         }

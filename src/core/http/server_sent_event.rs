@@ -1,22 +1,16 @@
 use super::{response_writer::ResponseWriter, set_header::SetHeader};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ServerSentEvent {
     event: String,
     data: Vec<String>,
 }
 
 pub fn sse() -> ServerSentEvent {
-    ServerSentEvent::new()
+    ServerSentEvent::default()
 }
 
 impl ServerSentEvent {
-    pub fn new() -> ServerSentEvent {
-        ServerSentEvent {
-            event: String::new(),
-            data: Vec::new(),
-        }
-    }
     pub fn event(&mut self, event: &str) -> &mut Self {
         self.event = event.to_string();
         self

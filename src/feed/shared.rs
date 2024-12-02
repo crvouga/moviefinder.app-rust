@@ -21,7 +21,7 @@ pub struct ViewModel {
     pub initial_feed_items: Vec<FeedItem>,
 }
 
-pub async fn respond_screen(
+pub async fn respond_feed_screen(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
