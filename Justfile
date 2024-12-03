@@ -11,10 +11,10 @@ fmt: #
   cargo fmt
 
 db-start: #
-  sudo docker-compose -f ./docker-compose.dev.yml up -d
+  sudo docker-compose -f ./db/docker-compose.local.yml up -d
 
 db-stop: #
-  sudo docker-compose -f ./docker-compose.dev.yml down
+  sudo docker-compose -f ./db/docker-compose.local.yml down
 
 db-up: #
   npx dbmate -e DATABASE_URL up
