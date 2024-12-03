@@ -71,7 +71,7 @@ pub async fn respond(
                 &route::Route::Feed(feed::route::Route::Screen {
                     feed_id: feed_id.clone(),
                 })
-                .encode(),
+                .url(),
             )
             .await?;
 
@@ -170,7 +170,7 @@ impl Route {
     }
 
     pub fn url(self) -> String {
-        self.route().encode()
+        self.route().url()
     }
 }
 
@@ -311,7 +311,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .view()
                 .data_on(|b| {
                     b.click()
-                        .push_then_get(&to_back_route(feed_id.clone()).encode())
+                        .push_then_get(&to_back_route(feed_id.clone()).url())
                 })
                 .type_("button")
                 .class("flex-1"),

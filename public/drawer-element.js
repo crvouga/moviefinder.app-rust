@@ -121,9 +121,7 @@ class Drawer extends HTMLElement {
     }
 
     if (name === "open") {
-      setTimeout(() => {
-        this.setupOpen();
-      }, 10);
+      this.setupOpen();
     }
   }
 

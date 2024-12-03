@@ -79,7 +79,7 @@ pub async fn verify_code(
 
             let existing_session = ctx
                 .user_session_db
-                .find_one_by_session_id(&session_id)
+                .find_by_session_id(&session_id)
                 .await
                 .map_err(VerifyCodeError::Error)?;
 
@@ -113,7 +113,7 @@ async fn transact_new_user(
             .await?;
 
         ctx.user_session_db
-            .upsert_one(uow.clone(), &session)
+            .upsert(uow.clone(), &session)
             .await?;
 
         Ok(())

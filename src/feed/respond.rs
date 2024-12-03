@@ -37,7 +37,7 @@ pub async fn respond(
             let feed_url = route::Route::Feed(Route::Screen {
                 feed_id: feed_id.clone(),
             })
-            .encode();
+            .url();
 
             w.send_replace_url(&feed_url).await?;
 

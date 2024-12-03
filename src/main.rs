@@ -51,7 +51,7 @@ async fn respond(
 
     let maybe_user_id = ctx
         .user_session_db
-        .find_one_by_session_id(&session_id)
+        .find_by_session_id(&session_id)
         .await?
         .map(|s| s.user_id);
 
@@ -148,7 +148,7 @@ async fn respond_fallback(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     let fallback = feed::route::Route::ScreenDefault;
-    w.send_push_url(&Route::Feed(fallback).encode()).await?;
+    w.send_push_url(&Route::Feed(fallback).url()).await?;
 
     feed::respond::respond(&ctx, r, &feed::route::Route::ScreenDefault, w).await
 }

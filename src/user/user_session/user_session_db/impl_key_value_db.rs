@@ -27,7 +27,7 @@ impl ImplKeyValueDb {
 
 #[async_trait]
 impl UserSessionDb for ImplKeyValueDb {
-    async fn find_one_by_user_id(
+    async fn find_by_user_id(
         &self,
         user_id: &UserId,
     ) -> Result<Option<UserSession>, std::io::Error> {
@@ -38,10 +38,10 @@ impl UserSessionDb for ImplKeyValueDb {
             None => return Ok(None),
         };
 
-        self.find_one_by_session_id(&session_id).await
+        self.find_by_session_id(&session_id).await
     }
 
-    async fn find_one_by_session_id(
+    async fn find_by_session_id(
         &self,
         session_id: &SessionId,
     ) -> Result<Option<UserSession>, std::io::Error> {
@@ -58,11 +58,7 @@ impl UserSessionDb for ImplKeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn upsert_one(
-        &self,
-        uow: UnitOfWork,
-        session: &UserSession,
-    ) -> Result<(), std::io::Error> {
+    async fn upsert(&self, uow: UnitOfWork, session: &UserSession) -> Result<(), std::io::Error> {
         let session_id = session.session_id.as_str().to_string();
         let user_id = session.user_id.as_str().to_string();
 
@@ -76,6 +72,23 @@ impl UserSessionDb for ImplKeyValueDb {
         self.session_id_by_user_id
             .put(uow.clone(), &user_id, session_id.to_string())
             .await?;
+
+        Ok(())
+    }
+
+    async fn zap(&self, uow: UnitOfWork, session_id: &SessionId) -> Result<(), std::io::Error> {
+        let session = self.find_by_session_id(session_id).await?;
+
+        if let Some(session) = session {
+            let user_id = session.user_id.as_str().to_string();
+            self.session_by_session_id
+                .zap(uow.clone(), &session_id.as_str())
+                .await?;
+
+            self.session_id_by_user_id
+                .zap(uow.clone(), &user_id)
+                .await?;
+        }
 
         Ok(())
     }

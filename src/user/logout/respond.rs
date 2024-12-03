@@ -4,24 +4,40 @@ use crate::{
         html::{children::text, div, Elem},
         http::response_writer::ResponseWriter,
         ui::{button::Button, drawer::Drawer},
+        unit_of_work::uow,
     },
     ctx::Ctx,
     req::Req,
+    user,
 };
 
 pub async fn respond(
-    _ctx: &Ctx,
-    _r: &Req,
+    ctx: &Ctx,
+    r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::ClickedCancel => Ok(()),
-        Route::ClickedLogout => Ok(()),
+        Route::ClickedLogout => {
+            ctx.user_session_db.zap(uow(), &r.session_id).await?;
+
+            Ok(())
+        }
+
         Route::Drawer => {
             w.send_fragment(view_logout_drawer()).await?;
             Ok(())
         }
+    }
+}
+
+impl Route {
+    pub fn route(self) -> crate::route::Route {
+        crate::route::Route::User(user::route::Route::Logout(self))
+    }
+
+    pub fn url(self) -> String {
+        self.route().url()
     }
 }
 
@@ -54,7 +70,8 @@ fn view_logout_drawer() -> Elem {
                                 .color_primary()
                                 .label("Logout")
                                 .view()
-                                .class("flex-1"),
+                                .class("flex-1")
+                                .data_on(|b| b.click().post(&Route::ClickedLogout.url())),
                         ),
                 ),
         )

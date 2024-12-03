@@ -82,7 +82,7 @@ impl ViewModel {
         };
 
         TopBar::default()
-            .back_url(route::Route::Feed(feed::route::Route::ScreenDefault).encode())
+            .back_url(route::Route::Feed(feed::route::Route::ScreenDefault).url())
             .title(title)
             .view()
             .id("top-bar")

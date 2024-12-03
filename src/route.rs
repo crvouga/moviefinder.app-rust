@@ -12,17 +12,17 @@ pub enum Route {
 }
 
 impl Route {
-    pub fn encode(&self) -> String {
+    pub fn url(&self) -> String {
         human_friendly_base64::encode(self)
     }
 
-    pub fn decode(encoded: &str) -> Option<Route> {
+    pub fn from_url(encoded: &str) -> Option<Route> {
         human_friendly_base64::decode(encoded).ok()
     }
 }
 
 impl Request {
     pub fn route(&self) -> Option<Route> {
-        Route::decode(&self.url.path)
+        Route::from_url(&self.url.path)
     }
 }

@@ -32,7 +32,7 @@ impl Route {
     }
 
     pub fn url(self) -> String {
-        self.route().encode()
+        self.route().url()
     }
 }
 

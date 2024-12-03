@@ -6,6 +6,7 @@ use super::{
 };
 use crate::{
     core::{
+        datastar::datastar::quote,
         html::*,
         http::response_writer::ResponseWriter,
         params::Params,
@@ -43,7 +44,7 @@ pub async fn respond(
 
             match sent {
                 Err(SendCodeError::InvalidPhoneNumber(err)) => {
-                    w.send_signals(&format!("{{ phoneNumberError: '{}' }}", err))
+                    w.send_signal("phoneNumberError", &quote(err.as_str()))
                         .await?;
 
                     Ok(())
@@ -118,7 +119,7 @@ pub async fn respond(
 
                     let route_new = route::Route::User(user::route::Route::Screen);
 
-                    w.send_push_url(&route_new.encode()).await?;
+                    w.send_push_url(&route_new.url()).await?;
 
                     respond_account_screen(ctx, r, w, &account, &profile).await?;
 
@@ -134,7 +135,7 @@ impl Route {
         route::Route::User(user::route::Route::LoginWithSms(self))
     }
     fn url(self) -> String {
-        self.route().encode()
+        self.route().url()
     }
 }
 
@@ -164,7 +165,7 @@ impl ViewModel {
             .child(
                 TopBar::default()
                     .title("Login with phone")
-                    .back_url(route::Route::User(user::route::Route::Screen).encode())
+                    .back_url(route::Route::User(user::route::Route::Screen).url())
                     .view(),
             )
             .child(

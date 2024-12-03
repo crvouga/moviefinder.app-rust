@@ -121,7 +121,7 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
             &route::Route::Feed(Route::Tags(feed_tags::route::Route::Screen {
                 feed_id: feed_id.clone(),
             }))
-            .encode(),
+            .url(),
         )
     })
 }
@@ -212,7 +212,7 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .data_on(|b| b
                 .e("swiperslidechange")
                 .js("$signalFeedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
-                .patch(&route::Route::Feed(Route::ChangedSlide { feed_id: model.feed_id.clone() }).encode()))
+                .patch(&route::Route::Feed(Route::ChangedSlide { feed_id: model.feed_id.clone() }).url()))
         .child(view_slides(&model.feed_id, &model.initial_feed_items))
 }
 
@@ -264,7 +264,7 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
                     feed_id: feed_id.clone(),
                     bottom_feed_index,
                 })
-                .encode(),
+                .url(),
             )
         })
         .child(view_slide_content_loading())
@@ -293,7 +293,7 @@ fn view_slide_content(feed_item: &FeedItem) -> Elem {
             .class("w-full h-full m-0 p-0")
             .data_on(|b| {
                 b.click()
-                    .push_then_get(&to_media_details_route(&media.id).encode())
+                    .push_then_get(&to_media_details_route(&media.id).url())
             })
             .aria_label("open media details")
             .child(

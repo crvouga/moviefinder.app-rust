@@ -38,17 +38,47 @@ mod tests {
             let uow = UnitOfWork::new();
             let before = f
                 .user_session_db
-                .find_one_by_session_id(&session.session_id)
+                .find_by_session_id(&session.session_id)
                 .await;
-            let put = f.user_session_db.upsert_one(uow, &session).await;
+            let put = f.user_session_db.upsert(uow, &session).await;
             let after = f
                 .user_session_db
-                .find_one_by_session_id(&session.session_id)
+                .find_by_session_id(&session.session_id)
                 .await;
 
             assert_eq!(before.unwrap(), None);
             assert_eq!(put.unwrap(), ());
             assert_eq!(after.unwrap(), Some(session));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_zap() {
+        for f in fixtures().await {
+            let session = UserSession::new(&UserId::default(), &SessionId::default());
+
+            let uow = UnitOfWork::new();
+
+            f.user_session_db
+                .upsert(uow.clone(), &session)
+                .await
+                .unwrap();
+
+            let before = f
+                .user_session_db
+                .find_by_session_id(&session.session_id)
+                .await;
+
+            let zap = f.user_session_db.zap(uow, &session.session_id).await;
+
+            let after = f
+                .user_session_db
+                .find_by_session_id(&session.session_id)
+                .await;
+
+            assert_eq!(before.unwrap(), Some(session));
+            assert_eq!(zap.unwrap(), ());
+            assert_eq!(after.unwrap(), None);
         }
     }
 }

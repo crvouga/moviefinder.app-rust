@@ -40,7 +40,11 @@ pub fn js_push_url(url: &str) -> String {
     format!("window.history.pushState(null, '', '{}');", url)
 }
 
-pub trait Builder {
+pub fn quote(value: &str) -> String {
+    format!("'{}'", value)
+}
+
+pub trait Attr {
     fn attr(&self) -> (String, String);
 }
 
@@ -62,7 +66,7 @@ impl DataClass {
     }
 }
 
-impl Builder for DataClass {
+impl Attr for DataClass {
     fn attr(&self) -> (String, String) {
         let mut classes = vec![];
         for (class, signal) in &self.classes {
@@ -93,7 +97,7 @@ impl DataIntersects {
     }
 }
 
-impl Builder for DataIntersects {
+impl Attr for DataIntersects {
     fn attr(&self) -> (String, String) {
         let value = self.actions.join("; ");
         let modifiers_str = self.modifiers.join(".");
@@ -257,7 +261,7 @@ impl DataOn {
     }
 }
 
-impl Builder for DataOn {
+impl Attr for DataOn {
     fn attr(&self) -> (String, String) {
         let modifiers_str = self.modifiers.join(".");
         let attr_str = if modifiers_str.is_empty() {
@@ -468,6 +472,15 @@ impl ResponseWriter {
         sse()
             .event_merge_signals()
             .data_signals(value)
+            .send(self)
+            .await
+    }
+
+    pub async fn send_signal(&mut self, key: &str, value: &str) -> Result<(), std::io::Error> {
+        let signal = format!("{{{}: {}}}", key, value);
+        sse()
+            .event_merge_signals()
+            .data_signals(&signal)
             .send(self)
             .await
     }

@@ -89,6 +89,10 @@ impl UnitOfWorkInternal {
 
 pub struct UnitOfWork(Arc<Mutex<UnitOfWorkInternal>>);
 
+pub fn uow() -> UnitOfWork {
+    UnitOfWork::new()
+}
+
 impl UnitOfWork {
     pub fn new() -> Self {
         Self(Arc::new(Mutex::new(UnitOfWorkInternal::new())))
