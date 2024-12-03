@@ -43,6 +43,7 @@ impl Root {
                 script().src_datastar().defer(),
                 script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());"),
                 script().src_drawer_element().defer(),
+                script().src_swiper().defer(),
             ])
         )
         .child(

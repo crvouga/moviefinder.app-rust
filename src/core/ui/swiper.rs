@@ -34,7 +34,7 @@ impl Direction {
 }
 
 pub fn container() -> Elem {
-    elem("swiper-container").child(HeadInjector::default().view().child(script().src_swiper()))
+    elem("swiper-container")
 }
 
 pub fn slide() -> Elem {
