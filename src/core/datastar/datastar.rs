@@ -28,6 +28,10 @@ pub fn signal(value: &str) -> String {
     format!("(${})", value)
 }
 
+pub fn dollar(value: &str) -> String {
+    format!("${}", value)
+}
+
 pub fn js_not(value: &str) -> String {
     format!("!({})", value)
 }

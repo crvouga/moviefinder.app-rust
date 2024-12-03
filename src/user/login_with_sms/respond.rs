@@ -28,6 +28,7 @@ pub async fn respond(
         Route::ScreenPhone => {
             let model = ViewModel::Phone;
 
+            w.send_signal("isSubmitting", "false").await?;
             w.send_screen_frag(model.view_screen()).await?;
 
             Ok(())
@@ -83,6 +84,7 @@ pub async fn respond(
                 phone_number: phone_number.to_string(),
             };
 
+            w.send_signal("isSubmitting", "false").await?;
             w.send_screen_frag(model.view_screen()).await?;
 
             ctx.verify_sms.send_code(&phone_number).await?;
@@ -162,6 +164,8 @@ impl ViewModel {
                     .prevent_default()
                     .post(&Route::ClickedSendCode.url())
             })
+            .id("screen-enter-phone")
+            .data_indicator("isSubmitting")
             .child(
                 TopBar::default()
                     .title("Login with phone")
@@ -189,10 +193,10 @@ impl ViewModel {
                             Button::default()
                                 .label("Send code")
                                 .color_primary()
-                                // .indicator("isSending")
+                                .indicator("isSubmitting")
                                 .view()
                                 .class("w-full")
-                                .type_("submit"), // .data_indicator("sending"),
+                                .type_("submit"),
                         ),
                     ),
             )
@@ -211,6 +215,7 @@ impl ViewModel {
                     .url(),
                 )
             })
+            .data_indicator("isSubmitting")
             .child(
                 TopBar::default()
                     .title("Login with phone")
@@ -244,7 +249,7 @@ impl ViewModel {
                             Button::default()
                                 .label("Verify code")
                                 .color_primary()
-                                // .indicator("isVerifying")
+                                .indicator("isSubmitting")
                                 .view()
                                 .class("w-full")
                                 .type_("submit"),

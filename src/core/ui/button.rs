@@ -1,11 +1,16 @@
 use super::icon;
-use crate::core::{datastar::datastar::signal, html::*};
+use crate::core::{
+    datastar::datastar::{dollar, js_not},
+    html::*,
+    uuid,
+};
 
 #[derive(Debug, Default)]
 pub struct Button {
     label: String,
     color: Color,
     indicator: Option<String>,
+    id: Option<String>,
 }
 
 impl Button {
@@ -35,17 +40,20 @@ impl Button {
     }
 
     pub fn view(self) -> Elem {
-        let signal_indicator = signal(&self.indicator.clone().unwrap_or_default());
+        let signal_indicator = dollar(&self.indicator.clone().unwrap_or_default());
+        let id = self.id.unwrap_or("".to_owned());
 
         button()
+        .id(&id)
         .class("group relative flex items-center justify-center gap-2 rounded px-4 py-3 text-lg font-bold text-white")
         .class("enabled:hover:opacity-80 enabled:active:opacity-60")
         .class("disabled:opacity-80 disabled:cursor-not-allowed")
+        .class("aria-busy:opacity-100 aria-busy:cursor-wait")
         .class(&self.color.to_class())
         .type_("button")
         .map(|e: Elem| {
             if let Some(indicator) = self.indicator {
-                e.data_indicator(&indicator).data_bind("aria-busy", &signal_indicator)
+                e.data_indicator(&indicator).data_bind("aria-busy", &signal_indicator).data_bind("disabled", &signal_indicator)
             } else {
                 e
             }
