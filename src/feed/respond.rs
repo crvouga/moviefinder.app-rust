@@ -23,7 +23,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::ScreenDefault => {
-            w.send_screen_frag(view_screen()).await?;
+            w.send_screen(view_screen()).await?;
 
             let maybe_feed_id = ctx
                 .feed_session_mapping_db
@@ -40,13 +40,13 @@ pub async fn respond(
 
             w.send_replace_url(&feed_url).await?;
 
-            w.send_screen_frag(view_screen()).await?;
+            w.send_screen(view_screen()).await?;
 
             respond_screen_contents(ctx, r, w, &feed_id).await
         }
 
         Route::Screen { feed_id } => {
-            w.send_screen_frag(view_screen()).await?;
+            w.send_screen(view_screen()).await?;
 
             respond_screen_contents(ctx, r, w, feed_id).await
         }

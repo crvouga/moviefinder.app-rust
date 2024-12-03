@@ -26,11 +26,8 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::ScreenPhone => {
-            let model = ViewModel::Phone;
-
             w.send_signal("isSubmitting", "false").await?;
-            w.send_screen_frag(model.view_screen()).await?;
-
+            w.send_screen(view_screen_enter_phone()).await?;
             Ok(())
         }
 
@@ -48,20 +45,20 @@ pub async fn respond(
                     w.send_signal("phoneNumberError", &quote(err.as_str()))
                         .await?;
 
+                    w.send_focus("input").await?;
+
                     Ok(())
                 }
 
                 Err(SendCodeError::Error(err)) => {
                     w.send_toast_error(&err.to_string()).await?;
+
                     Ok(())
                 }
 
                 Ok(()) => {
-                    let model = ViewModel::Code {
-                        phone_number: phone_number_input.clone(),
-                    };
-
-                    w.send_screen_frag(model.view_screen()).await?;
+                    w.send_screen(view_screen_enter_code(&phone_number_input))
+                        .await?;
 
                     w.send_toast_dark(&format!("Code sent to {}", phone_number_input))
                         .await?;
@@ -70,9 +67,9 @@ pub async fn respond(
                         phone_number: phone_number_input,
                     };
 
-                    w.send_focus("#code").await?;
-
                     w.send_push_url(&new_route.url()).await?;
+
+                    w.send_focus("input").await?;
 
                     Ok(())
                 }
@@ -80,12 +77,9 @@ pub async fn respond(
         }
 
         Route::ScreenCode { phone_number } => {
-            let model = ViewModel::Code {
-                phone_number: phone_number.to_string(),
-            };
-
             w.send_signal("isSubmitting", "false").await?;
-            w.send_screen_frag(model.view_screen()).await?;
+
+            w.send_screen(view_screen_enter_code(&phone_number)).await?;
 
             ctx.verify_sms.send_code(&phone_number).await?;
 
@@ -105,8 +99,10 @@ pub async fn respond(
 
             match verified {
                 Err(VerifyCodeError::InvalidCode(err)) => {
-                    w.send_signals(&format!("{{ codeError: '{}' }}", err))
-                        .await?;
+                    w.send_signal("codeError", &quote(&err)).await?;
+
+                    w.send_focus("input").await?;
+
                     Ok(())
                 }
 
@@ -147,123 +143,109 @@ impl Route {
     }
 }
 
-enum ViewModel {
-    Phone,
-    Code { phone_number: String },
+fn view_screen_enter_phone() -> Elem {
+    form()
+        .class("w-full h-full flex flex-col")
+        .data_store("{ phoneNumber: '', phoneNumberError: '' }")
+        .debug_store(false)
+        .data_on(|b| {
+            b.submit()
+                .prevent_default()
+                .post(&Route::ClickedSendCode.url())
+        })
+        .id("screen-enter-phone")
+        .data_indicator("isSubmitting")
+        .child(
+            TopBar::default()
+                .title("Login with phone")
+                .back_url(route::Route::User(user::route::Route::Screen).url())
+                .view(),
+        )
+        .child(
+            div()
+                .class("flex-1 p-6 gap-6 flex flex-col")
+                .child(
+                    TextField::default()
+                        .label("Phone number")
+                        .placeholder("Enter phone number")
+                        .input(|e| {
+                            e.data_model("phoneNumber")
+                                .type_("tel")
+                                .data_on(|d| d.input().js("$phoneNumberError = ''"))
+                        })
+                        .model_error("phoneNumberError")
+                        .view()
+                        .id("phone_number"),
+                )
+                .child(
+                    div().class("pt-3 w-full").child(
+                        Button::default()
+                            .label("Send code")
+                            .color_primary()
+                            .indicator("isSubmitting")
+                            .view()
+                            .id("send-code")
+                            .class("w-full")
+                            .type_("submit"),
+                    ),
+                ),
+        )
 }
 
-impl ViewModel {
-    pub fn view_screen(&self) -> Elem {
-        match self {
-            ViewModel::Phone => self.view_screen_enter_phone(),
-            ViewModel::Code { phone_number } => self.view_screen_enter_code(phone_number),
-        }
-    }
-
-    pub fn view_screen_enter_phone(&self) -> Elem {
-        form()
-            .class("w-full h-full flex flex-col")
-            .data_store("{ phoneNumber: '', phoneNumberError: '' }")
-            .debug_store(false)
-            .data_on(|b| {
-                b.submit()
-                    .prevent_default()
-                    .post(&Route::ClickedSendCode.url())
-            })
-            .id("screen-enter-phone")
-            .data_indicator("isSubmitting")
-            .child(
-                TopBar::default()
-                    .title("Login with phone")
-                    .back_url(route::Route::User(user::route::Route::Screen).url())
-                    .view(),
+fn view_screen_enter_code(phone_number: &str) -> Elem {
+    form()
+        .class("w-full h-full flex flex-col")
+        .data_store("{ code: '', codeError: '' }")
+        .debug_store(false)
+        .data_on(|b| {
+            b.submit().prevent_default().post(
+                &Route::ClickedVerifyCode {
+                    phone_number: phone_number.to_string(),
+                }
+                .url(),
             )
-            .child(
-                div()
-                    .class("flex-1 p-6 gap-6 flex flex-col")
-                    .child(
-                        TextField::default()
-                            .label("Phone number")
-                            .placeholder("Enter phone number")
-                            .input(|e| {
-                                e.data_model("phoneNumber")
-                                    .type_("tel")
-                                    .data_on(|d| d.input().js("$phoneNumberError = ''"))
-                            })
-                            .model_error("phoneNumberError")
-                            .view()
-                            .id("phone_number"),
-                    )
-                    .child(
-                        div().class("pt-3 w-full").child(
-                            Button::default()
-                                .label("Send code")
-                                .color_primary()
-                                .indicator("isSubmitting")
-                                .view()
-                                .id("send-code")
-                                .class("w-full")
-                                .type_("submit"),
-                        ),
-                    ),
-            )
-    }
-
-    pub fn view_screen_enter_code(&self, phone_number: &str) -> Elem {
-        form()
-            .class("w-full h-full flex flex-col")
-            .data_store("{ code: '', codeError: '' }")
-            .debug_store(false)
-            .data_on(|b| {
-                b.submit().prevent_default().post(
-                    &Route::ClickedVerifyCode {
-                        phone_number: phone_number.to_string(),
-                    }
-                    .url(),
+        })
+        .id("screen-enter-code")
+        .data_indicator("isSubmitting")
+        .child(
+            TopBar::default()
+                .title("Login with phone")
+                .back_url(Route::ScreenPhone.url())
+                .view(),
+        )
+        .child(
+            div()
+                .class("flex-1 p-6 gap-6 flex flex-col")
+                .child(
+                    div()
+                        .class("text-xl w-full")
+                        .child(text("Enter the code send to "))
+                        .child(span().class("font-bold").child(text(phone_number))),
                 )
-            })
-            .id("screen-enter-code")
-            .data_indicator("isSubmitting")
-            .child(
-                TopBar::default()
-                    .title("Login with phone")
-                    .back_url(Route::ScreenPhone.url())
-                    .view(),
-            )
-            .child(
-                div()
-                    .class("flex-1 p-6 gap-6 flex flex-col")
-                    .child(
-                        div()
-                            .class("text-xl w-full")
-                            .child(text("Enter the code send to "))
-                            .child(span().class("font-bold").child(text(phone_number))),
-                    )
-                    .child(
-                        TextField::default()
-                            .label("Code")
-                            .placeholder("Enter code")
-                            .input(|e| {
-                                e.data_model("code")
-                                    .type_("tel")
-                                    .data_on(|d| d.input().js("$codeError = ''"))
-                            })
-                            .model_error("codeError")
+                .child(
+                    TextField::default()
+                        .label("Code")
+                        .placeholder("Enter code")
+                        .input(|e| {
+                            e.data_model("code")
+                                .type_("tel")
+                                .data_on(|d| d.input().js("$codeError = ''"))
+                        })
+                        .model_error("codeError")
+                        .view()
+                        .id("code"),
+                )
+                .child(
+                    div().class("pt-3 w-full").child(
+                        Button::default()
+                            .label("Verify code")
+                            .color_primary()
+                            .indicator("isSubmitting")
                             .view()
-                            .id("code"),
-                    )
-                    .child(
-                        div().class("pt-3 w-full").child(
-                            Button::default()
-                                .label("Verify code")
-                                .color_primary()
-                                .indicator("isSubmitting")
-                                .view()
-                                .id("verify-code")
-                                .class("w-full")
-                                .type_("submit"),
-                        ),
+                            .id("verify-code")
+                            .class("w-full")
+                            .type_("submit"),
                     ),
-            )
-    }
+                ),
+        )
 }

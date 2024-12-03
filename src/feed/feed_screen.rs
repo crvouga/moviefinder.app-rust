@@ -28,7 +28,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
     feed_id: &FeedId,
 ) -> Result<(), std::io::Error> {
-    w.send_screen_frag(view_screen()).await?;
+    w.send_screen(view_screen()).await?;
 
     respond_screen_contents(ctx, r, w, feed_id).await?;
 

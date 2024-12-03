@@ -40,7 +40,7 @@ impl VerifySms for ImplFake {
         if SHOULD_SLEEP {
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
-        let should_error = false;
+        let should_error = true;
         if should_error {
             let err = std::io::Error::new(std::io::ErrorKind::Other, "Verifying code failed");
             return Err(VerifyCodeError::Error(err));

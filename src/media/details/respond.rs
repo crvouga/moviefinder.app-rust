@@ -24,7 +24,7 @@ pub async fn respond(
         Route::Screen { media_id } => {
             let model = ViewModel::Loading;
 
-            w.send_screen_frag(model.view_screen()).await?;
+            w.send_screen(model.view_screen()).await?;
 
             let queried = ctx
                 .media_db
@@ -50,7 +50,7 @@ pub async fn respond(
 
             let model = ViewModel::Loaded { media };
 
-            w.send_screen_frag(model.view_screen()).await?;
+            w.send_screen(model.view_screen()).await?;
 
             Ok(())
         }

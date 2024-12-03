@@ -27,7 +27,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Screen { feed_id } => {
-            w.send_screen_frag(view_screen(&feed_id)).await?;
+            w.send_screen(view_screen(&feed_id)).await?;
 
             let model = ViewModel::load(ctx, feed_id, "").await;
 

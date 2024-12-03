@@ -11,7 +11,7 @@ use crate::{
 const ID_SCREEN: &str = "screen";
 
 impl ResponseWriter {
-    pub async fn send_screen_frag(&mut self, screen: Elem) -> Result<(), std::io::Error> {
+    pub async fn send_screen(&mut self, screen: Elem) -> Result<(), std::io::Error> {
         self.send_fragment(screen.id(ID_SCREEN)).await?;
 
         Ok(())

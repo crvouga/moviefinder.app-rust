@@ -27,7 +27,7 @@ pub async fn respond_screen(
         }
 
         Some(user_id) => {
-            w.send_screen_frag(view_loading_screen()).await?;
+            w.send_screen(view_loading_screen()).await?;
 
             let maybe_account = ctx.user_account_db.find_one_by_user_id(&user_id).await?;
 
@@ -51,8 +51,7 @@ pub async fn respond_screen(
                 }
             };
 
-            w.send_screen_frag(view_logged_in(&account, &profile))
-                .await?;
+            w.send_screen(view_logged_in(&account, &profile)).await?;
 
             Ok(())
         }
@@ -69,7 +68,7 @@ fn view_loading_screen() -> Elem {
 }
 
 async fn respond_screen_logged_out(w: &mut ResponseWriter) -> Result<(), std::io::Error> {
-    w.send_screen_frag(view_logged_out()).await?;
+    w.send_screen(view_logged_out()).await?;
     Ok(())
 }
 
