@@ -27,7 +27,9 @@ pub async fn respond(
     match route {
         Route::ScreenPhone => {
             w.send_signal("isSubmitting", "false").await?;
+
             w.send_screen(view_screen_enter_phone()).await?;
+
             Ok(())
         }
 

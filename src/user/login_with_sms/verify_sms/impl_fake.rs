@@ -20,6 +20,8 @@ impl ImplFake {
 }
 
 const SHOULD_SLEEP: bool = true;
+const SHOULD_ERROR_SEND_CODE: bool = false;
+const SHOULD_ERROR_VERIFY_CODE: bool = false;
 
 #[async_trait]
 impl VerifySms for ImplFake {
@@ -28,11 +30,11 @@ impl VerifySms for ImplFake {
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
 
-        let should_error = false;
-        if should_error {
+        if SHOULD_ERROR_SEND_CODE {
             let err = std::io::Error::new(std::io::ErrorKind::Other, "Sending code failed");
             return Err(err);
         }
+
         Ok(())
     }
 
@@ -40,14 +42,16 @@ impl VerifySms for ImplFake {
         if SHOULD_SLEEP {
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
-        let should_error = true;
-        if should_error {
+
+        if SHOULD_ERROR_VERIFY_CODE {
             let err = std::io::Error::new(std::io::ErrorKind::Other, "Verifying code failed");
             return Err(VerifyCodeError::Error(err));
         }
+
         if self.correct_code != code {
             return Err(VerifyCodeError::WrongCode);
         }
+
         Ok(())
     }
 }

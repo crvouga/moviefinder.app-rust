@@ -30,16 +30,6 @@ impl Default for Toast {
 }
 
 impl Toast {
-    pub fn message(mut self, message: &str) -> Self {
-        self.message = message.to_string();
-        self
-    }
-
-    pub fn variant(mut self, variant: ToastVariant) -> Self {
-        self.variant = variant;
-        self
-    }
-
     pub fn dark(message: &str) -> Self {
         Self {
             message: message.to_string(),
