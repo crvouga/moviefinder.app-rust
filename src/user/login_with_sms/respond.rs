@@ -195,6 +195,7 @@ impl ViewModel {
                                 .color_primary()
                                 .indicator("isSubmitting")
                                 .view()
+                                .id("send-code")
                                 .class("w-full")
                                 .type_("submit"),
                         ),
@@ -215,6 +216,7 @@ impl ViewModel {
                     .url(),
                 )
             })
+            .id("screen-enter-code")
             .data_indicator("isSubmitting")
             .child(
                 TopBar::default()
@@ -251,6 +253,7 @@ impl ViewModel {
                                 .color_primary()
                                 .indicator("isSubmitting")
                                 .view()
+                                .id("verify-code")
                                 .class("w-full")
                                 .type_("submit"),
                         ),

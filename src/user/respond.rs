@@ -90,6 +90,7 @@ pub fn view_screen_login_cta() -> Elem {
                         .label("Login")
                         .color_primary()
                         .view()
+                        .id("logout")
                         .data_on(|b| {
                             b.click().push_then_get(
                                 &Route::LoginWithSms(login_with_sms::route::Route::ScreenPhone)
