@@ -1,7 +1,9 @@
 use crate::{
     core::{
-        html::*, http::response_writer::ResponseWriter, tmdb_api::TMDB_IMAGE_BASE_URL,
-        ui::toast::Toast,
+        html::*,
+        http::response_writer::ResponseWriter,
+        tmdb_api::TMDB_IMAGE_BASE_URL,
+        ui::{drawer::Drawer, toast::Toast},
     },
     route::Route,
 };
@@ -39,7 +41,8 @@ impl Root {
                 link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
                 script().src_head_injector().defer(),
                 script().src_datastar().defer(),
-                script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());")
+                script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());"),
+                // script().src_drawer_element()
             ])
         )
         .child(
@@ -50,6 +53,7 @@ impl Root {
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col relative")
                     .child(div().id(ID_SCREEN).data_on(|b| b.load().push_then_get(&self.route.encode())))
                     .child(Toast::view_root())
+                    .child(Drawer::view_root())
             )
         )
     }

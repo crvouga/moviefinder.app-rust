@@ -1,12 +1,9 @@
 use crate::core::html::*;
 
+#[derive(Default)]
 pub struct HeadInjector {}
 
 impl HeadInjector {
-    pub fn new() -> Self {
-        Self {}
-    }
-
     pub fn view(self) -> Elem {
         elem("head-injector")
     }

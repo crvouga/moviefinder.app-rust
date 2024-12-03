@@ -11,7 +11,7 @@ impl Image {
 
     pub fn view(self) -> Elem {
         elem("image-element").child(
-            HeadInjector::new()
+            HeadInjector::default()
                 .view()
                 .child(script().src_image_element()),
         )

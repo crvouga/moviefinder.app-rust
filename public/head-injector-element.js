@@ -2,46 +2,84 @@
 
 class HeadInjector extends HTMLElement {
   connectedCallback() {
-    while (this.firstChild) {
-      const child = this.firstChild.cloneNode(true);
-      this.removeChild(this.firstChild);
+    const headElements = Array.from(this.children);
+    /**
+     * @type {HTMLScriptElement[]}
+     */
+    const scriptsToLoad = headElements.flatMap((node) =>
+      node instanceof HTMLScriptElement &&
+      !this.isDuplicateScript(node) &&
+      !this.isScriptLoaded(node)
+        ? [node]
+        : []
+    );
 
-      if (!(child instanceof Element)) {
-        continue;
-      }
-
-      if (child.tagName === "SCRIPT" && !this.isDuplicateScript(child)) {
-        this.executeScript(child);
-        continue;
-      }
-
-      if (!this.isDuplicateElement(child)) {
-        document.head.appendChild(child);
-        continue;
-      }
+    if (scriptsToLoad.length === 0) {
+      // Emit the event immediately if all scripts are already loaded
+      this.dispatchEvent(
+        new CustomEvent("head-injector-loaded", { bubbles: true })
+      );
+      return;
     }
-  }
 
-  /**
-   * @param {Element} script
-   * @returns {void}
-   */
-  executeScript(script) {
-    const newScript = document.createElement("script");
+    const scriptPromises = scriptsToLoad.map((script) =>
+      this.loadScript(script)
+    );
 
-    Array.from(script.attributes).forEach((attr) => {
-      newScript.setAttribute(attr.name, attr.value);
+    Promise.all(scriptPromises).then(() => {
+      headElements.forEach((element) => {
+        if (!(element instanceof Element)) {
+          return;
+        }
+
+        if (element.tagName === "SCRIPT") {
+          return;
+        }
+
+        if (!this.isDuplicateElement(element)) {
+          document.head.appendChild(element);
+        }
+      });
+
+      this.dispatchEvent(
+        new CustomEvent("head-injector-loaded", { bubbles: true })
+      );
     });
-
-    if (script.textContent) {
-      newScript.textContent = script.textContent;
-    }
-
-    document.head.appendChild(newScript);
   }
 
   /**
-   * @param {Element} script
+   * @param {HTMLScriptElement} script
+   * @returns {Promise<void>}
+   */
+  loadScript(script) {
+    return new Promise((resolve, reject) => {
+      const newScript = document.createElement("script");
+
+      Array.from(script.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+
+      if (script.textContent) {
+        newScript.textContent = script.textContent;
+      }
+
+      const isAlreadyLoaded =
+        script.src && document.querySelector(`script[src="${script.src}"]`);
+
+      if (isAlreadyLoaded) {
+        return resolve();
+      }
+
+      newScript.onload = () => resolve();
+      newScript.onerror = () =>
+        reject(new Error(`Failed to load script: ${newScript.src}`));
+
+      document.head.appendChild(newScript);
+    });
+  }
+
+  /**
+   * @param {HTMLScriptElement} script
    * @returns {boolean}
    */
   isDuplicateScript(script) {
@@ -55,6 +93,17 @@ class HeadInjector extends HTMLElement {
         }) && script.textContent === existingScript.textContent
       );
     });
+  }
+
+  /**
+   * @param {HTMLScriptElement} script
+   * @returns {boolean}
+   */
+  isScriptLoaded(script) {
+    if (script.src) {
+      return !!document.querySelector(`script[src="${script.src}"]`);
+    }
+    return false; // Inline scripts are not considered already loaded
   }
 
   /**

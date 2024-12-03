@@ -2,6 +2,7 @@ pub mod alert;
 pub mod bottom_bar_buttons;
 pub mod button;
 pub mod chip;
+pub mod drawer;
 pub mod error;
 pub mod form;
 pub mod head_injector;

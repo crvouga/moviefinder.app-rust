@@ -1,13 +1,12 @@
-use super::{login_with_sms, route::Route, shared::respond_account_screen};
+use super::{login_with_sms, logout, route::Route, shared::respond_account_screen};
 use crate::{
     core::{
         html::*,
         http::response_writer::ResponseWriter,
-        ui::{button::Button, icon, spinner_page},
+        ui::{button::Button, icon, spinner_page, top_bar::TopBar},
     },
     ctx::Ctx,
     req::Req,
-    route,
     ui::bottom_bar::BottomBar,
 };
 
@@ -19,6 +18,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::LoginWithSms(child) => login_with_sms::respond::respond(ctx, r, child, w).await,
+        Route::Logout(child) => logout::respond::respond(ctx, r, child, w).await,
         Route::Screen => match &r.user_id {
             Some(user_id) => {
                 w.send_screen_frag(view_loading_screen()).await?;
@@ -62,16 +62,6 @@ async fn respond_screen_login_cta(w: &mut ResponseWriter) -> Result<(), std::io:
     Ok(())
 }
 
-impl Route {
-    pub fn route(self) -> route::Route {
-        route::Route::User(self)
-    }
-
-    pub fn url(self) -> String {
-        self.route().encode()
-    }
-}
-
 pub fn view_loading_screen() -> Elem {
     div()
         .id("loading")
@@ -84,6 +74,7 @@ pub fn view_screen_login_cta() -> Elem {
     div()
         .id("login-cta")
         .class("w-full flex-1 flex items-center justify-center flex-col")
+        .child(TopBar::default().title("Account").view())
         .child(
             div()
                 .class("flex-1 flex items-center justify-center flex-col gap-3")

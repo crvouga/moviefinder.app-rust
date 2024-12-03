@@ -16,6 +16,12 @@ pub enum Elem {
     Text(String),
 }
 
+impl Default for Elem {
+    fn default() -> Self {
+        Elem::Frag(vec![])
+    }
+}
+
 impl Elem {
     pub fn map(self, f: impl FnOnce(Elem) -> Elem) -> Elem {
         f(self)
@@ -112,6 +118,10 @@ pub fn meta() -> Elem {
 
 pub fn title() -> Elem {
     elem("title")
+}
+
+pub fn slot(name: &str) -> Elem {
+    elem("slot").attr("name", name)
 }
 
 pub fn link() -> Elem {

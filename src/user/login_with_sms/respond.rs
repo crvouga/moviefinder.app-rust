@@ -9,7 +9,7 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         params::Params,
-        ui::{button::Button, text_field::TextField, toast::Toast, top_bar::TopBar},
+        ui::{button::Button, text_field::TextField, top_bar::TopBar},
     },
     ctx::Ctx,
     req::Req,
@@ -45,6 +45,7 @@ pub async fn respond(
                 Err(SendCodeError::InvalidPhoneNumber(err)) => {
                     w.send_signals(&format!("{{ phoneNumberError: '{}' }}", err))
                         .await?;
+
                     Ok(())
                 }
 

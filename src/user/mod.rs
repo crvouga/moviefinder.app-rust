@@ -1,4 +1,5 @@
 pub mod login_with_sms;
+pub mod logout;
 pub mod respond;
 pub mod route;
 pub mod shared;

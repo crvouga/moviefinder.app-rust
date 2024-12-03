@@ -19,6 +19,11 @@ impl Button {
         self
     }
 
+    pub fn color_gray(mut self) -> Self {
+        self.color = Color::Gray;
+        self
+    }
+
     pub fn color_primary(mut self) -> Self {
         self.color = Color::Primary;
         self
