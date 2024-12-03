@@ -1,5 +1,5 @@
 use crate::core::query::Query;
-use crate::{core::pagination::Paginated, person::person_::Person};
+use crate::{core::pagination::Paginated, media::person::person_::Person};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 

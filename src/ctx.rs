@@ -13,11 +13,11 @@ use crate::{
         feed_tag_db::interface::FeedTagDb, feed_tags::form_state_db::FeedTagsFormStateDb,
     },
     key_value_db::{self, interface::KeyValueDb},
+    media::person::person_db::{self, interface::PersonDb},
     media::{
         genre::genre_db::{self, interface::GenreDb},
         media_db::{self, interface::MediaDb},
     },
-    person::person_db::{self, interface::PersonDb},
     user::{
         login_with_sms::verify_sms::{self, interface::VerifySms},
         user_account::user_account_db::{self, interface::UserAccountDb},

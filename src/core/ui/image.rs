@@ -1,7 +1,5 @@
 use crate::core::html::*;
 
-use super::head_injector::HeadInjector;
-
 pub struct Image {}
 
 impl Image {
@@ -10,11 +8,7 @@ impl Image {
     }
 
     pub fn view(self) -> Elem {
-        elem("image-element").child(
-            HeadInjector::default()
-                .view()
-                .child(script().src_image_element()),
-        )
+        elem("image-element")
     }
 }
 

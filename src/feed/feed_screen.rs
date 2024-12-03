@@ -22,7 +22,7 @@ pub struct ViewModel {
     pub initial_feed_items: Vec<FeedItem>,
 }
 
-pub async fn respond_feed_screen(
+pub async fn respond(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
@@ -30,12 +30,12 @@ pub async fn respond_feed_screen(
 ) -> Result<(), std::io::Error> {
     w.send_screen_frag(view_screen()).await?;
 
-    respond_populate_screen(ctx, r, w, feed_id).await?;
+    respond_screen_contents(ctx, r, w, feed_id).await?;
 
     Ok(())
 }
 
-pub async fn respond_populate_screen(
+pub async fn respond_screen_contents(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,

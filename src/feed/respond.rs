@@ -1,17 +1,16 @@
 use super::{
     feed_::Feed,
+    feed_screen::{get_feed_items, respond_screen_contents, view_screen, view_slide, BOTTOM_ID},
     feed_tags,
     route::Route,
-    shared::{get_feed_items, respond_populate_screen, view_screen, view_slide, BOTTOM_ID},
 };
 use crate::{
     core::{
         http::{response_writer::ResponseWriter, server_sent_event::sse},
         params::Params,
-        unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
-    feed::shared::transact_put_feed,
+    feed::feed_screen::transact_put_feed,
     req::Req,
     route,
 };
@@ -43,13 +42,13 @@ pub async fn respond(
 
             w.send_screen_frag(view_screen()).await?;
 
-            respond_populate_screen(ctx, r, w, &feed_id).await
+            respond_screen_contents(ctx, r, w, &feed_id).await
         }
 
         Route::Screen { feed_id } => {
             w.send_screen_frag(view_screen()).await?;
 
-            respond_populate_screen(ctx, r, w, feed_id).await
+            respond_screen_contents(ctx, r, w, feed_id).await
         }
 
         Route::ChangedSlide { feed_id } => {

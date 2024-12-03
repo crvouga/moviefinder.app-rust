@@ -6,8 +6,8 @@ use crate::{
         query::{QueryFilter, QueryOp},
         ui::chip::{Chip, ChipSize},
     },
+    media::person::person_::Person,
     media::{genre::genre::Genre, media_db::interface::MediaQueryField},
-    person::person_::Person,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Eq)]

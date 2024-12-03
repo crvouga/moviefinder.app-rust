@@ -1,7 +1,7 @@
 use crate::{
     env,
     fixture::BaseFixture,
-    person::person_db::{impl_tmdb, interface::PersonDb},
+    media::person::person_db::{impl_tmdb, interface::PersonDb},
 };
 
 pub struct Fixture {

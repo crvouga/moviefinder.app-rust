@@ -14,7 +14,7 @@ use crate::{
         unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
-    feed::{self, feed_::Feed, feed_id::FeedId, feed_tag::FeedTag, shared::respond_feed_screen},
+    feed::{self, feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},
     req::Req,
     route,
 };
@@ -75,7 +75,7 @@ pub async fn respond(
             )
             .await?;
 
-            respond_feed_screen(ctx, r, w, feed_id).await?;
+            feed_screen::respond(ctx, r, w, feed_id).await?;
 
             Ok(())
         }

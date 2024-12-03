@@ -5,7 +5,7 @@ use crate::{
         query::{QueryFilter, QueryOp},
         tmdb_api::{self, config::TmdbConfig, person::PersonResult, TMDB_PAGE_SIZE},
     },
-    person::person_::Person,
+    media::person::person_::Person,
 };
 use async_trait::async_trait;
 use std::sync::Arc;

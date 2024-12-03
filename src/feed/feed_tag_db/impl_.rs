@@ -8,7 +8,7 @@ use crate::{
     },
     feed::feed_tag::FeedTag,
     media::genre::genre_db::interface::GenreDb,
-    person::person_db::interface::{PersonDb, PersonQueryField},
+    media::person::person_db::interface::{PersonDb, PersonQueryField},
 };
 use async_trait::async_trait;
 
