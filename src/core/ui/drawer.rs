@@ -56,13 +56,7 @@ impl Drawer {
         let initial_open = if self.initial_open { "true" } else { "false" };
         div()
             .id("drawer")
-            .data_store(&format!("{{ {}: {}, isLoaded: false }}", self.model_open, initial_open))
-            .child(
-                HeadInjector::default()
-                    .view()
-                    .child(script().src_drawer_element())
-                    .data_on(|b| b.e("head-injector-loaded").js("$isLoaded = true").log("loaded")),
-            )
+            .data_store(&format!("{{ {}: {}, isLoaded: true }}", self.model_open, initial_open))
             .child(
                 elem("drawer-element")
                     .data_show("$isLoaded")

@@ -42,7 +42,7 @@ impl Root {
                 script().src_head_injector().defer(),
                 script().src_datastar().defer(),
                 script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());"),
-                // script().src_drawer_element()
+                script().src_drawer_element().defer(),
             ])
         )
         .child(

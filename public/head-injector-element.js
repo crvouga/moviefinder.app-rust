@@ -15,7 +15,6 @@ class HeadInjector extends HTMLElement {
     );
 
     if (scriptsToLoad.length === 0) {
-      // Emit the event immediately if all scripts are already loaded
       this.dispatchEvent(
         new CustomEvent("head-injector-loaded", { bubbles: true })
       );
