@@ -57,7 +57,7 @@ class Drawer extends HTMLElement {
         transition: opacity 0.2s ease-in-out;
     }
     .darken-background {
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.75);
     }
     .visible {
         opacity: 1;

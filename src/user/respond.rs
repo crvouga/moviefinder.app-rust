@@ -66,6 +66,7 @@ pub fn view_loading_screen() -> Elem {
     div()
         .id("loading")
         .class("w-full flex-1 flex items-center justify-center flex-col")
+        .child(TopBar::default().title("Account").view())
         .child(spinner_page::view())
         .child(BottomBar::default().active_account().view())
 }
