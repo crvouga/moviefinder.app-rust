@@ -83,7 +83,7 @@ Scrollbar
 
 @keyframes slide-down {
   0% {
-    transform: translateY(-100%);
+    transform: translateY(-150%);
   }
   100% {
     transform: translateY(0);
@@ -91,7 +91,7 @@ Scrollbar
 }
 
 .animate-slide-down {
-  animation: slide-down 0.25s ease-out forwards;
+  animation: slide-down 200ms ease-in-out both;
 }
 
 @keyframes slide-up {
@@ -104,5 +104,5 @@ Scrollbar
 }
 
 .animate-slide-up {
-  animation: slide-up 0.25s ease-out forwards;
+  animation: slide-up 200ms ease-in-out both;
 }
