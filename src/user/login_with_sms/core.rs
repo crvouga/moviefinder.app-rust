@@ -33,17 +33,12 @@ pub enum VerifyCodeError {
     Error(std::io::Error),
 }
 
-pub struct VerifyCodeOk {
-    pub account: UserAccount,
-    pub profile: UserProfile,
-}
-
 pub async fn verify_code(
     ctx: &Ctx,
     session_id: &SessionId,
     phone_number: &str,
     code_input: &str,
-) -> Result<VerifyCodeOk, VerifyCodeError> {
+) -> Result<(), VerifyCodeError> {
     if code_input.is_empty() {
         return Err(VerifyCodeError::InvalidCode("Code is required".to_string()));
     }
@@ -89,10 +84,7 @@ pub async fn verify_code(
                 .await
                 .map_err(VerifyCodeError::Error)?;
 
-            Ok(VerifyCodeOk {
-                account: account_new,
-                profile: profile_new,
-            })
+            Ok(())
         }
     }
 }
@@ -112,9 +104,7 @@ async fn transact_new_user(
             .upsert_one(uow.clone(), &profile)
             .await?;
 
-        ctx.user_session_db
-            .upsert(uow.clone(), &session)
-            .await?;
+        ctx.user_session_db.upsert(uow.clone(), &session).await?;
 
         Ok(())
     })

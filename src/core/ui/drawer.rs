@@ -4,8 +4,6 @@ use crate::core::{
     html::{div, frag, Elem},
 };
 
-use super::head_injector::HeadInjector;
-
 #[derive(Default)]
 pub struct Drawer {
     model_open: String,
@@ -49,27 +47,31 @@ impl Drawer {
     }
 
     pub fn view_root() -> Elem {
-        div().id("drawer")
+        div().id("drawer-root")
     }
 
     pub fn view(self) -> Elem {
         let initial_open = if self.initial_open { "true" } else { "false" };
-        div()
-            .id("drawer")
-            .data_store(&format!("{{ {}: {}, isLoaded: true }}", self.model_open, initial_open))
-            .child(
-                elem("drawer-element")
-                    .data_show("$isLoaded")
-                    .data_bind("open", &signal(&self.model_open))
-                    .attr("open", initial_open)
-                    .data_on(|b| b.e("close").js(&self.on_close))
-                    .child(
-                        div()
-                            .class(
-                                "h-fit max-h-full w-full overflow-hidden border bg-black rounded-t-2xl",
-                            )
-                            .child(self.content.unwrap_or(frag())),
-                    )
-            )
+        let store_entry_open = if self.model_open.is_empty() {
+            ""
+        } else {
+            &format!("{}: {}", self.model_open, initial_open)
+        };
+        let store = format!("{{ {}, isLoaded: true }}", store_entry_open);
+
+        Self::view_root().data_store(&store).child(
+            elem("drawer-element")
+                .data_show("$isLoaded")
+                .data_bind("open", &signal(&self.model_open))
+                .attr("open", initial_open)
+                .data_on(|b| b.e("close").js(&self.on_close))
+                .child(
+                    div()
+                        .class(
+                            "h-fit max-h-full w-full overflow-hidden border bg-black rounded-t-2xl",
+                        )
+                        .child(self.content.unwrap_or(frag())),
+                ),
+        )
     }
 }

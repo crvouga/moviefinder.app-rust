@@ -58,18 +58,19 @@ impl Toast {
 
     pub fn view_root() -> Elem {
         div()
-            .class("absolute top-0 left-0 right-0 bottom-0 pointer-events-none p-6 flex flex-col items-center justify-start items-start z-50")
-            .data_on(|b| b.e("toast-loaded").log("toaster loaded"))
-            .child(div().id("toast"))
+            .id("toast")
+            .class("absolute inset-0 pointer-events-none p-6 w-full h-full")
     }
 
     pub fn view(self) -> Elem {
         let duration_ms = self.duration.as_millis();
-        let js_close = "document.getElementById('toast').classList.replace('animate-slide-down', 'animate-slide-up')";
+        let js_close = "document.getElementById('toast-content').classList.replace('animate-slide-down', 'animate-slide-up')";
 
-        div()
-            .id("toast")
-            .class("w-full p-4 text-lg font-bold pointer-events-auto rounded shadow-xl overflow-hidden animate-slide-down items-center flex z-50")
+        Self::view_root()
+        .child(
+            div()
+            .id("toast-content")
+            .class("w-full h-fit p-4 text-lg font-bold pointer-events-auto rounded shadow-xl overflow-hidden animate-slide-down items-center flex z-50")
             .data_on(|b|
                     b.load()
                     .js(&format!("const duration = {}", duration_ms))
@@ -86,6 +87,7 @@ impl Toast {
                 .on_click(js_close)
                 .child(icon::x_mark("size-8"))
             )
+        )
     }
 }
 

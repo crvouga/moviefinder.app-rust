@@ -1,7 +1,7 @@
 use children::text;
 
 use super::{
-    core::{self, verify_code, SendCodeError, VerifyCodeError, VerifyCodeOk},
+    core::{self, verify_code, SendCodeError, VerifyCodeError},
     route::Route,
 };
 use crate::{
@@ -15,7 +15,7 @@ use crate::{
     ctx::Ctx,
     req::Req,
     route,
-    user::{self, shared::respond_account_screen},
+    user::{self, account_screen},
 };
 
 pub async fn respond(
@@ -116,14 +116,20 @@ pub async fn respond(
                     Ok(())
                 }
 
-                Ok(VerifyCodeOk { account, profile }) => {
+                Ok(()) => {
                     w.send_toast_dark("Logged in").await?;
 
                     let route_new = route::Route::User(user::route::Route::Screen);
 
                     w.send_push_url(&route_new.url()).await?;
 
-                    respond_account_screen(ctx, r, w, &account, &profile).await?;
+                    let user_id = ctx
+                        .user_session_db
+                        .find_by_session_id(&r.session_id)
+                        .await?
+                        .map(|s| s.user_id);
+
+                    account_screen::respond_screen(ctx, r, w, &user_id).await?;
 
                     Ok(())
                 }
