@@ -76,7 +76,7 @@ async fn respond(
     let result = match (maybe_route, request.is_datastar_request()) {
         (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
-        (Some(route), false) => response_root(route, &request, &mut w).await,
+        (Some(route), false) => response_root(&request, &mut w, route.url()).await,
 
         (None, true) => respond_fallback(&ctx, &r, &mut w).await,
 
@@ -84,9 +84,9 @@ async fn respond(
             Some(file_path) => response_public(&file_path, &request, &mut w).await,
             None => {
                 response_root(
-                    Route::Feed(feed::route::Route::FeedScreenDefault),
                     &request,
                     &mut w,
+                    feed::route::Route::FeedScreenDefault.url(),
                 )
                 .await
             }
@@ -99,11 +99,11 @@ async fn respond(
 }
 
 async fn response_root(
-    route: Route,
     _r: &Request,
     w: &mut ResponseWriter,
+    url: String,
 ) -> Result<(), std::io::Error> {
-    let html: &String = &root::Root::new(route.url()).view().render_with_doctype();
+    let html: &String = &root::Root::new(url).view().render_with_doctype();
 
     w.content("text/html", html.as_bytes()).await
 }
