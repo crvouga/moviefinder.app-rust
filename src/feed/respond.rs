@@ -12,8 +12,7 @@ use crate::{
     ctx::Ctx,
     feed::feed_screen::transact_put_feed,
     req::Req,
-    route,
-    ui::to_url::ToURL,
+    ui::route::Routable,
 };
 
 pub async fn respond(
@@ -23,7 +22,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::ScreenDefault => {
+        Route::FeedScreenDefault => {
             w.send_screen(view_screen()).await?;
 
             let maybe_feed_id = ctx
@@ -34,10 +33,10 @@ pub async fn respond(
 
             let feed_id = maybe_feed_id.unwrap_or_default();
 
-            let feed_url = (Route::Screen {
+            let feed_url = (Route::FeedScreen {
                 feed_id: feed_id.clone(),
             })
-            .to_url();
+            .url();
 
             w.send_replace_url(&feed_url).await?;
 
@@ -46,7 +45,7 @@ pub async fn respond(
             respond_screen_contents(ctx, r, w, &feed_id).await
         }
 
-        Route::Screen { feed_id } => {
+        Route::FeedScreen { feed_id } => {
             w.send_screen(view_screen()).await?;
 
             respond_screen_contents(ctx, r, w, feed_id).await

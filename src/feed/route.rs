@@ -1,14 +1,14 @@
 use serde::{Deserialize, Serialize};
 
-use crate::ui::to_url::ToURL;
+use crate::ui::route::Routable;
 
 use super::{feed_id::FeedId, feed_tags};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
-    ScreenDefault,
+    FeedScreenDefault,
 
-    Screen {
+    FeedScreen {
         feed_id: FeedId,
     },
 
@@ -24,8 +24,8 @@ pub enum Route {
     Tags(feed_tags::route::Route),
 }
 
-impl ToURL for feed_tags::route::Route {
-    fn to_url(&self) -> String {
-        Route::Tags(self.clone()).to_url()
+impl Routable for feed_tags::route::Route {
+    fn url(&self) -> String {
+        Route::Tags(self.clone()).url()
     }
 }

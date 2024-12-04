@@ -16,7 +16,7 @@ use crate::{
     ctx::Ctx,
     feed::{self, feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},
     req::Req,
-    ui::to_url::ToURL,
+    ui::route::Routable,
 };
 
 pub async fn respond(
@@ -26,7 +26,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Screen { feed_id } => {
+        Route::FeedTagsFormScreen { feed_id } => {
             w.send_screen(view_screen(&feed_id)).await?;
 
             let model = ViewModel::load(ctx, feed_id, "").await;
@@ -68,10 +68,10 @@ pub async fn respond(
             w.send_signals("{signalIsSaving: false}").await?;
 
             w.send_push_url(
-                &feed::route::Route::Screen {
+                &feed::route::Route::FeedScreen {
                     feed_id: feed_id.clone(),
                 }
-                .to_url(),
+                .url(),
             )
             .await?;
 
@@ -184,7 +184,7 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
             &Route::InputtedSearch {
                 feed_id: feed_id.clone(),
             }
-            .to_url(),
+            .url(),
         )
         .indicator("signalIsSearching")
         .input(|e| {
@@ -242,7 +242,7 @@ fn view_selected(model: &ViewModel) -> Elem {
                         &Route::ClickedClear {
                             feed_id: model.feed.feed_id.clone(),
                         }
-                        .to_url(),
+                        .url(),
                     )
                 })
                 .class("underline text-secondary p-2")
@@ -265,7 +265,7 @@ fn view_screen(feed_id: &FeedId) -> Elem {
             .js("const v = evt?.detail?.tagId?.toLowerCase?.()?.trim?.()")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.map(v => v.toLowerCase().trim())")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]")
-            .patch(&Route::ClickedTag {feed_id: feed_id.clone()}.to_url())
+            .patch(&Route::ClickedTag {feed_id: feed_id.clone()}.url())
         )
         .data_indicator("signalIsUpdatingSelected")
         .class("w-full h-full flex flex-col overflow-hidden relative")
@@ -297,10 +297,10 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .view()
                 .data_on(|b| {
                     b.click().push_then_get(
-                        &feed::route::Route::Screen {
+                        &feed::route::Route::FeedScreen {
                             feed_id: feed_id.clone(),
                         }
-                        .to_url(),
+                        .url(),
                     )
                 })
                 .type_("button")
@@ -317,7 +317,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                         &(Route::ClickedSave {
                             feed_id: feed_id.clone(),
                         })
-                        .to_url(),
+                        .url(),
                     )
                 })
                 .id("save-button")

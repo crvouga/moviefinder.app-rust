@@ -15,7 +15,7 @@ use crate::{
     ctx::Ctx,
     req::Req,
     route,
-    ui::to_url::ToURL,
+    ui::route::Routable,
     user::{self, account_screen},
 };
 
@@ -70,7 +70,7 @@ pub async fn respond(
                         &Route::ScreenCode {
                             phone_number: phone_number_input,
                         }
-                        .to_url(),
+                        .url(),
                     )
                     .await?;
 
@@ -120,7 +120,7 @@ pub async fn respond(
                 Ok(()) => {
                     w.send_toast_dark("Logged in").await?;
 
-                    w.send_push_url(&user::route::Route::Screen.to_url())
+                    w.send_push_url(&user::route::Route::AccountScreen.url())
                         .await?;
 
                     let user_id = ctx
@@ -129,7 +129,7 @@ pub async fn respond(
                         .await?
                         .map(|s| s.user_id);
 
-                    account_screen::respond_screen(ctx, r, w, &user_id).await?;
+                    account_screen::respond(ctx, r, w, &user_id).await?;
 
                     Ok(())
                 }
@@ -146,14 +146,14 @@ fn view_screen_enter_phone() -> Elem {
         .data_on(|b| {
             b.submit()
                 .prevent_default()
-                .post(&Route::ClickedSendCode.to_url())
+                .post(&Route::ClickedSendCode.url())
         })
         .id("screen-enter-phone")
         .data_indicator("isSubmitting")
         .child(
             TopBar::default()
                 .title("Login with phone")
-                .back_url(route::Route::User(user::route::Route::Screen).to_url())
+                .back_url(route::Route::User(user::route::Route::AccountScreen).url())
                 .view(),
         )
         .child(
@@ -197,7 +197,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
                 &Route::ClickedVerifyCode {
                     phone_number: phone_number.to_string(),
                 }
-                .to_url(),
+                .url(),
             )
         })
         .id("screen-enter-code")
@@ -205,7 +205,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
         .child(
             TopBar::default()
                 .title("Login with phone")
-                .back_url(Route::ScreenPhone.to_url())
+                .back_url(Route::ScreenPhone.url())
                 .view(),
         )
         .child(

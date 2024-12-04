@@ -9,7 +9,7 @@ use crate::{
     feed,
     media::{media_::Media, media_db::interface::MediaQueryField},
     req::Req,
-    ui::to_url::ToURL,
+    ui::route::Routable,
 };
 
 use super::route::Route;
@@ -21,7 +21,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::Screen { media_id } => {
+        Route::MediaDetailsScreen { media_id } => {
             let model = ViewModel::Loading;
 
             w.send_screen(model.view_screen()).await?;
@@ -82,7 +82,7 @@ impl ViewModel {
         };
 
         TopBar::default()
-            .back_url(feed::route::Route::ScreenDefault.to_url())
+            .back_url(feed::route::Route::FeedScreenDefault.url())
             .title(title)
             .view()
             .id("top-bar")

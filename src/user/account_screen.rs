@@ -10,10 +10,10 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::{bottom_bar::BottomBar, to_url::ToURL},
+    ui::{bottom_bar::BottomBar, route::Routable},
 };
 
-pub async fn respond_screen(
+pub async fn respond(
     ctx: &Ctx,
     _r: &Req,
     w: &mut ResponseWriter,
@@ -58,6 +58,11 @@ pub async fn respond_screen(
     }
 }
 
+async fn respond_screen_logged_out(w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+    w.send_screen(view_logged_out()).await?;
+    Ok(())
+}
+
 fn view_loading_screen() -> Elem {
     div()
         .id("loading")
@@ -65,11 +70,6 @@ fn view_loading_screen() -> Elem {
         .child(TopBar::default().title("Account").view())
         .child(spinner_page::view())
         .child(BottomBar::default().active_account().view())
-}
-
-async fn respond_screen_logged_out(w: &mut ResponseWriter) -> Result<(), std::io::Error> {
-    w.send_screen(view_logged_out()).await?;
-    Ok(())
 }
 
 fn view_logged_out() -> Elem {
@@ -95,7 +95,7 @@ fn view_logged_out() -> Elem {
                         .data_on(|b| {
                             b.click().push_then_get(
                                 &Route::LoginWithSms(login_with_sms::route::Route::ScreenPhone)
-                                    .to_url(),
+                                    .url(),
                             )
                         }),
                 ),
@@ -118,7 +118,7 @@ fn view_logged_in(_account: &UserAccount, _profile: &UserProfile) -> Elem {
                         .view()
                         .data_on(|b| {
                             b.click()
-                                .get(&Route::Logout(logout::route::Route::Drawer).to_url())
+                                .get(&Route::Logout(logout::route::Route::LogoutDrawer).url())
                         }),
                 ),
         )

@@ -7,7 +7,7 @@ use env::Env;
 use req::Req;
 use route::Route;
 use std::sync::Arc;
-use ui::{root, to_url::ToURL};
+use ui::{root, route::Routable};
 
 mod core;
 mod ctx;
@@ -84,7 +84,7 @@ async fn respond(
             Some(file_path) => response_public(&file_path, &request, &mut w).await,
             None => {
                 response_root(
-                    Route::Feed(feed::route::Route::ScreenDefault),
+                    Route::Feed(feed::route::Route::FeedScreenDefault),
                     &request,
                     &mut w,
                 )
@@ -103,7 +103,7 @@ async fn response_root(
     _r: &Request,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let html: &String = &root::Root::new(route.to_url()).view().render_with_doctype();
+    let html: &String = &root::Root::new(route.url()).view().render_with_doctype();
 
     w.content("text/html", html.as_bytes()).await
 }
@@ -146,8 +146,8 @@ async fn respond_fallback(
     r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let fallback = feed::route::Route::ScreenDefault;
-    w.send_push_url(&Route::Feed(fallback).to_url()).await?;
+    let fallback = feed::route::Route::FeedScreenDefault;
+    w.send_push_url(&Route::Feed(fallback).url()).await?;
 
-    feed::respond::respond(&ctx, r, &feed::route::Route::ScreenDefault, w).await
+    feed::respond::respond(&ctx, r, &feed::route::Route::FeedScreenDefault, w).await
 }

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::ui::to_url::ToURL;
+use crate::ui::route::Routable;
 
 use super::details;
 
@@ -9,8 +9,8 @@ pub enum Route {
     Details(details::route::Route),
 }
 
-impl ToURL for details::route::Route {
-    fn to_url(&self) -> String {
-        Route::Details(self.clone()).to_url()
+impl Routable for details::route::Route {
+    fn url(&self) -> String {
+        Route::Details(self.clone()).url()
     }
 }

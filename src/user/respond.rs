@@ -10,6 +10,6 @@ pub async fn respond(
     match route {
         Route::LoginWithSms(child) => login_with_sms::respond::respond(ctx, r, child, w).await,
         Route::Logout(child) => logout::respond::respond(ctx, r, child, w).await,
-        Route::Screen => account_screen::respond_screen(ctx, r, w, &r.user_id).await,
+        Route::AccountScreen => account_screen::respond(ctx, r, w, &r.user_id).await,
     }
 }

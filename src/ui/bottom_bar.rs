@@ -9,7 +9,7 @@ use crate::{
     feed, route, user,
 };
 
-use super::to_url::ToURL;
+use super::route::Routable;
 
 #[derive(PartialEq, Eq, Default)]
 pub enum Active {
@@ -51,7 +51,7 @@ impl BottomBar {
                         .view()
                         .data_on(|b| {
                             b.click().push_then_get(
-                                &route::Route::Feed(feed::route::Route::ScreenDefault).to_url(),
+                                &route::Route::Feed(feed::route::Route::FeedScreenDefault).url(),
                             )
                         }),
                 )
@@ -63,7 +63,7 @@ impl BottomBar {
                         .view()
                         .data_on(|b| {
                             b.click().push_then_get(
-                                &route::Route::User(user::route::Route::Screen).to_url(),
+                                &route::Route::User(user::route::Route::AccountScreen).url(),
                             )
                         }),
                 ),

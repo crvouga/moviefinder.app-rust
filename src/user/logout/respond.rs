@@ -8,8 +8,8 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::to_url::ToURL,
-    user::{self, account_screen},
+    ui::route::Routable,
+    user::account_screen,
 };
 
 pub async fn respond(
@@ -22,7 +22,7 @@ pub async fn respond(
         Route::ClickedLogout => {
             ctx.user_session_db.zap(uow(), &r.session_id).await?;
 
-            account_screen::respond_screen(ctx, r, w, &None).await?;
+            account_screen::respond(ctx, r, w, &None).await?;
 
             w.send_signal("isLogoutDrawerOpen", "false").await?;
 
@@ -31,8 +31,9 @@ pub async fn respond(
             Ok(())
         }
 
-        Route::Drawer => {
+        Route::LogoutDrawer => {
             w.send_fragment(view_logout_drawer()).await?;
+
             Ok(())
         }
     }
@@ -70,7 +71,7 @@ fn view_logout_drawer() -> Elem {
                                 .view()
                                 .class("flex-1")
                                 .id("logout-button")
-                                .data_on(|b| b.click().post(&Route::ClickedLogout.to_url())),
+                                .data_on(|b| b.click().post(&Route::ClickedLogout.url())),
                         ),
                 ),
         )
