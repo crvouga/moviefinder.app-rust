@@ -1,6 +1,5 @@
 pub mod cache;
 pub mod client;
-pub mod compress;
 pub mod content;
 pub mod content_encoding;
 pub mod content_type;
