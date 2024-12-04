@@ -1,9 +1,5 @@
 use super::icon;
-use crate::core::{
-    datastar::datastar::{dollar, js_not},
-    html::*,
-    uuid,
-};
+use crate::core::{datastar::datastar::dollar, html::*};
 
 #[derive(Debug, Default)]
 pub struct Button {

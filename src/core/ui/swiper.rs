@@ -1,7 +1,5 @@
 use crate::core::html::*;
 
-use super::head_injector::HeadInjector;
-
 impl Elem {
     pub fn src_swiper(self) -> Self {
         self.src("https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js")
