@@ -13,6 +13,7 @@ use crate::{
     feed::feed_screen::transact_put_feed,
     req::Req,
     route,
+    ui::to_url::ToURL,
 };
 
 pub async fn respond(
@@ -33,10 +34,10 @@ pub async fn respond(
 
             let feed_id = maybe_feed_id.unwrap_or_default();
 
-            let feed_url = route::Route::Feed(Route::Screen {
+            let feed_url = (Route::Screen {
                 feed_id: feed_id.clone(),
             })
-            .url();
+            .to_url();
 
             w.send_replace_url(&feed_url).await?;
 

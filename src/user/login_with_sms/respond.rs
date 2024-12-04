@@ -15,6 +15,7 @@ use crate::{
     ctx::Ctx,
     req::Req,
     route,
+    ui::to_url::ToURL,
     user::{self, account_screen},
 };
 
@@ -59,17 +60,19 @@ pub async fn respond(
                 }
 
                 Ok(()) => {
-                    w.send_screen(view_screen_enter_code(&phone_number_input))
-                        .await?;
-
                     w.send_toast_dark(&format!("Code sent to {}", phone_number_input))
                         .await?;
 
-                    let new_route = Route::ScreenCode {
-                        phone_number: phone_number_input,
-                    };
+                    w.send_screen(view_screen_enter_code(&phone_number_input))
+                        .await?;
 
-                    w.send_push_url(&new_route.url()).await?;
+                    w.send_push_url(
+                        &Route::ScreenCode {
+                            phone_number: phone_number_input,
+                        }
+                        .to_url(),
+                    )
+                    .await?;
 
                     w.send_focus("input").await?;
 
@@ -117,9 +120,8 @@ pub async fn respond(
                 Ok(()) => {
                     w.send_toast_dark("Logged in").await?;
 
-                    let route_new = route::Route::User(user::route::Route::Screen);
-
-                    w.send_push_url(&route_new.url()).await?;
+                    w.send_push_url(&user::route::Route::Screen.to_url())
+                        .await?;
 
                     let user_id = ctx
                         .user_session_db
@@ -136,15 +138,6 @@ pub async fn respond(
     }
 }
 
-impl Route {
-    fn route(self) -> route::Route {
-        route::Route::User(user::route::Route::LoginWithSms(self))
-    }
-    fn url(self) -> String {
-        self.route().url()
-    }
-}
-
 fn view_screen_enter_phone() -> Elem {
     form()
         .class("w-full h-full flex flex-col")
@@ -153,14 +146,14 @@ fn view_screen_enter_phone() -> Elem {
         .data_on(|b| {
             b.submit()
                 .prevent_default()
-                .post(&Route::ClickedSendCode.url())
+                .post(&Route::ClickedSendCode.to_url())
         })
         .id("screen-enter-phone")
         .data_indicator("isSubmitting")
         .child(
             TopBar::default()
                 .title("Login with phone")
-                .back_url(route::Route::User(user::route::Route::Screen).url())
+                .back_url(route::Route::User(user::route::Route::Screen).to_url())
                 .view(),
         )
         .child(
@@ -204,7 +197,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
                 &Route::ClickedVerifyCode {
                     phone_number: phone_number.to_string(),
                 }
-                .url(),
+                .to_url(),
             )
         })
         .id("screen-enter-code")
@@ -212,7 +205,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
         .child(
             TopBar::default()
                 .title("Login with phone")
-                .back_url(Route::ScreenPhone.url())
+                .back_url(Route::ScreenPhone.to_url())
                 .view(),
         )
         .child(

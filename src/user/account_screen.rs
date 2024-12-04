@@ -10,7 +10,7 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::bottom_bar::BottomBar,
+    ui::{bottom_bar::BottomBar, to_url::ToURL},
 };
 
 pub async fn respond_screen(
@@ -95,22 +95,12 @@ fn view_logged_out() -> Elem {
                         .data_on(|b| {
                             b.click().push_then_get(
                                 &Route::LoginWithSms(login_with_sms::route::Route::ScreenPhone)
-                                    .url(),
+                                    .to_url(),
                             )
                         }),
                 ),
         )
         .child(BottomBar::default().active_account().view())
-}
-
-impl Route {
-    fn route(self) -> crate::route::Route {
-        crate::route::Route::User(self)
-    }
-
-    fn url(self) -> String {
-        self.route().url()
-    }
 }
 
 fn view_logged_in(_account: &UserAccount, _profile: &UserProfile) -> Elem {
@@ -128,7 +118,7 @@ fn view_logged_in(_account: &UserAccount, _profile: &UserProfile) -> Elem {
                         .view()
                         .data_on(|b| {
                             b.click()
-                                .get(&Route::Logout(logout::route::Route::Drawer).url())
+                                .get(&Route::Logout(logout::route::Route::Drawer).to_url())
                         }),
                 ),
         )

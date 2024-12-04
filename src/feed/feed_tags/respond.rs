@@ -16,7 +16,7 @@ use crate::{
     ctx::Ctx,
     feed::{self, feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},
     req::Req,
-    route,
+    ui::to_url::ToURL,
 };
 
 pub async fn respond(
@@ -68,10 +68,10 @@ pub async fn respond(
             w.send_signals("{signalIsSaving: false}").await?;
 
             w.send_push_url(
-                &route::Route::Feed(feed::route::Route::Screen {
+                &feed::route::Route::Screen {
                     feed_id: feed_id.clone(),
-                })
-                .url(),
+                }
+                .to_url(),
             )
             .await?;
 
@@ -164,16 +164,6 @@ pub async fn respond(
     }
 }
 
-impl Route {
-    pub fn route(self) -> route::Route {
-        route::Route::Feed(feed::route::Route::Tags(self))
-    }
-
-    pub fn url(self) -> String {
-        self.route().url()
-    }
-}
-
 impl Req {
     pub fn to_selected_tags(&self) -> Vec<FeedTag> {
         let signal_selected_tag_ids = self.params.get_all("signalSelectedTagIds");
@@ -188,17 +178,13 @@ impl Req {
     }
 }
 
-fn to_back_route(feed_id: FeedId) -> route::Route {
-    route::Route::Feed(feed::route::Route::Screen { feed_id })
-}
-
 fn view_search_input(feed_id: &FeedId) -> Elem {
     SearchBar::default()
         .url(
             &Route::InputtedSearch {
                 feed_id: feed_id.clone(),
             }
-            .url(),
+            .to_url(),
         )
         .indicator("signalIsSearching")
         .input(|e| {
@@ -256,7 +242,7 @@ fn view_selected(model: &ViewModel) -> Elem {
                         &Route::ClickedClear {
                             feed_id: model.feed.feed_id.clone(),
                         }
-                        .url(),
+                        .to_url(),
                     )
                 })
                 .class("underline text-secondary p-2")
@@ -279,9 +265,9 @@ fn view_screen(feed_id: &FeedId) -> Elem {
             .js("const v = evt?.detail?.tagId?.toLowerCase?.()?.trim?.()")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.map(v => v.toLowerCase().trim())")
             .js("$signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]")
-            .patch(&Route::ClickedTag {feed_id: feed_id.clone()}.url())
+            .patch(&Route::ClickedTag {feed_id: feed_id.clone()}.to_url())
         )
-        .data_indicator("signalIsUpatingSelected")
+        .data_indicator("signalIsUpdatingSelected")
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .child(view_selected_loading())
         .child(view_search_input(feed_id))
@@ -310,8 +296,12 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                 .color(Color::Gray)
                 .view()
                 .data_on(|b| {
-                    b.click()
-                        .push_then_get(&to_back_route(feed_id.clone()).url())
+                    b.click().push_then_get(
+                        &feed::route::Route::Screen {
+                            feed_id: feed_id.clone(),
+                        }
+                        .to_url(),
+                    )
                 })
                 .type_("button")
                 .class("flex-1"),
@@ -327,7 +317,7 @@ fn view_bottom_bar(feed_id: &FeedId) -> Elem {
                         &(Route::ClickedSave {
                             feed_id: feed_id.clone(),
                         })
-                        .url(),
+                        .to_url(),
                     )
                 })
                 .id("save-button")

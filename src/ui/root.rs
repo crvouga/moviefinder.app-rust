@@ -1,11 +1,8 @@
-use crate::{
-    core::{
-        html::*,
-        http::response_writer::ResponseWriter,
-        tmdb_api::TMDB_IMAGE_BASE_URL,
-        ui::{drawer::Drawer, toast::Toast},
-    },
-    route::Route,
+use crate::core::{
+    html::*,
+    http::response_writer::ResponseWriter,
+    tmdb_api::TMDB_IMAGE_BASE_URL,
+    ui::{drawer::Drawer, toast::Toast},
 };
 
 const ID_SCREEN: &str = "screen";
@@ -19,12 +16,12 @@ impl ResponseWriter {
 }
 
 pub struct Root {
-    route: Route,
+    url: String,
 }
 
 impl Root {
-    pub fn new(route: Route) -> Self {
-        Self { route }
+    pub fn new(url: String) -> Self {
+        Self { url }
     }
 
     pub fn view(self) -> Elem {
@@ -54,7 +51,7 @@ impl Root {
             .child(
                 div()
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col relative")
-                    .child(div().id(ID_SCREEN).data_on(|b| b.load().push_then_get(&self.route.url())))
+                    .child(div().id(ID_SCREEN).data_on(|b| b.load().push_then_get(&self.url)))
                     .child(Toast::view_root())
                     .child(Drawer::view_root())
             )

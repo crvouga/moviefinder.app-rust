@@ -7,7 +7,7 @@ use env::Env;
 use req::Req;
 use route::Route;
 use std::sync::Arc;
-use ui::root;
+use ui::{root, to_url::ToURL};
 
 mod core;
 mod ctx;
@@ -103,7 +103,7 @@ async fn response_root(
     _r: &Request,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let html: &String = &root::Root::new(route).view().render_with_doctype();
+    let html: &String = &root::Root::new(route.to_url()).view().render_with_doctype();
 
     w.content("text/html", html.as_bytes()).await
 }
@@ -147,7 +147,7 @@ async fn respond_fallback(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     let fallback = feed::route::Route::ScreenDefault;
-    w.send_push_url(&Route::Feed(fallback).url()).await?;
+    w.send_push_url(&Route::Feed(fallback).to_url()).await?;
 
     feed::respond::respond(&ctx, r, &feed::route::Route::ScreenDefault, w).await
 }

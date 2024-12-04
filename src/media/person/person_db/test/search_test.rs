@@ -3,7 +3,7 @@ mod search_test {
     use super::super::fixture::fixtures;
     use crate::{
         core::query::{Query, QueryFilter, QueryOp},
-        person::person_db::interface::PersonQueryField,
+        media::person::person_db::interface::PersonQueryField,
     };
 
     #[tokio::test]

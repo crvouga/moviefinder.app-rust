@@ -9,7 +9,7 @@ use crate::{
     feed,
     media::{media_::Media, media_db::interface::MediaQueryField},
     req::Req,
-    route,
+    ui::to_url::ToURL,
 };
 
 use super::route::Route;
@@ -82,7 +82,7 @@ impl ViewModel {
         };
 
         TopBar::default()
-            .back_url(route::Route::Feed(feed::route::Route::ScreenDefault).url())
+            .back_url(feed::route::Route::ScreenDefault.to_url())
             .title(title)
             .view()
             .id("top-bar")
