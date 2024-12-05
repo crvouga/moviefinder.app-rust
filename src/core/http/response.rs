@@ -1,11 +1,6 @@
 #![allow(dead_code)]
-use flate2::{write::GzEncoder, Compression};
-use std::collections::HashMap;
-use std::io::Write;
-
-use super::content_encoding::ContentEncoding;
-use super::request::Request;
 use super::set_header::SetHeader;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Response {
@@ -111,36 +106,6 @@ impl Response {
             304 => "Not Modified",
             _ => "Unknown Status",
         }
-    }
-
-    pub fn compress(&mut self, request: &Request) {
-        for encoding in request.to_accept_encoding() {
-            match encoding {
-                ContentEncoding::Gzip => {
-                    self.compress_gzip();
-                    break;
-                }
-                _ => {}
-            }
-        }
-    }
-
-    pub fn compress_gzip(&mut self) {
-        let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
-
-        encoder
-            .write_all(&self.body)
-            .expect("Failed to write to Gzip encoder");
-
-        let compressed_body = encoder.finish().expect("Failed to finish Gzip encoding");
-
-        self.body = compressed_body;
-
-        self.headers
-            .insert("Content-Encoding".to_string(), "gzip".to_string());
-
-        self.headers
-            .insert("Content-Length".to_string(), self.body.len().to_string());
     }
 }
 

@@ -3,9 +3,11 @@ use crate::{
         pagination::{PageBased, Paginated},
         query::{QueryFilter, QueryOp},
         tmdb_api::{
-            self,
             config::TmdbConfig,
-            discover_movie::{DiscoverMovieParams, DiscoverMovieResult, TMDB_AND_OP, TMDB_OR_OP},
+            discover_movie::{
+                DiscoverMovieParams, DiscoverMovieResponse, DiscoverMovieResult, TMDB_AND_OP,
+                TMDB_OR_OP,
+            },
             TmdbApi, TMDB_PAGE_SIZE,
         },
     },
@@ -17,7 +19,6 @@ use crate::{
         media_type::MediaType,
     },
 };
-use futures::future::join_all;
 use std::{collections::HashSet, vec};
 
 #[derive(Debug, Clone)]
@@ -55,11 +56,19 @@ impl TmdbQueryPlanItem {
             TmdbQueryPlanItem::GetDiscoverMovie { params } => {
                 let discover_requests = params
                     .params
-                    .iter()
-                    .map(|params| tmdb_api.discover_movie(params.clone()));
+                    .clone()
+                    .into_iter()
+                    .map(|param| tmdb_api.discover_movie(param));
 
-                let discover_responses: Vec<tmdb_api::discover_movie::DiscoverMovieResponse> =
-                    partition_results(join_all(discover_requests).await).unwrap_or_default();
+                let mut discover_responses: Vec<DiscoverMovieResponse> = vec![];
+
+                for request in discover_requests {
+                    let result = request.await;
+                    match result {
+                        Ok(val) => discover_responses.push(val),
+                        Err(err) => return Err(err),
+                    }
+                }
 
                 let offset = params.page_based.index;
 
