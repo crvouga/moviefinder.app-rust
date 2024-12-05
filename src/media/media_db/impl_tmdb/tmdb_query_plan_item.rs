@@ -199,24 +199,6 @@ fn remove_prefix(s: String, prefix: &str) -> String {
     }
 }
 
-fn partition_results<T, E>(results: Vec<Result<T, E>>) -> Result<Vec<T>, Vec<E>> {
-    let mut oks = Vec::new();
-    let mut errs = Vec::new();
-
-    for result in results {
-        match result {
-            Ok(val) => oks.push(val),
-            Err(err) => errs.push(err),
-        }
-    }
-
-    if errs.is_empty() {
-        Ok(oks)
-    } else {
-        Err(errs)
-    }
-}
-
 impl From<(&TmdbConfig, DiscoverMovieResult)> for Media {
     fn from((config, result): (&TmdbConfig, DiscoverMovieResult)) -> Self {
         Media {
