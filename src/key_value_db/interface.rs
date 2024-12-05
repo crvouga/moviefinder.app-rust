@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::core::unit_of_work::UnitOfWork;
 use async_trait::async_trait;
 
@@ -14,3 +16,5 @@ const SEPARATOR: &str = ":";
 pub fn to_namespaced_key(namespace: &[String], key: &str) -> String {
     namespace.join(SEPARATOR) + SEPARATOR + key
 }
+
+pub type KeyValueDbRef = Arc<dyn KeyValueDb>;

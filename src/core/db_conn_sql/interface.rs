@@ -5,7 +5,6 @@ use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 
 #[async_trait]
-
 pub trait DbConnSql: Send + Sync {
     async fn query<T, F>(
         &self,

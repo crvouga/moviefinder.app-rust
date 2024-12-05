@@ -1,31 +1,33 @@
 use super::interface::UserProfileDb;
 use crate::{
     core::unit_of_work::UnitOfWork,
-    key_value_db::interface::KeyValueDb,
+    key_value_db::interface::KeyValueDbRef,
     user::{user_id::UserId, user_profile::user_profile_::UserProfile},
 };
 use async_trait::async_trait;
-use std::sync::Arc;
 
-pub struct ImplKeyValueDb {
-    profile_by_user_id: Box<dyn KeyValueDb>,
-    user_id_by_username: Box<dyn KeyValueDb>,
+pub struct KeyValueDb {
+    profile_by_user_id: KeyValueDbRef,
+    user_id_by_username: KeyValueDbRef,
 }
 
-impl ImplKeyValueDb {
-    pub fn new(key_value_db: Arc<dyn KeyValueDb>) -> Self {
+impl KeyValueDb {
+    pub fn new(key_value_db: KeyValueDbRef) -> Self {
         Self {
             profile_by_user_id: key_value_db
                 .clone()
-                .child(vec!["profile_by_user_id".to_string()]),
+                .child(vec!["profile_by_user_id".to_string()])
+                .into(),
 
-            user_id_by_username: key_value_db.child(vec!["user_id_by_username".to_string()]),
+            user_id_by_username: key_value_db
+                .child(vec!["user_id_by_username".to_string()])
+                .into(),
         }
     }
 }
 
 #[async_trait]
-impl UserProfileDb for ImplKeyValueDb {
+impl UserProfileDb for KeyValueDb {
     async fn find_one_by_user_id(
         &self,
         user_id: &UserId,

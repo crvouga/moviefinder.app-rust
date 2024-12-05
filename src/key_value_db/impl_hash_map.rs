@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 use crate::core::unit_of_work::UnitOfWork;
@@ -7,16 +6,16 @@ use crate::core::unit_of_work::UnitOfWork;
 use super::interface::{to_namespaced_key, KeyValueDb};
 
 #[derive(Clone)]
-pub struct ImplHashMap {
+pub struct HashMap {
     namespace: Vec<String>,
-    map: Arc<RwLock<HashMap<String, String>>>,
+    map: Arc<RwLock<std::collections::HashMap<String, String>>>,
 }
 
-impl ImplHashMap {
+impl HashMap {
     pub fn new() -> Self {
         Self {
             namespace: vec![],
-            map: Arc::new(RwLock::new(HashMap::new())),
+            map: Arc::new(RwLock::new(std::collections::HashMap::new())),
         }
     }
 
@@ -26,7 +25,7 @@ impl ImplHashMap {
 }
 
 #[async_trait]
-impl KeyValueDb for ImplHashMap {
+impl KeyValueDb for HashMap {
     async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map = self.map.read().unwrap();
@@ -92,7 +91,7 @@ impl KeyValueDb for ImplHashMap {
             .map(|s| s.to_string())
             .collect();
 
-        Box::new(ImplHashMap {
+        Box::new(HashMap {
             namespace: new_namespace,
             map: Arc::clone(&self.map),
         })

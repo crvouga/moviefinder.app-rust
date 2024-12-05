@@ -19,7 +19,7 @@ mod tests {
         let base = BaseFixture::new().await;
 
         fixtures.push(Fixture {
-            feed_session_mapping_db: Box::new(impl_key_value_db::ImplKeyValueDb::new(
+            feed_session_mapping_db: Box::new(impl_key_value_db::KeyValueDb::new(
                 base.ctx.key_value_db.clone(),
             )),
         });

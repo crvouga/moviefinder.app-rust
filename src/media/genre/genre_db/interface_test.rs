@@ -6,7 +6,7 @@ mod tests {
     use crate::{
         env::TestEnv,
         fixture::BaseFixture,
-        media::genre::genre_db::{impl_tmdb::ImplTmdb, interface::GenreDb},
+        media::genre::genre_db::{impl_tmdb::Tmdb, interface::GenreDb},
     };
 
     struct Fixture {
@@ -20,7 +20,7 @@ mod tests {
 
         if f.env.test_env == TestEnv::Integration {
             let tmdb = Fixture {
-                genre_db: Arc::new(ImplTmdb::new(f.ctx.tmdb_api)),
+                genre_db: Arc::new(Tmdb::new(f.ctx.tmdb_api)),
             };
 
             fixtures.push(tmdb);

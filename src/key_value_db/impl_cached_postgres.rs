@@ -1,5 +1,5 @@
 use super::{
-    impl_hash_map::ImplHashMap, impl_postgres::ImplPostgres, impl_with_cache, interface::KeyValueDb,
+    impl_hash_map::HashMap, impl_postgres::Postgres, impl_with_cache, interface::KeyValueDb,
 };
 use crate::core::{
     db_conn_sql::interface::DbConnSql, logger::interface::Logger, unit_of_work::UnitOfWork,
@@ -7,17 +7,17 @@ use crate::core::{
 use async_trait::async_trait;
 use std::sync::Arc;
 
-pub struct ImplCachedPostgres<T: DbConnSql + 'static> {
+pub struct CachedPostgres<T: DbConnSql + 'static> {
     impl_with_cache: Box<dyn KeyValueDb>,
-    impl_postgres: Arc<ImplPostgres<T>>,
-    impl_hash_map: Arc<ImplHashMap>,
+    impl_postgres: Arc<Postgres<T>>,
+    impl_hash_map: Arc<HashMap>,
 }
 
-impl<T: DbConnSql + 'static> ImplCachedPostgres<T> {
+impl<T: DbConnSql + 'static> CachedPostgres<T> {
     pub fn new(logger: Arc<dyn Logger>, db_conn_sql: Arc<T>) -> Self {
-        let impl_postgres = Arc::new(ImplPostgres::new(logger.clone(), db_conn_sql.clone()));
-        let impl_hash_map = Arc::new(ImplHashMap::new());
-        let impl_with_cache = Box::new(impl_with_cache::ImplWithCache::new(
+        let impl_postgres = Arc::new(Postgres::new(logger.clone(), db_conn_sql.clone()));
+        let impl_hash_map = Arc::new(HashMap::new());
+        let impl_with_cache = Box::new(impl_with_cache::WithCache::new(
             impl_postgres.clone(),
             impl_hash_map.clone(),
         ));
@@ -30,7 +30,7 @@ impl<T: DbConnSql + 'static> ImplCachedPostgres<T> {
 }
 
 #[async_trait]
-impl<T: DbConnSql> KeyValueDb for ImplCachedPostgres<T> {
+impl<T: DbConnSql> KeyValueDb for CachedPostgres<T> {
     async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
         self.impl_with_cache.get(key).await
     }

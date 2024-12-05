@@ -39,7 +39,7 @@ pub async fn fixtures() -> Vec<Fixture> {
 
     if base_fixture.env.test_env == env::TestEnv::Integration {
         let fixture = Fixture {
-            media_db: Box::new(impl_tmdb::ImplTmdb::new(
+            media_db: Box::new(impl_tmdb::Tmdb::new(
                 base_fixture.ctx.logger.clone(),
                 base_fixture.ctx.tmdb_api.clone(),
             )),

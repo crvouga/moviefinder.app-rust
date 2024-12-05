@@ -12,15 +12,16 @@ use async_trait::async_trait;
 use std::sync::Arc;
 
 use super::interface::{PersonDb, PersonQuery, PersonQueryField};
-pub struct ImplTmdb {
+
+pub struct Tmdb {
     tmdb_api: Arc<tmdb_api::TmdbApi>,
     logger: Arc<dyn Logger>,
 }
 
-impl ImplTmdb {
-    pub fn new(logger: Arc<dyn Logger>, tmdb_api: Arc<tmdb_api::TmdbApi>) -> ImplTmdb {
+impl Tmdb {
+    pub fn new(logger: Arc<dyn Logger>, tmdb_api: Arc<tmdb_api::TmdbApi>) -> Tmdb {
         let logger = logger.child("impl_tmdb");
-        ImplTmdb { tmdb_api, logger }
+        Tmdb { tmdb_api, logger }
     }
 }
 
@@ -34,7 +35,7 @@ impl From<(&TmdbConfig, PersonResult)> for Person {
     }
 }
 
-impl ImplTmdb {
+impl Tmdb {
     async fn person_search(
         &self,
         query: &PersonQuery,
@@ -92,7 +93,7 @@ impl ImplTmdb {
 }
 
 #[async_trait]
-impl PersonDb for ImplTmdb {
+impl PersonDb for Tmdb {
     async fn query(&self, query: PersonQuery) -> Result<Paginated<Person>, String> {
         debug!(self.logger, "query {:?}", query);
 

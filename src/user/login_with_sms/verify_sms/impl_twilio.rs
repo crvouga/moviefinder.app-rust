@@ -2,13 +2,13 @@ use async_trait::async_trait;
 
 use super::interface::{VerifyCodeError, VerifySms};
 
-pub struct Fake {
+pub struct Twilio {
     correct_code: String,
 }
 
-impl Fake {
+impl Twilio {
     pub fn new() -> Self {
-        Fake {
+        Twilio {
             correct_code: "123".to_string(),
         }
     }
@@ -19,7 +19,7 @@ const SHOULD_ERROR_SEND_CODE: bool = false;
 const SHOULD_ERROR_VERIFY_CODE: bool = false;
 
 #[async_trait]
-impl VerifySms for Fake {
+impl VerifySms for Twilio {
     async fn send_code(&self, _phone_number: &str) -> Result<(), std::io::Error> {
         if SHOULD_SLEEP {
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;

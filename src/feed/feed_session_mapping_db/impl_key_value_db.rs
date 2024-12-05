@@ -1,19 +1,18 @@
 use crate::{
     core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
     feed::feed_id::FeedId,
-    key_value_db::interface::KeyValueDb,
+    key_value_db::interface::KeyValueDbRef,
 };
 use async_trait::async_trait;
-use std::sync::Arc;
 
 use super::interface::FeedSessionMappingDb;
 
-pub struct ImplKeyValueDb {
-    key_value_db: Arc<dyn KeyValueDb>,
+pub struct KeyValueDb {
+    key_value_db: KeyValueDbRef,
 }
 
-impl ImplKeyValueDb {
-    pub fn new(key_value_db: Arc<dyn KeyValueDb>) -> Self {
+impl KeyValueDb {
+    pub fn new(key_value_db: KeyValueDbRef) -> Self {
         Self {
             key_value_db: key_value_db
                 .child(vec!["session-feed-mapping".to_string()])
@@ -23,7 +22,7 @@ impl ImplKeyValueDb {
 }
 
 #[async_trait]
-impl FeedSessionMappingDb for ImplKeyValueDb {
+impl FeedSessionMappingDb for KeyValueDb {
     async fn get(&self, session_id: SessionId) -> Result<Option<FeedId>, std::io::Error> {
         match self.key_value_db.get(session_id.as_str()).await {
             Ok(Some(value)) => Ok(Some(FeedId::new(&value))),

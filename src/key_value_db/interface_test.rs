@@ -7,8 +7,8 @@ mod tests {
         core::{unit_of_work::UnitOfWork, uuid},
         fixture::BaseFixture,
         key_value_db::{
-            impl_cached_postgres::ImplCachedPostgres, impl_hash_map::ImplHashMap,
-            impl_postgres::ImplPostgres, interface::KeyValueDb,
+            impl_cached_postgres::CachedPostgres, impl_hash_map::HashMap, impl_postgres::Postgres,
+            interface::KeyValueDb,
         },
     };
 
@@ -37,23 +37,24 @@ mod tests {
         let mut fixtures: Vec<Fixture> = vec![];
 
         fixtures.push(Fixture {
-            key_value_db: Box::new(ImplHashMap::new()),
+            key_value_db: Box::new(HashMap::new()),
         });
 
         if base_fixture.env.test_env.is_integration() {
             fixtures.push(Fixture {
-                key_value_db: Box::new(ImplPostgres::new(
+                key_value_db: Box::new(Postgres::new(
+                    base_fixture.ctx.logger.clone(),
+                    base_fixture.ctx.db_conn_sql.clone(),
+                )),
+            });
+
+            fixtures.push(Fixture {
+                key_value_db: Box::new(CachedPostgres::new(
                     base_fixture.ctx.logger.clone(),
                     base_fixture.ctx.db_conn_sql.clone(),
                 )),
             });
         }
-        fixtures.push(Fixture {
-            key_value_db: Box::new(ImplCachedPostgres::new(
-                base_fixture.ctx.logger.clone(),
-                base_fixture.ctx.db_conn_sql.clone(),
-            )),
-        });
 
         fixtures
     }

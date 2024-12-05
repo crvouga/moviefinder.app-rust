@@ -11,13 +11,13 @@ use crate::{
 
 use super::interface::DbConnSql;
 
-pub struct ImplPostgres {
+pub struct Postgres {
     client: tokio_postgres::Client,
     simulate_latency: Option<Duration>,
     logger: Arc<dyn Logger>,
 }
 
-impl ImplPostgres {
+impl Postgres {
     pub async fn new(logger_parent: Arc<dyn Logger>, database_url: &str) -> Result<Self, String> {
         let (client, connection) = tokio_postgres::connect(database_url, NoTls)
             .await
@@ -45,7 +45,7 @@ impl ImplPostgres {
 }
 
 #[async_trait]
-impl DbConnSql for ImplPostgres {
+impl DbConnSql for Postgres {
     async fn query<T, F>(&self, parse_row_json: Box<F>, sql: &Sql) -> Result<Vec<T>, std::io::Error>
     where
         F: Fn(String) -> Result<T, std::io::Error> + Send + Sync,

@@ -22,9 +22,7 @@ mod tests {
         let base = BaseFixture::new().await;
 
         fixtures.push(Fixture {
-            user_session_db: Box::new(impl_key_value_db::ImplKeyValueDb::new(
-                base.ctx.key_value_db,
-            )),
+            user_session_db: Box::new(impl_key_value_db::KeyValueDb::new(base.ctx.key_value_db)),
         });
 
         fixtures

@@ -12,12 +12,12 @@ use crate::{
 };
 use async_trait::async_trait;
 
-pub struct Impl_ {
+pub struct Poly {
     genre_db: Arc<dyn GenreDb>,
     person_db: Arc<dyn PersonDb>,
 }
 
-impl Impl_ {
+impl Poly {
     pub fn new(genre_db: Arc<dyn GenreDb>, person_db: Arc<dyn PersonDb>) -> Self {
         Self {
             genre_db,
@@ -27,7 +27,7 @@ impl Impl_ {
 }
 
 #[async_trait]
-impl FeedTagDb for Impl_ {
+impl FeedTagDb for Poly {
     async fn query(&self, query: Query<FeedTagQueryField>) -> Result<Paginated<FeedTag>, String> {
         let genres = self.genre_db.get_all().await.unwrap_or(vec![]);
 

@@ -1,31 +1,33 @@
 use super::interface::UserAccountDb;
 use crate::{
-    core::unit_of_work::UnitOfWork, key_value_db::interface::KeyValueDb,
-    user::user_account::user_account_::UserAccount, user::user_id::UserId,
+    core::unit_of_work::UnitOfWork,
+    key_value_db::interface::KeyValueDbRef,
+    user::{user_account::user_account_::UserAccount, user_id::UserId},
 };
 use async_trait::async_trait;
-use std::sync::Arc;
 
-pub struct ImplKeyValueDb {
-    account_by_user_id: Box<dyn KeyValueDb>,
-    user_id_by_phone_number: Box<dyn KeyValueDb>,
+pub struct KeyValueDb {
+    account_by_user_id: KeyValueDbRef,
+    user_id_by_phone_number: KeyValueDbRef,
 }
 
-impl ImplKeyValueDb {
-    pub fn new(key_value_db: Arc<dyn KeyValueDb>) -> Self {
+impl KeyValueDb {
+    pub fn new(key_value_db: KeyValueDbRef) -> Self {
         Self {
             account_by_user_id: key_value_db
                 .clone()
-                .child(vec!["user".to_string(), "account".to_string()]),
+                .child(vec!["user".to_string(), "account".to_string()])
+                .into(),
 
             user_id_by_phone_number: key_value_db
-                .child(vec!["user".to_string(), "user_id".to_string()]),
+                .child(vec!["user".to_string(), "user_id".to_string()])
+                .into(),
         }
     }
 }
 
 #[async_trait]
-impl UserAccountDb for ImplKeyValueDb {
+impl UserAccountDb for KeyValueDb {
     async fn find_one_by_phone_number(
         &self,
         phone_number: &str,

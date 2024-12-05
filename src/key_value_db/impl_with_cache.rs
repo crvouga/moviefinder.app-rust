@@ -5,19 +5,19 @@ use crate::core::unit_of_work::UnitOfWork;
 
 use super::interface::KeyValueDb;
 
-pub struct ImplWithCache {
+pub struct WithCache {
     source: Arc<dyn KeyValueDb>,
     cache: Arc<dyn KeyValueDb>,
 }
 
-impl ImplWithCache {
+impl WithCache {
     pub fn new(source: Arc<dyn KeyValueDb>, cache: Arc<dyn KeyValueDb>) -> Self {
         Self { source, cache }
     }
 }
 
 #[async_trait]
-impl KeyValueDb for ImplWithCache {
+impl KeyValueDb for WithCache {
     async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
         let got_cache = self.cache.get(key).await?;
 

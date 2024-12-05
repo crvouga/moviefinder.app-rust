@@ -1,32 +1,33 @@
+use super::interface::UserSessionDb;
 use crate::{
     core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
-    key_value_db::interface::KeyValueDb,
+    key_value_db::interface::KeyValueDbRef,
     user::user_session::user_session_::UserSession,
 };
 use async_trait::async_trait;
-use std::sync::Arc;
 
-use super::interface::UserSessionDb;
-
-pub struct ImplKeyValueDb {
-    session_by_session_id: Box<dyn KeyValueDb>,
-    session_id_by_user_id: Box<dyn KeyValueDb>,
+pub struct KeyValueDb {
+    session_by_session_id: KeyValueDbRef,
+    session_id_by_user_id: KeyValueDbRef,
 }
 
-impl ImplKeyValueDb {
-    pub fn new(key_value_db: Arc<dyn KeyValueDb>) -> Self {
+impl KeyValueDb {
+    pub fn new(key_value_db: KeyValueDbRef) -> Self {
         Self {
             session_by_session_id: key_value_db
                 .clone()
-                .child(vec!["session_by_session_id".to_string()]),
+                .child(vec!["session_by_session_id".to_string()])
+                .into(),
 
-            session_id_by_user_id: key_value_db.child(vec!["session_id_by_user_id".to_string()]),
+            session_id_by_user_id: key_value_db
+                .child(vec!["session_id_by_user_id".to_string()])
+                .into(),
         }
     }
 }
 
 #[async_trait]
-impl UserSessionDb for ImplKeyValueDb {
+impl UserSessionDb for KeyValueDb {
     // async fn find_by_user_id(
     //     &self,
     //     user_id: &UserId,

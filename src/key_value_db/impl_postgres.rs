@@ -13,13 +13,13 @@ use crate::{
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-pub struct ImplPostgres<T: DbConnSql + 'static> {
+pub struct Postgres<T: DbConnSql + 'static> {
     db_conn_sql: Arc<T>,
     namespace: Vec<String>,
     logger: Arc<dyn Logger>,
 }
 
-impl<T: DbConnSql + 'static> ImplPostgres<T> {
+impl<T: DbConnSql + 'static> Postgres<T> {
     pub fn new(logger: Arc<dyn Logger>, db_conn_sql: Arc<T>) -> Self {
         Self {
             logger: logger.child("key_value_db_postgres"),
@@ -43,7 +43,7 @@ fn parse_row_json(json_row: String) -> Result<Row, std::io::Error> {
 }
 
 #[async_trait]
-impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
+impl<T: DbConnSql> KeyValueDb for Postgres<T> {
     async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
@@ -210,7 +210,7 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
             .chain(namespace.iter())
             .cloned()
             .collect();
-        Box::new(ImplPostgres {
+        Box::new(Postgres {
             db_conn_sql: self.db_conn_sql.clone(),
             namespace: namespace_new,
             logger: self.logger.clone(),
