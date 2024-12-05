@@ -1,13 +1,16 @@
+#[cfg(test)]
 use crate::{
     env,
     fixture::BaseFixture,
     media::person::person_db::{impl_tmdb, interface::PersonDb},
 };
 
+#[cfg(test)]
 pub struct Fixture {
     pub person_db: Box<dyn PersonDb>,
 }
 
+#[cfg(test)]
 pub async fn fixtures() -> Vec<Fixture> {
     let base_fixture = BaseFixture::new().await;
     let mut fixtures: Vec<Fixture> = vec![];

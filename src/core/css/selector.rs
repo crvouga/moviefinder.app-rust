@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub fn is_valid(selector: &str) -> bool {
     if selector.is_empty() {
         return false;

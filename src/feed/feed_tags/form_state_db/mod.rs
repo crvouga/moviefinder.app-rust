@@ -1,6 +1,7 @@
 use super::form_state::FormState;
 use crate::{
     core::{logger::interface::Logger, unit_of_work::UnitOfWork},
+    debug,
     feed::feed_id::FeedId,
     key_value_db::interface::KeyValueDb,
 };
@@ -26,6 +27,7 @@ impl FeedTagsFormStateDb {
     }
 
     pub async fn get(&self, feed_id: &FeedId) -> Result<Option<FormState>, std::io::Error> {
+        debug!(self.logger, "get {:?}", feed_id);
         let got = self.key_value_db.get(feed_id.as_str()).await.unwrap();
 
         if got.is_none() {
@@ -40,6 +42,7 @@ impl FeedTagsFormStateDb {
     }
 
     pub async fn put(&self, uow: UnitOfWork, form_state: &FormState) -> Result<(), std::io::Error> {
+        debug!(self.logger, "put {:?}", form_state);
         let value = serde_json::to_string(&form_state)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
 

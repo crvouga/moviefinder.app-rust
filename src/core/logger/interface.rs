@@ -10,21 +10,21 @@ pub trait Logger: Send + Sync {
 }
 
 #[macro_export]
-macro_rules! log_info {
+macro_rules! info {
     ($logger:expr, $($arg:tt)*) => {
         $logger.info(format_args!($($arg)*));
     };
 }
 
 #[macro_export]
-macro_rules! log_debug {
+macro_rules! debug {
     ($logger:expr, $($arg:tt)*) => {
         $logger.debug(format_args!($($arg)*));
     };
 }
 
 #[macro_export]
-macro_rules! log_error {
+macro_rules! error {
     ($logger:expr, $($arg:tt)*) => {
         $logger.error(format_args!($($arg)*));
     };

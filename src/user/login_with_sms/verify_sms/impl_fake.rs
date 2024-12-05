@@ -13,10 +13,10 @@ impl ImplFake {
         }
     }
 
-    pub fn correct_code(mut self, value: &str) -> Self {
-        self.correct_code = value.to_string();
-        self
-    }
+    // pub fn correct_code(mut self, value: &str) -> Self {
+    //     self.correct_code = value.to_string();
+    //     self
+    // }
 }
 
 const SHOULD_SLEEP: bool = true;

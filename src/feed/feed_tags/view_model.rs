@@ -19,28 +19,6 @@ pub struct ViewModel {
 }
 
 impl ViewModel {
-    pub fn to_seperated_tags(&self) -> (Vec<FeedTag>, Vec<FeedTag>) {
-        let mut active: Vec<FeedTag> = self
-            .tags
-            .clone()
-            .into_iter()
-            .filter(|feed_tag| self.form_state.tags.contains(feed_tag))
-            .collect();
-        active.sort();
-        active.dedup();
-
-        let mut inactive: Vec<FeedTag> = self
-            .tags
-            .clone()
-            .into_iter()
-            .filter(|feed_tag| !self.form_state.tags.contains(feed_tag))
-            .collect();
-        inactive.sort();
-        inactive.dedup();
-
-        (active, inactive)
-    }
-
     pub fn to_tags(&self) -> Vec<FeedTag> {
         let mut tags = self.tags.clone();
         tags.sort();

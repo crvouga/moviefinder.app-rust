@@ -10,10 +10,13 @@ pub struct Media {
     pub id: MediaId,
     pub title: String,
     pub description: String,
+    #[allow(dead_code)]
     pub media_type: MediaType,
+    #[allow(dead_code)]
     pub genre_ids: HashSet<GenreId>,
     pub poster: ImageSet,
     pub backdrop: ImageSet,
+    #[allow(dead_code)]
     pub popularity: f64,
 }
 

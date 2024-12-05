@@ -9,7 +9,6 @@ use std::time::Duration;
 pub enum ToastVariant {
     #[default]
     Dark,
-    Success,
     Error,
 }
 
@@ -67,7 +66,7 @@ impl Toast {
                     .js(&js_timeout(self.duration, js_close))
             )
             .class(match self.variant {
-                ToastVariant::Success => "bg-green-600 text-white",
+                // ToastVariant::Success => "bg-green-600 text-white",
                 ToastVariant::Dark => "bg-neutral-700 text-white",
                 ToastVariant::Error => "border-red-600 border bg-red-800 text-white",
             })

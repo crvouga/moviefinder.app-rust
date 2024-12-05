@@ -1,7 +1,7 @@
 use crate::{
     core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
     key_value_db::interface::KeyValueDb,
-    user::{user_id::UserId, user_session::user_session_::UserSession},
+    user::user_session::user_session_::UserSession,
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -27,19 +27,19 @@ impl ImplKeyValueDb {
 
 #[async_trait]
 impl UserSessionDb for ImplKeyValueDb {
-    async fn find_by_user_id(
-        &self,
-        user_id: &UserId,
-    ) -> Result<Option<UserSession>, std::io::Error> {
-        let maybe_session_id = self.session_id_by_user_id.get(user_id.as_str()).await?;
+    // async fn find_by_user_id(
+    //     &self,
+    //     user_id: &UserId,
+    // ) -> Result<Option<UserSession>, std::io::Error> {
+    //     let maybe_session_id = self.session_id_by_user_id.get(user_id.as_str()).await?;
 
-        let session_id = match maybe_session_id {
-            Some(id) => SessionId::new(&id).unwrap_or_default(),
-            None => return Ok(None),
-        };
+    //     let session_id = match maybe_session_id {
+    //         Some(id) => SessionId::new(&id).unwrap_or_default(),
+    //         None => return Ok(None),
+    //     };
 
-        self.find_by_session_id(&session_id).await
-    }
+    //     self.find_by_session_id(&session_id).await
+    // }
 
     async fn find_by_session_id(
         &self,

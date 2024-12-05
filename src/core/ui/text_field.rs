@@ -10,7 +10,6 @@ pub struct TextField {
     label: String,
     placeholder: String,
     input: Option<Box<dyn Fn(Elem) -> Elem>>,
-    error: Option<String>,
     model_error: String,
 }
 
@@ -32,14 +31,6 @@ impl TextField {
 
     pub fn model_error(mut self, value: &str) -> Self {
         self.model_error = value.to_string();
-        self
-    }
-
-    pub fn error(mut self, error: &str) -> Self {
-        if error.is_empty() {
-            return self;
-        }
-        self.error = Some(error.to_string());
         self
     }
 

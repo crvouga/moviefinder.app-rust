@@ -27,11 +27,6 @@ impl TopBar {
         self
     }
 
-    pub fn cancel_url(mut self, value: String) -> Self {
-        self.cancel_url = Some(value);
-        self
-    }
-
     pub fn view(self) -> Elem {
         let back_button_elem = self
             .back_url
@@ -99,6 +94,7 @@ impl CancelButton {
             .aria_label("cancel")
             .type_("button")
             .tab_index(0)
+            .data_on(|b| b.click().push_then_get(&self.url.unwrap_or("".to_string())))
             .child(icon::x_mark("size-8"))
     }
 }

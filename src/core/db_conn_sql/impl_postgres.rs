@@ -6,7 +6,7 @@ use tokio_postgres::{self, NoTls};
 
 use crate::{
     core::{logger::interface::Logger, sql::Sql},
-    log_debug, log_error,
+    debug, error,
 };
 
 use super::interface::DbConnSql;
@@ -27,7 +27,7 @@ impl ImplPostgres {
 
         tokio::spawn(async move {
             if let Err(err) = connection.await {
-                log_error!(logger, "Database connection error: {}", err);
+                error!(logger, "Database connection error: {}", err);
             }
         });
 
@@ -75,7 +75,7 @@ impl DbConnSql for ImplPostgres {
 
         let dur = start.elapsed();
 
-        log_debug!(self.logger, "\n\tsql={}\n\tduration={:?}", sql.query, dur);
+        debug!(self.logger, "\n\tsql={}\n\tduration={:?}", sql.query, dur);
 
         Ok(results)
     }

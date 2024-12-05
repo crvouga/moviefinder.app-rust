@@ -34,11 +34,6 @@ impl Chip {
         self
     }
 
-    pub fn name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
         self

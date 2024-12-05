@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use flate2::{write::GzEncoder, Compression};
 use std::collections::HashMap;
 use std::io::Write;

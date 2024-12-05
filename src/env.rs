@@ -2,48 +2,12 @@ use std::{env, time::Duration};
 
 use crate::core::{self, env_stage::EnvStage};
 
-#[derive(PartialEq, Eq, Clone)]
-pub enum TestEnv {
-    Unit,
-    Integration,
-    None,
-}
-
-impl TestEnv {
-    pub fn is_unit(&self) -> bool {
-        self == &TestEnv::Unit
-    }
-
-    pub fn is_integration(&self) -> bool {
-        self == &TestEnv::Integration
-    }
-
-    pub fn is_none(&self) -> bool {
-        self == &TestEnv::None
-    }
-}
-
-impl TestEnv {
-    pub fn from_str(s: &str) -> TestEnv {
-        let cleaned = s.to_ascii_lowercase();
-
-        if cleaned.contains("unit") {
-            return TestEnv::Unit;
-        }
-
-        if cleaned.contains("int") {
-            return TestEnv::Integration;
-        }
-
-        TestEnv::None
-    }
-}
-
 pub struct Env {
     pub tmdb_api_read_access_token: String,
     pub port: String,
     pub database_url: String,
     pub simulate_latency: Option<Duration>,
+    #[cfg(test)]
     pub test_env: TestEnv,
 }
 
@@ -59,7 +23,6 @@ impl Env {
         let tmdb_api_read_access_token =
             env::var("TMDB_API_READ_ACCESS_TOKEN").unwrap_or("".to_string());
         let port = env::var("PORT").unwrap_or("".to_string());
-        let test_env = TestEnv::from_str(&env::var("TEST_ENV").unwrap_or("".to_string()));
         let database_url = env::var("DATABASE_URL").unwrap_or("".to_string());
 
         let simulate_latency_duration = Duration::from_millis(100);
@@ -70,14 +33,50 @@ impl Env {
             None
         };
 
+        #[cfg(test)]
+        let test_env = TestEnv::from_str(&env::var("TEST_ENV").unwrap_or("".to_string()));
+
         let env = Env {
             simulate_latency,
             database_url,
             tmdb_api_read_access_token,
             port,
+            #[cfg(test)]
             test_env,
         };
 
         env
+    }
+}
+
+#[cfg(test)]
+#[derive(PartialEq, Eq, Clone)]
+pub enum TestEnv {
+    Unit,
+    Integration,
+    None,
+}
+
+#[cfg(test)]
+impl TestEnv {
+    pub fn is_integration(&self) -> bool {
+        self == &TestEnv::Integration
+    }
+}
+
+#[cfg(test)]
+impl TestEnv {
+    pub fn from_str(s: &str) -> TestEnv {
+        let cleaned = s.to_ascii_lowercase();
+
+        if cleaned.contains("unit") {
+            return TestEnv::Unit;
+        }
+
+        if cleaned.contains("int") {
+            return TestEnv::Integration;
+        }
+
+        TestEnv::None
     }
 }

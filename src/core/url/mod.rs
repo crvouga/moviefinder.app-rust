@@ -10,6 +10,7 @@ pub struct Url {
 }
 
 impl Url {
+    #[allow(dead_code)]
     pub fn from_str(url: &str) -> Result<Url, String> {
         let url_parts: Vec<&str> = url.split('?').collect();
 

@@ -25,11 +25,6 @@ impl ServerSentEvent {
         w.write_sse_event(&self.event, self.data.iter().map(|s| s.as_str()).collect())
             .await
     }
-
-    pub fn println(&mut self) -> &mut Self {
-        println!("ServerSentEvent: {:?}", self);
-        self
-    }
 }
 
 impl ResponseWriter {

@@ -1,6 +1,7 @@
 use std::{collections::HashMap, hash::Hash};
 
 pub trait VecExt<T> {
+    #[allow(dead_code)]
     fn frequencies(self) -> HashMap<T, usize>
     where
         T: Hash + Eq;

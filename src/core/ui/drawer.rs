@@ -9,7 +9,6 @@ pub struct Drawer {
     model_open: String,
     initial_open: bool,
     content: Option<Elem>,
-    position: Position,
     on_close: String,
 }
 
@@ -17,12 +16,6 @@ impl Elem {
     pub fn src_drawer_element(self) -> Self {
         self.src("./drawer-element.js")
     }
-}
-
-#[derive(Default)]
-pub enum Position {
-    #[default]
-    Bottom,
 }
 
 impl Drawer {

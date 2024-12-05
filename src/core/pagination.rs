@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Pagination {
     pub limit: usize,
@@ -8,9 +9,7 @@ pub struct Pagination {
 pub struct Paginated<T> {
     pub items: Vec<T>,
     pub total: usize,
-
     pub limit: usize,
-
     pub offset: usize,
 }
 

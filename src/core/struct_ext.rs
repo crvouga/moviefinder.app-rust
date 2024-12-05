@@ -20,6 +20,7 @@ pub fn struct_to_map<T: Serialize>(input: &T) -> HashMap<String, String> {
     map
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

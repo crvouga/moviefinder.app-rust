@@ -8,7 +8,7 @@ use crate::{
         sql::{Sql, SqlPrimitive, SqlVarType},
         unit_of_work::UnitOfWork,
     },
-    log_debug,
+    debug,
 };
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -58,7 +58,7 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
             .await?;
         let value = queried.first().and_then(|row| row.value.clone());
 
-        log_debug!(self.logger, "get key={}", key);
+        debug!(self.logger, "get key={}", key);
 
         Ok(value)
     }
@@ -83,7 +83,7 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
             SqlVarType::Primitive(SqlPrimitive::Text(value.to_string())),
         );
 
-        log_debug!(self.logger, "put key={}", key);
+        debug!(self.logger, "put key={}", key);
 
         let old_value = self
             .db_conn_sql
@@ -158,7 +158,7 @@ impl<T: DbConnSql> KeyValueDb for ImplPostgres<T> {
             SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
         );
 
-        log_debug!(self.logger, "zap key={}", key);
+        debug!(self.logger, "zap key={}", key);
 
         let db_conn_sql = self.db_conn_sql.clone();
         let namespace = self.namespace.clone();

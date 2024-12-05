@@ -3,7 +3,7 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         query::{Query, QueryFilter, QueryOp},
-        ui::{image::Image, top_bar::TopBar},
+        ui::{error, image::Image, top_bar::TopBar},
     },
     ctx::Ctx,
     feed,
@@ -44,7 +44,10 @@ pub async fn respond(
                 .next();
 
             let media = match queried {
-                None => return Ok(()),
+                None => {
+                    w.send_screen(error::screen("Media not found")).await?;
+                    return Ok(());
+                }
                 Some(media) => media,
             };
 

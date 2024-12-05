@@ -4,7 +4,6 @@ pub mod button;
 pub mod chip;
 pub mod drawer;
 pub mod error;
-pub mod form;
 pub mod head_injector;
 pub mod icon;
 pub mod image;

@@ -1,4 +1,3 @@
-pub mod cache;
 pub mod client;
 pub mod compress;
 pub mod content;

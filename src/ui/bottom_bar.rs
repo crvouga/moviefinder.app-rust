@@ -29,14 +29,12 @@ impl BottomBar {
         self
     }
 
-    pub fn active_home(mut self) -> Self {
-        self.active = Active::Home;
-        self
+    pub fn active_home(self) -> Self {
+        self.active(Active::Home)
     }
 
-    pub fn active_account(mut self) -> Self {
-        self.active = Active::Account;
-        self
+    pub fn active_account(self) -> Self {
+        self.active(Active::Account)
     }
 
     pub fn view(self) -> Elem {

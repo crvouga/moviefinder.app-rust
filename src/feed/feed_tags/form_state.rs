@@ -33,17 +33,4 @@ impl FormState {
 
         form_state
     }
-
-    pub fn toggle(self, tag: &FeedTag) -> Self {
-        let mut form_state = self.clone();
-
-        if form_state.tags.contains(tag) {
-            form_state.tags.retain(|t| t != tag);
-        } else {
-            form_state.tags.retain(|t| t != tag);
-            form_state.tags.push(tag.clone());
-        }
-
-        form_state
-    }
 }

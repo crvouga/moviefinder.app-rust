@@ -2,6 +2,7 @@
 // use alloc::vec::Vec;
 use core::cmp::min;
 
+#[allow(dead_code)]
 #[derive(Copy, Clone)]
 pub enum Alphabet {
     Crockford,

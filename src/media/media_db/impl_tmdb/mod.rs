@@ -1,7 +1,7 @@
 use super::interface::{MediaDb, MediaQuery};
 use crate::{
     core::{logger::interface::Logger, pagination::Paginated, tmdb_api},
-    log_info,
+    info,
     media::media_::Media,
 };
 use async_trait::async_trait;
@@ -32,10 +32,10 @@ impl MediaDb for ImplTmdb {
 
         let query_plan: TmdbQueryPlan = query.clone().into();
 
-        log_info!(self.logger, "query= {:?}", query);
-        log_info!(self.logger, "query_plan=");
+        info!(self.logger, "query= {:?}", query);
+        info!(self.logger, "query_plan=");
         for item in query_plan.items.iter() {
-            log_info!(self.logger, "\t{:?}", item);
+            info!(self.logger, "\t{:?}", item);
         }
 
         let result = query_plan

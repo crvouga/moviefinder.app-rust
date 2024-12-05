@@ -26,15 +26,16 @@ use crate::{
     },
 };
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct Ctx {
     pub key_value_db: Arc<dyn KeyValueDb>,
     pub db_conn_sql: Arc<ImplPostgres>,
     pub http_client: Arc<HttpClient>,
-    pub media_db: Arc<dyn MediaDb>,
     pub tmdb_api: Arc<TmdbApi>,
     pub genre_db: Arc<dyn GenreDb>,
     pub person_db: Arc<dyn PersonDb>,
+    pub media_db: Arc<dyn MediaDb>,
     pub logger: Arc<dyn Logger>,
     pub feed_db: Arc<dyn FeedDb>,
     pub feed_tags_db: Arc<dyn FeedTagDb>,

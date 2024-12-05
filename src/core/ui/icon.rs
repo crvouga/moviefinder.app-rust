@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::core::html::*;
 
 const BASE_CLASS: &str = "text-inherit";

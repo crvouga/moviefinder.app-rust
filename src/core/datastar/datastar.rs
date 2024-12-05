@@ -153,13 +153,13 @@ impl DataOn {
         }
     }
 
-    pub fn keydown(self) -> Self {
-        Self {
-            event: "keydown".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
+    // pub fn keydown(self) -> Self {
+    //     Self {
+    //         event: "keydown".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
 
     pub fn submit(self) -> Self {
         Self {
@@ -189,13 +189,13 @@ impl DataOn {
         }
     }
 
-    pub fn raf(self) -> Self {
-        Self {
-            event: "raf".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
+    // pub fn raf(self) -> Self {
+    //     Self {
+    //         event: "raf".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
 
     pub fn debounce(mut self, duration: Duration) -> Self {
         self.modifiers
@@ -203,31 +203,31 @@ impl DataOn {
         self
     }
 
-    pub fn once(mut self) -> Self {
-        self.modifiers.push("once".to_string());
-        self
-    }
+    // pub fn once(mut self) -> Self {
+    //     self.modifiers.push("once".to_string());
+    //     self
+    // }
 
-    pub fn passive(mut self) -> Self {
-        self.modifiers.push("passive".to_string());
-        self
-    }
+    // pub fn passive(mut self) -> Self {
+    //     self.modifiers.push("passive".to_string());
+    //     self
+    // }
 
-    pub fn capture(mut self) -> Self {
-        self.modifiers.push("capture".to_string());
-        self
-    }
+    // pub fn capture(mut self) -> Self {
+    //     self.modifiers.push("capture".to_string());
+    //     self
+    // }
 
-    pub fn throttle(mut self, duration: Duration) -> Self {
-        self.modifiers
-            .push(format!("throttle_{}ms", duration.as_millis()));
-        self
-    }
+    // pub fn throttle(mut self, duration: Duration) -> Self {
+    //     self.modifiers
+    //         .push(format!("throttle_{}ms", duration.as_millis()));
+    //     self
+    // }
 
-    pub fn window(mut self) -> Self {
-        self.modifiers.push("window".to_string());
-        self
-    }
+    // pub fn window(mut self) -> Self {
+    //     self.modifiers.push("window".to_string());
+    //     self
+    // }
 
     pub fn get(mut self, url: &str) -> Self {
         self.js.push(js_get(url));
@@ -288,9 +288,9 @@ impl Elem {
         self.attr_unsafe("data-model", value)
     }
 
-    pub fn data_ref(self, value: &str) -> Self {
-        self.attr_unsafe("data-ref", value)
-    }
+    // pub fn data_ref(self, value: &str) -> Self {
+    //     self.attr_unsafe("data-ref", value)
+    // }
 
     pub fn data_store(self, value: &str) -> Self {
         self.attr_unsafe("data-store", value)
@@ -308,9 +308,9 @@ impl Elem {
         self.attr_unsafe(&key, &value)
     }
 
-    pub fn data_persist(self, value: &str) -> Self {
-        self.attr_unsafe("data-persist", value)
-    }
+    // pub fn data_persist(self, value: &str) -> Self {
+    //     self.attr_unsafe("data-persist", value)
+    // }
 
     pub fn data_class(self, b: impl FnOnce(DataClass) -> DataClass) -> Self {
         let builder = b(DataClass::new());
@@ -334,9 +334,9 @@ impl Elem {
         self.attr_unsafe("data-show", value)
     }
 
-    pub fn data_computed(self, name: &str, value: &str) -> Self {
-        self.attr_unsafe(&format!("data-computed-{}", name), value)
-    }
+    // pub fn data_computed(self, name: &str, value: &str) -> Self {
+    //     self.attr_unsafe(&format!("data-computed-{}", name), value)
+    // }
 
     pub fn debug_store(self, debug: bool) -> Self {
         if debug {
@@ -347,51 +347,51 @@ impl Elem {
     }
 }
 
-struct MergeFragment {
-    sse: ServerSentEvent,
-    fragment: Elem,
-}
+// pub struct MergeFragment {
+//     sse: ServerSentEvent,
+//     fragment: Elem,
+// }
 
-impl MergeFragment {
-    pub fn new(sse: ServerSentEvent, fragment: Elem) -> Self {
-        Self { fragment, sse }
-    }
+// impl MergeFragment {
+//     pub fn new(sse: ServerSentEvent, fragment: Elem) -> Self {
+//         Self { fragment, sse }
+//     }
 
-    pub fn fragment(&mut self, elem: Elem) -> &mut Self {
-        self.sse.data_fragments(elem);
-        self
-    }
+//     pub fn fragment(&mut self, elem: Elem) -> &mut Self {
+//         self.sse.data_fragments(elem);
+//         self
+//     }
 
-    pub fn merge_mode_outer(&mut self) -> &mut Self {
-        self.sse.data_merge_mode_outer();
-        self
-    }
+//     pub fn merge_mode_outer(&mut self) -> &mut Self {
+//         self.sse.data_merge_mode_outer();
+//         self
+//     }
 
-    pub fn merge_mode_before(&mut self) -> &mut Self {
-        self.sse.data_merge_mode_before();
-        self
-    }
+//     pub fn merge_mode_before(&mut self) -> &mut Self {
+//         self.sse.data_merge_mode_before();
+//         self
+//     }
 
-    pub fn selector(&mut self, selector: &str) -> &mut Self {
-        self.sse.data_selector(selector);
-        self
-    }
+//     pub fn selector(&mut self, selector: &str) -> &mut Self {
+//         self.sse.data_selector(selector);
+//         self
+//     }
 
-    pub fn selector_id(&mut self, id: &str) -> &mut Self {
-        self.sse.data_selector_id(id);
-        self
-    }
+//     pub fn selector_id(&mut self, id: &str) -> &mut Self {
+//         self.sse.data_selector_id(id);
+//         self
+//     }
 
-    pub fn only_if_missing(&mut self, value: bool) -> &mut Self {
-        self.sse.data_only_if_missing(value);
-        self
-    }
-}
+//     pub fn only_if_missing(&mut self, value: bool) -> &mut Self {
+//         self.sse.data_only_if_missing(value);
+//         self
+//     }
+// }
 
 impl ServerSentEvent {
-    pub fn fragment(self, elem: Elem) -> MergeFragment {
-        MergeFragment::new(self, elem)
-    }
+    // pub fn fragment(self, elem: Elem) -> MergeFragment {
+    //     MergeFragment::new(self, elem)
+    // }
 
     pub fn event_merge_fragments(&mut self) -> &mut Self {
         self.event("datastar-merge-fragments")
@@ -405,21 +405,21 @@ impl ServerSentEvent {
         self.data(&format!("signals {}", value))
     }
 
-    pub fn data_only_if_missing(&mut self, value: bool) -> &mut Self {
-        if value {
-            self.data("onlyIfMissing true")
-        } else {
-            self.data("onlyIfMissing false")
-        }
-    }
+    // pub fn data_only_if_missing(&mut self, value: bool) -> &mut Self {
+    //     if value {
+    //         self.data("onlyIfMissing true")
+    //     } else {
+    //         self.data("onlyIfMissing false")
+    //     }
+    // }
 
     pub fn data_merge_mode(&mut self, mode: &str) -> &mut Self {
         self.data(&format!("mergeMode {}", mode))
     }
 
-    pub fn data_merge_mode_outer(&mut self) -> &mut Self {
-        self.data_merge_mode("outer")
-    }
+    // pub fn data_merge_mode_outer(&mut self) -> &mut Self {
+    //     self.data_merge_mode("outer")
+    // }
 
     pub fn data_merge_mode_before(&mut self) -> &mut Self {
         self.data_merge_mode("before")
@@ -448,19 +448,19 @@ impl ServerSentEvent {
         self.data(&data)
     }
 
-    pub fn data_script_redirect(&mut self, url: &str) -> &mut Self {
-        let script = format!("window.location = '{}'", url);
-        self.data_script(&script)
-    }
+    // pub fn data_script_redirect(&mut self, url: &str) -> &mut Self {
+    //     let script = format!("window.location = '{}'", url);
+    //     self.data_script(&script)
+    // }
 
-    pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {
-        let script: String = format!("window.history.pushState(null, '', '{}');", url);
-        self.data_script(&script)
-    }
+    // pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {
+    //     let script: String = format!("window.history.pushState(null, '', '{}');", url);
+    //     self.data_script(&script)
+    // }
 
-    pub fn data_script_replace_url(&mut self, url: &str) -> &mut Self {
-        self.data_script(&js_replace_url(url))
-    }
+    // pub fn data_script_replace_url(&mut self, url: &str) -> &mut Self {
+    //     self.data_script(&js_replace_url(url))
+    // }
 }
 
 impl ResponseWriter {

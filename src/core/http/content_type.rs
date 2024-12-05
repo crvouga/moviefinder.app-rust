@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use super::request::Request;
 
 #[derive(Clone, Debug, PartialEq)]

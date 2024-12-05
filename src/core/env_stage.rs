@@ -19,10 +19,6 @@ impl EnvStage {
         EnvStage::Dev
     }
 
-    pub fn is_prod(&self) -> bool {
-        *self == EnvStage::Prod
-    }
-
     pub fn is_dev(&self) -> bool {
         *self == EnvStage::Dev
     }

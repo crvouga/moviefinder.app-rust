@@ -30,7 +30,7 @@ async fn main() {
 
     let ctx = Arc::new(Ctx::new(&env).await.unwrap());
 
-    log_info!(ctx.logger, "Starting server on http://{}", address);
+    info!(ctx.logger, "Starting server on http://{}", address);
 
     core::http::server::start(&address, move |r, w| respond(ctx.clone(), r, w))
         .await
@@ -61,10 +61,10 @@ async fn respond(
     };
 
     if let None = maybe_route {
-        log_info!(ctx.logger, "No route found for {:?}", request.url.path);
+        info!(ctx.logger, "No route found for {:?}", request.url.path);
     }
 
-    log_info!(
+    info!(
         ctx.logger,
         "{:?} session_id={:?} user_id={:?} params={:?}",
         maybe_route,

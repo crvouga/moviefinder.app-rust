@@ -1,3 +1,4 @@
+#[cfg(test)]
 use crate::{
     env,
     fixture::BaseFixture,
@@ -6,13 +7,16 @@ use crate::{
         media_db::{impl_tmdb, interface::MediaDb},
     },
 };
+#[cfg(test)]
 use std::sync::Arc;
 
+#[cfg(test)]
 pub struct Fixture {
     pub media_db: Box<dyn MediaDb>,
     pub genre_db: Arc<dyn GenreDb>,
 }
 
+#[cfg(test)]
 impl Fixture {
     pub async fn random_genre_id(&self) -> GenreId {
         let genre_ids: Vec<GenreId> = self
@@ -28,6 +32,7 @@ impl Fixture {
     }
 }
 
+#[cfg(test)]
 pub async fn fixtures() -> Vec<Fixture> {
     let base_fixture = BaseFixture::new().await;
     let mut fixtures: Vec<Fixture> = vec![];

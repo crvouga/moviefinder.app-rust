@@ -5,6 +5,7 @@ use crate::{
         query::{QueryFilter, QueryOp},
         tmdb_api::{self, config::TmdbConfig, person::PersonResult, TMDB_PAGE_SIZE},
     },
+    debug,
     media::person::person_::Person,
 };
 use async_trait::async_trait;
@@ -18,11 +19,8 @@ pub struct ImplTmdb {
 
 impl ImplTmdb {
     pub fn new(logger: Arc<dyn Logger>, tmdb_api: Arc<tmdb_api::TmdbApi>) -> ImplTmdb {
-        let logger_new = logger.child("impl_tmdb");
-        ImplTmdb {
-            tmdb_api,
-            logger: logger_new,
-        }
+        let logger = logger.child("impl_tmdb");
+        ImplTmdb { tmdb_api, logger }
     }
 }
 
@@ -96,6 +94,8 @@ impl ImplTmdb {
 #[async_trait]
 impl PersonDb for ImplTmdb {
     async fn query(&self, query: PersonQuery) -> Result<Paginated<Person>, String> {
+        debug!(self.logger, "query {:?}", query);
+
         match &query.filter {
             QueryFilter::Clause(PersonQueryField::Name, QueryOp::Like, search_query) => {
                 self.person_search(&query, search_query).await

@@ -1,5 +1,5 @@
+#![allow(dead_code)]
 use std::fmt;
-
 #[derive(Debug, Default, Clone)]
 pub struct ResponseCookie {
     pub name: String,

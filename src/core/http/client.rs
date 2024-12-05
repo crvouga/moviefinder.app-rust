@@ -5,6 +5,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
 use crate::core::logger::interface::Logger;
+use crate::debug;
 
 use super::request::Request;
 use super::response::Response;
@@ -28,6 +29,8 @@ impl HttpClient {
     }
 
     pub async fn send(&self, request: Request) -> tokio::io::Result<Response> {
+        debug!(self.logger, "send {:?}", request);
+
         if let Some(dur) = self.simulate_latency {
             tokio::time::sleep(dur).await;
         }
