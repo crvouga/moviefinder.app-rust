@@ -12,7 +12,7 @@ impl BaseFixture {
     pub async fn new() -> Self {
         let env = Env::load();
 
-        let ctx = Ctx::new(&env).await.unwrap();
+        let ctx = Ctx::new(&env).await;
 
         Self { ctx, env }
     }

@@ -19,6 +19,10 @@ pub struct Postgres {
 
 impl Postgres {
     pub async fn new(logger_parent: Arc<dyn Logger>, database_url: &str) -> Result<Self, String> {
+        if database_url.trim().is_empty() {
+            return Err("Database URL is empty".to_string());
+        }
+
         let (client, connection) = tokio_postgres::connect(database_url, NoTls)
             .await
             .map_err(|err| err.to_string())?;

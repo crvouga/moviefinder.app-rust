@@ -17,10 +17,10 @@ db-stop: #
   sudo docker-compose -f ./db/docker-compose.local.yml down
 
 db-up: #
-  npx dbmate -e DATABASE_URL up
+  npx dbmate -e DATABASE_URL --env-file ".env.local" up
 
 db-down: #
-  npx dbmate -e DATABASE_URL down
+  npx dbmate -e DATABASE_URL --env-file ".env.local" down
 
 test: #
   TEST_ENV=int cargo test

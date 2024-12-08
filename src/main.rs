@@ -28,9 +28,9 @@ async fn main() {
 
     let address = format!("0.0.0.0:{}", env.port);
 
-    let ctx = Arc::new(Ctx::new(&env).await.unwrap());
+    let ctx = Arc::new(Ctx::new(&env).await);
 
-    info!(ctx.logger, "Starting server on http://{}", address);
+    info!(ctx.logger, "Server listening here http://{}", address);
 
     core::http::server::start(&address, move |r, w| respond(ctx.clone(), r, w))
         .await
@@ -46,13 +46,19 @@ async fn respond(
 
     let maybe_route = request.route();
 
+    debug!(ctx.logger, "Request {:?}", maybe_route);
+
     let session_id = request.session_id();
+
+    println!("session_id: {:?}", session_id);
 
     let maybe_user_id = ctx
         .user_session_db
         .find_by_session_id(&session_id)
         .await?
         .map(|s| s.user_id);
+
+    println!("maybe_user_id: {:?}", maybe_user_id);
 
     let r = Req {
         params: request.datastar_params(),

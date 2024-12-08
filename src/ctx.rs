@@ -47,7 +47,7 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub async fn new(env: &Env) -> Result<Ctx, String> {
+    pub async fn new(env: &Env) -> Ctx {
         let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
 
         let http_client =
@@ -55,16 +55,17 @@ impl Ctx {
 
         let db_conn_sql = Arc::new(
             db_conn_sql::impl_postgres::Postgres::new(logger.noop(), &env.database_url)
-                .await?
+                .await
+                .unwrap()
                 .simulate_latency(env.simulate_latency),
         );
 
-        let _key_value_db = Arc::new(key_value_db::impl_cached_postgres::CachedPostgres::new(
+        let key_value_db = Arc::new(key_value_db::impl_cached_postgres::CachedPostgres::new(
             logger.clone(),
             db_conn_sql.clone(),
         ));
 
-        let key_value_db = Arc::new(key_value_db::impl_postgres::Postgres::new(
+        let _key_value_db = Arc::new(key_value_db::impl_postgres::Postgres::new(
             logger.clone(),
             db_conn_sql.clone(),
         ));
@@ -122,7 +123,7 @@ impl Ctx {
             user_session::user_session_db::impl_key_value_db::KeyValueDb::new(key_value_db.clone()),
         );
 
-        Ok(Ctx {
+        Ctx {
             logger,
             http_client,
             key_value_db,
@@ -139,6 +140,6 @@ impl Ctx {
             user_account_db,
             user_profile_db,
             user_session_db,
-        })
+        }
     }
 }
