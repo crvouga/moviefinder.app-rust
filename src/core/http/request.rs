@@ -1,5 +1,5 @@
 use super::{content_encoding::ContentEncoding, form_data::FormData, method::Method};
-use crate::core::{params::Params, url::Url};
+use crate::core::{unstructed_data::UnstructedData, url::Url};
 use std::collections::HashMap;
 
 #[derive(Debug, Eq, PartialEq, Clone)]

@@ -13,7 +13,7 @@ impl TwilioApi {
             query_params: QueryParams::default(),
         };
 
-        let body = format!("To={}&Channel=sms", phone_number);
+        let body = format!("To={}&Channel=sms", url_encoded::encode(phone_number));
         println!("body: {:?}", body);
         let body = body.into_bytes();
 
@@ -27,6 +27,8 @@ impl TwilioApi {
         .into_iter()
         .collect();
 
+        println!("to_basic_auth: {:?}", self.to_basic_auth());
+
         let request = Request {
             url,
             method: Method::Post,
@@ -38,7 +40,7 @@ impl TwilioApi {
 
         let response = self.http_client.send(request).await?;
 
-        println!("response: {:?}", response);
+        println!("response: {:?}", String::from_utf8(response.body.clone()));
 
         if response.status_code == 200 {
             Ok(())

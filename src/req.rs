@@ -1,5 +1,5 @@
 use crate::{
-    core::{params::ParamsHashMap, session::session_id::SessionId},
+    core::{unstructed_data::UnstructedDataHashMap, session::session_id::SessionId},
     user::user_id::UserId,
 };
 
@@ -7,5 +7,5 @@ use crate::{
 pub struct Req {
     pub session_id: SessionId,
     pub user_id: Option<UserId>,
-    pub params: ParamsHashMap,
+    pub params: UnstructedDataHashMap,
 }

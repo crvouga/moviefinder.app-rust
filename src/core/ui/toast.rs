@@ -70,7 +70,7 @@ impl Toast {
                 ToastVariant::Dark => "bg-neutral-700 text-white",
                 ToastVariant::Error => "border-red-600 border bg-red-800 text-white",
             })
-            .child(div().class("flex-1").child(unsafe_html(&self.message)))
+            .child(div().class("flex-1").child(unsafe_html(&self.message.replace("\n", ""))))
             .child(
                 button().aria_label("close toast")
                 .on_click(js_close)

@@ -1,17 +1,17 @@
 use serde_json::Value;
 use std::collections::HashMap;
 
-use crate::core::params::{Params, ParamsHashMap};
+use crate::core::unstructed_data::{UnstructedData, UnstructedDataHashMap};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct JsonData {
-    pub params: ParamsHashMap,
+    pub params: UnstructedDataHashMap,
 }
 
-impl Params for JsonData {
+impl UnstructedData for JsonData {
     fn empty() -> Self {
         JsonData {
-            params: ParamsHashMap::empty(),
+            params: UnstructedDataHashMap::empty(),
         }
     }
 
@@ -74,7 +74,7 @@ impl Params for JsonData {
         }
 
         JsonData {
-            params: ParamsHashMap(map),
+            params: UnstructedDataHashMap(map),
         }
     }
 }

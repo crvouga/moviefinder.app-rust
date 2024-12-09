@@ -1,4 +1,4 @@
-use crate::core::{params::Params, url::query_params::QueryParams};
+use crate::core::{unstructed_data::UnstructedData, url::query_params::QueryParams};
 
 use super::{person::GetPersonResponse, TmdbApi};
 

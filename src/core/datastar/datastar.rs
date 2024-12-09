@@ -8,7 +8,7 @@ use crate::core::{
         response_writer::ResponseWriter,
         server_sent_event::{sse, ServerSentEvent},
     },
-    params::{Params, ParamsHashMap},
+    unstructed_data::{UnstructedDataHashMap, UnstructedData},
     url_encoded,
 };
 
@@ -523,7 +523,7 @@ impl Request {
         header_value == "true"
     }
 
-    pub fn datastar_params(self: &Self) -> ParamsHashMap {
+    pub fn datastar_params(self: &Self) -> UnstructedDataHashMap {
         let datastar_params = self.url.query_params.get_first("datastar");
 
         if let Some(urlencoded_json) = datastar_params {

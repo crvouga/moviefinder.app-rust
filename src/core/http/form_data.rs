@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 
-use crate::core::params::{Params, ParamsHashMap};
+use crate::core::unstructed_data::{UnstructedData, UnstructedDataHashMap};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct FormData {
-    pub params: ParamsHashMap,
+    pub params: UnstructedDataHashMap,
 }
 
-impl Params for FormData {
+impl UnstructedData for FormData {
     fn empty() -> Self {
         FormData {
-            params: ParamsHashMap::empty(),
+            params: UnstructedDataHashMap::empty(),
         }
     }
 
@@ -54,7 +54,7 @@ impl Params for FormData {
         }
 
         FormData {
-            params: ParamsHashMap(map),
+            params: UnstructedDataHashMap(map),
         }
     }
 }

@@ -1,5 +1,5 @@
 // https://developer.themoviedb.org/reference/discover-movie
-use crate::core::{params::Params, struct_ext::struct_to_map, url::query_params::QueryParams};
+use crate::core::{unstructed_data::UnstructedData, struct_ext::struct_to_map, url::query_params::QueryParams};
 
 use super::TmdbApi;
 use serde::{Deserialize, Serialize};
