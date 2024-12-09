@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{
     core::{
-        datastar::datastar::{js_console_error, js_console_log, quote},
+        datastar::datastar::quote,
         html::*,
         http::response_writer::ResponseWriter,
         ui::{button::Button, text_field::TextField, top_bar::TopBar},
@@ -158,6 +158,20 @@ fn view_screen_enter_phone() -> Elem {
         .child(
             div()
                 .class("flex-1 p-6 gap-6 flex flex-col")
+                // .child(
+                //     Select::default()
+                //         .label("Country Code")
+                //         .placeholder("Select country code")
+                //         .input(|e| {
+                //             e.data_model("countryCode")
+                //                 .type_("tel")
+                //                 .data_on(|d| d.input().js("$countryCodeError = ''"))
+                //         })
+                //         .options(country_codes.iter())
+                //         .model_error("countryCodeError")
+                //         .view()
+                //         .id("country_code"),
+                // )
                 .child(
                     TextField::default()
                         .label("Phone number")

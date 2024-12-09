@@ -4,6 +4,7 @@ use crate::{
         db_conn_sql::{self, impl_postgres::Postgres},
         http::client::HttpClient,
         logger::{impl_console::ConsoleLogger, interface::Logger},
+        phone_number::{self, country_code::PhoneNumberCountryCodeDb},
         tmdb_api::{self, TmdbApi},
         twilio_api::TwilioApi,
     },
@@ -46,6 +47,7 @@ pub struct Ctx {
     pub user_account_db: Arc<dyn UserAccountDb>,
     pub user_profile_db: Arc<dyn UserProfileDb>,
     pub user_session_db: Arc<dyn UserSessionDb>,
+    pub phone_number_country_code_db: Arc<dyn PhoneNumberCountryCodeDb>,
 }
 
 impl Ctx {
@@ -133,7 +135,12 @@ impl Ctx {
             user_session::user_session_db::impl_key_value_db::KeyValueDb::new(key_value_db.clone()),
         );
 
+        let phone_number_country_code_db = Arc::new(phone_number::country_code::ImplJson::new(
+            "./src/core/phone_number/country_code.json",
+        ));
+
         Ctx {
+            phone_number_country_code_db,
             logger,
             twilio_api,
             http_client,

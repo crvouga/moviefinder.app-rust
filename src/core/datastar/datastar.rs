@@ -44,10 +44,6 @@ pub fn js_push_url(url: &str) -> String {
     format!("window.history.pushState(null, '', '{}');", url)
 }
 
-pub fn js_console_log(message: &str) -> String {
-    format!("console.log('{}')", message)
-}
-
 pub fn js_console_error(message: &str) -> String {
     format!("console.error('{}')", message)
 }

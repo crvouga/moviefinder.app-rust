@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
 
+pub mod country_code;
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PhoneNumber(String);
 
