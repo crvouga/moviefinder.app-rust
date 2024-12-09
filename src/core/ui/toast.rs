@@ -1,6 +1,6 @@
 use super::icon;
 use crate::core::{
-    html::{button, children::text, div, Elem},
+    html::{button, div, unsafe_html, Elem},
     http::response_writer::ResponseWriter,
 };
 use std::time::Duration;
@@ -21,7 +21,7 @@ pub struct Toast {
 impl Default for Toast {
     fn default() -> Self {
         Self {
-            duration: Duration::from_secs(3),
+            duration: Duration::from_secs(5),
             message: "".to_string(),
             variant: ToastVariant::Dark,
         }
@@ -70,7 +70,7 @@ impl Toast {
                 ToastVariant::Dark => "bg-neutral-700 text-white",
                 ToastVariant::Error => "border-red-600 border bg-red-800 text-white",
             })
-            .child(div().class("flex-1").child(text(&self.message)))
+            .child(div().class("flex-1").child(unsafe_html(&self.message)))
             .child(
                 button().aria_label("close toast")
                 .on_click(js_close)

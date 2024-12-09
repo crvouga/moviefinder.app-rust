@@ -1,11 +1,10 @@
-use crate::core::http::{client::HttpClient, form_data::FormData, request::Request};
-use std::{collections::HashMap, sync::Arc};
-
 use super::{
     http::method::Method,
     params::Params,
     url::{query_params::QueryParams, Url},
 };
+use crate::core::http::{client::HttpClient, form_data::FormData, request::Request};
+use std::{collections::HashMap, sync::Arc};
 
 pub mod config;
 pub mod discover_movie;

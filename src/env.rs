@@ -6,13 +6,16 @@ pub struct Env {
     pub port: String,
     pub database_url: String,
     pub simulate_latency: Option<Duration>,
+    pub twilio_service_sid: String,
+    pub twilio_auth_token: String,
+    pub twilio_account_sid: String,
     #[cfg(test)]
     pub test_env: TestEnv,
 }
 
 impl Env {
     pub fn load() -> Env {
-        core::env::load(".env").unwrap();
+        core::env::load(".env").unwrap_or(());
 
         let env_stage = EnvStage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
 
@@ -37,11 +40,20 @@ impl Env {
         #[cfg(test)]
         let test_env = TestEnv::from_str(&env::var("TEST_ENV").unwrap_or("".to_string()));
 
+        let twilio_account_sid = env::var("TWILIO_ACCOUNT_SID").unwrap();
+
+        let twilio_auth_token = env::var("TWILIO_AUTH_TOKEN").unwrap();
+
+        let twilio_service_sid = env::var("TWILIO_SERVICE_SID").unwrap();
+
         let env = Env {
             simulate_latency,
             database_url,
             tmdb_api_read_access_token,
             port,
+            twilio_account_sid,
+            twilio_auth_token,
+            twilio_service_sid,
             #[cfg(test)]
             test_env,
         };

@@ -1,51 +1,30 @@
-use async_trait::async_trait;
-
 use super::interface::{VerifyCodeError, VerifySms};
+use crate::core::twilio_api::TwilioApi;
+use async_trait::async_trait;
+use std::sync::Arc;
 
 pub struct Twilio {
-    correct_code: String,
+    twilio_api: Arc<TwilioApi>,
 }
 
 impl Twilio {
-    pub fn new() -> Self {
-        Twilio {
-            correct_code: "123".to_string(),
-        }
+    pub fn new(twilio_api: Arc<TwilioApi>) -> Self {
+        Twilio { twilio_api }
     }
 }
 
-const SHOULD_SLEEP: bool = true;
-const SHOULD_ERROR_SEND_CODE: bool = false;
-const SHOULD_ERROR_VERIFY_CODE: bool = false;
-
 #[async_trait]
 impl VerifySms for Twilio {
-    async fn send_code(&self, _phone_number: &str) -> Result<(), std::io::Error> {
-        if SHOULD_SLEEP {
-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-        }
-
-        if SHOULD_ERROR_SEND_CODE {
-            let err = std::io::Error::new(std::io::ErrorKind::Other, "Sending code failed");
-            return Err(err);
-        }
-
+    async fn send_code(&self, phone_number: &str) -> Result<(), std::io::Error> {
+        self.twilio_api.verify_send_code(phone_number).await?;
         Ok(())
     }
 
-    async fn verify_code(&self, _phone_number: &str, code: &str) -> Result<(), VerifyCodeError> {
-        if SHOULD_SLEEP {
-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-        }
-
-        if SHOULD_ERROR_VERIFY_CODE {
-            let err = std::io::Error::new(std::io::ErrorKind::Other, "Verifying code failed");
-            return Err(VerifyCodeError::Error(err));
-        }
-
-        if self.correct_code != code {
-            return Err(VerifyCodeError::WrongCode);
-        }
+    async fn verify_code(&self, phone_number: &str, code: &str) -> Result<(), VerifyCodeError> {
+        self.twilio_api
+            .verify_verify_code(phone_number, code)
+            .await
+            .map_err(|err| VerifyCodeError::Error(err))?;
 
         Ok(())
     }

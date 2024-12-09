@@ -5,6 +5,7 @@ use crate::{
         http::client::HttpClient,
         logger::{impl_console::ConsoleLogger, interface::Logger},
         tmdb_api::{self, TmdbApi},
+        twilio_api::TwilioApi,
     },
     env::Env,
     feed::{
@@ -12,10 +13,10 @@ use crate::{
         feed_tag_db::interface::FeedTagDb, feed_tags::form_state_db::FeedTagsFormStateDb,
     },
     key_value_db::{self, interface::KeyValueDb},
-    media::person::person_db::{self, interface::PersonDb},
     media::{
         genre::genre_db::{self, interface::GenreDb},
         media_db::{self, interface::MediaDb},
+        person::person_db::{self, interface::PersonDb},
     },
     user::{
         login_with_sms::verify_sms::{self, interface::VerifySms},
@@ -32,6 +33,7 @@ pub struct Ctx {
     pub db_conn_sql: Arc<Postgres>,
     pub http_client: Arc<HttpClient>,
     pub tmdb_api: Arc<TmdbApi>,
+    pub twilio_api: Arc<TwilioApi>,
     pub genre_db: Arc<dyn GenreDb>,
     pub person_db: Arc<dyn PersonDb>,
     pub media_db: Arc<dyn MediaDb>,
@@ -109,7 +111,15 @@ impl Ctx {
             ));
 
         let _verify_sms = Arc::new(verify_sms::impl_fake::Fake::new());
-        let verify_sms = Arc::new(verify_sms::impl_twilio::Twilio::new());
+
+        let twilio_api = Arc::new(TwilioApi::new(
+            env.twilio_service_sid.clone(),
+            env.twilio_auth_token.clone(),
+            env.twilio_account_sid.clone(),
+            http_client.clone(),
+        ));
+
+        let verify_sms = Arc::new(verify_sms::impl_twilio::Twilio::new(twilio_api.clone()));
 
         let user_account_db = Arc::new(user_account_db::impl_key_value_db::KeyValueDb::new(
             key_value_db.clone(),
@@ -125,6 +135,7 @@ impl Ctx {
 
         Ctx {
             logger,
+            twilio_api,
             http_client,
             key_value_db,
             db_conn_sql,
