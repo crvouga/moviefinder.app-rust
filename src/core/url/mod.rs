@@ -41,4 +41,53 @@ impl Url {
             query_params,
         })
     }
+
+    pub fn to_string(&self) -> String {
+        if self.query_params.is_empty() {
+            format!("https://{}/{}", self.host, self.path)
+        } else {
+            format!(
+                "https://{}/{}?{}",
+                self.host,
+                self.path,
+                self.query_params.to_string()
+            )
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::query_params::QueryParams;
+    use super::*;
+
+    #[test]
+    fn test_to_string_without_query_params() {
+        let url = Url {
+            host: "example.com".to_string(),
+            path: "path/to/resource".to_string(),
+            query_params: QueryParams::default(),
+        };
+
+        assert_eq!(url.to_string(), "https://example.com/path/to/resource");
+    }
+
+    #[test]
+    fn test_to_string_with_query_params() {
+        let mut query_params = QueryParams::default();
+        query_params.insert(&"key1".to_string(), "value1".to_string());
+        query_params.insert(&"key2".to_string(), "value2".to_string());
+
+        let url = Url {
+            host: "example.com".to_string(),
+            path: "path/to/resource".to_string(),
+            query_params,
+        };
+
+        let result = url.to_string();
+        let expected_1 = "https://example.com/path/to/resource?key1=value1&key2=value2";
+        let expected_2 = "https://example.com/path/to/resource?key2=value2&key1=value1";
+
+        assert!(result == expected_1 || result == expected_2);
+    }
 }

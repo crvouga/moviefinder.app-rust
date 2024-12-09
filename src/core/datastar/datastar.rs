@@ -8,7 +8,7 @@ use crate::core::{
         response_writer::ResponseWriter,
         server_sent_event::{sse, ServerSentEvent},
     },
-    unstructed_data::{UnstructedDataHashMap, UnstructedData},
+    unstructed_data::{UnstructedData, UnstructedDataHashMap},
     url_encoded,
 };
 
@@ -42,6 +42,14 @@ pub fn js_replace_url(url: &str) -> String {
 
 pub fn js_push_url(url: &str) -> String {
     format!("window.history.pushState(null, '', '{}');", url)
+}
+
+pub fn js_console_log(message: &str) -> String {
+    format!("console.log('{}')", message)
+}
+
+pub fn js_console_error(message: &str) -> String {
+    format!("console.error('{}')", message)
 }
 
 pub fn quote(value: &str) -> String {
@@ -501,6 +509,14 @@ impl ResponseWriter {
         sse()
             .event_execute_script()
             .data_script(&format!("document.querySelector('{}').focus()", selector))
+            .send(self)
+            .await
+    }
+
+    pub async fn send_console_log(&mut self, message: &str) -> Result<(), std::io::Error> {
+        sse()
+            .event_execute_script()
+            .data_script(&format!("console.log('{}')", message))
             .send(self)
             .await
     }

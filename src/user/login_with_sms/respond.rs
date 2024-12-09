@@ -6,11 +6,11 @@ use super::{
 };
 use crate::{
     core::{
-        datastar::datastar::quote,
+        datastar::datastar::{js_console_error, js_console_log, quote},
         html::*,
         http::response_writer::ResponseWriter,
-        unstructed_data::UnstructedData,
         ui::{button::Button, text_field::TextField, top_bar::TopBar},
+        unstructed_data::UnstructedData,
     },
     ctx::Ctx,
     req::Req,
@@ -55,7 +55,6 @@ pub async fn respond(
 
                 Err(SendCodeError::Error(err)) => {
                     w.send_toast_error(&err.to_string()).await?;
-
                     Ok(())
                 }
 
