@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::core::unstructed_data::{UnstructuredData, UnstructuredDataHashMap};
+use crate::core::unstructured_data::{UnstructuredData, UnstructuredDataHashMap};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct FormData {

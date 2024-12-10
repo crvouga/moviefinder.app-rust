@@ -1,5 +1,5 @@
 use crate::{
-    core::{session::session_id::SessionId, unstructed_data::UnstructuredDataHashMap},
+    core::{session::session_id::SessionId, unstructured_data::UnstructuredDataHashMap},
     user::user_id::UserId,
 };
 

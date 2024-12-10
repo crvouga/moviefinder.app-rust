@@ -1,6 +1,6 @@
 use super::{
     http::method::Method,
-    unstructed_data::UnstructuredData,
+    unstructured_data::UnstructuredData,
     url::{query_params::QueryParams, Url},
 };
 use crate::core::http::{client::HttpClient, form_data::FormData, request::Request};

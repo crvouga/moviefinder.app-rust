@@ -8,7 +8,7 @@ use crate::core::{
         response_writer::ResponseWriter,
         server_sent_event::{sse, ServerSentEvent},
     },
-    unstructed_data::{UnstructuredData, UnstructuredDataHashMap},
+    unstructured_data::{UnstructuredData, UnstructuredDataHashMap},
     url_encoded,
 };
 

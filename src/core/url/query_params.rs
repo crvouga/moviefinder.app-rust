@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::core::{
-    unstructed_data::{UnstructuredData, UnstructuredDataHashMap},
+    unstructured_data::{UnstructuredData, UnstructuredDataHashMap},
     url_encoded,
 };
 

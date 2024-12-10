@@ -1,4 +1,4 @@
-use crate::core::unstructed_data::{UnstructuredData, UnstructuredDataHashMap};
+use crate::core::unstructured_data::{UnstructuredData, UnstructuredDataHashMap};
 
 use super::{content_type::ContentType, json_data::JsonData, method::Method, request::Request};
 
