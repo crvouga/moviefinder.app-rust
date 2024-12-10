@@ -113,7 +113,12 @@ fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
         .child(
             div()
                 .class("flex-1 flex items-center justify-start flex-col gap-6 p-6 w-full")
-                .child(Avatar::default().src(" ").view().class("size-36"))
+                .child(
+                    Avatar::default()
+                        .src(&profile.to_avatar_url())
+                        .view()
+                        .class("size-36"),
+                )
                 .child(
                     p().child(text(&profile.username.to_string()))
                         .class("text-3xl font-bold w-full text-center"),
