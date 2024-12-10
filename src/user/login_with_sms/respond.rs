@@ -16,7 +16,7 @@ use crate::{
             text_field::TextField,
             top_bar::TopBar,
         },
-        unstructed_data::UnstructedData,
+        unstructed_data::UnstructuredData,
     },
     ctx::Ctx,
     req::Req,

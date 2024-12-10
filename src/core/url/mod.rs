@@ -1,4 +1,4 @@
-use super::unstructed_data::UnstructedData;
+use super::unstructed_data::UnstructuredData;
 
 pub mod query_params;
 

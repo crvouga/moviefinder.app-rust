@@ -1,9 +1,9 @@
-use crate::core::unstructed_data::{UnstructedData, UnstructedDataHashMap};
+use crate::core::unstructed_data::{UnstructuredData, UnstructuredDataHashMap};
 
 use super::{content_type::ContentType, json_data::JsonData, method::Method, request::Request};
 
 impl Request {
-    pub fn params(&self) -> UnstructedDataHashMap {
+    pub fn params(&self) -> UnstructuredDataHashMap {
         match self.method.clone() {
             Method::Get => self.url.query_params.params.clone(),
             Method::Post | Method::Patch | Method::Put => match self.content_type() {

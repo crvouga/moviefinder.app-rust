@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-pub trait UnstructedData {
+pub trait UnstructuredData {
     fn is_empty(&self) -> bool;
 
     fn empty() -> Self;
@@ -28,21 +28,21 @@ pub trait UnstructedData {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
-pub struct UnstructedDataHashMap(pub HashMap<String, Vec<String>>);
+pub struct UnstructuredDataHashMap(pub HashMap<String, Vec<String>>);
 
-impl From<HashMap<String, Vec<String>>> for UnstructedDataHashMap {
+impl From<HashMap<String, Vec<String>>> for UnstructuredDataHashMap {
     fn from(map: HashMap<String, Vec<String>>) -> Self {
-        UnstructedDataHashMap(map)
+        UnstructuredDataHashMap(map)
     }
 }
 
-impl UnstructedData for UnstructedDataHashMap {
+impl UnstructuredData for UnstructuredDataHashMap {
     fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
-    fn empty() -> UnstructedDataHashMap {
-        UnstructedDataHashMap(HashMap::new())
+    fn empty() -> UnstructuredDataHashMap {
+        UnstructuredDataHashMap(HashMap::new())
     }
 
     fn to_string(&self) -> String {
@@ -53,7 +53,7 @@ impl UnstructedData for UnstructedDataHashMap {
             .join("&")
     }
 
-    fn from_string(string: &str) -> UnstructedDataHashMap {
+    fn from_string(string: &str) -> UnstructuredDataHashMap {
         let mut map = HashMap::new();
         for pair in string.split('&') {
             let mut parts = pair.split('=');
@@ -64,7 +64,7 @@ impl UnstructedData for UnstructedDataHashMap {
             let value = parts.next().unwrap_or("").to_string();
             map.entry(key).or_insert_with(Vec::new).push(value);
         }
-        UnstructedDataHashMap(map)
+        UnstructuredDataHashMap(map)
     }
 
     fn get_first(&self, key: &str) -> Option<&String> {
@@ -92,7 +92,7 @@ mod test {
     #[test]
     fn test_from_string() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = UnstructedDataHashMap::from_string(form_string);
+        let form_data = UnstructuredDataHashMap::from_string(form_string);
         let mut expected_data = HashMap::new();
         expected_data.insert("name".to_string(), vec!["John".to_string()]);
         expected_data.insert("age".to_string(), vec!["20".to_string()]);
@@ -100,14 +100,14 @@ mod test {
             "hobby".to_string(),
             vec!["reading".to_string(), "coding".to_string()],
         );
-        let expected = UnstructedDataHashMap(expected_data);
+        let expected = UnstructuredDataHashMap(expected_data);
         assert_eq!(form_data, expected);
     }
 
     #[test]
     fn test_get_first() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = UnstructedDataHashMap::from_string(form_string);
+        let form_data = UnstructuredDataHashMap::from_string(form_string);
         assert_eq!(form_data.get_first("name"), Some(&"John".to_string()));
         assert_eq!(form_data.get_first("age"), Some(&"20".to_string()));
         assert_eq!(form_data.get_first("hobby"), Some(&"reading".to_string()));
@@ -116,7 +116,7 @@ mod test {
     #[test]
     fn test_get_all() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = UnstructedDataHashMap::from_string(form_string);
+        let form_data = UnstructuredDataHashMap::from_string(form_string);
         assert_eq!(
             form_data.get_all("hobby"),
             Some(&vec!["reading".to_string(), "coding".to_string()])
@@ -126,7 +126,7 @@ mod test {
     #[test]
     fn test_to_string() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = UnstructedDataHashMap::from_string(form_string);
+        let form_data = UnstructuredDataHashMap::from_string(form_string);
         let result_string = form_data.to_string();
         assert!(result_string.contains("name=John"));
         assert!(result_string.contains("age=20"));

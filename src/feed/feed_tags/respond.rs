@@ -11,7 +11,7 @@ use crate::{
             spinner_page,
         },
         unit_of_work::UnitOfWork,
-        unstructed_data::UnstructedData,
+        unstructed_data::UnstructuredData,
     },
     ctx::Ctx,
     feed::{self, feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},

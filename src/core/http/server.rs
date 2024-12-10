@@ -2,7 +2,7 @@ use super::form_data::FormData;
 use super::method::Method;
 use super::request::Request;
 use super::response_writer::ResponseWriter;
-use crate::core::unstructed_data::UnstructedData;
+use crate::core::unstructed_data::UnstructuredData;
 use crate::core::url::query_params::QueryParams;
 use crate::core::url::Url;
 use crate::core::url_encoded;

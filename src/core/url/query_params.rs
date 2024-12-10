@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 
 use crate::core::{
-    unstructed_data::{UnstructedData, UnstructedDataHashMap},
+    unstructed_data::{UnstructuredData, UnstructuredDataHashMap},
     url_encoded,
 };
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct QueryParams {
-    pub params: UnstructedDataHashMap,
+    pub params: UnstructuredDataHashMap,
 }
 
-impl UnstructedData for QueryParams {
+impl UnstructuredData for QueryParams {
     fn empty() -> Self {
         QueryParams {
-            params: UnstructedDataHashMap::empty(),
+            params: UnstructuredDataHashMap::empty(),
         }
     }
 
@@ -61,7 +61,7 @@ impl UnstructedData for QueryParams {
         }
 
         QueryParams {
-            params: UnstructedDataHashMap(map),
+            params: UnstructuredDataHashMap(map),
         }
     }
 }
