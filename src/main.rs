@@ -50,15 +50,11 @@ async fn respond(
 
     let session_id = request.session_id();
 
-    println!("session_id: {:?}", session_id);
-
     let maybe_user_id = ctx
         .user_session_db
         .find_by_session_id(&session_id)
         .await?
         .map(|s| s.user_id);
-
-    println!("maybe_user_id: {:?}", maybe_user_id);
 
     let r = Req {
         params: request.datastar_params(),
