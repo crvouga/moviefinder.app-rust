@@ -130,7 +130,18 @@ impl TwilioApi {
         );
 
         if response.status_code <= 299 && response.status_code >= 200 {
-            Ok(())
+            #[derive(Debug, Deserialize, Serialize)]
+            struct BodyOk {
+                valid: bool,
+            }
+
+            let body_ok = serde_json::from_slice::<BodyOk>(&response.body).unwrap();
+
+            if body_ok.valid {
+                return Ok(());
+            }
+
+            return Err(VerifyCodeError::WrongCode);
         } else {
             #[derive(Debug, Deserialize, Serialize)]
             struct BodyError {
