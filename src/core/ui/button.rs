@@ -4,7 +4,7 @@ use crate::core::{datastar::datastar::dollar, html::*};
 #[derive(Debug, Default)]
 pub struct Button {
     label: String,
-    color: Color,
+    color: ButtonColor,
     indicator: Option<String>,
     id: Option<String>,
 }
@@ -15,18 +15,18 @@ impl Button {
         self
     }
 
-    pub fn color(mut self, color: Color) -> Self {
+    pub fn color(mut self, color: ButtonColor) -> Self {
         self.color = color;
         self
     }
 
     pub fn color_gray(mut self) -> Self {
-        self.color = Color::Gray;
+        self.color = ButtonColor::Gray;
         self
     }
 
     pub fn color_primary(mut self) -> Self {
-        self.color = Color::Primary;
+        self.color = ButtonColor::Primary;
         self
     }
 
@@ -68,17 +68,17 @@ impl Button {
 }
 
 #[derive(Debug, Default, Clone)]
-pub enum Color {
+pub enum ButtonColor {
     #[default]
     Primary,
     Gray,
 }
 
-impl Color {
+impl ButtonColor {
     pub fn to_class(self) -> String {
         match self {
-            Color::Gray => "bg-neutral-800".to_string(),
-            Color::Primary => "bg-blue-600".to_string(),
+            ButtonColor::Gray => "bg-neutral-800".to_string(),
+            ButtonColor::Primary => "bg-blue-600".to_string(),
         }
     }
 }

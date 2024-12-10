@@ -1,7 +1,7 @@
 use children::text;
 
 use super::{
-    login_with_sms, logout, route::Route, user_account::user_account_::UserAccount,
+    edit_profile, login_with_sms, logout, route::Route, user_account::user_account_::UserAccount,
     user_id::UserId, user_profile::user_profile_::UserProfile,
 };
 use crate::{
@@ -122,6 +122,21 @@ fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
                 .child(
                     p().child(text(&profile.username.to_string()))
                         .class("text-3xl font-bold w-full text-center"),
+                )
+                .child(
+                    Button::default()
+                        .color_primary()
+                        .label("Edit Profile")
+                        .view()
+                        .class("w-full")
+                        .data_on(|b| {
+                            b.click().push_then_get(
+                                &Route::EditProfile(edit_profile::route::Route::Screen {
+                                    user_id: profile.user_id.clone(),
+                                })
+                                .url(),
+                            )
+                        }),
                 )
                 .child(
                     Button::default()

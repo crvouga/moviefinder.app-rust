@@ -3,20 +3,14 @@ use crate::{
     core::{
         html::*,
         http::response_writer::ResponseWriter,
-        ui::{
-            self,
-            button::{Button, Color},
-            chip::ChipSize,
-            search_bar::SearchBar,
-            spinner_page,
-        },
+        ui::{chip::ChipSize, search_bar::SearchBar, spinner_page},
         unit_of_work::UnitOfWork,
         unstructured_data::UnstructuredData,
     },
     ctx::Ctx,
     feed::{self, feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},
     req::Req,
-    ui::route::Routable,
+    ui::{bottom_bar_form::BottomBarForm, route::Routable},
 };
 
 pub async fn respond(
@@ -287,42 +281,20 @@ impl Elem {
 }
 
 fn view_bottom_bar(feed_id: &FeedId) -> Elem {
-    div()
-        .id("bottom-bar")
-        .class("flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20")
-        .child(
-            Button::default()
-                .label("Cancel")
-                .color(Color::Gray)
-                .view()
-                .data_on(|b| {
-                    b.click().push_then_get(
-                        &feed::route::Route::FeedScreen {
-                            feed_id: feed_id.clone(),
-                        }
-                        .url(),
-                    )
-                })
-                .type_("button")
-                .class("flex-1"),
+    BottomBarForm::default()
+        .cancel_url(
+            &feed::route::Route::FeedScreen {
+                feed_id: feed_id.clone(),
+            }
+            .url(),
         )
-        .child(
-            Button::default()
-                .label("Save")
-                .color(ui::button::Color::Primary)
-                .indicator("signalIsSaving")
-                .view()
-                .data_on(|b| {
-                    b.click().get(
-                        &(Route::ClickedSave {
-                            feed_id: feed_id.clone(),
-                        })
-                        .url(),
-                    )
-                })
-                .id("save-button")
-                .class("flex-1"),
+        .save_url(
+            &(Route::ClickedSave {
+                feed_id: feed_id.clone(),
+            })
+            .url(),
         )
+        .view()
 }
 
 fn view_unselected_root() -> Elem {
