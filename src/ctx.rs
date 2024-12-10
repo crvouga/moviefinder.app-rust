@@ -13,6 +13,7 @@ use crate::{
         self, feed_db::interface::FeedDb, feed_session_mapping_db::interface::FeedSessionMappingDb,
         feed_tag_db::interface::FeedTagDb, feed_tags::form_state_db::FeedTagsFormStateDb,
     },
+    info,
     key_value_db::{self, interface::KeyValueDb},
     media::{
         genre::genre_db::{self, interface::GenreDb},
@@ -64,17 +65,30 @@ impl Ctx {
                 .simulate_latency(env.simulate_latency),
         );
 
-        let key_value_db = Arc::new(key_value_db::impl_cached_postgres::CachedPostgres::new(
-            logger.clone(),
-            db_conn_sql.clone(),
-        ));
+        #[derive(Debug)]
+        enum KeyValueDbImpl {
+            Postgres,
+            HashMap,
+            CachedPostgres,
+        }
 
-        let _key_value_db = Arc::new(key_value_db::impl_postgres::Postgres::new(
-            logger.clone(),
-            db_conn_sql.clone(),
-        ));
+        let key_value_db_impl = KeyValueDbImpl::Postgres;
 
-        let _key_value_db = Arc::new(key_value_db::impl_hash_map::HashMap::new());
+        info!(logger, "key value db impl: {:?}", key_value_db_impl);
+
+        let key_value_db: Arc<dyn KeyValueDb> = match key_value_db_impl {
+            KeyValueDbImpl::CachedPostgres => {
+                Arc::new(key_value_db::impl_cached_postgres::CachedPostgres::new(
+                    logger.clone(),
+                    db_conn_sql.clone(),
+                ))
+            }
+            KeyValueDbImpl::Postgres => Arc::new(key_value_db::impl_postgres::Postgres::new(
+                logger.clone(),
+                db_conn_sql.clone(),
+            )),
+            KeyValueDbImpl::HashMap => Arc::new(key_value_db::impl_hash_map::HashMap::new()),
+        };
 
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
             http_client.clone(),
@@ -112,16 +126,33 @@ impl Ctx {
                 key_value_db.clone(),
             ));
 
-        let _verify_sms = Arc::new(verify_sms::impl_fake::Fake::new());
-
         let twilio_api = Arc::new(TwilioApi::new(
+            http_client.clone(),
             env.twilio_service_sid.clone(),
             env.twilio_auth_token.clone(),
             env.twilio_account_sid.clone(),
-            http_client.clone(),
         ));
 
-        let verify_sms = Arc::new(verify_sms::impl_twilio::Twilio::new(twilio_api.clone()));
+        #[derive(Debug)]
+        enum VerifySmsImpl {
+            Twilio,
+            Fake,
+        }
+
+        let verify_sms_impl = if env.stage.is_local() {
+            VerifySmsImpl::Fake
+        } else {
+            VerifySmsImpl::Twilio
+        };
+
+        info!(logger, "verify sms impl: {:?}", verify_sms_impl);
+
+        let verify_sms: Arc<dyn VerifySms> = match verify_sms_impl {
+            VerifySmsImpl::Twilio => {
+                Arc::new(verify_sms::impl_twilio::Twilio::new(twilio_api.clone()))
+            }
+            VerifySmsImpl::Fake => Arc::new(verify_sms::impl_fake::Fake::new()),
+        };
 
         let user_account_db = Arc::new(user_account_db::impl_key_value_db::KeyValueDb::new(
             key_value_db.clone(),

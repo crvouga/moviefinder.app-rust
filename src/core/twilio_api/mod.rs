@@ -5,24 +5,24 @@ use std::sync::Arc;
 pub mod verify;
 
 pub struct TwilioApi {
+    http_client: Arc<HttpClient>,
     twilio_service_sid: String,
     twilio_auth_token: String,
     twilio_account_sid: String,
-    http_client: Arc<HttpClient>,
 }
 
 impl TwilioApi {
     pub fn new(
+        http_client: Arc<HttpClient>,
         twilio_service_sid: String,
         twilio_auth_token: String,
         twilio_account_sid: String,
-        http_client: Arc<HttpClient>,
     ) -> Self {
         TwilioApi {
+            http_client,
             twilio_service_sid,
             twilio_auth_token,
             twilio_account_sid,
-            http_client,
         }
     }
 

@@ -14,21 +14,6 @@ impl Avatar {
         self
     }
 
-    pub fn alt(mut self, alt: &str) -> Self {
-        self.alt = Some(alt.to_string());
-        self
-    }
-
-    pub fn class_name(mut self, class_name: &str) -> Self {
-        self.class_name = Some(class_name.to_string());
-        self
-    }
-
-    pub fn on_click(mut self, on_click: &str) -> Self {
-        self.on_click = Some(on_click.to_string());
-        self
-    }
-
     pub fn view(self) -> Elem {
         let class_name = format!(
             "inline-block aspect-square flex-shrink-0 overflow-hidden rounded-full bg-white/40 {}",

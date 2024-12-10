@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum EnvStage {
-    Dev,
+    Local,
     Prod,
 }
 
@@ -8,18 +8,18 @@ impl EnvStage {
     pub fn from_str(s: &str) -> Self {
         let cleaned = s.to_ascii_lowercase();
 
-        if cleaned.contains("dev") {
-            return EnvStage::Dev;
+        if cleaned.contains("local") {
+            return EnvStage::Local;
         }
 
         if cleaned.contains("prod") {
             return EnvStage::Prod;
         }
 
-        EnvStage::Dev
+        EnvStage::Local
     }
 
-    pub fn is_dev(&self) -> bool {
-        *self == EnvStage::Dev
+    pub fn is_local(&self) -> bool {
+        *self == EnvStage::Local
     }
 }

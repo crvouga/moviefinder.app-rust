@@ -37,6 +37,7 @@ impl Method {
         }
     }
 
+    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         match self {
             Method::Get => "GET".to_string(),

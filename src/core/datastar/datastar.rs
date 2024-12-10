@@ -535,14 +535,6 @@ impl ResponseWriter {
             .await
     }
 
-    pub async fn send_console_log(&mut self, message: &str) -> Result<(), std::io::Error> {
-        sse()
-            .event_execute_script()
-            .data_script(&format!("console.log('{}')", message))
-            .send(self)
-            .await
-    }
-
     pub async fn send_script(&mut self, script: &str) -> Result<(), std::io::Error> {
         sse()
             .event_execute_script()

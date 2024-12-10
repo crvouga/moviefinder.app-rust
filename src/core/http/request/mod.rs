@@ -15,6 +15,7 @@ pub struct Request {
 }
 
 impl Request {
+    #[allow(dead_code)]
     pub fn to_http_string(&self) -> String {
         let mut headers_vec: Vec<_> = self.headers.iter().collect();
         headers_vec.sort_by(|a, b| a.0.to_lowercase().cmp(&b.0.to_lowercase()));

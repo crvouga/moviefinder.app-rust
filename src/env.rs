@@ -9,17 +9,18 @@ pub struct Env {
     pub twilio_service_sid: String,
     pub twilio_auth_token: String,
     pub twilio_account_sid: String,
+    pub stage: EnvStage,
     #[cfg(test)]
     pub test_env: TestEnv,
 }
 
 impl Env {
     pub fn load() -> Env {
+        let stage = EnvStage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
+
         core::env::load(".env").unwrap_or(());
 
-        let env_stage = EnvStage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
-
-        if env_stage.is_dev() {
+        if stage.is_local() {
             core::env::load(".env.local").unwrap_or(());
         }
 
@@ -31,7 +32,7 @@ impl Env {
 
         let simulate_latency_duration = Duration::from_millis(100);
 
-        let simulate_latency = if env_stage.is_dev() {
+        let simulate_latency = if stage.is_local() {
             Some(simulate_latency_duration)
         } else {
             None
@@ -54,6 +55,7 @@ impl Env {
             twilio_account_sid,
             twilio_auth_token,
             twilio_service_sid,
+            stage,
             #[cfg(test)]
             test_env,
         };

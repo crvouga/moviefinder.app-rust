@@ -23,6 +23,7 @@
     "Reswap",
     "retarget",
     "serde",
+    "sslmode",
     "stylesheet",
     "swiperslidechange",
     "themoviedb",
