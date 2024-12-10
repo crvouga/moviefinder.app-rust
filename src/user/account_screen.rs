@@ -1,3 +1,5 @@
+use children::text;
+
 use super::{
     login_with_sms, logout, route::Route, user_account::user_account_::UserAccount,
     user_id::UserId, user_profile::user_profile_::UserProfile,
@@ -6,7 +8,7 @@ use crate::{
     core::{
         html::*,
         http::response_writer::ResponseWriter,
-        ui::{button::Button, icon, spinner_page, top_bar::TopBar},
+        ui::{avatar::Avatar, button::Button, icon, spinner_page, top_bar::TopBar},
     },
     ctx::Ctx,
     req::Req,
@@ -103,19 +105,25 @@ fn view_logged_out() -> Elem {
         .child(BottomBar::default().active_account().view())
 }
 
-fn view_logged_in(_account: &UserAccount, _profile: &UserProfile) -> Elem {
+fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
     div()
         .id("account")
         .class("w-full flex-1 flex items-center justify-center flex-col")
         .child(TopBar::default().title("Account").view())
         .child(
             div()
-                .class("flex-1 flex items-center justify-center flex-col gap-3")
+                .class("flex-1 flex items-center justify-start flex-col gap-6 p-6 w-full")
+                .child(Avatar::default().src(" ").view().class("size-36"))
+                .child(
+                    p().child(text(&profile.username.to_string()))
+                        .class("text-3xl font-bold w-full text-center"),
+                )
                 .child(
                     Button::default()
                         .color_primary()
                         .label("Logout")
                         .view()
+                        .class("w-full")
                         .data_on(|b| {
                             b.click()
                                 .get(&Route::Logout(logout::route::Route::LogoutDrawer).url())

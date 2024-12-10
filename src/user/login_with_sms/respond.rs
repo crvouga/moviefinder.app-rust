@@ -67,7 +67,16 @@ pub async fn respond(
                 .map(|s| s.clone())
                 .unwrap_or_default();
 
-            let phone_number_input = ensure_country_code(&country_code_input, &phone_number_input);
+            let country_codes = ctx.phone_number_country_code_db.get_all().await;
+
+            let phone_number_input = ensure_country_code(
+                country_codes
+                    .iter()
+                    .map(|c| c.country_code.clone())
+                    .collect(),
+                &country_code_input,
+                &phone_number_input,
+            );
 
             let sent = core::send_code(ctx, &phone_number_input).await;
 

@@ -280,11 +280,17 @@ impl DataOn {
 impl Attr for DataOn {
     fn attr(&self) -> (String, String) {
         let modifiers_str = self.modifiers.join(".");
-        let attr_str = if modifiers_str.is_empty() {
+        let binding = if modifiers_str.is_empty() {
             self.event.clone()
         } else {
             format!("{}.{}", self.event, modifiers_str)
         };
+        let attr_str = binding.trim();
+
+        if attr_str.is_empty() {
+            return ("".to_string(), "".to_string());
+        }
+
         let key = format!("data-on-{}", attr_str);
         let value = self.js.join("; ");
         (key, value)

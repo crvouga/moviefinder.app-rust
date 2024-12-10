@@ -1,4 +1,5 @@
 pub mod alert;
+pub mod avatar;
 pub mod bottom_bar_buttons;
 pub mod button;
 pub mod chip;

@@ -44,7 +44,11 @@ impl PhoneNumber {
     }
 }
 
-pub fn ensure_country_code(country_code: &str, phone_number: &str) -> String {
+pub fn ensure_country_code(
+    country_codes: Vec<String>,
+    country_code: &str,
+    phone_number: &str,
+) -> String {
     let fallback_country_code = "1";
 
     let country_code = if country_code.trim().is_empty() {
@@ -53,17 +57,26 @@ pub fn ensure_country_code(country_code: &str, phone_number: &str) -> String {
         country_code.trim()
     };
 
-    let country_code_with_plus = format!(
-        "+{}",
-        country_code.strip_prefix("+").unwrap_or(country_code)
-    );
+    let country_code = country_codes
+        .into_iter()
+        .find(|c: &String| phone_number.starts_with(c))
+        .unwrap_or(country_code.to_string());
+
+    let country_code_without_plus = country_code.strip_prefix("+").unwrap_or(&country_code);
+
+    let country_code_with_plus = format!("+{}", country_code_without_plus);
+
+    let phone_number = phone_number
+        .strip_prefix(country_code_without_plus)
+        .unwrap_or(phone_number);
+
+    let phone_number_without_country_code = phone_number
+        .strip_prefix(&country_code_with_plus)
+        .unwrap_or(phone_number);
 
     let phone_number_with_country_code = format!(
         "{}{}",
-        country_code_with_plus,
-        phone_number
-            .strip_prefix(&country_code_with_plus)
-            .unwrap_or(phone_number)
+        country_code_with_plus, phone_number_without_country_code,
     );
 
     phone_number_with_country_code
@@ -75,9 +88,25 @@ mod tests {
 
     #[test]
     fn test_ensure_country_code() {
-        assert_eq!(ensure_country_code("1", "5555555555"), "+15555555555");
-        assert_eq!(ensure_country_code("", "5555555555"), "+15555555555");
-        assert_eq!(ensure_country_code("1", "+15555555555"), "+15555555555");
-        assert_eq!(ensure_country_code("", "+15555555555"), "+15555555555");
+        assert_eq!(
+            ensure_country_code(vec![], "1", "5555555555"),
+            "+15555555555"
+        );
+        assert_eq!(
+            ensure_country_code(vec![], "", "5555555555"),
+            "+15555555555"
+        );
+        assert_eq!(
+            ensure_country_code(vec![], "1", "+15555555555"),
+            "+15555555555"
+        );
+        assert_eq!(
+            ensure_country_code(vec![], "", "+15555555555"),
+            "+15555555555"
+        );
+        assert_eq!(
+            ensure_country_code(vec!["1".to_string()], "+1", "15555555555"),
+            "+15555555555"
+        );
     }
 }

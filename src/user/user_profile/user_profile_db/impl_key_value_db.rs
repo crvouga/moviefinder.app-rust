@@ -61,7 +61,7 @@ impl UserProfileDb for KeyValueDb {
             .await?;
 
         self.user_id_by_username
-            .put(uow, &username, user_id.to_string())
+            .put(uow, &username.to_string(), user_id.to_string())
             .await?;
 
         Ok(())
