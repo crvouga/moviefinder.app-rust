@@ -33,4 +33,15 @@ impl UserProfile {
 
         avatar_url
     }
+
+    pub fn ensure_valid(self) -> Self {
+        self.ensure_valid_username()
+    }
+
+    fn ensure_valid_username(self) -> Self {
+        Self {
+            username: self.username.ensure_valid(),
+            ..self
+        }
+    }
 }

@@ -15,4 +15,8 @@ impl Username {
     pub fn from_string(username: &str) -> Self {
         Self(username.to_string())
     }
+
+    pub fn ensure_valid(self) -> Self {
+        self
+    }
 }
