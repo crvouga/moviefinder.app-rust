@@ -19,3 +19,11 @@ pub fn bool() -> bool {
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     now.as_nanos() % 2 == 0
 }
+
+pub fn unit() -> f32 {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let nanos = now.as_nanos();
+    let unit = (nanos % 100) as f32;
+
+    unit / 100.0
+}
