@@ -16,7 +16,7 @@ impl EnvStage {
             return EnvStage::Prod;
         }
 
-        EnvStage::Local
+        EnvStage::Prod
     }
 
     pub fn is_local(&self) -> bool {
