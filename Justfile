@@ -23,7 +23,7 @@ db-down: #
   npx dbmate -e DATABASE_URL down
 
 test: #
-  TEST_ENV=int cargo test
+  STAGE=test TEST_ENV=int cargo test
 
 cloc: #
   npx cloc src
