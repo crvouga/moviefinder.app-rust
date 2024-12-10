@@ -197,6 +197,7 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
                                 .map_input(|e| {
                                     e.data_model("phoneNumber")
                                         .type_("tel")
+                                        .autocomplete("tel")
                                         .data_on(|d| d.input().js("$phoneNumberError = ''"))
                                 })
                                 .model_error("phoneNumberError")

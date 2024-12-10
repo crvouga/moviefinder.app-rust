@@ -123,12 +123,6 @@ impl TwilioApi {
             .await
             .map_err(VerifyCodeError::Error)?;
 
-        println!("Response: {:?}", response);
-        println!(
-            "Response Body: {:?}",
-            String::from_utf8(response.body.clone())
-        );
-
         if response.status_code <= 299 && response.status_code >= 200 {
             #[derive(Debug, Deserialize, Serialize)]
             struct BodyOk {
