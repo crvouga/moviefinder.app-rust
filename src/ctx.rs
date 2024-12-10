@@ -55,6 +55,8 @@ impl Ctx {
     pub async fn new(env: &Env) -> Ctx {
         let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
 
+        info!(logger, "env stage: {:?}", env.stage);
+
         let http_client =
             Arc::new(HttpClient::new(logger.clone()).simulate_latency(env.simulate_latency));
 
