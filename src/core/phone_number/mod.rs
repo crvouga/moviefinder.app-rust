@@ -43,3 +43,41 @@ impl PhoneNumber {
         self.0.clone()
     }
 }
+
+pub fn ensure_country_code(country_code: &str, phone_number: &str) -> String {
+    let fallback_country_code = "1";
+
+    let country_code = if country_code.trim().is_empty() {
+        fallback_country_code.trim()
+    } else {
+        country_code.trim()
+    };
+
+    let country_code_with_plus = format!(
+        "+{}",
+        country_code.strip_prefix("+").unwrap_or(country_code)
+    );
+
+    let phone_number_with_country_code = format!(
+        "{}{}",
+        country_code_with_plus,
+        phone_number
+            .strip_prefix(&country_code_with_plus)
+            .unwrap_or(phone_number)
+    );
+
+    phone_number_with_country_code
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ensure_country_code() {
+        assert_eq!(ensure_country_code("1", "5555555555"), "+15555555555");
+        assert_eq!(ensure_country_code("", "5555555555"), "+15555555555");
+        assert_eq!(ensure_country_code("1", "+15555555555"), "+15555555555");
+        assert_eq!(ensure_country_code("", "+15555555555"), "+15555555555");
+    }
+}

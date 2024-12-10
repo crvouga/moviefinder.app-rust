@@ -192,3 +192,11 @@ pub fn label() -> Elem {
 pub fn span() -> Elem {
     elem("span")
 }
+
+pub fn select() -> Elem {
+    elem("select")
+}
+
+pub fn option() -> Elem {
+    elem("option")
+}

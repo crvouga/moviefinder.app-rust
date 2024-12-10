@@ -123,6 +123,22 @@ impl Elem {
         }
     }
 
+    pub fn hidden(self, value: bool) -> Self {
+        if value {
+            self.attr("hidden", "true")
+        } else {
+            self
+        }
+    }
+
+    pub fn selected(self, value: bool) -> Self {
+        if value {
+            self.attr("selected", "true")
+        } else {
+            self
+        }
+    }
+
     pub fn aria_label(self, value: &str) -> Self {
         self.attr("aria-label", value)
     }

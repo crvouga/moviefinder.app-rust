@@ -173,6 +173,14 @@ impl DataOn {
         }
     }
 
+    pub fn change(self) -> Self {
+        Self {
+            event: "change".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
+
     pub fn prevent_default(self) -> Self {
         self.js("evt.preventDefault()")
     }
@@ -439,7 +447,18 @@ impl ServerSentEvent {
 
     pub fn data_fragments(&mut self, elem: Elem) -> &mut Self {
         let rendered = elem.render();
-        let data = format!("fragments {}", rendered.replace("\n", ""));
+
+        fn clean_string(input: &str) -> String {
+            input
+                .replace('\t', " ")
+                .replace('\n', " ")
+                .split_whitespace()
+                .collect::<Vec<&str>>()
+                .join(" ")
+        }
+
+        let data = format!("fragments {}", clean_string(&rendered));
+
         self.data(&data)
     }
 

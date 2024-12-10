@@ -9,7 +9,7 @@ use super::icon;
 pub struct TextField {
     label: String,
     placeholder: String,
-    input: Option<Box<dyn Fn(Elem) -> Elem>>,
+    map_input: Option<Box<dyn Fn(Elem) -> Elem>>,
     model_error: String,
 }
 
@@ -24,8 +24,8 @@ impl TextField {
         self
     }
 
-    pub fn input(mut self, input: impl Fn(Elem) -> Elem + 'static) -> Self {
-        self.input = Some(Box::new(input));
+    pub fn map_input(mut self, map_input: impl Fn(Elem) -> Elem + 'static) -> Self {
+        self.map_input = Some(Box::new(map_input));
         self
     }
 
@@ -45,7 +45,7 @@ impl TextField {
     pub fn view(self) -> Elem {
         let signal_has_error = self.signal_has_error();
         let signal_error = self.signal_error();
-        let map_input = self.input.unwrap_or_else(|| Box::new(|x| x));
+        let map_input = self.map_input.unwrap_or_else(|| Box::new(|x| x));
         label()
             .class("w-full flex flex-col gap-2")
             .child(

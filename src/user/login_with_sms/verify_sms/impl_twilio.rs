@@ -1,4 +1,4 @@
-use super::interface::{VerifyCodeError, VerifySms};
+use super::interface::{SendCodeError, VerifyCodeError, VerifySms};
 use crate::core::twilio_api::{self, TwilioApi};
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -15,8 +15,17 @@ impl Twilio {
 
 #[async_trait]
 impl VerifySms for Twilio {
-    async fn send_code(&self, phone_number: &str) -> Result<(), std::io::Error> {
-        self.twilio_api.verify_send_code(phone_number).await?;
+    async fn send_code(&self, phone_number: &str) -> Result<(), SendCodeError> {
+        self.twilio_api
+            .verify_send_code(phone_number)
+            .await
+            .map_err(|err| match err {
+                twilio_api::verify::SendCodeError::InvalidPhoneNumber => {
+                    SendCodeError::InvalidPhoneNumber
+                }
+                twilio_api::verify::SendCodeError::Error(err) => SendCodeError::Error(err),
+            })?;
+
         Ok(())
     }
 

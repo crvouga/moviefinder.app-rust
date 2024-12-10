@@ -8,6 +8,7 @@ pub mod head_injector;
 pub mod icon;
 pub mod image;
 pub mod search_bar;
+pub mod select;
 pub mod spinner_page;
 pub mod swiper;
 pub mod text_field;

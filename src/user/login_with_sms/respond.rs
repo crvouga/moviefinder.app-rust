@@ -9,7 +9,13 @@ use crate::{
         datastar::datastar::quote,
         html::*,
         http::response_writer::ResponseWriter,
-        ui::{button::Button, text_field::TextField, top_bar::TopBar},
+        phone_number::{country_code::PhoneNumerCountryCode, ensure_country_code},
+        ui::{
+            button::Button,
+            select::{Select, SelectOption},
+            text_field::TextField,
+            top_bar::TopBar,
+        },
         unstructed_data::UnstructedData,
     },
     ctx::Ctx,
@@ -29,17 +35,39 @@ pub async fn respond(
         Route::ScreenPhone => {
             w.send_signal("isSubmitting", "false").await?;
 
-            w.send_screen(view_screen_enter_phone()).await?;
+            w.send_screen(view_screen_enter_phone(vec![])).await?;
+
+            let country_codes = ctx.phone_number_country_code_db.get_all().await;
+
+            let initial_country_code = country_codes
+                .first()
+                .map(|c| c.country_code.clone())
+                .unwrap_or_default();
+
+            w.send_fragment(view_select_country_code_input(country_codes))
+                .await?;
+
+            w.send_signal("countryCode", &initial_country_code).await?;
 
             Ok(())
         }
 
         Route::ClickedSendCode => {
+            w.send_signal("phoneNumberError", "''").await?;
+
             let phone_number_input = r
                 .params
                 .get_first("phoneNumber")
                 .map(|s| s.clone())
                 .unwrap_or_default();
+
+            let country_code_input = r
+                .params
+                .get_first("countryCode")
+                .map(|s| s.clone())
+                .unwrap_or_default();
+
+            let phone_number_input = ensure_country_code(&country_code_input, &phone_number_input);
 
             let sent = core::send_code(ctx, &phone_number_input).await;
 
@@ -84,8 +112,6 @@ pub async fn respond(
             w.send_signal("isSubmitting", "false").await?;
 
             w.send_screen(view_screen_enter_code(&phone_number)).await?;
-
-            ctx.verify_sms.send_code(&phone_number).await?;
 
             Ok(())
         }
@@ -137,10 +163,12 @@ pub async fn respond(
     }
 }
 
-fn view_screen_enter_phone() -> Elem {
+fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
     form()
         .class("w-full h-full flex flex-col")
-        .data_store("{ phoneNumber: '', phoneNumberError: '' }")
+        .data_store(
+            "{ phoneNumber: '', phoneNumberError: '', countryCode: '', countryCodeError: '' }",
+        )
         .debug_store(false)
         .data_on(|b| {
             b.submit()
@@ -157,33 +185,24 @@ fn view_screen_enter_phone() -> Elem {
         )
         .child(
             div()
-                .class("flex-1 p-6 gap-6 flex flex-col")
-                // .child(
-                //     Select::default()
-                //         .label("Country Code")
-                //         .placeholder("Select country code")
-                //         .input(|e| {
-                //             e.data_model("countryCode")
-                //                 .type_("tel")
-                //                 .data_on(|d| d.input().js("$countryCodeError = ''"))
-                //         })
-                //         .options(country_codes.iter())
-                //         .model_error("countryCodeError")
-                //         .view()
-                //         .id("country_code"),
-                // )
+                .class("flex-1 p-6 gap-8 flex flex-col")
                 .child(
-                    TextField::default()
-                        .label("Phone number")
-                        .placeholder("Enter phone number")
-                        .input(|e| {
-                            e.data_model("phoneNumber")
-                                .type_("tel")
-                                .data_on(|d| d.input().js("$phoneNumberError = ''"))
-                        })
-                        .model_error("phoneNumberError")
-                        .view()
-                        .id("phone_number"),
+                    div()
+                        .class("gap-4 flex flex-col")
+                        .child(view_select_country_code_input(country_codes))
+                        .child(
+                            TextField::default()
+                                .label("Phone number")
+                                .placeholder("Enter phone number")
+                                .map_input(|e| {
+                                    e.data_model("phoneNumber")
+                                        .type_("tel")
+                                        .data_on(|d| d.input().js("$phoneNumberError = ''"))
+                                })
+                                .model_error("phoneNumberError")
+                                .view()
+                                .id("phone_number"),
+                        ),
                 )
                 .child(
                     div().class("pt-3 w-full").child(
@@ -198,6 +217,42 @@ fn view_screen_enter_phone() -> Elem {
                     ),
                 ),
         )
+}
+
+fn view_select_country_code_input(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
+    let options: Vec<SelectOption> = country_codes
+        .iter()
+        .map(|c| {
+            SelectOption::default().value(&c.country_code).label(
+                &format!(
+                    "{} {} (+{})",
+                    c.to_emoji().unwrap_or("".to_string()),
+                    &c.country_name,
+                    &c.country_code
+                )
+                .trim(),
+            )
+        })
+        .collect();
+
+    let options = if options.is_empty() {
+        vec![SelectOption::default().value("").label("Loading...")]
+    } else {
+        options
+    };
+
+    Select::default()
+        .label("Country Code")
+        .placeholder("Select country code")
+        .map_select(|e| {
+            e.data_model("countryCode")
+                .data_on(|d| d.change().js("$countryCodeError = ''"))
+        })
+        .options(options)
+        .model_error("countryCodeError")
+        .select_id("country-code-select")
+        .view()
+        .id("country_code")
 }
 
 fn view_screen_enter_code(phone_number: &str) -> Elem {
@@ -223,7 +278,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
         )
         .child(
             div()
-                .class("flex-1 p-6 gap-6 flex flex-col")
+                .class("flex-1 p-6 gap-8 flex flex-col")
                 .child(
                     div()
                         .class("text-xl w-full")
@@ -234,7 +289,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
                     TextField::default()
                         .label("Code")
                         .placeholder("Enter code")
-                        .input(|e| {
+                        .map_input(|e| {
                             e.data_model("code")
                                 .type_("tel")
                                 .data_on(|d| d.input().js("$codeError = ''"))

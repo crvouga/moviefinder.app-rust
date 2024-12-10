@@ -19,11 +19,15 @@ pub async fn send_code(ctx: &Ctx, phone_number: &str) -> Result<(), SendCodeErro
         ));
     }
 
-    let sent_code = ctx.verify_sms.send_code(&phone_number).await;
-
-    if let Err(err) = sent_code {
-        return Err(SendCodeError::Error(err.to_string()));
-    }
+    ctx.verify_sms
+        .send_code(&phone_number)
+        .await
+        .map_err(|e| match e {
+            interface::SendCodeError::InvalidPhoneNumber => {
+                SendCodeError::InvalidPhoneNumber("Invalid phone number".to_string())
+            }
+            interface::SendCodeError::Error(err) => SendCodeError::Error(err.to_string()),
+        })?;
 
     Ok(())
 }
@@ -43,50 +47,47 @@ pub async fn verify_code(
         return Err(VerifyCodeError::InvalidCode("Code is required".to_string()));
     }
 
-    let verified = ctx.verify_sms.verify_code(&phone_number, &code_input).await;
+    ctx.verify_sms
+        .verify_code(&phone_number, &code_input)
+        .await
+        .map_err(|e| match e {
+            interface::VerifyCodeError::WrongCode => {
+                VerifyCodeError::InvalidCode("Wrong code".to_string())
+            }
+            interface::VerifyCodeError::Error(err) => VerifyCodeError::Error(err),
+        })?;
 
-    match verified {
-        Err(interface::VerifyCodeError::WrongCode) => {
-            Err(VerifyCodeError::InvalidCode("Wrong code".to_string()))
-        }
+    let existing_account = ctx
+        .user_account_db
+        .find_one_by_phone_number(&phone_number)
+        .await
+        .map_err(VerifyCodeError::Error)?;
 
-        Err(interface::VerifyCodeError::Error(err)) => Err(VerifyCodeError::Error(err)),
+    let account_new = existing_account.unwrap_or(UserAccount::new(phone_number.to_string()));
 
-        Ok(()) => {
-            let existing_account = ctx
-                .user_account_db
-                .find_one_by_phone_number(&phone_number)
-                .await
-                .map_err(VerifyCodeError::Error)?;
+    let user_id = account_new.user_id.clone();
 
-            let account_new =
-                existing_account.unwrap_or(UserAccount::new(phone_number.to_string()));
+    let existing_profile = ctx
+        .user_profile_db
+        .find_one_by_user_id(&user_id)
+        .await
+        .map_err(VerifyCodeError::Error)?;
 
-            let user_id = account_new.user_id.clone();
+    let profile_new = existing_profile.unwrap_or(UserProfile::new(&user_id));
 
-            let existing_profile = ctx
-                .user_profile_db
-                .find_one_by_user_id(&user_id)
-                .await
-                .map_err(VerifyCodeError::Error)?;
+    let existing_session = ctx
+        .user_session_db
+        .find_by_session_id(&session_id)
+        .await
+        .map_err(VerifyCodeError::Error)?;
 
-            let profile_new = existing_profile.unwrap_or(UserProfile::new(&user_id));
+    let session_new = existing_session.unwrap_or(UserSession::new(&user_id, &session_id));
 
-            let existing_session = ctx
-                .user_session_db
-                .find_by_session_id(&session_id)
-                .await
-                .map_err(VerifyCodeError::Error)?;
+    transact_new_user(ctx, &account_new, &profile_new, &session_new)
+        .await
+        .map_err(VerifyCodeError::Error)?;
 
-            let session_new = existing_session.unwrap_or(UserSession::new(&user_id, &session_id));
-
-            transact_new_user(ctx, &account_new, &profile_new, &session_new)
-                .await
-                .map_err(VerifyCodeError::Error)?;
-
-            Ok(())
-        }
-    }
+    Ok(())
 }
 
 async fn transact_new_user(

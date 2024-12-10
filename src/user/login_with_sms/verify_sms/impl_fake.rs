@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use super::interface::{VerifyCodeError, VerifySms};
+use super::interface::{SendCodeError, VerifyCodeError, VerifySms};
 
 pub struct Fake {
     correct_code: String,
@@ -20,14 +20,14 @@ const SHOULD_ERROR_VERIFY_CODE: bool = false;
 
 #[async_trait]
 impl VerifySms for Fake {
-    async fn send_code(&self, _phone_number: &str) -> Result<(), std::io::Error> {
+    async fn send_code(&self, _phone_number: &str) -> Result<(), SendCodeError> {
         if SHOULD_SLEEP {
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
 
         if SHOULD_ERROR_SEND_CODE {
             let err = std::io::Error::new(std::io::ErrorKind::Other, "Sending code failed");
-            return Err(err);
+            return Err(SendCodeError::Error(err));
         }
 
         Ok(())

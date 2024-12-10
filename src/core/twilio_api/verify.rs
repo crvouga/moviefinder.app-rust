@@ -12,8 +12,13 @@ pub enum VerifyCodeError {
     Error(std::io::Error),
 }
 
+pub enum SendCodeError {
+    InvalidPhoneNumber,
+    Error(std::io::Error),
+}
+
 impl TwilioApi {
-    pub async fn verify_send_code(&self, phone_number: &str) -> Result<(), std::io::Error> {
+    pub async fn verify_send_code(&self, phone_number: &str) -> Result<(), SendCodeError> {
         let url = Url {
             host: "verify.twilio.com".to_string(),
             path: format!("/v2/Services/{}/Verifications", self.twilio_service_sid),
@@ -44,18 +49,34 @@ impl TwilioApi {
             body,
         };
 
-        let response = self.http_client.send(request).await?;
+        let response = self
+            .http_client
+            .send(request)
+            .await
+            .map_err(SendCodeError::Error)?;
 
         if response.status_code <= 299 && response.status_code >= 200 {
             Ok(())
         } else {
-            Err(std::io::Error::new(
+            #[derive(Debug, Deserialize, Serialize)]
+            struct BodyError {
+                code: u16,
+            }
+
+            let body_error: BodyError = serde_json::from_slice(&response.body.clone()).unwrap();
+
+            // https://www.twilio.com/docs/api/errors/60200
+            if body_error.code == 60200 {
+                return Err(SendCodeError::InvalidPhoneNumber);
+            }
+
+            Err(SendCodeError::Error(std::io::Error::new(
                 std::io::ErrorKind::Other,
                 format!(
                     "Failed to send code: {:?}",
                     String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
                 ),
-            ))
+            )))
         }
     }
 
@@ -122,8 +143,6 @@ impl TwilioApi {
             if body_error.code == 60200 {
                 return Err(VerifyCodeError::WrongCode);
             }
-
-            println!("Error code: {:?}", body_error);
 
             Err(VerifyCodeError::Error(std::io::Error::new(
                 std::io::ErrorKind::Other,
