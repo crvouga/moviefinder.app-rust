@@ -1,4 +1,5 @@
 pub mod account_screen;
+pub mod edit_profile;
 pub mod login_with_sms;
 pub mod logout;
 pub mod respond;
