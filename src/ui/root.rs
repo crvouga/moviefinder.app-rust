@@ -1,6 +1,6 @@
 use crate::core::{
     html::*,
-    http::response_writer::ResponseWriter,
+    http::{response_writer::ResponseWriter, server_sent_event::sse},
     tmdb_api::TMDB_IMAGE_BASE_URL,
     ui::{drawer::Drawer, toast::Toast},
 };
@@ -9,7 +9,12 @@ const ID_SCREEN: &str = "screen";
 
 impl ResponseWriter {
     pub async fn send_screen(&mut self, screen: Elem) -> Result<(), std::io::Error> {
-        self.send_fragment(screen.id(ID_SCREEN)).await?;
+        sse()
+            .event_merge_fragments()
+            .data_fragments(screen.id(ID_SCREEN))
+            .data_merge_mode_outer()
+            .send(self)
+            .await?;
 
         Ok(())
     }

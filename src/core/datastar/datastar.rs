@@ -435,9 +435,9 @@ impl ServerSentEvent {
         self.data(&format!("mergeMode {}", mode))
     }
 
-    // pub fn data_merge_mode_outer(&mut self) -> &mut Self {
-    //     self.data_merge_mode("outer")
-    // }
+    pub fn data_merge_mode_outer(&mut self) -> &mut Self {
+        self.data_merge_mode("outer")
+    }
 
     pub fn data_merge_mode_before(&mut self) -> &mut Self {
         self.data_merge_mode("before")
@@ -497,6 +497,7 @@ impl ResponseWriter {
         sse()
             .event_merge_fragments()
             .data_fragments(elem)
+            .data_merge_mode_outer()
             .send(self)
             .await
     }
