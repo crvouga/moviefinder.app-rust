@@ -26,11 +26,16 @@ impl UserProfile {
     pub fn to_avatar_url(&self) -> String {
         let avatar_seed = self.avatar_seed.as_deref().unwrap_or_default();
 
-        let avatar_url = format!(
-            "https://api.dicebear.com/9.x/fun-emoji/svg?seed={}",
-            url_encoded::encode(avatar_seed)
-        );
+        let avatar_url = to_avatar_url(avatar_seed);
 
         avatar_url
     }
+}
+
+const AVATAR_BASE_URL: &str = "https://api.dicebear.com/9.x/fun-emoji/svg?seed=";
+
+pub fn to_avatar_url(avatar_seed: &str) -> String {
+    let avatar_url = AVATAR_BASE_URL.to_owned() + &url_encoded::encode(avatar_seed);
+
+    avatar_url
 }

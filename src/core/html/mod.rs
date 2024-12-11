@@ -200,3 +200,7 @@ pub fn select() -> Elem {
 pub fn option() -> Elem {
     elem("option")
 }
+
+pub fn fieldset() -> Elem {
+    elem("fieldset")
+}

@@ -77,6 +77,14 @@ impl DataClass {
         self.classes.insert(class.to_string(), signal.to_string());
         self
     }
+
+    pub fn maybe_class(mut self, class: &str, signal: &Option<String>) -> Self {
+        match signal {
+            Some(signal) => self.classes.insert(class.to_string(), signal.to_string()),
+            None => None,
+        };
+        self
+    }
 }
 
 impl Attr for DataClass {

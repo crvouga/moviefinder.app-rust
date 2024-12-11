@@ -10,7 +10,7 @@ pub struct TextField {
     label: String,
     placeholder: String,
     map_input: Option<Box<dyn Fn(Elem) -> Elem>>,
-    model_error: String,
+    bind_error: Option<String>,
 }
 
 impl TextField {
@@ -30,16 +30,16 @@ impl TextField {
     }
 
     pub fn bind_error(mut self, value: &str) -> Self {
-        self.model_error = value.to_string();
+        self.bind_error = Some(value.to_string());
         self
     }
 
-    fn signal_error(&self) -> String {
-        js_dot_value(&self.model_error)
+    fn signal_error(&self) -> Option<String> {
+        self.bind_error.clone().map(|x| js_dot_value(&x))
     }
 
-    fn signal_has_error(&self) -> String {
-        format!("{}?.length > 0", self.signal_error())
+    fn signal_has_error(&self) -> Option<String> {
+        self.signal_error().map(|x| format!("{}?.length > 0", x))
     }
 
     pub fn view(self) -> Elem {
@@ -52,19 +52,19 @@ impl TextField {
                 span()
                     .child(text(&self.label))
                     .class("font-bold")
-                    .data_class(|c| c.c("text-red-500", &signal_has_error)),
+                    .data_class(|c| c.maybe_class("text-red-500", &signal_has_error)),
             )
             .child(
                 div()
                     .class("p-4 bg-neutral-900 border-2 rounded w-full flex items-center gap-2 min-w-0 overflow-hidden")
                     .data_class(|c| {
-                        c.c(
+                        c.maybe_class(
                             "border-red-500 focus:border-offset-2 focus:border-red-500",
                             &signal_has_error,
                         )
-                        .c(
+                        .maybe_class(
                             "border-neutral-700 focus:border-offset-2 focus:border-blue-500",
-                            &js_not(&signal_has_error),
+                            &signal_has_error.map(|s| js_not(&s)),
                         )
                     })
                     .child(
@@ -92,10 +92,15 @@ impl TextField {
                             .child(icon::x_mark("size-8 pointer-events-none")),
                     )
             )
-            .child(
-                span()
-                    .class("font-bold text-red-500")
-                    .data_text(&signal_error),
-            )
+            .map(|e| {
+                match signal_error {
+                    Some(signal_error) => e.child(
+                        span()
+                            .class("font-bold text-red-500")
+                            .data_text(&signal_error),
+                    ),
+                    None => e,
+                }
+            })
     }
 }

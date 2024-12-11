@@ -3,6 +3,8 @@ use crate::core::{
     ui::button::{Button, ButtonColor},
 };
 
+const SIGNAL_IS_SAVING: &str = "signal_is_saving";
+
 #[derive(Debug, Default)]
 pub struct BottomBarForm {
     cancel_url: String,
@@ -39,7 +41,7 @@ impl BottomBarForm {
                 Button::default()
                     .label("Save")
                     .color(ButtonColor::Primary)
-                    .indicator("signalIsSaving")
+                    .indicator(SIGNAL_IS_SAVING)
                     .view()
                     .data_on(|b| b.click().sse(&self.save_url))
                     .id("save-button")
