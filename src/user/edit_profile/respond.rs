@@ -19,7 +19,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Screen { .. } => {
-            w.send_screen(view_screen(ViewModel::Loading)).await?;
+            w.send_screen(view_screen_loading()).await?;
 
             let user_id = match r.user_id.clone() {
                 Some(user_id) => user_id,
@@ -33,8 +33,7 @@ pub async fn respond(
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
 
-            w.send_screen(view_screen(ViewModel::Loaded { profile }))
-                .await?;
+            w.send_screen(view_screen_loaded(profile)).await?;
 
             Ok(())
         }
@@ -64,18 +63,6 @@ async fn respond_failed_to_load(
     user::account_screen::respond(ctx, r, w, &None).await?;
 
     Ok(())
-}
-
-enum ViewModel {
-    Loading,
-    Loaded { profile: UserProfile },
-}
-
-fn view_screen(vm: ViewModel) -> Elem {
-    match vm {
-        ViewModel::Loading => view_screen_loading(),
-        ViewModel::Loaded { profile } => view_screen_loaded(profile),
-    }
 }
 
 fn view_screen_root() -> Elem {
