@@ -13,6 +13,10 @@ impl Username {
         Self(format)
     }
 
+    pub fn from_string(s: String) -> Self {
+        Self(s.trim().to_string())
+    }
+
     pub fn to_string(&self) -> String {
         self.0.clone()
     }

@@ -11,15 +11,18 @@ pub struct UserProfile {
     pub username: Username,
     pub created_at_posix: Posix,
     pub avatar_seed: Option<String>,
+    pub full_name: Option<String>,
 }
 
 impl UserProfile {
     pub fn new(user_id: &UserId) -> Self {
+        let username = Username::generate();
         Self {
             user_id: user_id.clone(),
-            username: Username::generate(),
+            avatar_seed: Some(username.to_string()),
             created_at_posix: Posix::now(),
-            avatar_seed: Some(user_id.as_str().to_owned()),
+            full_name: None,
+            username,
         }
     }
 

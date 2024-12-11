@@ -7,6 +7,7 @@ use crate::{
         ui::{
             avatar::Avatar, button::Button, spinner_page, text_field::TextField, top_bar::TopBar,
         },
+        unit_of_work::UnitOfWork,
         unstructured_data::UnstructuredData,
     },
     ctx::Ctx,
@@ -15,6 +16,7 @@ use crate::{
     user::{
         self,
         user_profile::user_profile_::{js_avatar_url_signal, UserProfile},
+        username::Username,
     },
 };
 
@@ -58,6 +60,12 @@ pub async fn respond(
             )
             .await?;
 
+            w.send_signal(
+                SIGNAL_FULL_NAME,
+                &js_quote(&profile.full_name.unwrap_or_default()),
+            )
+            .await?;
+
             Ok(())
         }
 
@@ -70,9 +78,30 @@ pub async fn respond(
             let full_name = r.params.get_first(SIGNAL_FULL_NAME).unwrap_or_default();
             let avatar_seed = r.params.get_first(SIGNAL_AVATAR_SEED).unwrap_or_default();
 
-            println!("username: {}", username);
-            println!("full_name: {}", full_name);
-            println!("avatar_seed: {}", avatar_seed);
+            let user_id = match r.user_id.clone() {
+                Some(user_id) => user_id,
+                None => return respond_failed_to_load(ctx, r, w).await,
+            };
+
+            let maybe_profile_existing = ctx.user_profile_db.find_one_by_user_id(&user_id).await?;
+
+            let profile_existing = match maybe_profile_existing {
+                Some(profile) => profile,
+                None => return respond_failed_to_load(ctx, r, w).await,
+            };
+
+            let profile_new = UserProfile {
+                avatar_seed: Some(avatar_seed.clone()),
+                username: Username::from_string(username.clone()),
+                full_name: Some(full_name.clone().trim().to_string()),
+                ..profile_existing
+            };
+
+            ctx.user_profile_db
+                .upsert_one(UnitOfWork::new(), &profile_new)
+                .await?;
+
+            user::account_screen::redirect_to(ctx, r, w, &r.user_id).await?;
 
             Ok(())
         }
@@ -87,13 +116,13 @@ async fn respond_failed_to_load(
     w.send_toast_dark("User not found. Try logging in again")
         .await?;
 
-    user::account_screen::respond(ctx, r, w, &None).await?;
+    user::account_screen::redirect_to(ctx, r, w, &None).await?;
 
     Ok(())
 }
 
 fn view_screen_root() -> Elem {
-    div()
+    form()
         .class("flex flex-col w-full flex-1 overflow-hidden")
         .data_signal(SIGNAL_USERNAME, "''")
         .data_signal(SIGNAL_AVATAR_SEED, "''")
@@ -114,7 +143,7 @@ fn view_screen_loading() -> Elem {
 fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
     view_screen_root()
         .child(
-            form()
+            div()
                 .class("flex-1 w-full flex flex-col gap-12 p-6 overflow-y-scroll pb-48")
                 .child(
                     fieldset()

@@ -22,7 +22,7 @@ pub async fn respond(
         Route::ClickedLogout => {
             ctx.user_session_db.zap(uow(), &r.session_id).await?;
 
-            account_screen::respond(ctx, r, w, &None).await?;
+            account_screen::redirect_to(ctx, r, w, &None).await?;
 
             w.send_signal("signal_is_logout_drawer_open", "false")
                 .await?;

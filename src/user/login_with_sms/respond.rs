@@ -175,16 +175,13 @@ pub async fn respond(
                 Ok(()) => {
                     w.send_toast_dark("Logged in").await?;
 
-                    w.send_push_url(&user::route::Route::AccountScreen.url())
-                        .await?;
-
                     let user_id = ctx
                         .user_session_db
                         .find_by_session_id(&r.session_id)
                         .await?
                         .map(|s| s.user_id);
 
-                    account_screen::respond(ctx, r, w, &user_id).await?;
+                    account_screen::redirect_to(ctx, r, w, &user_id).await?;
 
                     Ok(())
                 }
