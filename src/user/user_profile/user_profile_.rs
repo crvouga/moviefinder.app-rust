@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{posix::Posix, url_encoded},
+    core::{datastar::datastar::js_dot_value, posix::Posix, url_encoded},
     user::{user_id::UserId, username::Username},
 };
 
@@ -33,6 +33,14 @@ impl UserProfile {
 }
 
 const AVATAR_BASE_URL: &str = "https://api.dicebear.com/9.x/fun-emoji/svg?seed=";
+
+pub fn js_avatar_url_signal(avatar_seed_signal: &str) -> String {
+    format!(
+        "`{}${{encodeURIComponent({})}}`",
+        AVATAR_BASE_URL,
+        js_dot_value(avatar_seed_signal)
+    )
+}
 
 pub fn to_avatar_url(avatar_seed: &str) -> String {
     let avatar_url = AVATAR_BASE_URL.to_owned() + &url_encoded::encode(avatar_seed);

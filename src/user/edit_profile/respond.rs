@@ -10,7 +10,10 @@ use crate::{
     ctx::Ctx,
     req::Req,
     ui::{bottom_bar_form::BottomBarForm, route::Routable},
-    user::{self, user_profile::user_profile_::UserProfile},
+    user::{
+        self,
+        user_profile::user_profile_::{js_avatar_url_signal, UserProfile},
+    },
 };
 
 const SIGNAL_USERNAME: &str = "signal_username";
@@ -115,7 +118,13 @@ fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
                 .child(
                     fieldset()
                         .class("flex flex-col w-full gap-4 items-center justify-center")
-                        .child(Avatar::default().src(" ").view().class("size-36"))
+                        .child(
+                            Avatar::default()
+                                .src("123")
+                                .view()
+                                .class("size-36")
+                                .data_attributes("src", &js_avatar_url_signal(SIGNAL_AVATAR_SEED)),
+                        )
                         .child(
                             TextField::default()
                                 .label("Avatar Seed")

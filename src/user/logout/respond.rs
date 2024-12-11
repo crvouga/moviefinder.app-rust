@@ -24,7 +24,8 @@ pub async fn respond(
 
             account_screen::respond(ctx, r, w, &None).await?;
 
-            w.send_signal("isLogoutDrawerOpen", "false").await?;
+            w.send_signal("signal_is_logout_drawer_open", "false")
+                .await?;
 
             w.send_toast_dark("Logged out").await?;
 
@@ -41,9 +42,9 @@ pub async fn respond(
 
 fn view_logout_drawer() -> Elem {
     Drawer::default()
-        .model_open("isLogoutDrawerOpen")
+        .model_open("signal_is_logout_drawer_open")
         .initial_open(true)
-        .on_close("isLogoutDrawerOpen.value = false")
+        .on_close("signal_is_logout_drawer_open.value = false")
         .content(
             div()
                 .class("w-full h-full p-6 gap-6 flex flex-col items-center")
@@ -60,14 +61,16 @@ fn view_logout_drawer() -> Elem {
                                 .color_gray()
                                 .label("Cancel")
                                 .view()
-                                .data_on(|b| b.click().js("isLogoutDrawerOpen.value = false"))
+                                .data_on(|b| {
+                                    b.click().js("signal_is_logout_drawer_open.value = false")
+                                })
                                 .class("flex-1"),
                         )
                         .child(
                             Button::default()
                                 .color_primary()
                                 .label("Logout")
-                                .indicator("isLoggingOut")
+                                .indicator("signal_is_logging_out")
                                 .view()
                                 .class("flex-1")
                                 .id("logout-button")
