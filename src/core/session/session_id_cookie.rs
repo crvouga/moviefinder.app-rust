@@ -41,6 +41,6 @@ fn new_session_cookie(session_id: String) -> ResponseCookie {
         max_age: Some(31536000),
         name: SESSION_ID_COOKIE_NAME.to_string(),
         value: session_id,
-        same_site: Some(SameSite::Strict),
+        same_site: Some(SameSite::Lax),
     }
 }
