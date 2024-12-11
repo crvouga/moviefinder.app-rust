@@ -18,7 +18,7 @@ impl UnstructuredData for FormData {
         self.params.get_all(key)
     }
 
-    fn get_first(&self, key: &str) -> Option<&String> {
+    fn get_first(&self, key: &str) -> Option<String> {
         self.params.get_first(key)
     }
 

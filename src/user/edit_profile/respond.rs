@@ -1,10 +1,11 @@
 use super::route::Route;
 use crate::{
     core::{
-        datastar::datastar::js_quote,
+        datastar::datastar::{js_dot_value, js_quote},
         html::{div, fieldset, form, Elem},
         http::response_writer::ResponseWriter,
-        ui::{avatar::Avatar, spinner_page, text_field::TextField, top_bar::TopBar},
+        ui::{avatar::Avatar, button::Button, text_field::TextField, top_bar::TopBar},
+        unstructured_data::UnstructuredData,
     },
     ctx::Ctx,
     req::Req,
@@ -56,16 +57,20 @@ pub async fn respond(
             Ok(())
         }
 
-        Route::CheckUsernameTaken { .. } => {
-            unimplemented!()
-        }
-
-        Route::ClickedCancel { .. } => {
+        Route::InputtedUsername { .. } => {
             unimplemented!()
         }
 
         Route::ClickedSave { .. } => {
-            unimplemented!()
+            let username = r.params.get_first(SIGNAL_USERNAME).unwrap_or_default();
+            let full_name = r.params.get_first(SIGNAL_FULL_NAME).unwrap_or_default();
+            let avatar_seed = r.params.get_first(SIGNAL_AVATAR_SEED).unwrap_or_default();
+
+            println!("username: {}", username);
+            println!("full_name: {}", full_name);
+            println!("avatar_seed: {}", avatar_seed);
+
+            Ok(())
         }
     }
 }
@@ -98,15 +103,15 @@ fn view_screen_root() -> Elem {
         )
 }
 
-fn view_screen_loading() -> Elem {
-    view_screen_root().child(spinner_page::view())
-}
+// fn view_screen_loading() -> Elem {
+//     view_screen_root().child(spinner_page::view())
+// }
 
 fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
     view_screen_root()
         .child(
             form()
-                .class("flex-1 w-full flex flex-col gap-12 p-6 overflow-y-scroll pb-36")
+                .class("flex-1 w-full flex flex-col gap-12 p-6 overflow-y-scroll pb-48")
                 .child(
                     fieldset()
                         .class("flex flex-col w-full gap-4 items-center justify-center")
@@ -117,7 +122,15 @@ fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
                                 .map_input(|i| i.data_bind(SIGNAL_AVATAR_SEED))
                                 .placeholder("Avatar Seed")
                                 .view(),
-                        ),
+                        )
+                        .child(div().class("w-full flex items-center justify-end").child(
+                            Button::default().label("Random seed").view().data_on(|b| {
+                                b.click().js(&format!(
+                                    "{} = Math.random().toString(36).substring(2);",
+                                    js_dot_value(SIGNAL_AVATAR_SEED)
+                                ))
+                            }),
+                        )),
                 )
                 .child(
                     fieldset().child(

@@ -565,7 +565,7 @@ impl Request {
         let datastar_params = self.url.query_params.get_first("datastar");
 
         if let Some(urlencoded_json) = datastar_params {
-            let json = url_encoded::decode(urlencoded_json);
+            let json = url_encoded::decode(&urlencoded_json);
             JsonData::from_string(&json).params
         } else {
             self.params()

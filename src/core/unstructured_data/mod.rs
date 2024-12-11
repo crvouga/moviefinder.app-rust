@@ -9,7 +9,7 @@ pub trait UnstructuredData {
 
     fn from_string(string: &str) -> Self;
 
-    fn get_first(&self, key: &str) -> Option<&String>;
+    fn get_first(&self, key: &str) -> Option<String>;
 
     fn get_all(&self, key: &str) -> Option<&Vec<String>>;
 
@@ -67,8 +67,14 @@ impl UnstructuredData for UnstructuredDataHashMap {
         UnstructuredDataHashMap(map)
     }
 
-    fn get_first(&self, key: &str) -> Option<&String> {
-        self.0.get(key).and_then(|values| values.first())
+    fn get_first(&self, key: &str) -> Option<String> {
+        let first = self
+            .0
+            .get(key)
+            .and_then(|values| values.first())
+            .map(|s| s.to_owned());
+
+        first
     }
 
     fn get_all(&self, key: &str) -> Option<&Vec<String>> {
@@ -108,9 +114,9 @@ mod test {
     fn test_get_first() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
         let form_data = UnstructuredDataHashMap::from_string(form_string);
-        assert_eq!(form_data.get_first("name"), Some(&"John".to_string()));
-        assert_eq!(form_data.get_first("age"), Some(&"20".to_string()));
-        assert_eq!(form_data.get_first("hobby"), Some(&"reading".to_string()));
+        assert_eq!(form_data.get_first("name"), Some("John".to_string()));
+        assert_eq!(form_data.get_first("age"), Some("20".to_string()));
+        assert_eq!(form_data.get_first("hobby"), Some("reading".to_string()));
     }
 
     #[test]

@@ -80,7 +80,7 @@ pub async fn respond(
             let signal_input_value = r.params.get_first("signalInputValue");
 
             let model =
-                ViewModel::load(ctx, feed_id, signal_input_value.unwrap_or(&"".to_string())).await;
+                ViewModel::load(ctx, feed_id, &signal_input_value.unwrap_or_default()).await;
 
             let form_state_new = FormState {
                 feed_id: model.feed.feed_id.clone(),
@@ -107,11 +107,9 @@ pub async fn respond(
         }
 
         Route::InputtedSearch { feed_id } => {
-            let default = "".to_string();
+            let search_input = r.params.get_first("signalInputValue").unwrap_or_default();
 
-            let search_input = r.params.get_first("signalInputValue").unwrap_or(&default);
-
-            let model = ViewModel::load(ctx, feed_id, search_input).await;
+            let model = ViewModel::load(ctx, feed_id, &search_input).await;
 
             let selected_tags_new = r.to_selected_tags();
             let model_new = ViewModel {
