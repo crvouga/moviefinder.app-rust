@@ -108,7 +108,7 @@ fn view_logged_out() -> Elem {
                         .view()
                         .id("logout")
                         .data_on(|b| {
-                            b.click().push_then_get(
+                            b.click().push_then_sse(
                                 &Route::LoginWithSms(login_with_sms::route::Route::ScreenPhone)
                                     .url(),
                             )
@@ -143,7 +143,7 @@ fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
                         .view()
                         .class("w-full")
                         .data_on(|b| {
-                            b.click().push_then_get(
+                            b.click().push_then_sse(
                                 &Route::EditProfile(edit_profile::route::Route::Screen {
                                     user_id: profile.user_id.clone(),
                                 })

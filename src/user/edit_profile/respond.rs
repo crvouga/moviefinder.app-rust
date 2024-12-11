@@ -12,7 +12,10 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::{bottom_bar_form::BottomBarForm, route::Routable},
+    ui::{
+        bottom_bar_form::{BottomBarForm, SIGNAL_IS_SUBMITTING},
+        route::Routable,
+    },
     user::{
         self,
         user_profile::user_profile_::{js_avatar_url_signal, UserProfile},
@@ -142,6 +145,19 @@ fn view_screen_loading() -> Elem {
 
 fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
     view_screen_root()
+        .map(|e| match profile {
+            Some(profile) => {
+                let route = Route::ClickedSave {
+                    user_id: profile.user_id.clone(),
+                };
+
+                let url = route.url();
+
+                e.data_on(|b| b.submit().sse(&url))
+            }
+            None => e,
+        })
+        .data_indicator(SIGNAL_IS_SUBMITTING)
         .child(
             div()
                 .class("flex-1 w-full flex flex-col gap-12 p-6 overflow-y-scroll pb-48")
@@ -193,18 +209,6 @@ fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
         .child(
             BottomBarForm::default()
                 .cancel_url(&user::route::Route::AccountScreen.url())
-                .save_url(&match profile {
-                    Some(profile) => {
-                        let route = Route::ClickedSave {
-                            user_id: profile.user_id.clone(),
-                        };
-
-                        let url = route.url();
-
-                        url
-                    }
-                    None => "".to_string(),
-                })
                 .view(),
         )
 }

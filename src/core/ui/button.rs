@@ -20,14 +20,12 @@ impl Button {
         self
     }
 
-    pub fn color_gray(mut self) -> Self {
-        self.color = ButtonColor::Gray;
-        self
+    pub fn color_gray(self) -> Self {
+        self.color(ButtonColor::Gray)
     }
 
-    pub fn color_primary(mut self) -> Self {
-        self.color = ButtonColor::Primary;
-        self
+    pub fn color_primary(self) -> Self {
+        self.color(ButtonColor::Primary)
     }
 
     pub fn indicator(mut self, value: &str) -> Self {

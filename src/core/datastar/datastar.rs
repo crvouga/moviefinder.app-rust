@@ -275,7 +275,7 @@ impl DataOn {
         self
     }
 
-    pub fn push_then_get(self, url: &str) -> Self {
+    pub fn push_then_sse(self, url: &str) -> Self {
         self.push_url(url).sse(url)
     }
 }

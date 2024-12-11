@@ -116,7 +116,7 @@ fn view_top_bar_loading() -> Elem {
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root().data_on(|b| {
-        b.click().push_then_get(
+        b.click().push_then_sse(
             &feed_tags::route::Route::FeedTagsFormScreen {
                 feed_id: feed_id.clone(),
             }
@@ -283,7 +283,7 @@ fn view_slide_content(feed_item: &FeedItem) -> Elem {
         } => button()
             .class("w-full h-full m-0 p-0")
             .data_on(|b| {
-                b.click().push_then_get(
+                b.click().push_then_sse(
                     &media::details::route::Route::MediaDetailsScreen {
                         media_id: media.id.clone(),
                     }

@@ -48,7 +48,7 @@ impl BottomBar {
                         .active(self.active == Active::Home)
                         .view()
                         .data_on(|b| {
-                            b.click().push_then_get(
+                            b.click().push_then_sse(
                                 &route::Route::Feed(feed::route::Route::FeedScreenDefault).url(),
                             )
                         }),
@@ -60,7 +60,7 @@ impl BottomBar {
                         .active(self.active == Active::Account)
                         .view()
                         .data_on(|b| {
-                            b.click().push_then_get(
+                            b.click().push_then_sse(
                                 &route::Route::User(user::route::Route::AccountScreen).url(),
                             )
                         }),
