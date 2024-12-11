@@ -12,24 +12,29 @@ use crate::core::{
     url_encoded,
 };
 
-pub fn js_get(url: &str) -> String {
-    format!("$get('{}')", url)
+fn fallback_empty_string(value: &str) -> String {
+    if value.trim().is_empty() {
+        "''".to_string()
+    } else {
+        value.to_string()
+    }
 }
 
-pub fn js_post(url: &str) -> String {
-    format!("$post('{}', this)", url)
+pub fn js_empty_string() -> String {
+    "''".to_string()
 }
 
-pub fn js_patch(url: &str) -> String {
-    format!("$patch('{}', this)", url)
+pub fn js_sse(url: &str) -> String {
+    "sse('URL', { method: 'post' })".replace("URL", url)
 }
 
-pub fn signal(value: &str) -> String {
-    format!("(${})", value)
+pub fn js_dot_value(value: &str) -> String {
+    format!("{}.value", value)
 }
 
-pub fn dollar(value: &str) -> String {
-    format!("${}", value)
+pub fn js_assign(variable: &str, value: &str) -> String {
+    let value_final = fallback_empty_string(value);
+    format!("{} = {}", variable, value_final)
 }
 
 pub fn js_not(value: &str) -> String {
@@ -37,18 +42,18 @@ pub fn js_not(value: &str) -> String {
 }
 
 pub fn js_replace_url(url: &str) -> String {
-    format!("window.history.replaceState(null, '', '{}');", url)
+    format!("window.history.replaceState(null, '', '{}')", url)
 }
 
 pub fn js_push_url(url: &str) -> String {
-    format!("window.history.pushState(null, '', '{}');", url)
+    format!("window.history.pushState(null, '', '{}')", url)
 }
 
 pub fn js_console_error(message: &str) -> String {
     format!("console.error('{}')", message)
 }
 
-pub fn quote(value: &str) -> String {
+pub fn js_quote(value: &str) -> String {
     format!("'{}'", value)
 }
 
@@ -99,8 +104,8 @@ impl DataIntersects {
         }
     }
 
-    pub fn get(mut self, url: &str) -> Self {
-        self.actions.push(js_get(url));
+    pub fn sse(mut self, url: &str) -> Self {
+        self.actions.push(js_sse(url));
         self
     }
 }
@@ -241,18 +246,8 @@ impl DataOn {
     //     self
     // }
 
-    pub fn get(mut self, url: &str) -> Self {
-        self.js.push(js_get(url));
-        self
-    }
-
-    pub fn patch(mut self, url: &str) -> Self {
-        self.js.push(js_patch(url));
-        self
-    }
-
-    pub fn post(mut self, url: &str) -> Self {
-        self.js.push(js_post(url));
+    pub fn sse(mut self, url: &str) -> Self {
+        self.js.push(js_sse(url));
         self
     }
 
@@ -268,12 +263,12 @@ impl DataOn {
 
     pub fn push_url(mut self, url: &str) -> Self {
         self.js
-            .push(format!("window.history.pushState(null, '', '{}');", url));
+            .push(format!("window.history.pushState(null, '', '{}')", url));
         self
     }
 
     pub fn push_then_get(self, url: &str) -> Self {
-        self.push_url(url).get(url)
+        self.push_url(url).sse(url)
     }
 }
 
@@ -302,16 +297,21 @@ impl Elem {
         self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
     }
 
-    pub fn data_model(self, value: &str) -> Self {
-        self.attr_unsafe("data-model", value)
+    pub fn data_bind(self, value: &str) -> Self {
+        self.attr_unsafe(&format!("data-bind-{}", value), "")
     }
 
     // pub fn data_ref(self, value: &str) -> Self {
     //     self.attr_unsafe("data-ref", value)
     // }
 
-    pub fn data_store(self, value: &str) -> Self {
-        self.attr_unsafe("data-store", value)
+    pub fn data_signals(self, value: &str) -> Self {
+        self.attr_unsafe("data-signals", value)
+    }
+
+    pub fn data_signal(self, key: &str, value: &str) -> Self {
+        let value_final = &fallback_empty_string(value);
+        self.attr_unsafe(&format!("data-signals-{}", key), value_final)
     }
 
     pub fn data_on(self, b: impl FnOnce(DataOn) -> DataOn) -> Self {
@@ -344,8 +344,8 @@ impl Elem {
         self.attr_unsafe("data-indicator", value)
     }
 
-    pub fn data_bind(self, attr: &str, value: &str) -> Self {
-        self.attr_unsafe(&format!("data-bind-{}", attr), value)
+    pub fn data_attributes(self, attr: &str, value: &str) -> Self {
+        self.attr_unsafe(&format!("data-attributes-{}", attr), value)
     }
 
     pub fn data_show(self, value: &str) -> Self {
@@ -356,9 +356,9 @@ impl Elem {
     //     self.attr_unsafe(&format!("data-computed-{}", name), value)
     // }
 
-    pub fn debug_store(self, debug: bool) -> Self {
+    pub fn debug_signals(self, debug: bool) -> Self {
         if debug {
-            self.child(code().child(pre().data_text("JSON.stringify(ctx.store(), null, 2)")))
+            self.child(code().child(pre().data_text("ctx.signals.JSON()")))
         } else {
             self
         }
@@ -483,7 +483,7 @@ impl ServerSentEvent {
     // }
 
     // pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {
-    //     let script: String = format!("window.history.pushState(null, '', '{}');", url);
+    //     let script: String = format!("window.history.pushState(null, '', '{}')", url);
     //     self.data_script(&script)
     // }
 

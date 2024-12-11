@@ -1,5 +1,5 @@
 use crate::core::{
-    datastar::datastar::{js_not, signal},
+    datastar::datastar::{js_dot_value, js_not},
     html::{children::text, div, label, option, select, span, Elem},
 };
 
@@ -11,7 +11,7 @@ pub struct Select {
     label: String,
     placeholder: String,
     options: Vec<SelectOption>,
-    model_error: String,
+    bind_error: String,
     map_select: Option<Box<dyn Fn(Elem) -> Elem>>,
 }
 
@@ -41,17 +41,17 @@ impl Select {
         self
     }
 
-    pub fn model_error(mut self, value: &str) -> Self {
-        self.model_error = value.to_string();
+    pub fn bind_error(mut self, value: &str) -> Self {
+        self.bind_error = value.to_string();
         self
     }
 
     fn signal_error(&self) -> String {
-        signal(&self.model_error)
+        js_dot_value(&self.bind_error)
     }
 
     fn signal_has_error(&self) -> String {
-        format!("{}.length > 0", self.signal_error())
+        format!("{}?.length > 0", self.signal_error())
     }
 
     pub fn view(self) -> Elem {

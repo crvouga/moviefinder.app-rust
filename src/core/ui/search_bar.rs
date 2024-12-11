@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::core::{
-    datastar::datastar::signal,
+    datastar::datastar::js_dot_value,
     html::*,
     ui::icon::{self, spinner},
 };
@@ -35,7 +35,7 @@ impl SearchBar {
             .class(
                 "w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden px-5",
             )
-            .data_bind("aria-busy", &signal(&self.indicator))
+            .data_attributes("aria-busy", &js_dot_value(&self.indicator))
             .child(
                 div()
                     .class("h-full grid place-items-center pr-2")
@@ -50,12 +50,12 @@ impl SearchBar {
                         b.e("clear")
                             .js("evt.target.focus()")
                             .js("evt.target.value = ''")
-                            .post(&self.url)
+                            .sse(&self.url)
                     })
                     .data_on(|b| {
                         b.input()
                             .debounce(Duration::from_millis(300))
-                            .post(&self.url)
+                            .sse(&self.url)
                     })
                     .map(map_input),
             )

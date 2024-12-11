@@ -41,7 +41,7 @@ impl BottomBarForm {
                     .color(ButtonColor::Primary)
                     .indicator("signalIsSaving")
                     .view()
-                    .data_on(|b| b.click().post(&self.save_url))
+                    .data_on(|b| b.click().sse(&self.save_url))
                     .id("save-button")
                     .class("flex-1"),
             )

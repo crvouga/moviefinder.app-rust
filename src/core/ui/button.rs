@@ -1,5 +1,5 @@
 use super::icon;
-use crate::core::{datastar::datastar::dollar, html::*};
+use crate::core::{datastar::datastar::js_dot_value, html::*};
 
 #[derive(Debug, Default)]
 pub struct Button {
@@ -36,7 +36,7 @@ impl Button {
     }
 
     pub fn view(self) -> Elem {
-        let signal_indicator = dollar(&self.indicator.clone().unwrap_or_default());
+        let signal_indicator = js_dot_value(&self.indicator.clone().unwrap_or_default());
         let id = self.id.unwrap_or("".to_owned());
 
         button()
@@ -49,7 +49,7 @@ impl Button {
         .type_("button")
         .map(|e: Elem| {
             if let Some(indicator) = self.indicator {
-                e.data_indicator(&indicator).data_bind("aria-busy", &signal_indicator).data_bind("disabled", &signal_indicator)
+                e.data_indicator(&indicator).data_attributes("aria-busy", &signal_indicator).data_attributes("disabled", &signal_indicator)
             } else {
                 e
             }

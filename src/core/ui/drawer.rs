@@ -1,6 +1,6 @@
 use crate::core::html::*;
 use crate::core::{
-    datastar::datastar::signal,
+    datastar::datastar::js_dot_value,
     html::{div, frag, Elem},
 };
 
@@ -52,10 +52,10 @@ impl Drawer {
         };
         let store = format!("{{ {}, isLoaded: true }}", store_entry_open);
 
-        Self::view_root().data_store(&store).child(
+        Self::view_root().data_signals(&store).child(
             elem("drawer-element")
-                .data_show("$isLoaded")
-                .data_bind("open", &signal(&self.model_open))
+                .data_show("isLoaded.value")
+                .data_attributes("open", &js_dot_value(&self.model_open))
                 .attr("open", initial_open)
                 .data_on(|b| b.e("close").js(&self.on_close))
                 .child(

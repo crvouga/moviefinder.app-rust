@@ -43,7 +43,7 @@ fn view_logout_drawer() -> Elem {
     Drawer::default()
         .model_open("isLogoutDrawerOpen")
         .initial_open(true)
-        .on_close("$isLogoutDrawerOpen = false")
+        .on_close("isLogoutDrawerOpen.value = false")
         .content(
             div()
                 .class("w-full h-full p-6 gap-6 flex flex-col items-center")
@@ -60,7 +60,7 @@ fn view_logout_drawer() -> Elem {
                                 .color_gray()
                                 .label("Cancel")
                                 .view()
-                                .data_on(|b| b.click().js("$isLogoutDrawerOpen = false"))
+                                .data_on(|b| b.click().js("isLogoutDrawerOpen.value = false"))
                                 .class("flex-1"),
                         )
                         .child(
@@ -71,7 +71,7 @@ fn view_logout_drawer() -> Elem {
                                 .view()
                                 .class("flex-1")
                                 .id("logout-button")
-                                .data_on(|b| b.click().post(&Route::ClickedLogout.url())),
+                                .data_on(|b| b.click().sse(&Route::ClickedLogout.url())),
                         ),
                 ),
         )

@@ -146,7 +146,7 @@ pub fn view_screen() -> Elem {
     div()
         .id("screen")
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
-        .data_store("{signalFeedIndex: 0, signalTrue: true}")
+        .data_signals("{signalFeedIndex: 0, signalTrue: true}")
         .child(view_top_bar_loading())
         .child(view_swiper_loading())
         .child(view_bottom_bar())
@@ -174,7 +174,7 @@ fn view_tags(model: &ViewModel) -> Elem {
                 .iter()
                 .map(|tag| {
                     tag.chip()
-                        .signal_checked("$signalTrue")
+                        .signal_checked("signalTrue.value")
                         .disabled(true)
                         .id(&tag.encode().to_lowercase())
                         .size(ChipSize::Small)
@@ -210,8 +210,8 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
         .data_on(|b| b
                 .e("swiperslidechange")
-                .js("$signalFeedIndex = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
-                .patch(&Route::ChangedSlide { feed_id: model.feed_id.clone() }.url()))
+                .js("signalFeedIndex.value = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
+                .sse(&Route::ChangedSlide { feed_id: model.feed_id.clone() }.url()))
         .child(view_slides(&model.feed_id, &model.initial_feed_items))
 }
 
@@ -258,7 +258,7 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
         .id(BOTTOM_ID)
         .data_feed_index(bottom_feed_index)
         .data_intersects(|b| {
-            b.get(
+            b.sse(
                 &Route::IntersectedBottom {
                     feed_id: feed_id.clone(),
                     bottom_feed_index,

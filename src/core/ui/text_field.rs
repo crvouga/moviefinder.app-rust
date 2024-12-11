@@ -1,5 +1,5 @@
 use crate::core::{
-    datastar::datastar::{js_not, signal},
+    datastar::datastar::{js_dot_value, js_not},
     html::{button, children::text, div, input, label, span, Elem},
 };
 
@@ -29,17 +29,17 @@ impl TextField {
         self
     }
 
-    pub fn model_error(mut self, value: &str) -> Self {
+    pub fn bind_error(mut self, value: &str) -> Self {
         self.model_error = value.to_string();
         self
     }
 
     fn signal_error(&self) -> String {
-        signal(&self.model_error)
+        js_dot_value(&self.model_error)
     }
 
     fn signal_has_error(&self) -> String {
-        format!("{}.length > 0", self.signal_error())
+        format!("{}?.length > 0", self.signal_error())
     }
 
     pub fn view(self) -> Elem {

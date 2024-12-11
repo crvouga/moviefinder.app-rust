@@ -85,7 +85,7 @@ fn view_screen_loaded(profile: UserProfile) -> Elem {
                 .child(
                     TextField::default()
                         .label("Username")
-                        .map_input(|i| i.data_model("username"))
+                        .map_input(|i| i.data_bind("username"))
                         .placeholder("Username")
                         .view(),
                 )
@@ -93,7 +93,7 @@ fn view_screen_loaded(profile: UserProfile) -> Elem {
                     div().child(Avatar::default().src(" ").view()).child(
                         TextField::default()
                             .label("Avatar Seed")
-                            .map_input(|i| i.data_model("avatar_seed"))
+                            .map_input(|i| i.data_bind("avatar_seed"))
                             .placeholder("Avatar Seed")
                             .view(),
                     ),

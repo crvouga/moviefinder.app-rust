@@ -146,7 +146,7 @@ fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
                         .class("w-full")
                         .data_on(|b| {
                             b.click()
-                                .get(&Route::Logout(logout::route::Route::LogoutDrawer).url())
+                                .sse(&Route::Logout(logout::route::Route::LogoutDrawer).url())
                         }),
                 ),
         )

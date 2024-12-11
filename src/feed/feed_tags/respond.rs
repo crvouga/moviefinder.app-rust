@@ -183,7 +183,7 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
         .indicator("signalIsSearching")
         .input(|e| {
             e.id("search-input")
-                .data_model("signalInputValue")
+                .data_bind("signalInputValue")
                 .placeholder("Search tags")
         })
         .view()
@@ -191,7 +191,7 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
 
 fn js_signal_is_checked(tag: &FeedTag) -> String {
     format!(
-        "$signalSelectedTagIds.map(v => v.toLowerCase().trim()).includes('{}')",
+        "signalSelectedTagIds.value.map(v => v.toLowerCase().trim()).includes('{}')",
         tag.encode().to_lowercase()
     )
 }
@@ -210,7 +210,7 @@ fn view_selected(model: &ViewModel) -> Elem {
     view_selected_root()
         .child(
             div()
-                .data_show("($signalSelectedTagIds).length === 0")
+                .data_show("signalSelectedTagIds.value?.length === 0")
                 .class("text-muted")
                 .child_text("No tags selected"),
         )
@@ -230,9 +230,9 @@ fn view_selected(model: &ViewModel) -> Elem {
         )
         .child(
             button()
-                .data_show("($signalSelectedTagIds).length > 0")
+                .data_show("signalSelectedTagIds.value?.length > 0")
                 .data_on(|b| {
-                    b.click().js("$signalSelectedTagIds = []").patch(
+                    b.click().js("signalSelectedTagIds.value = []").sse(
                         &Route::ClickedClear {
                             feed_id: model.feed.feed_id.clone(),
                         }
@@ -247,19 +247,15 @@ fn view_selected(model: &ViewModel) -> Elem {
 fn view_screen(feed_id: &FeedId) -> Elem {
     div()
         .id("screen")
-        .data_store(
-            r#"{
-                signalInputValue: '', 
-                signalUnselectedTagIds: [],  
-                signalSelectedTagIds: [],
-            }"#,
-        )
+        .data_signal("signalInputValue", "''")
+        .data_signal("signalUnselectedTagIds", "[]")
+        .data_signal("signalSelectedTagIds", "[]")
         .data_on(|b| b
             .e("clicked-tag")
             .js("const v = evt?.detail?.tagId?.toLowerCase?.()?.trim?.()")
-            .js("$signalSelectedTagIds = $signalSelectedTagIds.map(v => v.toLowerCase().trim())")
-            .js("$signalSelectedTagIds = $signalSelectedTagIds.includes(v) ? $signalSelectedTagIds.filter(v_ => v_ !== v) : [...$signalSelectedTagIds, v]")
-            .patch(&Route::ClickedTag {feed_id: feed_id.clone()}.url())
+            .js("signalSelectedTagIds.value = signalSelectedTagIds.value.map(v => v.toLowerCase().trim())")
+            .js("signalSelectedTagIds.value = signalSelectedTagIds.value.includes(v) ? signalSelectedTagIds.value.filter(v_ => v_ !== v) : [...signalSelectedTagIds.value, v]")
+            .sse(&Route::ClickedTag {feed_id: feed_id.clone()}.url())
         )
         .data_indicator("signalIsUpdatingSelected")
         .class("w-full h-full flex flex-col overflow-hidden relative")

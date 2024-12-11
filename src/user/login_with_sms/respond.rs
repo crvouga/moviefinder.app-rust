@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{
     core::{
-        datastar::datastar::quote,
+        datastar::datastar::{js_assign, js_dot_value, js_empty_string, js_quote},
         html::*,
         http::response_writer::ResponseWriter,
         phone_number::{country_code::PhoneNumerCountryCode, ensure_country_code},
@@ -25,6 +25,14 @@ use crate::{
     user::{self, account_screen},
 };
 
+const SIGNAL_IS_SUBMITTING: &str = "signal_is_submitting";
+const SIGNAL_PHONE_NUMBER: &str = "signal_phone_number";
+const SIGNAL_PHONE_NUMBER_ERROR: &str = "signal_phone_number_error";
+const SIGNAL_COUNTRY_CODE: &str = "signal_country_code";
+const SIGNAL_COUNTRY_CODE_ERROR: &str = "signal_country_code_error";
+const SIGNAL_CODE: &str = "signal_code";
+const SIGNAL_CODE_ERROR: &str = "signal_code_error";
+
 pub async fn respond(
     ctx: &Ctx,
     r: &Req,
@@ -33,7 +41,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::ScreenPhone => {
-            w.send_signal("isSubmitting", "false").await?;
+            w.send_signal(SIGNAL_IS_SUBMITTING, "false").await?;
 
             w.send_screen(view_screen_enter_phone(vec![])).await?;
 
@@ -47,23 +55,36 @@ pub async fn respond(
             w.send_fragment(view_select_country_code_input(country_codes))
                 .await?;
 
-            w.send_signal("countryCode", &initial_country_code).await?;
+            w.send_signal(SIGNAL_COUNTRY_CODE, &initial_country_code)
+                .await?;
 
             Ok(())
         }
 
         Route::ClickedSendCode => {
-            w.send_signal("phoneNumberError", "''").await?;
+            w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, "''").await?;
 
             let phone_number_input = r
                 .params
-                .get_first("phoneNumber")
+                .get_first(SIGNAL_PHONE_NUMBER)
                 .map(|s| s.clone())
                 .unwrap_or_default();
 
+            if phone_number_input.trim().is_empty() {
+                w.send_signal(
+                    SIGNAL_PHONE_NUMBER_ERROR,
+                    &js_quote("Phone number is required"),
+                )
+                .await?;
+
+                w.send_focus("input").await?;
+
+                return Ok(());
+            }
+
             let country_code_input = r
                 .params
-                .get_first("countryCode")
+                .get_first(SIGNAL_COUNTRY_CODE)
                 .map(|s| s.clone())
                 .unwrap_or_default();
 
@@ -82,7 +103,7 @@ pub async fn respond(
 
             match sent {
                 Err(SendCodeError::InvalidPhoneNumber(err)) => {
-                    w.send_signal("phoneNumberError", &quote(err.as_str()))
+                    w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, &js_quote(err.as_str()))
                         .await?;
 
                     w.send_focus("input").await?;
@@ -118,7 +139,7 @@ pub async fn respond(
         }
 
         Route::ScreenCode { phone_number } => {
-            w.send_signal("isSubmitting", "false").await?;
+            w.send_signal(SIGNAL_IS_SUBMITTING, "false").await?;
 
             w.send_screen(view_screen_enter_code(&phone_number)).await?;
 
@@ -128,7 +149,7 @@ pub async fn respond(
         Route::ClickedVerifyCode { phone_number } => {
             let code_input = r
                 .params
-                .get_first("code")
+                .get_first(SIGNAL_CODE)
                 .map(|s| s.clone())
                 .unwrap_or_default()
                 .trim()
@@ -138,7 +159,7 @@ pub async fn respond(
 
             match verified {
                 Err(VerifyCodeError::InvalidCode(err)) => {
-                    w.send_signal("codeError", &quote(&err)).await?;
+                    w.send_signal(SIGNAL_CODE_ERROR, &js_quote(&err)).await?;
 
                     w.send_focus("input").await?;
 
@@ -175,17 +196,18 @@ pub async fn respond(
 fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
     form()
         .class("w-full h-full flex flex-col")
-        .data_store(
-            "{ phoneNumber: '', phoneNumberError: '', countryCode: '', countryCodeError: '' }",
-        )
-        .debug_store(false)
+        .data_signal(SIGNAL_PHONE_NUMBER, "")
+        .data_signal(SIGNAL_PHONE_NUMBER_ERROR, "")
+        .data_signal(SIGNAL_COUNTRY_CODE, "")
+        .data_signal(SIGNAL_COUNTRY_CODE_ERROR, "")
+        .debug_signals(false)
         .data_on(|b| {
             b.submit()
                 .prevent_default()
-                .post(&Route::ClickedSendCode.url())
+                .sse(&Route::ClickedSendCode.url())
         })
         .id("screen-enter-phone")
-        .data_indicator("isSubmitting")
+        .data_indicator(SIGNAL_IS_SUBMITTING)
         .child(
             TopBar::default()
                 .title("Login with phone")
@@ -204,12 +226,17 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
                                 .label("Phone number")
                                 .placeholder("Enter phone number")
                                 .map_input(|e| {
-                                    e.data_model("phoneNumber")
+                                    e.data_bind(SIGNAL_PHONE_NUMBER)
                                         .type_("tel")
                                         .autocomplete("tel")
-                                        .data_on(|d| d.input().js("$phoneNumberError = ''"))
+                                        .data_on(|d| {
+                                            d.input().js(&js_assign(
+                                                &js_dot_value(SIGNAL_PHONE_NUMBER_ERROR),
+                                                &js_empty_string(),
+                                            ))
+                                        })
                                 })
-                                .model_error("phoneNumberError")
+                                .bind_error(SIGNAL_PHONE_NUMBER_ERROR)
                                 .view()
                                 .id("phone_number"),
                         ),
@@ -219,9 +246,9 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
                         Button::default()
                             .label("Send code")
                             .color_primary()
-                            .indicator("isSubmitting")
+                            .indicator(SIGNAL_IS_SUBMITTING)
                             .view()
-                            .id("send-code")
+                            .id("send_code")
                             .class("w-full")
                             .type_("submit"),
                     ),
@@ -255,12 +282,14 @@ fn view_select_country_code_input(country_codes: Vec<PhoneNumerCountryCode>) -> 
         .label("Country Code")
         .placeholder("Select country code")
         .map_select(|e| {
-            e.data_model("countryCode")
-                .data_on(|d| d.change().js("$countryCodeError = ''"))
+            e.data_bind(SIGNAL_COUNTRY_CODE).data_on(|d| {
+                d.change()
+                    .js(&js_assign(&js_dot_value(SIGNAL_COUNTRY_CODE_ERROR), ""))
+            })
         })
         .options(options)
-        .model_error("countryCodeError")
-        .select_id("country-code-select")
+        .bind_error(SIGNAL_COUNTRY_CODE_ERROR)
+        .select_id("country_code_select")
         .view()
         .id("country_code")
 }
@@ -268,10 +297,11 @@ fn view_select_country_code_input(country_codes: Vec<PhoneNumerCountryCode>) -> 
 fn view_screen_enter_code(phone_number: &str) -> Elem {
     form()
         .class("w-full h-full flex flex-col")
-        .data_store("{ code: '', codeError: '' }")
-        .debug_store(false)
+        .data_signal(SIGNAL_CODE, "''")
+        .data_signal(SIGNAL_CODE_ERROR, "''")
+        .debug_signals(false)
         .data_on(|b| {
-            b.submit().prevent_default().post(
+            b.submit().prevent_default().sse(
                 &Route::ClickedVerifyCode {
                     phone_number: phone_number.to_string(),
                 }
@@ -279,7 +309,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
             )
         })
         .id("screen-enter-code")
-        .data_indicator("isSubmitting")
+        .data_indicator(SIGNAL_IS_SUBMITTING)
         .child(
             TopBar::default()
                 .title("Login with phone")
@@ -300,11 +330,14 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
                         .label("Code")
                         .placeholder("Enter code")
                         .map_input(|e| {
-                            e.data_model("code")
-                                .type_("tel")
-                                .data_on(|d| d.input().js("$codeError = ''"))
+                            e.data_bind(SIGNAL_CODE).type_("tel").data_on(|d| {
+                                d.input().js(&js_assign(
+                                    &js_dot_value(SIGNAL_CODE_ERROR),
+                                    &js_empty_string(),
+                                ))
+                            })
                         })
-                        .model_error("codeError")
+                        .bind_error(SIGNAL_CODE_ERROR)
                         .view()
                         .id("code"),
                 )
@@ -313,7 +346,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
                         Button::default()
                             .label("Verify code")
                             .color_primary()
-                            .indicator("isSubmitting")
+                            .indicator(SIGNAL_IS_SUBMITTING)
                             .view()
                             .id("verify-code")
                             .class("w-full")
