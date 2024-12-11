@@ -4,7 +4,9 @@ use crate::{
         datastar::datastar::{js_dot_value, js_quote},
         html::{div, fieldset, form, Elem},
         http::response_writer::ResponseWriter,
-        ui::{avatar::Avatar, button::Button, text_field::TextField, top_bar::TopBar},
+        ui::{
+            avatar::Avatar, button::Button, spinner_page, text_field::TextField, top_bar::TopBar,
+        },
         unstructured_data::UnstructuredData,
     },
     ctx::Ctx,
@@ -28,8 +30,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Screen { .. } => {
-            // w.send_screen(view_screen_loading()).await?;
-            w.send_screen(view_screen_loaded(None)).await?;
+            w.send_screen(view_screen_loading()).await?;
 
             let user_id = match r.user_id.clone() {
                 Some(user_id) => user_id,
@@ -106,9 +107,9 @@ fn view_screen_root() -> Elem {
         )
 }
 
-// fn view_screen_loading() -> Elem {
-//     view_screen_root().child(spinner_page::view())
-// }
+fn view_screen_loading() -> Elem {
+    view_screen_root().child(spinner_page::view())
+}
 
 fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
     view_screen_root()
@@ -120,7 +121,7 @@ fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
                         .class("flex flex-col w-full gap-4 items-center justify-center")
                         .child(
                             Avatar::default()
-                                .src("123")
+                                .src("_")
                                 .view()
                                 .class("size-36")
                                 .data_attributes("src", &js_avatar_url_signal(SIGNAL_AVATAR_SEED)),

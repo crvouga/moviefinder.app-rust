@@ -206,13 +206,13 @@ impl DataOn {
         }
     }
 
-    pub fn store_changed(self) -> Self {
-        Self {
-            event: "store-changed".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
+    // pub fn store_changed(self) -> Self {
+    //     Self {
+    //         event: "store-changed".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
 
     // pub fn raf(self) -> Self {
     //     Self {
@@ -264,10 +264,10 @@ impl DataOn {
         self
     }
 
-    pub fn log(mut self, message: &str) -> Self {
-        self.js.push(format!("console.log('{}')", message));
-        self
-    }
+    // pub fn log(mut self, message: &str) -> Self {
+    //     self.js.push(format!("console.log('{}')", message));
+    //     self
+    // }
 
     pub fn push_url(mut self, url: &str) -> Self {
         self.js

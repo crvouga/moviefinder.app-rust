@@ -204,3 +204,7 @@ pub fn option() -> Elem {
 pub fn fieldset() -> Elem {
     elem("fieldset")
 }
+
+pub fn legend() -> Elem {
+    elem("legend")
+}
