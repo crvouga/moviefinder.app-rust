@@ -50,12 +50,12 @@ impl SearchBar {
                         b.e("clear")
                             .js("evt.target.focus()")
                             .js("evt.target.value = ''")
-                            .sse(&self.url)
+                            .js("evt.target.dispatchEvent(new Event('input'))")
+
                     })
                     .data_on(|b| {
                         b.input()
                             .debounce(Duration::from_millis(300))
-                            .js("console.log('hello')")
                             .sse(&self.url)
                     })
                     .map(map_input),

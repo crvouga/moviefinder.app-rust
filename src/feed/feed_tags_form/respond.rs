@@ -272,9 +272,9 @@ fn view_screen(feed_id: &FeedId) -> Elem {
 
 impl Elem {
     fn data_on_clicked_tag(self, tag_id: &str) -> Self {
-        self.data_on(|b| {
+        self.id(tag_id).data_on(|b| {
             b.click()
-                .js(&format!("const js_tag_id = '{}'", tag_id))
+                .js("const js_tag_id = evt.target.id")
                 .js("const e = new CustomEvent('clicked_tag', { bubbles: true, detail: { js_tag_id } })")
                 .js("evt.target.dispatchEvent(e)")
         })

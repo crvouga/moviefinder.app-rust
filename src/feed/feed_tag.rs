@@ -51,7 +51,7 @@ impl FeedTag {
             .size(ChipSize::Medium);
         match self {
             FeedTag::Genre(_genre) => base_chip,
-            FeedTag::Person(person) => base_chip.image(&person.profile.to_highest_res()),
+            FeedTag::Person(person) => base_chip.image(&person.profile.to_middle_res()),
         }
     }
 
