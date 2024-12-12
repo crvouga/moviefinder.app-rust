@@ -32,6 +32,14 @@ pub fn js_dot_value(value: &str) -> String {
     format!("{}.value", value)
 }
 
+// pub fn js_dot_length(value: &str) -> String {
+//     format!("{}.length", value)
+// }
+
+// pub fn js_eq(left: &str, right: &str) -> String {
+//     format!("{} === {}", left, right)
+// }
+
 pub fn js_assign(variable: &str, value: &str) -> String {
     let value_final = fallback_empty_string(value);
     format!("{} = {}", variable, value_final)

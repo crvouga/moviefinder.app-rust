@@ -1,31 +1,41 @@
-use crate::core::html::{children::text_unsafe, img, span, Elem};
+use crate::core::{
+    datastar::datastar::js_not,
+    html::{children::text_unsafe, frag, img, span, Elem},
+};
 
 #[derive(Default)]
 pub struct Avatar {
-    src: Option<String>,
-    alt: Option<String>,
-    class_name: Option<String>,
+    data_attributes_src: String,
+    class: String,
     on_click: Option<String>,
 }
 
+fn js_is_string(js: &str) -> String {
+    format!("typeof ({}) === 'string'", js)
+}
+
 impl Avatar {
-    pub fn src(mut self, src: &str) -> Self {
-        self.src = Some(src.to_string());
+    pub fn data_attributes_src(mut self, data_attributes_src: &str) -> Self {
+        self.data_attributes_src = data_attributes_src.to_string();
+        self
+    }
+
+    pub fn class(mut self, class: &str) -> Self {
+        self.class = class.to_string();
         self
     }
 
     pub fn view(self) -> Elem {
-        let class_name = format!(
+        let class = format!(
             "inline-block aspect-square flex-shrink-0 overflow-hidden rounded-full bg-white/40 {}",
-            self.class_name.unwrap_or_default()
+            self.class,
         );
 
-        let binding = self.src.unwrap_or_default();
-        let src = binding.trim();
-
-        if src.is_empty() {
+        frag()
+        .child(
             span()
-                .class(&class_name)
+                .class(&class)
+                .data_show(&js_not(&js_is_string(&self.data_attributes_src)))
                 .data_on(|b| {
                     if let Some(on_click) = &self.on_click {
                         b.click().js(on_click)
@@ -42,11 +52,12 @@ impl Avatar {
                         "#,
                     )
                 )
-        } else {
+        ).child(
             img()
-                .src(&src)
-                .alt(self.alt.as_deref().unwrap_or("user avatar"))
-                .class(&class_name)
+                .alt("avatar")
+                .class(&class)
+                .data_attributes("src", &self.data_attributes_src)
+                .data_show(&&js_is_string(&self.data_attributes_src))
                 .data_on(|b| {
                     if let Some(on_click) = &self.on_click {
                         b.click().js(on_click)
@@ -54,6 +65,6 @@ impl Avatar {
                         b
                     }
                 })
-        }
+            )
     }
 }

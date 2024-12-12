@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::random;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub struct Username(String);
 
 impl Username {

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use super::route::Route;
 use crate::{
     core::{
@@ -18,7 +20,7 @@ use crate::{
     },
     user::{
         self,
-        user_profile::user_profile_::{js_avatar_url_signal, UserProfile},
+        user_profile::user_profile_::{js_avatar_url, UserProfile},
         username::Username,
     },
 };
@@ -49,7 +51,7 @@ pub async fn respond(
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
 
-            w.send_screen(view_screen_loaded(&profile)).await?;
+            w.send_screen(view_screen(profile.clone())).await?;
 
             w.send_signals(vec![
                 (SIGNAL_USERNAME, &js_quote(&profile.username.to_string())),
@@ -140,7 +142,7 @@ fn view_screen_loading() -> Elem {
     view_screen_root().child(spinner_page::view())
 }
 
-fn view_screen_loaded(profile: &UserProfile) -> Elem {
+fn view_screen(profile: UserProfile) -> Elem {
     view_screen_root()
         .map(|e| {
             let route = Route::SubmittedForm {
@@ -160,10 +162,13 @@ fn view_screen_loaded(profile: &UserProfile) -> Elem {
                         .class("flex flex-col w-full gap-4 items-center justify-center")
                         .child(
                             Avatar::default()
-                                .src("_")
-                                .view()
+                                .data_attributes_src(&format!(
+                                    "{}.value.trim().length === 0 ? null : {}",
+                                    SIGNAL_AVATAR_SEED,
+                                    js_avatar_url(&js_dot_value(SIGNAL_AVATAR_SEED))
+                                ))
                                 .class("size-36")
-                                .data_attributes("src", &js_avatar_url_signal(SIGNAL_AVATAR_SEED)),
+                                .view(),
                         )
                         .child(
                             TextField::default()
@@ -175,8 +180,8 @@ fn view_screen_loaded(profile: &UserProfile) -> Elem {
                         .child(div().class("w-full flex items-center justify-end").child(
                             Button::default().label("Random seed").view().data_on(|b| {
                                 b.click().js(&format!(
-                                    "{} = Math.random().toString(36).substring(2);",
-                                    js_dot_value(SIGNAL_AVATAR_SEED)
+                                    "{}.value = Math.random().toString(36).substring(2);",
+                                    SIGNAL_AVATAR_SEED
                                 ))
                             }),
                         )),
@@ -185,7 +190,16 @@ fn view_screen_loaded(profile: &UserProfile) -> Elem {
                     fieldset().child(
                         TextField::default()
                             .label("Username")
-                            .map_input(|i| i.data_bind(SIGNAL_USERNAME))
+                            .map_input(move |i| {
+                                i.data_bind(SIGNAL_USERNAME).data_on(|e| {
+                                    e.change().debounce(Duration::from_secs(1 / 3)).sse(
+                                        &Route::InputtedUsername {
+                                            user_id: profile.user_id.clone(),
+                                        }
+                                        .url(),
+                                    )
+                                })
+                            })
                             .placeholder("Username")
                             .view(),
                     ),
