@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 
-use crate::core::unstructured_data::{UnstructuredData, UnstructuredDataHashMap};
+use crate::core::dynamic_data::{DynamicData, DynamicDataHashMap};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct FormData {
-    pub params: UnstructuredDataHashMap,
+    pub params: DynamicDataHashMap,
 }
 
-impl UnstructuredData for FormData {
+impl DynamicData for FormData {
     fn empty() -> Self {
         FormData {
-            params: UnstructuredDataHashMap::empty(),
+            params: DynamicDataHashMap::empty(),
         }
     }
 
@@ -54,7 +54,7 @@ impl UnstructuredData for FormData {
         }
 
         FormData {
-            params: UnstructuredDataHashMap(map),
+            params: DynamicDataHashMap(map),
         }
     }
 }

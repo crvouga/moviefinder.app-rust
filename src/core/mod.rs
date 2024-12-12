@@ -23,7 +23,7 @@ pub mod tmdb_api;
 pub mod twilio_api;
 pub mod ui;
 pub mod unit_of_work;
-pub mod unstructured_data;
+pub mod dynamic_data;
 pub mod url;
 pub mod url_encoded;
 pub mod uuid;

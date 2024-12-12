@@ -4,7 +4,7 @@ mod tests {
 
     use crate::core::{
         http::{content_encoding::ContentEncoding, method::Method, request::Request},
-        unstructured_data::UnstructuredData,
+        dynamic_data::DynamicData,
         url::{query_params::QueryParams, Url},
     };
 

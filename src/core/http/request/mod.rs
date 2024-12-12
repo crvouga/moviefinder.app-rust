@@ -1,5 +1,5 @@
 use super::{content_encoding::ContentEncoding, form_data::FormData, method::Method};
-use crate::core::{unstructured_data::UnstructuredData, url::Url};
+use crate::core::{dynamic_data::DynamicData, url::Url};
 use std::collections::HashMap;
 
 mod request_test;

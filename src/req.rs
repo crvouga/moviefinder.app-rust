@@ -1,5 +1,5 @@
 use crate::{
-    core::{session::session_id::SessionId, unstructured_data::UnstructuredDataHashMap},
+    core::{dynamic_data::DynamicDataHashMap, session::session_id::SessionId},
     user::user_id::UserId,
 };
 
@@ -7,5 +7,5 @@ use crate::{
 pub struct Req {
     pub session_id: SessionId,
     pub user_id: Option<UserId>,
-    pub params: UnstructuredDataHashMap,
+    pub params: DynamicDataHashMap,
 }

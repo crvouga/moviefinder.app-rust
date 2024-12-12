@@ -1,4 +1,4 @@
-use super::unstructured_data::UnstructuredData;
+use super::dynamic_data::DynamicData;
 
 pub mod query_params;
 

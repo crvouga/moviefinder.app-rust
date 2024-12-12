@@ -4,13 +4,14 @@ use super::route::Route;
 use crate::{
     core::{
         datastar::datastar::{js_dot_value, js_quote},
+        dynamic_data::DynamicData,
         html::{div, fieldset, form, Elem},
         http::response_writer::ResponseWriter,
+        random,
         ui::{
             avatar::Avatar, button::Button, spinner_page, text_field::TextField, top_bar::TopBar,
         },
         unit_of_work::UnitOfWork,
-        unstructured_data::UnstructuredData,
     },
     ctx::Ctx,
     req::Req,
@@ -20,6 +21,7 @@ use crate::{
     },
     user::{
         self,
+        edit_profile::form_state::FormState,
         user_profile::user_profile_::{js_avatar_url, UserProfile},
         username::Username,
     },
@@ -107,6 +109,20 @@ pub async fn respond(
 
             Ok(())
         }
+
+        Route::ClickedRandomSeed => {
+            let avatar_seed_new = random::string(32);
+
+            println!("unit: '{}'", random::unit());
+            println!("avatar_seed_new: '{}'", avatar_seed_new);
+
+            w.send_signal(SIGNAL_AVATAR_SEED, &js_quote(&avatar_seed_new))
+                .await?;
+
+            // let form_state = FormState::load(r.session_id)?;
+
+            Ok(())
+        }
     }
 }
 
@@ -179,10 +195,11 @@ fn view_screen(profile: UserProfile) -> Elem {
                         )
                         .child(div().class("w-full flex items-center justify-end").child(
                             Button::default().label("Random seed").view().data_on(|b| {
-                                b.click().js(&format!(
-                                    "{}.value = Math.random().toString(36).substring(2);",
-                                    SIGNAL_AVATAR_SEED
-                                ))
+                                b.click().sse(&Route::ClickedRandomSeed.url())
+                                // .js(&format!(
+                                //     "{}.value = Math.random().toString(36).substring(2);",
+                                //     SIGNAL_AVATAR_SEED
+                                // ))
                             }),
                         )),
                 )

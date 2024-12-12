@@ -6,4 +6,5 @@ pub enum Route {
     Screen { user_id: UserId },
     InputtedUsername { user_id: UserId },
     SubmittedForm { user_id: UserId },
+    ClickedRandomSeed,
 }

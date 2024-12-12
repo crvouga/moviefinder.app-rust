@@ -7,7 +7,7 @@ use super::{
 use crate::{
     core::{
         http::{response_writer::ResponseWriter, server_sent_event::sse},
-        unstructured_data::UnstructuredData,
+        dynamic_data::DynamicData,
     },
     ctx::Ctx,
     feed::feed_screen::transact_put_feed,

@@ -1,6 +1,7 @@
 use std::{collections::HashMap, time::Duration};
 
 use crate::core::{
+    dynamic_data::{DynamicData, DynamicDataHashMap},
     html::{code, pre, Elem},
     http::{
         json_data::JsonData,
@@ -8,7 +9,6 @@ use crate::core::{
         response_writer::ResponseWriter,
         server_sent_event::{sse, ServerSentEvent},
     },
-    unstructured_data::{UnstructuredData, UnstructuredDataHashMap},
     url_encoded,
 };
 
@@ -561,7 +561,7 @@ impl Request {
         header_value == "true"
     }
 
-    pub fn datastar_params(self: &Self) -> UnstructuredDataHashMap {
+    pub fn datastar_params(self: &Self) -> DynamicDataHashMap {
         let datastar_params = self.url.query_params.get_first("datastar");
 
         if let Some(urlencoded_json) = datastar_params {

@@ -1,11 +1,11 @@
 use super::{form_state::FormState, route::Route, view_model::ViewModel};
 use crate::{
     core::{
+        dynamic_data::DynamicData,
         html::*,
         http::response_writer::ResponseWriter,
         ui::{chip::ChipSize, search_bar::SearchBar, spinner_page},
         unit_of_work::UnitOfWork,
-        unstructured_data::UnstructuredData,
     },
     ctx::Ctx,
     feed::{self, feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},

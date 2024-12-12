@@ -1,6 +1,6 @@
 // https://developer.themoviedb.org/reference/search-person
 use super::{person::GetPersonResponse, TmdbApi};
-use crate::core::{unstructured_data::UnstructuredData, url::query_params::QueryParams};
+use crate::core::{dynamic_data::DynamicData, url::query_params::QueryParams};
 
 impl TmdbApi {
     /// Searches for persons in the TMDB API.

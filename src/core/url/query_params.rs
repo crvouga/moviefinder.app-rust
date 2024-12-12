@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 
 use crate::core::{
-    unstructured_data::{UnstructuredData, UnstructuredDataHashMap},
+    dynamic_data::{DynamicData, DynamicDataHashMap},
     url_encoded,
 };
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct QueryParams {
-    pub params: UnstructuredDataHashMap,
+    pub params: DynamicDataHashMap,
 }
 
-impl UnstructuredData for QueryParams {
+impl DynamicData for QueryParams {
     fn empty() -> Self {
         QueryParams {
-            params: UnstructuredDataHashMap::empty(),
+            params: DynamicDataHashMap::empty(),
         }
     }
 
@@ -61,7 +61,7 @@ impl UnstructuredData for QueryParams {
         }
 
         QueryParams {
-            params: UnstructuredDataHashMap(map),
+            params: DynamicDataHashMap(map),
         }
     }
 }
