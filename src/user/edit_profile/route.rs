@@ -5,5 +5,5 @@ use serde::{Deserialize, Serialize};
 pub enum Route {
     Screen { user_id: UserId },
     InputtedUsername { user_id: UserId },
-    ClickedSave { user_id: UserId },
+    SubmittedForm { user_id: UserId },
 }

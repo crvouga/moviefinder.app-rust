@@ -33,9 +33,11 @@ pub async fn respond(
                 .collect::<Vec<String>>()
                 .join(",");
 
-            let signals_new = &format!("{{signalSelectedTagIds: [{}]}}", signal_selected_tag_ids);
-
-            w.send_signals(signals_new).await?;
+            w.send_signal(
+                "signalSelectedTagIds",
+                &format!("[{}]", signal_selected_tag_ids),
+            )
+            .await?;
 
             w.send_fragment(view_selected(&model)).await?;
 
@@ -59,7 +61,7 @@ pub async fn respond(
             })
             .await?;
 
-            w.send_signals("{signalIsSaving: false}").await?;
+            w.send_signal("signalIsSaving", "false").await?;
 
             w.send_push_url(
                 &feed::route::Route::FeedScreen {

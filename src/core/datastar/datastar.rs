@@ -505,26 +505,29 @@ impl ResponseWriter {
         sse()
             .event_merge_fragments()
             .data_fragments(elem)
-            .data_merge_mode_outer()
+            // .data_merge_mode_outer()
             .send(self)
             .await
     }
 
-    pub async fn send_signals(&mut self, value: &str) -> Result<(), std::io::Error> {
+    pub async fn send_signals(&mut self, signals: Vec<(&str, &str)>) -> Result<(), std::io::Error> {
+        let key_value_pairs = signals
+            .iter()
+            .map(|(k, v)| format!("{}: {}", k, v))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        let js_obj = format!("{{{}}}", key_value_pairs);
+
         sse()
             .event_merge_signals()
-            .data_signals(value)
+            .data_signals(&js_obj)
             .send(self)
             .await
     }
 
     pub async fn send_signal(&mut self, key: &str, value: &str) -> Result<(), std::io::Error> {
-        let signal = format!("{{{}: {}}}", key, value);
-        sse()
-            .event_merge_signals()
-            .data_signals(&signal)
-            .send(self)
-            .await
+        self.send_signals(vec![(key, value)]).await
     }
 
     pub async fn send_replace_url(&mut self, url: &str) -> Result<(), std::io::Error> {

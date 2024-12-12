@@ -49,24 +49,19 @@ pub async fn respond(
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
 
-            w.send_screen(view_screen_loaded(Some(&profile))).await?;
+            w.send_screen(view_screen_loaded(&profile)).await?;
 
-            w.send_signal(
-                SIGNAL_USERNAME,
-                &js_quote(&profile.username.clone().to_string()),
-            )
-            .await?;
-
-            w.send_signal(
-                SIGNAL_AVATAR_SEED,
-                &js_quote(&profile.avatar_seed.clone().unwrap_or_default()),
-            )
-            .await?;
-
-            w.send_signal(
-                SIGNAL_FULL_NAME,
-                &js_quote(&profile.full_name.unwrap_or_default()),
-            )
+            w.send_signals(vec![
+                (SIGNAL_USERNAME, &js_quote(&profile.username.to_string())),
+                (
+                    SIGNAL_AVATAR_SEED,
+                    &js_quote(&profile.avatar_seed.unwrap_or_default()),
+                ),
+                (
+                    SIGNAL_FULL_NAME,
+                    &js_quote(&profile.full_name.unwrap_or_default()),
+                ),
+            ])
             .await?;
 
             Ok(())
@@ -76,7 +71,7 @@ pub async fn respond(
             unimplemented!()
         }
 
-        Route::ClickedSave { .. } => {
+        Route::SubmittedForm { .. } => {
             let username = r.params.get_first(SIGNAL_USERNAME).unwrap_or_default();
             let full_name = r.params.get_first(SIGNAL_FULL_NAME).unwrap_or_default();
             let avatar_seed = r.params.get_first(SIGNAL_AVATAR_SEED).unwrap_or_default();
@@ -103,6 +98,8 @@ pub async fn respond(
             ctx.user_profile_db
                 .upsert_one(UnitOfWork::new(), &profile_new)
                 .await?;
+
+            w.send_toast_dark("Profile updated").await?;
 
             user::account_screen::redirect_to(ctx, r, w, &r.user_id).await?;
 
@@ -143,19 +140,16 @@ fn view_screen_loading() -> Elem {
     view_screen_root().child(spinner_page::view())
 }
 
-fn view_screen_loaded(profile: Option<&UserProfile>) -> Elem {
+fn view_screen_loaded(profile: &UserProfile) -> Elem {
     view_screen_root()
-        .map(|e| match profile {
-            Some(profile) => {
-                let route = Route::ClickedSave {
-                    user_id: profile.user_id.clone(),
-                };
+        .map(|e| {
+            let route = Route::SubmittedForm {
+                user_id: profile.user_id.clone(),
+            };
 
-                let url = route.url();
+            let url = route.url();
 
-                e.data_on(|b| b.submit().sse(&url))
-            }
-            None => e,
+            e.data_on(|b| b.submit().prevent_default().sse(&url))
         })
         .data_indicator(SIGNAL_IS_SUBMITTING)
         .child(
