@@ -1,4 +1,4 @@
-use super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags, route::Route};
+use super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags_form, route::Route};
 use crate::{
     core::{
         html::*,
@@ -117,7 +117,7 @@ fn view_top_bar_loading() -> Elem {
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root().data_on(|b| {
         b.click().push_then_sse(
-            &feed_tags::route::Route::FeedTagsFormScreen {
+            &feed_tags_form::route::Route::FeedTagsFormScreen {
                 feed_id: feed_id.clone(),
             }
             .url(),

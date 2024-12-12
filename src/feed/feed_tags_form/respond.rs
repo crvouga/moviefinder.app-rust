@@ -34,7 +34,7 @@ pub async fn respond(
                 .join(",");
 
             w.send_signal(
-                "signalSelectedTagIds",
+                "signal_selected_tags_ids",
                 &format!("[{}]", signal_selected_tag_ids),
             )
             .await?;
@@ -61,7 +61,7 @@ pub async fn respond(
             })
             .await?;
 
-            w.send_signal("signalIsSaving", "false").await?;
+            w.send_signal("signal_is_saving", "false").await?;
 
             w.send_push_url(
                 &feed::route::Route::FeedScreen {
@@ -79,7 +79,7 @@ pub async fn respond(
         Route::ClickedTag { feed_id } => {
             let selected_tags_new = r.to_selected_tags();
 
-            let signal_input_value = r.params.get_first("signalInputValue");
+            let signal_input_value = r.params.get_first("signal_input_value");
 
             let model =
                 ViewModel::load(ctx, feed_id, &signal_input_value.unwrap_or_default()).await;
@@ -109,7 +109,7 @@ pub async fn respond(
         }
 
         Route::InputtedSearch { feed_id } => {
-            let search_input = r.params.get_first("signalInputValue").unwrap_or_default();
+            let search_input = r.params.get_first("signal_input_value").unwrap_or_default();
 
             let model = ViewModel::load(ctx, feed_id, &search_input).await;
 
@@ -160,7 +160,7 @@ pub async fn respond(
 
 impl Req {
     pub fn to_selected_tags(&self) -> Vec<FeedTag> {
-        let signal_selected_tag_ids = self.params.get_all("signalSelectedTagIds");
+        let signal_selected_tag_ids = self.params.get_all("signal_selected_tags_ids");
 
         let selected_tags = signal_selected_tag_ids
             .unwrap_or(&vec![])
@@ -180,10 +180,10 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
             }
             .url(),
         )
-        .indicator("signalIsSearching")
+        .indicator("signal_is_searching")
         .input(|e| {
             e.id("search-input")
-                .data_bind("signalInputValue")
+                .data_bind("signal_input_value")
                 .placeholder("Search tags")
         })
         .view()
@@ -191,7 +191,7 @@ fn view_search_input(feed_id: &FeedId) -> Elem {
 
 fn js_signal_is_checked(tag: &FeedTag) -> String {
     format!(
-        "signalSelectedTagIds.value.map(v => v.toLowerCase().trim()).includes('{}')",
+        "signal_selected_tags_ids.value.map(v => v.toLowerCase().trim()).includes('{}')",
         tag.encode().to_lowercase()
     )
 }
@@ -210,7 +210,7 @@ fn view_selected(model: &ViewModel) -> Elem {
     view_selected_root()
         .child(
             div()
-                .data_show("signalSelectedTagIds.value?.length === 0")
+                .data_show("signal_selected_tags_ids.value?.length === 0")
                 .class("text-muted")
                 .child_text("No tags selected"),
         )
@@ -230,9 +230,9 @@ fn view_selected(model: &ViewModel) -> Elem {
         )
         .child(
             button()
-                .data_show("signalSelectedTagIds.value?.length > 0")
+                .data_show("signal_selected_tags_ids.value?.length > 0")
                 .data_on(|b| {
-                    b.click().js("signalSelectedTagIds.value = []").sse(
+                    b.click().js("signal_selected_tags_ids.value = []").sse(
                         &Route::ClickedClear {
                             feed_id: model.feed.feed_id.clone(),
                         }
@@ -247,30 +247,35 @@ fn view_selected(model: &ViewModel) -> Elem {
 fn view_screen(feed_id: &FeedId) -> Elem {
     div()
         .id("screen")
-        .data_signal("signalInputValue", "''")
-        .data_signal("signalUnselectedTagIds", "[]")
-        .data_signal("signalSelectedTagIds", "[]")
-        .data_on(|b| b
-            .e("clicked-tag")
-            .js("const v = evt?.detail?.tagId?.toLowerCase?.()?.trim?.()")
-            .js("signalSelectedTagIds.value = signalSelectedTagIds.value.map(v => v.toLowerCase().trim())")
-            .js("signalSelectedTagIds.value = signalSelectedTagIds.value.includes(v) ? signalSelectedTagIds.value.filter(v_ => v_ !== v) : [...signalSelectedTagIds.value, v]")
-            .sse(&Route::ClickedTag {feed_id: feed_id.clone()}.url())
-        )
-        .data_indicator("signalIsUpdatingSelected")
+        .data_signal("signal_input_value", "''")
+        .data_signal("signal_selected_tags_ids", "[]")
+        .debug_signals(false)
+        .data_indicator("signal_is_updating_selected")
         .class("w-full h-full flex flex-col overflow-hidden relative")
-        .child(view_selected_loading())
-        .child(view_search_input(feed_id))
-        .child(view_unselected_loading())
-        .child(view_bottom_bar(feed_id))
+        .child(
+            div()
+            .class("w-full h-full flex flex-col overflow-hidden relative")
+            .data_on(|b| b
+                .e("clicked_tag")
+                .js("signal_selected_tags_ids.value = (signal_selected_tags_ids.value).map(x => x.toLowerCase().trim())")
+                .js("const js_id = evt?.detail?.js_tag_id?.toLowerCase?.()?.trim?.()")
+                .js("const js_ids = signal_selected_tags_ids.value")
+                .js("signal_selected_tags_ids.value = js_ids.includes(js_id) ? js_ids.filter(x => x !== js_id) : [...js_ids, js_id]")
+                .sse(&Route::ClickedTag {feed_id: feed_id.clone()}.url())
+            )
+            .child(view_selected_loading())
+            .child(view_search_input(feed_id))
+            .child(view_unselected_loading())
+            .child(view_bottom_bar(feed_id))
+        )
 }
 
 impl Elem {
     fn data_on_clicked_tag(self, tag_id: &str) -> Self {
         self.data_on(|b| {
             b.click()
-                .js(&format!("const tagId = '{}'", tag_id))
-                .js("const e = new CustomEvent('clicked-tag', { bubbles: true, detail: { tagId } })")
+                .js(&format!("const js_tag_id = '{}'", tag_id))
+                .js("const e = new CustomEvent('clicked_tag', { bubbles: true, detail: { js_tag_id } })")
                 .js("evt.target.dispatchEvent(e)")
         })
     }

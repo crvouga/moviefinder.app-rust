@@ -232,7 +232,7 @@ impl DataOn {
 
     pub fn debounce(mut self, duration: Duration) -> Self {
         self.modifiers
-            .push(format!("debounce_{}ms", duration.as_millis()));
+            .push(format!("debounce.{}ms", duration.as_millis()));
         self
     }
 
@@ -272,19 +272,8 @@ impl DataOn {
         self
     }
 
-    // pub fn log(mut self, message: &str) -> Self {
-    //     self.js.push(format!("console.log('{}')", message));
-    //     self
-    // }
-
-    pub fn push_url(mut self, url: &str) -> Self {
-        self.js
-            .push(format!("window.history.pushState(null, '', '{}')", url));
-        self
-    }
-
     pub fn push_then_sse(self, url: &str) -> Self {
-        self.push_url(url).sse(url)
+        self.js(&js_push_url(url)).sse(url)
     }
 }
 
@@ -294,7 +283,7 @@ impl Attr for DataOn {
         let binding = if modifiers_str.is_empty() {
             self.event.clone()
         } else {
-            format!("{}.{}", self.event, modifiers_str)
+            format!("{}__{}", self.event, modifiers_str)
         };
         let attr_str = binding.trim();
 

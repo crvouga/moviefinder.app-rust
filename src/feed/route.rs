@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ui::route::Routable;
 
-use super::{feed_id::FeedId, feed_tags};
+use super::{feed_id::FeedId, feed_tags_form};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
@@ -21,10 +21,10 @@ pub enum Route {
         feed_id: FeedId,
     },
 
-    Tags(feed_tags::route::Route),
+    Tags(feed_tags_form::route::Route),
 }
 
-impl Routable for feed_tags::route::Route {
+impl Routable for feed_tags_form::route::Route {
     fn url(&self) -> String {
         Route::Tags(self.clone()).url()
     }

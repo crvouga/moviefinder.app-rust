@@ -6,6 +6,6 @@ mod feed_screen;
 pub mod feed_session_mapping_db;
 pub mod feed_tag;
 pub mod feed_tag_db;
-pub mod feed_tags;
+pub mod feed_tags_form;
 pub mod respond;
 pub mod route;

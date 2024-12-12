@@ -5,7 +5,7 @@ mod tests {
         core::unit_of_work::UnitOfWork,
         feed::{
             feed_::Feed,
-            feed_tags::{form_state::FormState, form_state_db::FeedTagsFormStateDb},
+            feed_tags_form::{form_state::FormState, form_state_db::FeedTagsFormStateDb},
         },
         fixture::BaseFixture,
     };

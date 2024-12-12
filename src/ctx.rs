@@ -11,7 +11,7 @@ use crate::{
     env::Env,
     feed::{
         self, feed_db::interface::FeedDb, feed_session_mapping_db::interface::FeedSessionMappingDb,
-        feed_tag_db::interface::FeedTagDb, feed_tags::form_state_db::FeedTagsFormStateDb,
+        feed_tag_db::interface::FeedTagDb, feed_tags_form::form_state_db::FeedTagsFormStateDb,
     },
     info,
     key_value_db::{self, interface::KeyValueDb},
@@ -122,11 +122,12 @@ impl Ctx {
             feed::feed_session_mapping_db::impl_key_value_db::KeyValueDb::new(key_value_db.clone()),
         );
 
-        let feed_tags_form_state_db =
-            Arc::new(feed::feed_tags::form_state_db::FeedTagsFormStateDb::new(
+        let feed_tags_form_state_db = Arc::new(
+            feed::feed_tags_form::form_state_db::FeedTagsFormStateDb::new(
                 logger.clone(),
                 key_value_db.clone(),
-            ));
+            ),
+        );
 
         let twilio_api = Arc::new(TwilioApi::new(
             http_client.clone(),

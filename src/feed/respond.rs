@@ -1,7 +1,7 @@
 use super::{
     feed_::Feed,
     feed_screen::{get_feed_items, respond_screen_contents, view_screen, view_slide, BOTTOM_ID},
-    feed_tags,
+    feed_tags_form,
     route::Route,
 };
 use crate::{
@@ -103,6 +103,6 @@ pub async fn respond(
             Ok(())
         }
 
-        Route::Tags(child) => feed_tags::respond::respond(&ctx, r, child, w).await,
+        Route::Tags(child) => feed_tags_form::respond::respond(&ctx, r, child, w).await,
     }
 }

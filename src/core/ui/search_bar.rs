@@ -55,6 +55,7 @@ impl SearchBar {
                     .data_on(|b| {
                         b.input()
                             .debounce(Duration::from_millis(300))
+                            .js("console.log('hello')")
                             .sse(&self.url)
                     })
                     .map(map_input),
