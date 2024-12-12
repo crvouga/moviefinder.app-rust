@@ -7,6 +7,7 @@ use super::{
 use crate::{
     core::{
         datastar::datastar::{js_assign, js_dot_value, js_empty_string, js_quote},
+        dynamic_data::DynamicData,
         html::*,
         http::response_writer::ResponseWriter,
         phone_number::{country_code::PhoneNumerCountryCode, ensure_country_code},
@@ -16,7 +17,6 @@ use crate::{
             text_field::TextField,
             top_bar::TopBar,
         },
-        dynamic_data::DynamicData,
     },
     ctx::Ctx,
     req::Req,
@@ -65,7 +65,7 @@ pub async fn respond(
             w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, "''").await?;
 
             let phone_number_input = r
-                .params
+                .payload
                 .get_first(SIGNAL_PHONE_NUMBER)
                 .map(|s| s.clone())
                 .unwrap_or_default();
@@ -83,7 +83,7 @@ pub async fn respond(
             }
 
             let country_code_input = r
-                .params
+                .payload
                 .get_first(SIGNAL_COUNTRY_CODE)
                 .map(|s| s.clone())
                 .unwrap_or_default();
@@ -148,7 +148,7 @@ pub async fn respond(
 
         Route::ClickedVerifyCode { phone_number } => {
             let code_input = r
-                .params
+                .payload
                 .get_first(SIGNAL_CODE)
                 .map(|s| s.clone())
                 .unwrap_or_default()

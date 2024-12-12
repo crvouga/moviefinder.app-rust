@@ -79,7 +79,7 @@ pub async fn respond(
         Route::ClickedTag { feed_id } => {
             let selected_tags_new = r.to_selected_tags();
 
-            let signal_input_value = r.params.get_first("signal_input_value");
+            let signal_input_value = r.payload.get_first("signal_input_value");
 
             let model =
                 ViewModel::load(ctx, feed_id, &signal_input_value.unwrap_or_default()).await;
@@ -109,7 +109,7 @@ pub async fn respond(
         }
 
         Route::InputtedSearch { feed_id } => {
-            let search_input = r.params.get_first("signal_input_value").unwrap_or_default();
+            let search_input = r.payload.get_first("signal_input_value").unwrap_or_default();
 
             let model = ViewModel::load(ctx, feed_id, &search_input).await;
 
@@ -160,7 +160,7 @@ pub async fn respond(
 
 impl Req {
     pub fn to_selected_tags(&self) -> Vec<FeedTag> {
-        let signal_selected_tag_ids = self.params.get_all("signal_selected_tags_ids");
+        let signal_selected_tag_ids = self.payload.get_all("signal_selected_tags_ids");
 
         let selected_tags = signal_selected_tag_ids
             .unwrap_or(&vec![])

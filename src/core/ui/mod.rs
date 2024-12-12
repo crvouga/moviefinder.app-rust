@@ -7,6 +7,7 @@ pub mod drawer;
 pub mod error;
 pub mod head_injector;
 pub mod icon;
+pub mod icon_button;
 pub mod image;
 pub mod search_bar;
 pub mod select;

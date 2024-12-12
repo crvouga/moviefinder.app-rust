@@ -50,16 +50,9 @@ async fn respond(
 
     let session_id = request.session_id();
 
-    let maybe_user_id = ctx
-        .user_session_db
-        .find_by_session_id(&session_id)
-        .await?
-        .map(|s| s.user_id);
-
     let r = Req {
-        params: request.datastar_params(),
+        payload: request.datastar_params(),
         session_id: session_id,
-        user_id: maybe_user_id,
     };
 
     if let None = maybe_route {
@@ -68,11 +61,7 @@ async fn respond(
 
     info!(
         ctx.logger,
-        "{:?} session_id={:?} user_id={:?} params={:?}",
-        maybe_route,
-        r.session_id,
-        r.user_id,
-        r.params
+        "{:?} session_id={:?} payload={:?}", maybe_route, r.session_id, r.payload
     );
 
     let result = match (maybe_route, request.is_datastar_request()) {

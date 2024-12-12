@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use super::route::Route;
+use super::{form_state::FormState, route::Route};
 use crate::{
     core::{
         datastar::datastar::{js_dot_value, js_quote},
@@ -9,9 +9,10 @@ use crate::{
         http::response_writer::ResponseWriter,
         random,
         ui::{
-            avatar::Avatar, button::Button, spinner_page, text_field::TextField, top_bar::TopBar,
+            avatar::Avatar, button::Button, icon, icon_button::IconButton, spinner_page,
+            text_field::TextField, top_bar::TopBar,
         },
-        unit_of_work::UnitOfWork,
+        unit_of_work::uow,
     },
     ctx::Ctx,
     req::Req,
@@ -21,7 +22,6 @@ use crate::{
     },
     user::{
         self,
-        edit_profile::form_state::FormState,
         user_profile::user_profile_::{js_avatar_url, UserProfile},
         username::Username,
     },
@@ -41,7 +41,7 @@ pub async fn respond(
         Route::Screen { .. } => {
             w.send_screen(view_screen_loading()).await?;
 
-            let user_id = match r.user_id.clone() {
+            let user_id = match r.user_id(ctx).await.clone() {
                 Some(user_id) => user_id,
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
@@ -55,18 +55,26 @@ pub async fn respond(
 
             w.send_screen(view_screen(profile.clone())).await?;
 
+            let mut form_state = FormState::get(ctx, &profile).await;
+            form_state.reset(&profile);
+
             w.send_signals(vec![
-                (SIGNAL_USERNAME, &js_quote(&profile.username.to_string())),
+                (
+                    SIGNAL_USERNAME,
+                    &js_quote(&profile.username.clone().to_string()),
+                ),
                 (
                     SIGNAL_AVATAR_SEED,
-                    &js_quote(&profile.avatar_seed.unwrap_or_default()),
+                    &js_quote(&profile.avatar_seed.clone().unwrap_or_default()),
                 ),
                 (
                     SIGNAL_FULL_NAME,
-                    &js_quote(&profile.full_name.unwrap_or_default()),
+                    &js_quote(&profile.full_name.clone().unwrap_or_default()),
                 ),
             ])
             .await?;
+
+            FormState::put(ctx, &profile, &form_state).await?;
 
             Ok(())
         }
@@ -76,11 +84,11 @@ pub async fn respond(
         }
 
         Route::SubmittedForm { .. } => {
-            let username = r.params.get_first(SIGNAL_USERNAME).unwrap_or_default();
-            let full_name = r.params.get_first(SIGNAL_FULL_NAME).unwrap_or_default();
-            let avatar_seed = r.params.get_first(SIGNAL_AVATAR_SEED).unwrap_or_default();
+            let username = r.payload.get_first(SIGNAL_USERNAME).unwrap_or_default();
+            let full_name = r.payload.get_first(SIGNAL_FULL_NAME).unwrap_or_default();
+            let avatar_seed = r.payload.get_first(SIGNAL_AVATAR_SEED).unwrap_or_default();
 
-            let user_id = match r.user_id.clone() {
+            let user_id = match r.user_id(ctx).await {
                 Some(user_id) => user_id,
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
@@ -99,13 +107,11 @@ pub async fn respond(
                 ..profile_existing
             };
 
-            ctx.user_profile_db
-                .upsert_one(UnitOfWork::new(), &profile_new)
-                .await?;
+            ctx.user_profile_db.upsert_one(uow(), &profile_new).await?;
 
             w.send_toast_dark("Profile updated").await?;
 
-            user::account_screen::redirect_to(ctx, r, w, &r.user_id).await?;
+            user::account_screen::redirect_to(ctx, r, w, &r.user_id(ctx).await).await?;
 
             Ok(())
         }
@@ -113,13 +119,20 @@ pub async fn respond(
         Route::ClickedRandomSeed => {
             let avatar_seed_new = random::string(32);
 
-            println!("unit: '{}'", random::unit());
-            println!("avatar_seed_new: '{}'", avatar_seed_new);
-
             w.send_signal(SIGNAL_AVATAR_SEED, &js_quote(&avatar_seed_new))
                 .await?;
 
-            // let form_state = FormState::load(r.session_id)?;
+            let profile = ctx
+                .user_profile_db
+                .find_one_by_user_id(&r.user_id(ctx).await.unwrap_or_default())
+                .await?
+                .unwrap_or_default();
+
+            let mut form_state = FormState::get(&ctx, &profile).await;
+
+            form_state.avatar_seed.push(avatar_seed_new);
+
+            FormState::put(&ctx, &profile, &form_state).await?;
 
             Ok(())
         }
@@ -193,15 +206,31 @@ fn view_screen(profile: UserProfile) -> Elem {
                                 .placeholder("Avatar Seed")
                                 .view(),
                         )
-                        .child(div().class("w-full flex items-center justify-end").child(
-                            Button::default().label("Random seed").view().data_on(|b| {
-                                b.click().sse(&Route::ClickedRandomSeed.url())
-                                // .js(&format!(
-                                //     "{}.value = Math.random().toString(36).substring(2);",
-                                //     SIGNAL_AVATAR_SEED
-                                // ))
-                            }),
-                        )),
+                        .child(
+                            div()
+                                .class("w-full flex items-center justify-center")
+                                .child(
+                                    div()
+                                        .class("flex-1 flex items-center justify-start")
+                                        .child(
+                                            IconButton::default()
+                                                .label("Undo".to_owned())
+                                                .icon(|class| icon::rotate_left(&class))
+                                                .view(),
+                                        )
+                                        .child(
+                                            IconButton::default()
+                                                .label("Redo".to_owned())
+                                                .icon(|class| icon::rotate_right(&class))
+                                                .view(),
+                                        ),
+                                )
+                                .child(
+                                    Button::default().label("Random seed").view().data_on(|b| {
+                                        b.click().sse(&Route::ClickedRandomSeed.url())
+                                    }),
+                                ),
+                        ),
                 )
                 .child(
                     fieldset().child(

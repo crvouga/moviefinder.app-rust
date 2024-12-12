@@ -6,8 +6,8 @@ use super::{
 };
 use crate::{
     core::{
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
         dynamic_data::DynamicData,
+        http::{response_writer::ResponseWriter, server_sent_event::sse},
     },
     ctx::Ctx,
     feed::feed_screen::transact_put_feed,
@@ -53,7 +53,7 @@ pub async fn respond(
 
         Route::ChangedSlide { feed_id } => {
             let maybe_slide_index = r
-                .params
+                .payload
                 .get_first("signalFeedIndex")
                 .and_then(|s| s.parse::<usize>().ok());
 
