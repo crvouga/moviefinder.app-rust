@@ -67,17 +67,17 @@ impl Select {
                 span()
                     .child(text(&self.label))
                     .class("font-bold")
-                    .data_class(|c| c.c("text-red-500", &signal_has_error)),
+                    .data_class(|c| c.class("text-red-500", &signal_has_error)),
             )
             .child(
                 div()
                     .class("p-4 bg-neutral-900 border-2 rounded w-full flex flex-row items-center gap-2 min-w-0 overflow-hidden max-w-full")
                     .data_class(|c| {
-                        c.c(
+                        c.class(
                             "border-red-500 focus:border-offset-2 focus:border-red-500",
                             &signal_has_error,
                         )
-                        .c(
+                        .class(
                             "border-neutral-700 focus:border-offset-2 focus:border-blue-500",
                             &js_not(&signal_has_error),
                         )

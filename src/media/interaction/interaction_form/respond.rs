@@ -1,3 +1,6 @@
+use super::route::Route;
+use crate::info;
+use crate::{core::http::response_writer::ResponseWriter, ctx::Ctx, req::Req};
 use crate::{
     core::{
         html::{button, children::text, div, span, style, unsafe_text, Elem},
@@ -6,27 +9,38 @@ use crate::{
     media::interaction::interaction_name::InteractionName,
 };
 
+pub async fn respond(
+    ctx: &Ctx,
+    _r: &Req,
+    route: &Route,
+    _w: &mut ResponseWriter,
+) -> Result<(), std::io::Error> {
+    match route {
+        Route::Record(interaction) => {
+            info!(ctx.logger, "interaction: {:?}", interaction);
+            Ok(())
+        }
+    }
+}
+
 pub fn view_form_bottom_bar() -> Elem {
     div().class("flex flex-row items-center").children(vec![
-        // InteractionName::Liked.view_icon_button(),
-        // InteractionName::Disliked.view_icon_button(),
-        // InteractionName::Interested.view_icon_button(),
-        // InteractionName::NotInterested.view_icon_button(),
-        InteractionName::Seen.view_bottom_button(),
-        InteractionName::NotSeen.view_bottom_button(),
+        InteractionName::Seen.view_bottom_button(false),
+        InteractionName::NotSeen.view_bottom_button(false),
+        // InteractionName::Liked.view_bottom_button(false),
+        // InteractionName::Disliked.view_bottom_button(false),
+        // InteractionName::Interested.view_bottom_button(false),
+        // InteractionName::NotInterested.view_bottom_button(false),
     ])
 }
 
 impl InteractionName {
-    fn view_bottom_button(self) -> Elem {
+    fn view_bottom_button(self, selected: bool) -> Elem {
         button()
-            .class("flex flex-row p-4 flex-1 gap-1 items-center justify-center active:opacity-80")
-            .child(self.view_icon(false, "size-8 shadow"))
-            .child(
-                span()
-                    .class("text-sm font-bold shadow")
-                    .child(text(&self.to_name())),
-            )
+            .class("flex flex-row h-16 flex-1 gap-1 items-center justify-center active:opacity-80 text-base font-bold")
+            .data_class(|b| b.class("text-blue-500", if selected { "true" } else { "false" }))
+            .child(self.view_icon(selected, "size-7"))
+            .child(text(&self.to_name()))
     }
 }
 

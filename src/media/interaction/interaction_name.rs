@@ -42,7 +42,7 @@ impl InteractionName {
             InteractionName::Liked => "Liked".to_string(),
             InteractionName::Disliked => "Disliked".to_string(),
             InteractionName::Interested => "Interested".to_string(),
-            InteractionName::NotInterested => "Uninterested".to_string(),
+            InteractionName::NotInterested => "Not Interested".to_string(),
             InteractionName::Seen => "Seen".to_string(),
             InteractionName::NotSeen => "Not Seen".to_string(),
         }

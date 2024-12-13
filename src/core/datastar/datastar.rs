@@ -81,7 +81,7 @@ impl DataClass {
         }
     }
 
-    pub fn c(mut self, class: &str, signal: &str) -> Self {
+    pub fn class(mut self, class: &str, signal: &str) -> Self {
         self.classes.insert(class.to_string(), signal.to_string());
         self
     }
