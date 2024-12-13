@@ -74,7 +74,7 @@ impl Ctx {
             CachedPostgres,
         }
 
-        let key_value_db_impl = KeyValueDbImpl::Postgres;
+        let key_value_db_impl = KeyValueDbImpl::CachedPostgres;
 
         info!(logger, "key value db impl: {:?}", key_value_db_impl);
 
@@ -174,7 +174,6 @@ impl Ctx {
         );
 
         Ctx {
-            phone_number_country_code_db,
             logger,
             twilio_api,
             http_client,
@@ -192,6 +191,7 @@ impl Ctx {
             user_account_db,
             user_profile_db,
             user_session_db,
+            phone_number_country_code_db,
         }
     }
 }

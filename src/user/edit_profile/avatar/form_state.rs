@@ -8,7 +8,7 @@ use crate::{
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct FormState {
-    pub avatar_seed: History<String>,
+    pub history: History<String>,
 }
 
 fn to_key(profile: &UserProfile) -> String {
@@ -43,11 +43,5 @@ impl FormState {
         ctx.key_value_db.put(uow(), &key, encoded).await?;
 
         Ok(())
-    }
-
-    pub fn reset(&mut self, profile: &UserProfile) {
-        self.avatar_seed = History::default();
-        self.avatar_seed
-            .push(profile.avatar_seed.clone().unwrap_or_default());
     }
 }

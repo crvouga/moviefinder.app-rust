@@ -22,6 +22,13 @@ where
         }
     }
 
+    /// Clears the history.
+    pub fn clear(&mut self, present: T) {
+        self.past.clear();
+        self.present = present;
+        self.future.clear();
+    }
+
     /// Pushes a new state onto the history.
     pub fn push(&mut self, new_present: T) {
         self.past.push(self.present.clone());
@@ -95,6 +102,45 @@ mod tests {
         history.redo();
         assert_eq!(history.present(), &1);
         assert!(history.can_undo());
+        assert!(history.can_redo());
+    }
+
+    #[test]
+    fn test_undo_multiple_times() {
+        let mut history = History::new(0);
+
+        // Push multiple states
+        history.push(1);
+        history.push(2);
+        history.push(3);
+
+        // Ensure present is the latest state
+        assert_eq!(history.present(), &3);
+        assert!(history.can_undo());
+        assert!(!history.can_redo());
+
+        // Undo once
+        assert!(history.undo());
+        assert_eq!(history.present(), &2);
+        assert!(history.can_undo());
+        assert!(history.can_redo());
+
+        // Undo twice
+        assert!(history.undo());
+        assert_eq!(history.present(), &1);
+        assert!(history.can_undo());
+        assert!(history.can_redo());
+
+        // Undo thrice
+        assert!(history.undo());
+        assert_eq!(history.present(), &0);
+        assert!(!history.can_undo());
+        assert!(history.can_redo());
+
+        // Further undo should return false
+        assert!(!history.undo());
+        assert_eq!(history.present(), &0);
+        assert!(!history.can_undo());
         assert!(history.can_redo());
     }
 }
