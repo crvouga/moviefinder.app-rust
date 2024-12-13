@@ -45,16 +45,20 @@ impl Drawer {
 
     pub fn view(self) -> Elem {
         let initial_open = if self.initial_open { "true" } else { "false" };
-        let store_entry_open = if self.model_open.is_empty() {
-            ""
-        } else {
-            &format!("{}: {}", self.model_open, initial_open)
-        };
-        let store = format!("{{ {}, isLoaded: true }}", store_entry_open);
 
-        Self::view_root().data_signals(&store).child(
+        Self::view_root()
+        
+        .data_signal("is_loaded", "true")
+        .map(|e| {
+            if self.model_open.is_empty() {
+                e
+            } else {
+                e.data_signal(&self.model_open, initial_open)
+            }
+        })
+        .child(
             elem("drawer-element")
-                .data_show("isLoaded.value")
+                .data_show("is_loaded.value")
                 .data_attributes("open", &js_dot_value(&self.model_open))
                 .attr("open", initial_open)
                 .data_on(|b| b.e("close").js(&self.on_close))

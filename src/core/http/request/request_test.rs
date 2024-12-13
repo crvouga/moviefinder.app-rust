@@ -3,8 +3,8 @@ mod tests {
     use std::collections::HashMap;
 
     use crate::core::{
-        http::{content_encoding::ContentEncoding, method::Method, request::Request},
         dynamic_data::DynamicData,
+        http::{content_encoding::ContentEncoding, method::Method, request::Request},
         url::{query_params::QueryParams, Url},
     };
 

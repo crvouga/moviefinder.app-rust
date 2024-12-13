@@ -1,6 +1,6 @@
 // https://developer.themoviedb.org/reference/discover-movie
 use crate::core::{
-    struct_ext::struct_to_map, dynamic_data::DynamicData, url::query_params::QueryParams,
+    dynamic_data::DynamicData, struct_ext::struct_to_map, url::query_params::QueryParams,
 };
 
 use super::TmdbApi;

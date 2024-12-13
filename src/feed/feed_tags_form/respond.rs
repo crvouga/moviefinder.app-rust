@@ -109,7 +109,10 @@ pub async fn respond(
         }
 
         Route::InputtedSearch { feed_id } => {
-            let search_input = r.payload.get_first("signal_input_value").unwrap_or_default();
+            let search_input = r
+                .payload
+                .get_first("signal_input_value")
+                .unwrap_or_default();
 
             let model = ViewModel::load(ctx, feed_id, &search_input).await;
 

@@ -54,7 +54,7 @@ pub async fn respond(
         Route::ChangedSlide { feed_id } => {
             let maybe_slide_index = r
                 .payload
-                .get_first("signalFeedIndex")
+                .get_first("signal_feed_index")
                 .and_then(|s| s.parse::<usize>().ok());
 
             let slide_index_new = match maybe_slide_index {
