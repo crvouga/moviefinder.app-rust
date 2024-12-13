@@ -1,7 +1,7 @@
 use super::icon;
 use crate::core::{
     datastar::datastar::js_console_error,
-    html::{button, div, unsafe_html, Elem},
+    html::{button, div, unsafe_text, Elem},
     http::response_writer::ResponseWriter,
 };
 use std::time::Duration;
@@ -71,7 +71,7 @@ impl Toast {
                 ToastVariant::Dark => "bg-neutral-700 text-white",
                 ToastVariant::Error => "border-red-600 border bg-red-800 text-white",
             })
-            .child(div().class("flex-1").child(unsafe_html(&self.message.replace("\n", ""))))
+            .child(div().class("flex-1").child(unsafe_text(&self.message.replace("\n", ""))))
             .child(
                 button().aria_label("close toast")
                 .on_click(js_close)

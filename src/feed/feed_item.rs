@@ -25,10 +25,10 @@ impl FeedItem {
                 media,
                 feed_index: _,
             } => div()
-                .class("w-full h-full m-0 p-0 relative")
+                .class("w-full h-full max-h-full overflow-hidden flex flex-col")
                 .child(
                     button()
-                        .class("w-full h-full m-0 p-0")
+                        .class("w-full flex-1 overflow-hidden active:opacity-80")
                         .data_on(|b| {
                             b.click().push_then_sse(
                                 &media::details::route::Route::MediaDetailsScreen {
@@ -50,8 +50,8 @@ impl FeedItem {
                 )
                 .child(
                     div()
-                        .class("absolute right-0 bottom-0 flex flex-col items-end justify-end")
-                        .child(interaction_form::respond::view_form_icon_buttons_vertical()),
+                        .class("shrink-0 w-full")
+                        .child(interaction_form::respond::view_form_bottom_bar()),
                 ),
         }
     }

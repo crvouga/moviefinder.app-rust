@@ -97,7 +97,7 @@ impl Elem {
     }
 }
 
-pub fn unsafe_html(content: &str) -> Elem {
+pub fn unsafe_text(content: &str) -> Elem {
     Elem::Text(content.to_string())
 }
 

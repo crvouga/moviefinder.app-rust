@@ -12,7 +12,7 @@ fn new(html: &str, class: &str) -> Elem {
             class.trim()
         ),
     );
-    unsafe_html(&replaced)
+    unsafe_text(&replaced)
 }
 
 const THUMBS_UP: &str = r#"
