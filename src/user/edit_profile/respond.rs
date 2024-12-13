@@ -125,7 +125,7 @@ fn view_screen_root() -> Elem {
         .class("flex flex-col w-full flex-1 overflow-hidden")
         .data_signal(SIGNAL_USERNAME, "''")
         .data_signal(SIGNAL_FULL_NAME, "''")
-        .debug_signals(true)
+        .debug_signals(false)
         .child(
             TopBar::default()
                 .back_url(user::route::Route::AccountScreen.url())
