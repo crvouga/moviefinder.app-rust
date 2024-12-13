@@ -44,7 +44,7 @@ impl BottomBar {
                 .child(
                     BottomButton::default()
                         .text("Home")
-                        .icon(icon::home("size-6"))
+                        .icon(icon::solid::home("size-6"))
                         .active(self.active == Active::Home)
                         .view()
                         .data_on(|b| {
@@ -56,7 +56,7 @@ impl BottomBar {
                 .child(
                     BottomButton::default()
                         .text("Account")
-                        .icon(icon::user_circle("size-6"))
+                        .icon(icon::solid::user_circle("size-6"))
                         .active(self.active == Active::Account)
                         .view()
                         .data_on(|b| {

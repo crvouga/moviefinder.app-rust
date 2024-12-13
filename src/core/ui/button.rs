@@ -55,7 +55,7 @@ impl Button {
         .child(
             div()
                 .class("absolute inset-0 flex items-center justify-center opacity-0 group-aria-busy:opacity-100")
-                .child(icon::spinner("size-8 animate-spin"))
+                .child(icon::solid::spinner("size-8 animate-spin"))
         )
         .child(
             div()

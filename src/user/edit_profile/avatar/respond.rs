@@ -149,7 +149,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                         .child(
                             IconButton::default()
                                 .label("Undo".to_owned())
-                                .icon(|class: String| icon::rotate_left(&class))
+                                .icon(|class: String| icon::solid::rotate_left(&class))
                                 .bind_disabled(js_not(&js_dot_value(SIGNAL_AVATAR_SEED_CAN_UNDO)))
                                 .view()
                                 .data_on(|e| e.click().sse(&Route::ClickedUndoSeed.url())),
@@ -157,7 +157,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                         .child(
                             IconButton::default()
                                 .label("Redo".to_owned())
-                                .icon(|class| icon::rotate_right(&class))
+                                .icon(|class| icon::solid::rotate_right(&class))
                                 .bind_disabled(js_not(&js_dot_value(SIGNAL_AVATAR_SEED_CAN_REDO)))
                                 .view()
                                 .data_on(|e| e.click().sse(&Route::ClickedRedoSeed.url())),

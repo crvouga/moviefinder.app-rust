@@ -70,7 +70,7 @@ impl BackButton {
                 Some(url) => elem.data_on(|b| b.click().push_then_sse(&url)),
                 None => elem,
             })
-            .child(icon::back_arrow("size-6"))
+            .child(icon::solid::back_arrow("size-6"))
     }
 }
 
@@ -95,7 +95,7 @@ impl CancelButton {
             .type_("button")
             .tab_index(0)
             .data_on(|b| b.click().push_then_sse(&self.url.unwrap_or("".to_string())))
-            .child(icon::x_mark("size-8"))
+            .child(icon::solid::x_mark("size-8"))
     }
 }
 

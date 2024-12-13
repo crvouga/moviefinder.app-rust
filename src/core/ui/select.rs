@@ -96,7 +96,7 @@ impl Select {
                     .child(
                         div()
                             .class("grid h-full place-items-center shrink-0 w-fit")
-                            .child(icon::chevron_down("size-8 pointer-events-none")),
+                            .child(icon::solid::chevron_down("size-8 pointer-events-none")),
                     )
             )
             .child(

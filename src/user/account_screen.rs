@@ -96,7 +96,7 @@ fn view_logged_out() -> Elem {
         .child(
             div()
                 .class("flex-1 flex items-center justify-center flex-col gap-3")
-                .child(icon::door_open("size-24"))
+                .child(icon::solid::door_open("size-24"))
                 .child(
                     div()
                         .class("text-2xl font-bold text-center")

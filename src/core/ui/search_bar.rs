@@ -1,10 +1,8 @@
 use std::time::Duration;
 
-use crate::core::{
-    datastar::datastar::js_dot_value,
-    html::*,
-    ui::icon::{self, spinner},
-};
+use crate::core::{datastar::datastar::js_dot_value, html::*, ui::icon::solid::spinner};
+
+use super::icon;
 
 #[derive(Default)]
 pub struct SearchBar {
@@ -39,7 +37,7 @@ impl SearchBar {
             .child(
                 div()
                     .class("h-full grid place-items-center pr-2")
-                    .child(icon::magnifying_glass("size-8")),
+                    .child(icon::solid::magnifying_glass("size-8")),
             )
             .child(
                 input()
@@ -76,7 +74,7 @@ impl SearchBar {
                     .aria_label("clear search")
                     .class("h-full place-items-center")
                     .class("grid peer-placeholder-shown:hidden")
-                    .child(icon::x_mark("size-8 pointer-events-none")),
+                    .child(icon::solid::x_mark("size-8 pointer-events-none")),
             )
     }
 }

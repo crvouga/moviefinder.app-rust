@@ -47,7 +47,6 @@ impl Drawer {
         let initial_open = if self.initial_open { "true" } else { "false" };
 
         Self::view_root()
-        
         .data_signal("is_loaded", "true")
         .map(|e| {
             if self.model_open.is_empty() {

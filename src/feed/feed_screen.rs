@@ -8,7 +8,6 @@ use crate::{
         unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
-    media,
     req::Req,
     ui::{bottom_bar::BottomBar, route::Routable},
 };
@@ -160,7 +159,7 @@ fn view_open_controls_button() -> Elem {
         .child(
             div()
                 .class("size-16 bg-black flex items-center justify-center")
-                .child(ui::icon::pencil("size-6")),
+                .child(ui::icon::solid::pencil("size-6")),
         )
 }
 
@@ -219,7 +218,7 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
 fn view_swiper_empty() -> Elem {
     div()
         .class("w-full h-full flex items-center justify-center flex-col gap-4")
-        .child(icon::magnifying_glass("size-16"))
+        .child(icon::solid::magnifying_glass("size-16"))
         .child(
             div()
                 .class("text-2xl font-bold w-full text-center")
@@ -273,33 +272,5 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
 pub fn view_slide(feed_item: &FeedItem) -> Elem {
     view_slide_root()
         .data_feed_index(feed_item.to_feed_index())
-        .child(view_slide_content(feed_item))
-}
-
-fn view_slide_content(feed_item: &FeedItem) -> Elem {
-    match feed_item {
-        FeedItem::Media {
-            media,
-            feed_index: _,
-        } => button()
-            .class("w-full h-full m-0 p-0")
-            .data_on(|b| {
-                b.click().push_then_sse(
-                    &media::details::route::Route::MediaDetailsScreen {
-                        media_id: media.id.clone(),
-                    }
-                    .url(),
-                )
-            })
-            .aria_label("open media details")
-            .child(
-                Image::new()
-                    .view()
-                    .src(media.poster.to_highest_res())
-                    .class("w-full h-full object-cover")
-                    .width("100%")
-                    .height("100%")
-                    .alt(media.title.as_str()),
-            ),
-    }
+        .child(feed_item.view_slide_content())
 }

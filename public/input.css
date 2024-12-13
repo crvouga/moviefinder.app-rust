@@ -106,3 +106,7 @@ Scrollbar
 .animate-slide-up {
   animation: slide-up 200ms ease-in-out both;
 }
+
+.shadow-icon {
+  filter: drop-shadow(0px 0px 6px black) drop-shadow(0px 0px 4px black);
+}

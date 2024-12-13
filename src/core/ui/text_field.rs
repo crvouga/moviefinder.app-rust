@@ -89,7 +89,7 @@ impl TextField {
                             .aria_label("clear search")
                             .class("h-full place-items-center shrink-0 w-fit")
                             .class("grid peer-placeholder-shown:hidden")
-                            .child(icon::x_mark("size-8 pointer-events-none")),
+                            .child(icon::solid::x_mark("size-8 pointer-events-none")),
                     )
             )
             .map(|e| {

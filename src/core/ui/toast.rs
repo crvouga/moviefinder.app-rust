@@ -75,7 +75,7 @@ impl Toast {
             .child(
                 button().aria_label("close toast")
                 .on_click(js_close)
-                .child(icon::x_mark("size-8"))
+                .child(icon::solid::x_mark("size-8"))
             )
         )
     }
