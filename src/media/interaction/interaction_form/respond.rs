@@ -32,7 +32,7 @@ impl InteractionName {
         let cloned = self.clone();
         IconButton::default()
             .label(self.to_name())
-            .icon(move |_c| cloned.view_icon("size-10 shadow"))
+            .icon(move |_c| cloned.view_icon(true, "size-10 shadow"))
             .view()
             .class("flex flex-col gap-0.5 p-1.5")
             .child(

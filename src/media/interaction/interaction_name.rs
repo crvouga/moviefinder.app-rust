@@ -14,14 +14,26 @@ pub enum InteractionName {
 }
 
 impl InteractionName {
-    pub fn view_icon(&self, class: &str) -> Elem {
+    pub fn view_icon(&self, selected: bool, class: &str) -> Elem {
         match self {
-            InteractionName::Liked => icon::outlined::thumbs_up(class),
-            InteractionName::Disliked => icon::outlined::thumbs_down(class),
+            InteractionName::Liked => match selected {
+                true => icon::solid::thumbs_up(class),
+                false => icon::outlined::thumbs_up(class),
+            },
+            InteractionName::Disliked => match selected {
+                true => icon::solid::thumbs_down(class),
+                false => icon::outlined::thumbs_down(class),
+            },
             InteractionName::Interested => icon::solid::check(class),
             InteractionName::NotInterested => icon::solid::x_mark(class),
-            InteractionName::Seen => icon::outlined::eye(class),
-            InteractionName::NotSeen => icon::outlined::eye_slash(class),
+            InteractionName::Seen => match selected {
+                true => icon::solid::eye(class),
+                false => icon::outlined::eye(class),
+            },
+            InteractionName::NotSeen => match selected {
+                true => icon::solid::eye_slash(class),
+                false => icon::outlined::eye_slash(class),
+            },
         }
     }
 
