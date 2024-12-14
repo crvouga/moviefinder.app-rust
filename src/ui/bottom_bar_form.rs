@@ -1,54 +1,65 @@
 use crate::core::{
+    datastar::datastar::DataOn,
     html::{div, Elem},
     ui::button::Button,
 };
 
 pub const SIGNAL_IS_SUBMITTING: &str = "signal_is_submitting";
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct BottomBarForm {
-    cancel_url: String,
-    save_url: Option<String>,
+    on_cancel: Option<Box<dyn FnOnce(DataOn) -> DataOn>>,
+    submit_indicator: Option<String>,
+    submit_label: Option<String>,
 }
 
 impl BottomBarForm {
-    pub fn cancel_url(mut self, cancel_url: &str) -> Self {
-        self.cancel_url = cancel_url.to_string();
+    pub fn on_cancel(mut self, on_cancel: impl FnOnce(DataOn) -> DataOn + 'static) -> Self {
+        self.on_cancel = Some(Box::new(on_cancel));
         self
     }
 
-    pub fn save_url(mut self, save_url: &str) -> Self {
-        self.save_url = Some(save_url.to_string());
+    pub fn submit_indicator(mut self, submit_indicator: &str) -> Self {
+        self.submit_indicator = Some(submit_indicator.to_string());
         self
     }
 
-    pub fn view(&self) -> Elem {
+    pub fn submit_label(mut self, submit_label: &str) -> Self {
+        self.submit_label = Some(submit_label.to_string());
+        self
+    }
+
+    pub fn view(self) -> Elem {
+        let on_cancel = self.on_cancel.unwrap_or_else(|| Box::new(|d| d));
+        let submit_label = self.submit_label.unwrap_or_else(|| "Submit".to_string());
+
         div()
             .id("bottom-bar-form")
             .data_signal(SIGNAL_IS_SUBMITTING, "false")
             .class(
-                "flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20",
+                "flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20 w-full",
             )
             .child(
                 Button::default()
                     .label("Cancel")
                     .color_gray()
                     .view()
-                    .data_on(|b| b.click().push_then_sse(&self.cancel_url))
+                    .data_on(on_cancel)
                     .type_("button")
+                    .id("bottom-bar-form-cancel-button")
                     .class("flex-1"),
             )
             .child(
                 Button::default()
-                    .label("Save")
+                    .label(&submit_label)
                     .color_primary()
                     .indicator(SIGNAL_IS_SUBMITTING)
                     .view()
-                    .data_on(|b| match &self.save_url {
-                        Some(save_url) => b.click().sse(save_url),
-                        None => b,
+                    .id("bottom-bar-form-submit-button")
+                    .map(|e| match self.submit_indicator {
+                        Some(ref indicator) => e.data_on(|b| b.click().sse(indicator)),
+                        None => e,
                     })
-                    .id("save-button")
                     .type_("submit")
                     .class("flex-1"),
             )

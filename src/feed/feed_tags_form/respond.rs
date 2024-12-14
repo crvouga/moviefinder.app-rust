@@ -248,13 +248,14 @@ fn view_selected(model: &ViewModel) -> Elem {
 }
 
 fn view_screen(feed_id: &FeedId) -> Elem {
-    div()
+    form()
         .id("screen")
         .data_signal("signal_input_value", "''")
         .data_signal("signal_selected_tags_ids", "[]")
         .debug_signals(false)
         .data_indicator("signal_is_updating_selected")
         .class("w-full h-full flex flex-col overflow-hidden relative")
+        .data_on(|e| e.submit().prevent_default().sse(&Route::ClickedSave { feed_id: feed_id.clone() }.url()))
         .child(
             div()
             .class("w-full h-full flex flex-col overflow-hidden relative")
@@ -269,7 +270,7 @@ fn view_screen(feed_id: &FeedId) -> Elem {
             .child(view_selected_loading())
             .child(view_search_input(feed_id))
             .child(view_unselected_loading())
-            .child(view_bottom_bar(feed_id))
+            .child(view_bottom_bar(feed_id.clone()))
         )
 }
 
@@ -284,20 +285,12 @@ impl Elem {
     }
 }
 
-fn view_bottom_bar(feed_id: &FeedId) -> Elem {
+fn view_bottom_bar(feed_id: FeedId) -> Elem {
     BottomBarForm::default()
-        .cancel_url(
-            &feed::route::Route::FeedScreen {
-                feed_id: feed_id.clone(),
-            }
-            .url(),
-        )
-        .save_url(
-            &(Route::ClickedSave {
-                feed_id: feed_id.clone(),
-            })
-            .url(),
-        )
+        .on_cancel(move |e| {
+            e.click()
+                .push_then_sse(&feed::route::Route::FeedScreen { feed_id }.url())
+        })
         .view()
 }
 

@@ -1,14 +1,14 @@
 use super::route::Route;
 use crate::{
     core::{
-        html::{children::text, div, Elem},
+        html::{form, Elem},
         http::response_writer::ResponseWriter,
-        ui::{button::Button, drawer::Drawer},
+        ui::drawer::{Drawer, DrawerTitle},
         unit_of_work::uow,
     },
     ctx::Ctx,
     req::Req,
-    ui::route::Routable,
+    ui::{bottom_bar_form::BottomBarForm, route::Routable},
     user::account_screen,
 };
 
@@ -24,8 +24,7 @@ pub async fn respond(
 
             account_screen::redirect_to(ctx, r, w, &None).await?;
 
-            w.send_signal("signal_is_logout_drawer_open", "false")
-                .await?;
+            w.send_signal("signal_is_drawer_open", "false").await?;
 
             w.send_toast_dark("Logged out").await?;
 
@@ -42,40 +41,31 @@ pub async fn respond(
 
 fn view_logout_drawer() -> Elem {
     Drawer::default()
-        .model_open("signal_is_logout_drawer_open")
+        .model_open("signal_is_drawer_open")
         .initial_open(true)
-        .on_close("signal_is_logout_drawer_open.value = false")
+        .on_close("signal_is_drawer_open.value = false")
         .content(
-            div()
+            form()
+                .data_on(|e| {
+                    e.submit()
+                        .prevent_default()
+                        .js("signal_is_drawer_open.value = false")
+                        .sse(&Route::ClickedLogout.url())
+                })
+                .data_indicator("is_submitting")
+                .id("logout-form")
                 .class("w-full h-full p-6 gap-6 flex flex-col items-center")
                 .child(
-                    div()
-                        .class("text-3xl font-bold text-left w-full")
-                        .child(text("Logout of moviefinder.app?")),
+                    DrawerTitle::default()
+                        .title("Logout of moviefinder.app?")
+                        .view(),
                 )
                 .child(
-                    div()
-                        .class("flex gap-3 w-full pb-3")
-                        .child(
-                            Button::default()
-                                .color_gray()
-                                .label("Cancel")
-                                .view()
-                                .data_on(|b| {
-                                    b.click().js("signal_is_logout_drawer_open.value = false")
-                                })
-                                .class("flex-1"),
-                        )
-                        .child(
-                            Button::default()
-                                .color_primary()
-                                .label("Logout")
-                                .indicator("signal_is_logging_out")
-                                .view()
-                                .class("flex-1")
-                                .id("logout-button")
-                                .data_on(|b| b.click().sse(&Route::ClickedLogout.url())),
-                        ),
+                    BottomBarForm::default()
+                        .on_cancel(|b| b.click().js("signal_is_drawer_open.value = false"))
+                        .submit_indicator("is_submitting")
+                        .submit_label("Logout")
+                        .view(),
                 ),
         )
         .view()

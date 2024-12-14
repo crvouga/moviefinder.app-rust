@@ -1,3 +1,5 @@
+use children::text;
+
 use crate::core::html::*;
 use crate::core::{
     datastar::datastar::js_dot_value,
@@ -69,5 +71,23 @@ impl Drawer {
                         .child(self.content.unwrap_or(frag())),
                 ),
         )
+    }
+}
+
+#[derive(Default)]
+pub struct DrawerTitle {
+    title: String,
+}
+
+impl DrawerTitle {
+    pub fn title(mut self, value: &str) -> Self {
+        self.title = value.to_string();
+        self
+    }
+
+    pub fn view(self) -> Elem {
+        div()
+            .class("text-3xl font-bold text-left w-full p-6")
+            .child(text(&self.title))
     }
 }

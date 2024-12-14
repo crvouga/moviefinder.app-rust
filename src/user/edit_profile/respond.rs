@@ -184,7 +184,7 @@ fn view_screen(profile: UserProfile) -> Elem {
         )
         .child(
             BottomBarForm::default()
-                .cancel_url(&user::route::Route::AccountScreen.url())
+                .on_cancel(|e| e.sse(&user::route::Route::AccountScreen.url()))
                 .view(),
         )
 }
