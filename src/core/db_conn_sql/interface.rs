@@ -1,17 +1,12 @@
-use std::fmt::Debug;
-
 use crate::core::sql::Sql;
 use async_trait::async_trait;
-use serde::de::DeserializeOwned;
+use serde_json::Value;
+use std::io::Error;
+use std::sync::Arc;
 
 #[async_trait]
 pub trait DbConnSql: Send + Sync {
-    async fn query<T, F>(
-        &self,
-        parse_row_json: Box<F>,
-        query: &Sql,
-    ) -> Result<Vec<T>, std::io::Error>
-    where
-        F: Fn(String) -> Result<T, std::io::Error> + Send + Sync,
-        T: DeserializeOwned + Send + Sync + Debug;
+    async fn query(&self, query: &Sql) -> Result<Vec<Value>, Error>;
 }
+
+pub type DbConnSqlRef = Arc<dyn DbConnSql>;

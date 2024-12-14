@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{html::Elem, ui::icon};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Default)]
 pub enum InteractionName {
+    #[default]
     Liked,
     Disliked,
     Interested,
@@ -45,6 +46,28 @@ impl InteractionName {
             InteractionName::NotInterested => "Not Interested".to_string(),
             InteractionName::Seen => "Seen".to_string(),
             InteractionName::NotSeen => "Not Seen".to_string(),
+        }
+    }
+}
+
+impl From<String> for InteractionName {
+    fn from(value: String) -> Self {
+        let cleaned = value
+            .trim()
+            .to_lowercase()
+            .replace(|c: char| c == '-' || c == '_', " ")
+            .split_whitespace()
+            .collect::<Vec<&str>>()
+            .join(" ");
+
+        match cleaned.as_str() {
+            "liked" => InteractionName::Liked,
+            "disliked" => InteractionName::Disliked,
+            "interested" => InteractionName::Interested,
+            "not interested" => InteractionName::NotInterested,
+            "seen" => InteractionName::Seen,
+            "not seen" => InteractionName::NotSeen,
+            _ => InteractionName::default(),
         }
     }
 }

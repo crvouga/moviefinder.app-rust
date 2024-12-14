@@ -1,14 +1,17 @@
 check: #
-  cargo check && cargo fmt
+  clear && cargo check && cargo fmt
 
 run: #
-  export STAGE=local && just tw-build && npx kill-port 3000 && just watch
+  clear && export STAGE=local && just tw-build && npx kill-port 3000 && just watch
 
 watch: #
   cargo watch -x run
 
 fmt: #
   cargo fmt
+
+db: #
+  export $(grep -v '^#' .env | xargs) && psql "$DATABASE_URL"
 
 db-start: #
   sudo docker-compose -f ./db/docker-compose.local.yml up -d
@@ -22,8 +25,11 @@ db-up: #
 db-down: #
   npx dbmate -e DATABASE_URL down
 
+db-new: #
+  npx dbmate -e DATABASE_URL new ${name}
+
 test: #
-  STAGE=test TEST_ENV=int cargo test
+  clear && STAGE=test TEST_ENV=int cargo test
 
 cloc: #
   npx cloc src

@@ -1,0 +1,19 @@
+use crate::{
+    core::unit_of_work::UnitOfWork, media::interaction::interaction_::MediaInteraction,
+    media::media_id::MediaId, user::user_id::UserId,
+};
+use async_trait::async_trait;
+
+#[async_trait]
+pub trait MediaInteractionDb: Send + Sync {
+    async fn list_for_media(
+        &self,
+        user_id: &UserId,
+        media_id: &MediaId,
+    ) -> Result<Vec<MediaInteraction>, std::io::Error>;
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        interaction: &MediaInteraction,
+    ) -> Result<(), std::io::Error>;
+}

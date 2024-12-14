@@ -1,4 +1,5 @@
 use core::{
+    datastar::datastar::js_console_error,
     http::{request::Request, response_writer::ResponseWriter},
     mime_type::mime_type,
 };
@@ -64,7 +65,7 @@ async fn respond(
         "{:?} session_id={:?} payload={:?}", maybe_route, r.session_id, r.payload
     );
 
-    let result = match (maybe_route, request.is_datastar_request()) {
+    let result: Result<(), std::io::Error> = match (maybe_route, request.is_datastar_request()) {
         (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
         (Some(route), false) => response_root(&request, &mut w, route.url()).await,
@@ -83,6 +84,17 @@ async fn respond(
             }
         },
     };
+
+    match &result {
+        Ok(_) => {}
+        Err(e) => {
+            let error_message = format!("Error: {:?}", e);
+
+            // error!(ctx.logger, "{}", error_message);
+
+            w.send_script(&js_console_error(&error_message)).await?;
+        }
+    }
 
     w.end().await?;
 

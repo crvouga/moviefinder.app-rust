@@ -20,6 +20,12 @@ impl Req {
             .map(|s| s.user_id)
     }
 
+    pub async fn user_id_result(&self, ctx: &Ctx) -> Result<UserId, std::io::Error> {
+        self.user_id(ctx)
+            .await
+            .ok_or(std::io::Error::from(std::io::ErrorKind::NotFound))
+    }
+
     pub async fn profile(&self, ctx: &Ctx) -> Option<UserProfile> {
         let user_id = self.user_id(ctx).await?;
 

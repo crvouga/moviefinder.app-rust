@@ -1,8 +1,18 @@
 use serde::{Deserialize, Serialize};
 
-use crate::media::interaction::interaction_::MediaInteraction;
+use crate::media::{
+    interaction::{interaction_action::InteractionAction, interaction_name::InteractionName},
+    media_id::MediaId,
+};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
-    Record(MediaInteraction),
+    Form {
+        media_id: MediaId,
+    },
+    Record {
+        media_id: MediaId,
+        interaction_name: InteractionName,
+        interaction_action: InteractionAction,
+    },
 }

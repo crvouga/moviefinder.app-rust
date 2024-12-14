@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use crate::{
     core::{
-        db_conn_sql::{self, impl_postgres::Postgres},
+        db_conn_sql::{self, interface::DbConnSql},
         http::client::HttpClient,
         logger::{impl_console::ConsoleLogger, interface::Logger},
         phone_number::{self, country_code::country_code_db::interface::PhoneNumberCountryCodeDb},
@@ -16,7 +16,9 @@ use crate::{
     info,
     key_value_db::{self, interface::KeyValueDb},
     media::{
+        self,
         genre::genre_db::{self, interface::GenreDb},
+        interaction::interaction_db::interface::MediaInteractionDb,
         media_db::{self, interface::MediaDb},
         person::person_db::{self, interface::PersonDb},
     },
@@ -32,13 +34,14 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct Ctx {
     pub key_value_db: Arc<dyn KeyValueDb>,
-    pub db_conn_sql: Arc<Postgres>,
+    pub db_conn_sql: Arc<dyn DbConnSql>,
     pub http_client: Arc<HttpClient>,
     pub tmdb_api: Arc<TmdbApi>,
     pub twilio_api: Arc<TwilioApi>,
     pub genre_db: Arc<dyn GenreDb>,
     pub person_db: Arc<dyn PersonDb>,
     pub media_db: Arc<dyn MediaDb>,
+    pub media_interaction_db: Arc<dyn MediaInteractionDb>,
     pub logger: Arc<dyn Logger>,
     pub feed_db: Arc<dyn FeedDb>,
     pub feed_tags_db: Arc<dyn FeedTagDb>,
@@ -101,6 +104,10 @@ impl Ctx {
             logger.noop(),
             tmdb_api.clone(),
         ));
+
+        let media_interaction_db = Arc::new(
+            media::interaction::interaction_db::impl_postgres::Postgres::new(db_conn_sql.clone()),
+        );
 
         let genre_db = Arc::new(genre_db::impl_tmdb::Tmdb::new(tmdb_api.clone()));
 
@@ -183,6 +190,7 @@ impl Ctx {
             genre_db,
             person_db,
             media_db,
+            media_interaction_db,
             feed_db,
             feed_tags_db,
             feed_session_mapping_db,

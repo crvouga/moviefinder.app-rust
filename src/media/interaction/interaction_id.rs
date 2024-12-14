@@ -1,11 +1,10 @@
+use crate::core::uuid;
 use serde::{Deserialize, Serialize};
 
-use crate::core::uuid;
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct UserId(String);
+pub struct MediaInteractionId(String);
 
-impl UserId {
+impl MediaInteractionId {
     pub fn new(id: &str) -> Self {
         Self(id.to_string())
     }
@@ -15,13 +14,13 @@ impl UserId {
     }
 }
 
-impl Default for UserId {
+impl Default for MediaInteractionId {
     fn default() -> Self {
-        UserId::new(&format!("user-{}", uuid::v4()))
+        MediaInteractionId::new(&format!("media-interaction-{}", uuid::v4()))
     }
 }
 
-impl From<String> for UserId {
+impl From<String> for MediaInteractionId {
     fn from(value: String) -> Self {
         Self::new(&value)
     }
