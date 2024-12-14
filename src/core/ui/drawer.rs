@@ -87,7 +87,25 @@ impl DrawerTitle {
 
     pub fn view(self) -> Elem {
         div()
-            .class("text-3xl font-bold text-left w-full p-6")
+            .class("text-3xl font-bold text-left w-full px-6 pt-6 pb-4")
             .child(text(&self.title))
+    }
+}
+
+#[derive(Default)]
+pub struct DrawerBody {
+    content: String,
+}
+
+impl DrawerBody {
+    pub fn content(mut self, value: &str) -> Self {
+        self.content = value.to_string();
+        self
+    }
+
+    pub fn view(self) -> Elem {
+        div()
+            .class("text-base text-secondary font-normal text-left w-full px-6 pb-6")
+            .child(text(&self.content))
     }
 }

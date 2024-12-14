@@ -7,6 +7,7 @@ use crate::media::interaction::interaction_action::InteractionAction;
 use crate::media::interaction::interaction_id::MediaInteractionId;
 use crate::media::media_id::MediaId;
 use crate::ui::route::Routable;
+use crate::user::login;
 use crate::{core::http::response_writer::ResponseWriter, ctx::Ctx, req::Req};
 use crate::{
     core::{
@@ -44,7 +45,11 @@ pub async fn respond(
 
             let user_id = match maybe_user_id {
                 Some(user_id) => user_id,
-                None => return w.send_must_login_first().await,
+                None => {
+                    return w
+                        .respond_login_drawer("You'll have to login before interacting with media")
+                        .await
+                }
             };
 
             let interaction_new = MediaInteraction {
