@@ -7,7 +7,6 @@ use crate::media::interaction::interaction_action::InteractionAction;
 use crate::media::interaction::interaction_id::MediaInteractionId;
 use crate::media::media_id::MediaId;
 use crate::ui::route::Routable;
-use crate::user::login;
 use crate::{core::http::response_writer::ResponseWriter, ctx::Ctx, req::Req};
 use crate::{
     core::{
@@ -33,6 +32,8 @@ pub async fn respond(
                 .media_interaction_db
                 .list_for_media(&user_id, media_id)
                 .await?;
+
+            println!("interactions: {:?}", _interactions);
 
             Ok(())
         }
@@ -72,7 +73,22 @@ pub async fn respond(
     }
 }
 
-pub fn view_form_bottom_bar(media_id: &MediaId) -> Elem {
+pub fn view_form_bottom_bar_load(media_id: &MediaId) -> Elem {
+    div()
+        .id(&format!("media-interaction-form-{}", media_id.as_str()))
+        .class("h-16 w-full")
+        .data_intersects(|e| {
+            e.sse(
+                &Route::Form {
+                    media_id: media_id.clone(),
+                }
+                .url(),
+            )
+        })
+        .class("flex flex-row items-center")
+}
+
+fn view_form_bottom_bar(media_id: &MediaId) -> Elem {
     div()
         .id(&format!("media-interaction-form-{}", media_id.as_str()))
         .class("flex flex-row items-center")
@@ -101,7 +117,7 @@ impl InteractionName {
     }
 }
 
-pub fn _view_form_icon_buttons_vertical() -> Elem {
+fn _view_form_icon_buttons_vertical() -> Elem {
     div()
         .class("flex flex-col pb-2")
         .children(vec![

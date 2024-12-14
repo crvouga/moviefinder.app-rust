@@ -64,7 +64,7 @@ impl Ctx {
             Arc::new(HttpClient::new(logger.clone()).simulate_latency(env.simulate_latency));
 
         let db_conn_sql = Arc::new(
-            db_conn_sql::impl_postgres::Postgres::new(logger.noop(), &env.database_url)
+            db_conn_sql::impl_postgres::Postgres::new(logger.clone(), &env.database_url)
                 .await
                 .unwrap()
                 .simulate_latency(env.simulate_latency),

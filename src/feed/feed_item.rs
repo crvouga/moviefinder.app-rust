@@ -48,11 +48,9 @@ impl FeedItem {
                                 .alt(media.title.as_str()),
                         ),
                 )
-                .child(
-                    div()
-                        .class("shrink-0 w-full border-t")
-                        .child(interaction_form::respond::view_form_bottom_bar(&media.id)),
-                ),
+                .child(div().class("shrink-0 w-full border-t").child(
+                    interaction_form::respond::view_form_bottom_bar_load(&media.id),
+                )),
         }
     }
 }
