@@ -31,77 +31,78 @@ pub fn derive(mut interactions: Vec<MediaInteraction>) -> InteractionForm {
     interactions
         .iter()
         .fold(InteractionForm::Initial, |_state, interaction| {
-            match (
+            to_next_interaction_form(
                 interaction.interaction_name.clone(),
                 interaction.interaction_action.clone(),
-            ) {
-                (InteractionName::Seen, InteractionAction::Add) => InteractionForm::Seen,
-                (InteractionName::Seen, InteractionAction::Retract) => InteractionForm::Initial,
-                (InteractionName::NotSeen, InteractionAction::Add) => InteractionForm::NotSeen,
-                (InteractionName::NotSeen, InteractionAction::Retract) => InteractionForm::Initial,
-                (InteractionName::Liked, InteractionAction::Add) => InteractionForm::Liked,
-                (InteractionName::Liked, InteractionAction::Retract) => InteractionForm::Seen,
-                (InteractionName::Disliked, InteractionAction::Add) => InteractionForm::Disliked,
-                (InteractionName::Disliked, InteractionAction::Retract) => InteractionForm::Seen,
-                (InteractionName::Interested, InteractionAction::Add) => {
-                    InteractionForm::Interested
-                }
-                (InteractionName::Interested, InteractionAction::Retract) => {
-                    InteractionForm::NotSeen
-                }
-                (InteractionName::NotInterested, InteractionAction::Add) => {
-                    InteractionForm::NotInterested
-                }
-                (InteractionName::NotInterested, InteractionAction::Retract) => {
-                    InteractionForm::NotSeen
-                }
-            }
+            )
         })
 }
 
-impl InteractionForm {
-    pub fn to_available_interactions(self) -> Vec<(InteractionName, InteractionAction)> {
-        match self {
-            InteractionForm::Initial => vec![
-                (InteractionName::Seen, InteractionAction::Add),
-                (InteractionName::NotSeen, InteractionAction::Add),
-            ],
-            InteractionForm::Seen => vec![
-                (InteractionName::Seen, InteractionAction::Retract),
-                (InteractionName::Liked, InteractionAction::Add),
-                (InteractionName::Disliked, InteractionAction::Add),
-            ],
-            InteractionForm::NotSeen => vec![
-                (InteractionName::NotSeen, InteractionAction::Retract),
-                (InteractionName::Interested, InteractionAction::Add),
-                (InteractionName::NotInterested, InteractionAction::Add),
-            ],
-            InteractionForm::Disliked => vec![
-                (InteractionName::Seen, InteractionAction::Retract),
-                (InteractionName::Liked, InteractionAction::Add),
-                (InteractionName::Disliked, InteractionAction::Retract),
-            ],
-            InteractionForm::Interested => vec![
-                (InteractionName::NotSeen, InteractionAction::Retract),
-                (InteractionName::Interested, InteractionAction::Retract),
-                (InteractionName::NotInterested, InteractionAction::Add),
-            ],
-            InteractionForm::Liked => vec![
-                (InteractionName::Seen, InteractionAction::Retract),
-                (InteractionName::Liked, InteractionAction::Retract),
-                (InteractionName::Disliked, InteractionAction::Add),
-            ],
-            InteractionForm::NotInterested => vec![
-                (InteractionName::NotSeen, InteractionAction::Retract),
-                (InteractionName::Interested, InteractionAction::Add),
-                (InteractionName::NotInterested, InteractionAction::Retract),
-            ],
-        }
+fn to_next_interaction_form(
+    interaction_name: InteractionName,
+    interaction_action: InteractionAction,
+) -> InteractionForm {
+    match (interaction_name, interaction_action) {
+        (InteractionName::Seen, InteractionAction::Add) => InteractionForm::Seen,
+        (InteractionName::Seen, InteractionAction::Retract) => InteractionForm::Initial,
+        (InteractionName::NotSeen, InteractionAction::Add) => InteractionForm::NotSeen,
+        (InteractionName::NotSeen, InteractionAction::Retract) => InteractionForm::Initial,
+        (InteractionName::Liked, InteractionAction::Add) => InteractionForm::Liked,
+        (InteractionName::Liked, InteractionAction::Retract) => InteractionForm::Seen,
+        (InteractionName::Disliked, InteractionAction::Add) => InteractionForm::Disliked,
+        (InteractionName::Disliked, InteractionAction::Retract) => InteractionForm::Seen,
+        (InteractionName::Interested, InteractionAction::Add) => InteractionForm::Interested,
+        (InteractionName::Interested, InteractionAction::Retract) => InteractionForm::NotSeen,
+        (InteractionName::NotInterested, InteractionAction::Add) => InteractionForm::NotInterested,
+        (InteractionName::NotInterested, InteractionAction::Retract) => InteractionForm::NotSeen,
     }
+}
 
+pub fn to_available_interactions(
+    interaction_form: InteractionForm,
+) -> Vec<(InteractionName, InteractionAction)> {
+    match interaction_form {
+        InteractionForm::Initial => vec![
+            (InteractionName::Seen, InteractionAction::Add),
+            (InteractionName::NotSeen, InteractionAction::Add),
+        ],
+        InteractionForm::Seen => vec![
+            (InteractionName::Seen, InteractionAction::Retract),
+            (InteractionName::Liked, InteractionAction::Add),
+            (InteractionName::Disliked, InteractionAction::Add),
+        ],
+        InteractionForm::NotSeen => vec![
+            (InteractionName::NotSeen, InteractionAction::Retract),
+            (InteractionName::Interested, InteractionAction::Add),
+            (InteractionName::NotInterested, InteractionAction::Add),
+        ],
+        InteractionForm::Disliked => vec![
+            (InteractionName::Seen, InteractionAction::Retract),
+            (InteractionName::Liked, InteractionAction::Add),
+            (InteractionName::Disliked, InteractionAction::Retract),
+        ],
+        InteractionForm::Interested => vec![
+            (InteractionName::NotSeen, InteractionAction::Retract),
+            (InteractionName::Interested, InteractionAction::Retract),
+            (InteractionName::NotInterested, InteractionAction::Add),
+        ],
+        InteractionForm::Liked => vec![
+            (InteractionName::Seen, InteractionAction::Retract),
+            (InteractionName::Liked, InteractionAction::Retract),
+            (InteractionName::Disliked, InteractionAction::Add),
+        ],
+        InteractionForm::NotInterested => vec![
+            (InteractionName::NotSeen, InteractionAction::Retract),
+            (InteractionName::Interested, InteractionAction::Add),
+            (InteractionName::NotInterested, InteractionAction::Retract),
+        ],
+    }
+}
+
+impl InteractionForm {
     pub fn view(self, media_id: &MediaId) -> Elem {
         div().class("w-full flex flex-row").children(
-            self.to_available_interactions()
+            to_available_interactions(self)
                 .iter()
                 .map(|(interaction_name, interaction_action)| {
                     interaction_name
