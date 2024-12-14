@@ -75,14 +75,17 @@ pub async fn respond(
             Ok(())
         }
 
-        Route::IntersectedBottom {
-            feed_id,
-            bottom_feed_index,
-        } => {
+        Route::IntersectedBottom { feed_id, .. } => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let feed_with_new_index = Feed {
-                start_index: *bottom_feed_index + 1,
+            let maybe_slide_index = r
+                .payload
+                .get_first("signal_feed_index")
+                .and_then(|s| s.parse::<usize>().ok())
+                .unwrap();
+
+            let feed_with_new_index: Feed = Feed {
+                start_index: maybe_slide_index + 1,
                 ..feed
             };
 

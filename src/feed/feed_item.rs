@@ -49,7 +49,7 @@ impl FeedItem {
                         ),
                 )
                 .child(div().class("shrink-0 w-full border-t").child(
-                    interaction_form::respond::view_form_bottom_bar_load(&media.id),
+                    interaction_form::respond::view_interaction_form_load(&media.id),
                 )),
         }
     }

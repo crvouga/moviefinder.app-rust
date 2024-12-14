@@ -82,22 +82,16 @@ pub async fn transact_put_feed(
 pub async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
     let query = feed.to_media_query(LIMIT);
 
-    let queried = ctx.media_db.query(query).await;
+    let paginated = ctx.media_db.query(query).await?;
 
-    match queried {
-        Err(err) => Err(err),
+    let feed_items = paginated
+        .items
+        .into_iter()
+        .enumerate()
+        .map(|(index, media)| FeedItem::from((media, index + feed.start_index)))
+        .collect::<Vec<FeedItem>>();
 
-        Ok(paginated) => {
-            let feed_items = paginated
-                .items
-                .into_iter()
-                .enumerate()
-                .map(|(index, media)| FeedItem::from((media, index + feed.start_index)))
-                .collect::<Vec<FeedItem>>();
-
-            Ok(feed_items)
-        }
-    }
+    Ok(feed_items)
 }
 
 fn view_top_bar_root() -> Elem {
@@ -227,17 +221,15 @@ fn view_swiper_empty() -> Elem {
 }
 
 fn view_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
+    let max_feed_index = feed_items
+        .iter()
+        .map(|feed_item| feed_item.to_feed_index())
+        .max()
+        .unwrap_or(0);
+
     frag()
         .children(feed_items.iter().map(view_slide).collect::<Vec<Elem>>())
-        .child(
-            feed_items
-                .iter()
-                .last()
-                .map(|last_feed_item| {
-                    view_slide_content_bottom(feed_id, last_feed_item.to_feed_index() + 1)
-                })
-                .unwrap_or(frag()),
-        )
+        .child(view_slide_content_bottom(feed_id, max_feed_index + 1))
 }
 
 fn view_slide_root() -> Elem {
@@ -245,18 +237,11 @@ fn view_slide_root() -> Elem {
         .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative")
 }
 
-impl Elem {
-    pub fn data_feed_index(self, feed_index: usize) -> Self {
-        self.attr("data-feed-index", &feed_index.to_string())
-    }
-}
-
 pub const BOTTOM_ID: &str = "load-more";
 
 fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem {
     view_slide_root()
         .id(BOTTOM_ID)
-        .data_feed_index(bottom_feed_index)
         .data_intersects(|b| {
             b.sse(
                 &Route::IntersectedBottom {
@@ -271,6 +256,6 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
 
 pub fn view_slide(feed_item: &FeedItem) -> Elem {
     view_slide_root()
-        .data_feed_index(feed_item.to_feed_index())
+        .attr("data-feed-index", &feed_item.to_feed_index().to_string())
         .child(feed_item.view_slide_content())
 }

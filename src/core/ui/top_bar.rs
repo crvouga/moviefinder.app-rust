@@ -94,7 +94,10 @@ impl CancelButton {
             .aria_label("cancel")
             .type_("button")
             .tab_index(0)
-            .data_on(|b| b.click().push_then_sse(&self.url.unwrap_or("".to_string())))
+            .data_on(|b| {
+                b.click()
+                    .push_then_sse(&self.url.clone().unwrap_or("".to_string()))
+            })
             .child(icon::solid::x_mark("size-8"))
     }
 }
