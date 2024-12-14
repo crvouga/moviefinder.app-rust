@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::html::{button, children::text, div, Elem},
+    core::{
+        html::{button, children::text, div, Elem},
+        ui::bottom_bar_buttons::{BottomButton, BottomButtons},
+    },
     media::{
         interaction::{
             interaction_::MediaInteraction, interaction_action::InteractionAction,
@@ -99,36 +102,37 @@ pub fn to_available_interactions(
     }
 }
 
-impl InteractionForm {
-    pub fn view(self, media_id: &MediaId) -> Elem {
-        div().class("w-full flex flex-row").children(
-            to_available_interactions(self)
-                .iter()
-                .map(|(interaction_name, interaction_action)| {
-                    interaction_name
-                        .clone()
-                        .view_bottom_button(media_id, interaction_action.clone())
-                })
-                .collect::<Vec<Elem>>(),
-        )
-    }
-}
+pub fn view(media_id: MediaId, interaction_form: Option<InteractionForm>) -> Elem {
+    BottomButtons::default()
+        .view()
+        .map(|e| match interaction_form {
+            None => e,
 
-impl InteractionName {
-    fn view_bottom_button(self, media_id: &MediaId, interaction_action: InteractionAction) -> Elem {
-        let selected = match interaction_action {
-            InteractionAction::Add => false,
-            InteractionAction::Retract => true,
-        };
-        button()
-            .class("flex flex-row h-16 flex-1 gap-1 items-center justify-center active:opacity-80 text-base font-bold")
-            .data_class(|b| b.class("text-blue-500", &selected.to_string()))
-            .child(self.view_icon(selected, "size-7"))
-            .data_on(|e|e.click().sse(&Route::Record{
-                interaction_action,
-                interaction_name: self.clone(),
-                media_id: media_id.clone(),
-            }.url()))
-            .child(text(&self.to_name()))
-    }
+            Some(interaction_form) => e.children(
+                to_available_interactions(interaction_form)
+                    .iter()
+                    .map(|(interaction_name, interaction_action)| {
+                        let selected = match interaction_action {
+                            InteractionAction::Add => false,
+                            InteractionAction::Retract => true,
+                        };
+                        BottomButton::default()
+                            .active(selected)
+                            .icon(interaction_name.view_icon(selected, "size-7"))
+                            .text(&interaction_name.to_name())
+                            .view()
+                            .data_on(|e| {
+                                e.click().sse(
+                                    &Route::Record {
+                                        interaction_action: interaction_action.clone(),
+                                        interaction_name: interaction_name.clone(),
+                                        media_id: media_id.clone(),
+                                    }
+                                    .url(),
+                                )
+                            })
+                    })
+                    .collect::<Vec<Elem>>(),
+            ),
+        })
 }

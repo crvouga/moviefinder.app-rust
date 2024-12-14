@@ -37,7 +37,7 @@ impl BottomBarForm {
             .id("bottom-bar-form")
             .data_signal(SIGNAL_IS_SUBMITTING, "false")
             .class(
-                "flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-20 w-full",
+                "flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-16 w-full",
             )
             .child(
                 Button::default()

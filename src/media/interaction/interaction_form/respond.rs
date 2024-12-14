@@ -84,20 +84,22 @@ pub async fn respond_interaction_form(
 pub fn view_root(media_id: &MediaId) -> Elem {
     div()
         .id(&format!("media-interaction-form-{}", media_id.as_str()))
-        .class("h-16 w-full flex flex-row items-center")
+        .class("h-fit w-full")
 }
 
 pub fn view_interaction_form_load(media_id: &MediaId) -> Elem {
-    view_root(media_id).data_intersects(|e| {
-        e.sse(
-            &Route::Form {
-                media_id: media_id.clone(),
-            }
-            .url(),
-        )
-    })
+    view_root(media_id)
+        .data_intersects(|e| {
+            e.sse(
+                &Route::Form {
+                    media_id: media_id.clone(),
+                }
+                .url(),
+            )
+        })
+        .child(interaction_form_::view(media_id.clone(), None))
 }
 
-fn view_interaction_form(media_id: &MediaId, interaction_form: InteractionForm) -> Elem {
-    view_root(media_id).child(interaction_form.view(media_id))
+fn view_interaction_form(media_id: &MediaId, f: InteractionForm) -> Elem {
+    view_root(media_id).child(interaction_form_::view(media_id.clone(), Some(f)))
 }
