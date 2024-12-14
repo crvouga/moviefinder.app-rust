@@ -1,6 +1,9 @@
 use super::{
     feed_::Feed,
-    feed_screen::{get_feed_items, respond_screen_contents, view_screen, view_slide, BOTTOM_ID},
+    feed_screen::{
+        get_feed_items, respond_screen_contents, view_screen, view_slide, view_slide_bottom_empty,
+        BOTTOM_ID,
+    },
     feed_tags_form,
     route::Route,
 };
@@ -93,6 +96,10 @@ pub async fn respond(
             let feed_items = get_feed_items(ctx, &feed_with_new_index)
                 .await
                 .unwrap_or_default();
+
+            if feed_items.is_empty() {
+                w.send_fragment(view_slide_bottom_empty()).await?;
+            }
 
             let user_id = r.user_id_result(ctx).await?;
 

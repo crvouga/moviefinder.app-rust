@@ -1,10 +1,4 @@
-use super::{
-    feed_::Feed,
-    feed_id::FeedId,
-    feed_item::{self, FeedItem},
-    feed_tags_form,
-    route::Route,
-};
+use super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags_form, route::Route};
 use crate::{
     core::{
         html::*,
@@ -14,7 +8,6 @@ use crate::{
         unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
-    media::interaction::interaction_form,
     req::Req,
     ui::{bottom_bar::BottomBar, route::Routable},
 };
@@ -24,7 +17,6 @@ pub const LIMIT: usize = 3;
 pub struct ViewModel {
     pub feed_id: FeedId,
     pub feed: Feed,
-    pub initial_feed_items: Vec<FeedItem>,
 }
 
 pub async fn respond(
@@ -53,31 +45,14 @@ pub async fn respond_screen_contents(
 
     put_feed(ctx, &r.session_id, &feed).await?;
 
-    let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
-
     let model = ViewModel {
         feed_id: feed.feed_id.clone(),
         feed,
-        initial_feed_items,
     };
 
     w.send_fragment(view_top_bar(&model)).await?;
 
     w.send_fragment(view_swiper(&model)).await?;
-
-    let user_id = r.user_id_result(ctx).await?;
-
-    for feed_item in &model.initial_feed_items {
-        if let Some(media_id) = feed_item.to_media_id() {
-            interaction_form::respond::respond_interaction_form(
-                ctx,
-                w,
-                user_id.clone(),
-                vec![media_id.clone()],
-            )
-            .await?;
-        }
-    }
 
     Ok(())
 }
@@ -217,9 +192,6 @@ fn view_swiper(model: &ViewModel) -> Elem {
 }
 
 fn view_swiper_container(model: &ViewModel) -> Elem {
-    if model.initial_feed_items.len() == 0 {
-        return view_swiper_empty();
-    }
     ui::swiper::container()
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
@@ -228,18 +200,7 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
                 .e("swiperslidechange")
                 .js("signal_feed_index.value = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
                 .sse(&Route::ChangedSlide { feed_id: model.feed_id.clone() }.url()))
-        .child(view_slides(&model.feed_id, &model.initial_feed_items))
-}
-
-fn view_swiper_empty() -> Elem {
-    div()
-        .class("w-full h-full flex items-center justify-center flex-col gap-4")
-        .child(icon::solid::magnifying_glass("size-16"))
-        .child(
-            div()
-                .class("text-2xl font-bold w-full text-center")
-                .child_text("No results found"),
-        )
+        .child(view_slides(&model.feed_id, &vec![]))
 }
 
 fn view_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
@@ -251,7 +212,7 @@ fn view_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
 
     frag()
         .children(feed_items.iter().map(view_slide).collect::<Vec<Elem>>())
-        .child(view_slide_content_bottom(feed_id, max_feed_index + 1))
+        .child(view_slide_bottom(feed_id, max_feed_index + 1))
 }
 
 fn view_slide_root() -> Elem {
@@ -261,7 +222,7 @@ fn view_slide_root() -> Elem {
 
 pub const BOTTOM_ID: &str = "load-more";
 
-fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem {
+fn view_slide_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem {
     view_slide_root()
         .id(BOTTOM_ID)
         .data_intersects(|b| {
@@ -274,6 +235,18 @@ fn view_slide_content_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem
             )
         })
         .child(view_slide_content_loading())
+}
+
+pub fn view_slide_bottom_empty() -> Elem {
+    view_slide_root()
+        .id(BOTTOM_ID)
+        .class("w-full h-full flex items-center justify-center flex-col gap-4")
+        .child(icon::solid::magnifying_glass("size-16"))
+        .child(
+            div()
+                .class("text-2xl font-bold w-full text-center")
+                .child_text("No results found"),
+        )
 }
 
 pub fn view_slide(feed_item: &FeedItem) -> Elem {
