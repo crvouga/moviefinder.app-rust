@@ -38,7 +38,7 @@ pub fn derive(mut interactions: Vec<MediaInteraction>) -> InteractionForm {
                 (InteractionName::Seen, InteractionAction::Add) => InteractionForm::Seen,
                 (InteractionName::Seen, InteractionAction::Retract) => InteractionForm::Initial,
                 (InteractionName::NotSeen, InteractionAction::Add) => InteractionForm::NotSeen,
-                (InteractionName::NotSeen, InteractionAction::Retract) => InteractionForm::NotSeen,
+                (InteractionName::NotSeen, InteractionAction::Retract) => InteractionForm::Initial,
                 (InteractionName::Liked, InteractionAction::Add) => InteractionForm::Liked,
                 (InteractionName::Liked, InteractionAction::Retract) => InteractionForm::Seen,
                 (InteractionName::Disliked, InteractionAction::Add) => InteractionForm::Disliked,
