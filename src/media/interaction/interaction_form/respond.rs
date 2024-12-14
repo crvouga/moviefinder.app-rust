@@ -88,5 +88,5 @@ pub fn view_interaction_form(media_id: &MediaId, f: Option<InteractionForm>) -> 
     div()
         .id(&format!("media-interaction-form-{}", media_id.as_str()))
         .class("h-fit w-full")
-        .child(interaction_form_::view(media_id.clone(), f))
+        .child(interaction_form_::view_bottom_buttons(media_id.clone(), f))
 }

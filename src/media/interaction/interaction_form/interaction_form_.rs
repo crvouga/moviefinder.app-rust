@@ -1,5 +1,4 @@
-use serde::{Deserialize, Serialize};
-
+use super::route::Route;
 use crate::{
     core::{
         html::Elem,
@@ -14,8 +13,7 @@ use crate::{
     },
     ui::route::Routable,
 };
-
-use super::route::Route;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum InteractionForm {
@@ -71,30 +69,36 @@ pub fn to_available_interactions(
         ],
         InteractionForm::Seen => vec![
             (InteractionName::Seen, InteractionAction::Retract),
+            (InteractionName::NotSeen, InteractionAction::Add),
             (InteractionName::Liked, InteractionAction::Add),
             (InteractionName::Disliked, InteractionAction::Add),
         ],
         InteractionForm::NotSeen => vec![
+            (InteractionName::Seen, InteractionAction::Add),
             (InteractionName::NotSeen, InteractionAction::Retract),
             (InteractionName::Interested, InteractionAction::Add),
             (InteractionName::NotInterested, InteractionAction::Add),
         ],
         InteractionForm::Disliked => vec![
             (InteractionName::Seen, InteractionAction::Retract),
+            (InteractionName::NotSeen, InteractionAction::Add),
             (InteractionName::Liked, InteractionAction::Add),
             (InteractionName::Disliked, InteractionAction::Retract),
         ],
         InteractionForm::Interested => vec![
+            (InteractionName::Seen, InteractionAction::Add),
             (InteractionName::NotSeen, InteractionAction::Retract),
             (InteractionName::Interested, InteractionAction::Retract),
             (InteractionName::NotInterested, InteractionAction::Add),
         ],
         InteractionForm::Liked => vec![
             (InteractionName::Seen, InteractionAction::Retract),
+            (InteractionName::NotSeen, InteractionAction::Add),
             (InteractionName::Liked, InteractionAction::Retract),
             (InteractionName::Disliked, InteractionAction::Add),
         ],
         InteractionForm::NotInterested => vec![
+            (InteractionName::Seen, InteractionAction::Add),
             (InteractionName::NotSeen, InteractionAction::Retract),
             (InteractionName::Interested, InteractionAction::Add),
             (InteractionName::NotInterested, InteractionAction::Retract),
@@ -102,37 +106,77 @@ pub fn to_available_interactions(
     }
 }
 
-pub fn view(media_id: MediaId, interaction_form: Option<InteractionForm>) -> Elem {
+pub fn view_bottom_buttons(media_id: MediaId, interaction_form: Option<InteractionForm>) -> Elem {
     BottomButtons::default()
         .view()
         .map(|e| match interaction_form {
             None => e,
-
             Some(interaction_form) => e.children(
                 to_available_interactions(interaction_form)
                     .iter()
                     .map(|(interaction_name, interaction_action)| {
-                        let selected = match interaction_action {
-                            InteractionAction::Add => false,
-                            InteractionAction::Retract => true,
-                        };
-                        BottomButton::default()
-                            .active(selected)
-                            .icon(interaction_name.view_icon(selected, "size-7"))
-                            .text(&interaction_name.to_name())
-                            .view()
-                            .data_on(|e| {
-                                e.click().sse(
-                                    &Route::Record {
-                                        interaction_action: interaction_action.clone(),
-                                        interaction_name: interaction_name.clone(),
-                                        media_id: media_id.clone(),
-                                    }
-                                    .url(),
-                                )
-                            })
+                        view_interaction_button(
+                            interaction_action.clone(),
+                            interaction_name.clone(),
+                            media_id.clone(),
+                        )
                     })
+                    .chain(view_empty_buttons().into_iter().take(4))
+                    .take(4)
                     .collect::<Vec<Elem>>(),
             ),
         })
+}
+
+fn is_selected(interaction_action: &InteractionAction) -> bool {
+    match interaction_action {
+        InteractionAction::Add => false,
+        InteractionAction::Retract => true,
+    }
+}
+
+fn view_interation_bottom_button(
+    interaction_action: &InteractionAction,
+    interaction_name: &InteractionName,
+) -> BottomButton {
+    BottomButton::default()
+        .icon(interaction_name.view_icon(is_selected(interaction_action), "size-7"))
+        .text(&interaction_name.to_name())
+}
+
+fn view_interaction_button(
+    interaction_action: InteractionAction,
+    interaction_name: InteractionName,
+    media_id: MediaId,
+) -> Elem {
+    view_interation_bottom_button(&interaction_action, &interaction_name)
+        .active(is_selected(&interaction_action))
+        .view()
+        .data_on(|e| {
+            e.click().sse(
+                &Route::Record {
+                    interaction_action,
+                    interaction_name,
+                    media_id,
+                }
+                .url(),
+            )
+        })
+}
+
+fn view_empty_buttons() -> Vec<Elem> {
+    vec![
+        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Liked)
+            .disabled(true)
+            .view(),
+        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Disliked)
+            .disabled(true)
+            .view(),
+        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Interested)
+            .disabled(true)
+            .view(),
+        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::NotInterested)
+            .disabled(true)
+            .view(),
+    ]
 }
