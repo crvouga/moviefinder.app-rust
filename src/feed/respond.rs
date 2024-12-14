@@ -10,7 +10,7 @@ use crate::{
         http::{response_writer::ResponseWriter, server_sent_event::sse},
     },
     ctx::Ctx,
-    feed::feed_screen::transact_put_feed,
+    feed::feed_screen::put_feed,
     req::Req,
     ui::route::Routable,
 };
@@ -52,25 +52,25 @@ pub async fn respond(
         }
 
         Route::ChangedSlide { feed_id } => {
-            let maybe_slide_index = r
+            let signal_feed_index = r
                 .payload
                 .get_first("signal_feed_index")
                 .and_then(|s| s.parse::<usize>().ok());
 
-            let slide_index_new = match maybe_slide_index {
+            let signal_feed_index = match signal_feed_index {
                 None => return Ok(()),
 
-                Some(slide_index_new) => slide_index_new,
+                Some(signal_feed_index) => signal_feed_index,
             };
 
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
             let feed_new = Feed {
-                start_index: slide_index_new,
+                start_index: signal_feed_index,
                 ..feed
             };
 
-            transact_put_feed(ctx, &r.session_id, &feed_new).await?;
+            put_feed(ctx, &r.session_id, &feed_new).await?;
 
             Ok(())
         }
@@ -78,14 +78,14 @@ pub async fn respond(
         Route::IntersectedBottom { feed_id, .. } => {
             let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-            let maybe_slide_index = r
+            let signal_feed_index = r
                 .payload
                 .get_first("signal_feed_index")
                 .and_then(|s| s.parse::<usize>().ok())
-                .unwrap();
+                .unwrap_or_default();
 
             let feed_with_new_index: Feed = Feed {
-                start_index: maybe_slide_index + 1,
+                start_index: signal_feed_index + 1,
                 ..feed
             };
 

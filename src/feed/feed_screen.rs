@@ -44,7 +44,7 @@ pub async fn respond_screen_contents(
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-    transact_put_feed(ctx, &r.session_id, &feed).await?;
+    put_feed(ctx, &r.session_id, &feed).await?;
 
     let initial_feed_items = get_feed_items(ctx, &feed).await.unwrap_or_default();
 
@@ -60,7 +60,7 @@ pub async fn respond_screen_contents(
     Ok(())
 }
 
-pub async fn transact_put_feed(
+pub async fn put_feed(
     ctx: &Ctx,
     session_id: &SessionId,
     feed: &Feed,
