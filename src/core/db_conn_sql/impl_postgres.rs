@@ -2,7 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use serde_json::{self, Value};
-use tokio_postgres::{self, NoTls};
+use tokio_postgres::{self, Client, Error, NoTls};
 
 use crate::{
     core::{logger::interface::Logger, sql::Sql},
@@ -67,8 +67,12 @@ impl DbConnSql for Postgres {
 
         let mut results = vec![];
 
+        let enum_types = fetch_enum_types(&self.client)
+            .await
+            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
+
         for row in rows {
-            let json = row_to_json(row)?;
+            let json = row_to_json(row, &enum_types)?;
             results.push(json);
         }
 
@@ -80,14 +84,38 @@ impl DbConnSql for Postgres {
     }
 }
 
-fn row_to_json(row: tokio_postgres::Row) -> Result<Value, std::io::Error> {
+async fn fetch_enum_types(client: &Client) -> Result<std::collections::HashSet<String>, Error> {
+    let rows = client
+        .query(
+            "SELECT t.typname AS type_name
+             FROM pg_type t
+             JOIN pg_enum e ON t.oid = e.enumtypid
+             GROUP BY t.typname",
+            &[],
+        )
+        .await?;
+
+    let enum_types: std::collections::HashSet<String> = rows
+        .into_iter()
+        .map(|row| row.get::<_, String>("type_name"))
+        .collect();
+
+    Ok(enum_types)
+}
+
+fn row_to_json(
+    row: tokio_postgres::Row,
+    enum_types: &std::collections::HashSet<String>,
+) -> Result<Value, std::io::Error> {
     let mut json_obj = serde_json::Map::new();
 
     for (idx, column) in row.columns().iter().enumerate() {
         let column_name = column.name();
-        let value: Value = match column.type_().name() {
-            // PostgreSQL enums are returned as strings, so we directly try to get them as strings
-            "enum" | "text" | "varchar" | "bpchar" => match row.try_get::<_, Option<String>>(idx) {
+        let column_type = column.type_().name();
+
+        let value: Value = if enum_types.contains(column_type) {
+            // Handle enums as strings
+            match row.try_get::<_, Option<String>>(idx) {
                 Ok(Some(value)) => Value::String(value),
                 Ok(None) => Value::Null,
                 Err(err) => {
@@ -96,49 +124,64 @@ fn row_to_json(row: tokio_postgres::Row) -> Result<Value, std::io::Error> {
                         err.to_string(),
                     ));
                 }
-            },
-            // Handle integers
-            "int2" | "int4" | "int8" => match row.try_get::<_, Option<i64>>(idx) {
-                Ok(Some(value)) => Value::Number(value.into()),
-                Ok(None) => Value::Null,
-                Err(err) => {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        err.to_string(),
-                    ));
-                }
-            },
-            // Handle floating-point numbers
-            "float4" | "float8" => match row.try_get::<_, Option<f64>>(idx) {
-                Ok(Some(value)) => {
-                    if let Some(number) = serde_json::Number::from_f64(value) {
-                        Value::Number(number)
-                    } else {
-                        Value::Null
+            }
+        } else {
+            match column_type {
+                // Handle strings
+                "text" | "varchar" | "bpchar" => match row.try_get::<_, Option<String>>(idx) {
+                    Ok(Some(value)) => Value::String(value),
+                    Ok(None) => Value::Null,
+                    Err(err) => {
+                        return Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            err.to_string(),
+                        ));
                     }
-                }
-                Ok(None) => Value::Null,
-                Err(err) => {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        err.to_string(),
-                    ));
-                }
-            },
-            // Handle booleans
-            "bool" => match row.try_get::<_, Option<bool>>(idx) {
-                Ok(Some(value)) => Value::Bool(value),
-                Ok(None) => Value::Null,
-                Err(err) => {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        err.to_string(),
-                    ));
-                }
-            },
-            // Default case for unsupported types
-            _ => Value::Null,
+                },
+                // Handle integers
+                "int2" | "int4" | "int8" => match row.try_get::<_, Option<i64>>(idx) {
+                    Ok(Some(value)) => Value::Number(value.into()),
+                    Ok(None) => Value::Null,
+                    Err(err) => {
+                        return Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            err.to_string(),
+                        ));
+                    }
+                },
+                // Handle floating-point numbers
+                "float4" | "float8" => match row.try_get::<_, Option<f64>>(idx) {
+                    Ok(Some(value)) => {
+                        if let Some(number) = serde_json::Number::from_f64(value) {
+                            Value::Number(number)
+                        } else {
+                            Value::Null
+                        }
+                    }
+                    Ok(None) => Value::Null,
+                    Err(err) => {
+                        return Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            err.to_string(),
+                        ));
+                    }
+                },
+                // Handle booleans
+                "bool" => match row.try_get::<_, Option<bool>>(idx) {
+                    Ok(Some(value)) => Value::Bool(value),
+                    Ok(None) => Value::Null,
+                    Err(err) => {
+                        return Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            err.to_string(),
+                        ));
+                    }
+                },
+                // Default case for unsupported types
+                _ => Value::Null,
+            }
         };
+
         json_obj.insert(column_name.to_string(), value);
     }
 

@@ -1,14 +1,21 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Default)]
+use crate::core::random;
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum InteractionAction {
-    #[default]
     Add,
     Retract,
 }
 
-impl From<String> for InteractionAction {
-    fn from(value: String) -> Self {
+impl InteractionAction {
+    pub fn random() -> Self {
+        random::choice(vec![InteractionAction::Add, InteractionAction::Retract]).unwrap()
+    }
+}
+
+impl InteractionAction {
+    pub fn from_string(value: String) -> Option<Self> {
         let cleaned = value
             .trim()
             .to_lowercase()
@@ -18,9 +25,9 @@ impl From<String> for InteractionAction {
             .join(" ");
 
         match cleaned.as_str() {
-            "add" => InteractionAction::Add,
-            "retract" => InteractionAction::Retract,
-            _ => InteractionAction::default(),
+            "add" => Some(InteractionAction::Add),
+            "retract" => Some(InteractionAction::Retract),
+            _ => None,
         }
     }
 }

@@ -30,18 +30,18 @@ mod tests {
     #[tokio::test]
     async fn test_it_should_work() {
         for f in fixtures().await {
-            let interaction = MediaInteraction::default();
+            let interaction = MediaInteraction::random();
 
             let before = f
                 .interaction_db
-                .list_for_media(&interaction.user_id, &interaction.media_id)
+                .list_by_user_media(&interaction.user_id, &interaction.media_id)
                 .await;
 
             let put = f.interaction_db.put(uow(), &interaction).await;
 
             let after = f
                 .interaction_db
-                .list_for_media(&interaction.user_id, &interaction.media_id)
+                .list_by_user_media(&interaction.user_id, &interaction.media_id)
                 .await;
 
             assert_eq!(before.unwrap(), vec![]);

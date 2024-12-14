@@ -27,7 +27,7 @@ impl Postgres {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct Row {
     id: Option<String>,
     media_id: Option<String>,
@@ -39,16 +39,22 @@ struct Row {
     deleted_at_posix: Option<i64>,
 }
 
-impl From<Row> for MediaInteraction {
-    fn from(value: Row) -> Self {
-        MediaInteraction {
-            id: value.id.unwrap_or_default().into(),
-            media_id: value.media_id.unwrap_or_default().into(),
-            user_id: value.user_id.unwrap_or_default().into(),
-            interaction_name: value.interaction_name.unwrap_or_default().into(),
-            interaction_action: value.interaction_action.unwrap_or_default().into(),
-            created_at_posix: value.created_at_posix.unwrap_or_default().into(),
-        }
+impl Row {
+    fn to_media_interaction(self) -> Option<MediaInteraction> {
+        let interaction_name =
+            InteractionName::from_string(self.interaction_name.unwrap_or_default())?;
+
+        let interaction_action =
+            InteractionAction::from_string(self.interaction_action.unwrap_or_default())?;
+
+        Some(MediaInteraction {
+            interaction_name,
+            interaction_action,
+            id: self.id.unwrap_or_default().into(),
+            media_id: self.media_id.unwrap_or_default().into(),
+            user_id: self.user_id.unwrap_or_default().into(),
+            created_at_posix: self.created_at_posix.unwrap_or_default().into(),
+        })
     }
 }
 
@@ -81,7 +87,7 @@ fn parse_row_json(value: serde_json::Value) -> Result<Row, std::io::Error> {
 
 #[async_trait]
 impl MediaInteractionDb for Postgres {
-    async fn list_for_media(
+    async fn list_by_user_media(
         &self,
         user_id: &UserId,
         media_id: &MediaId,
@@ -92,11 +98,10 @@ impl MediaInteractionDb for Postgres {
                 id,
                 media_id,
                 user_id,
-                interaction_name,
-                interaction_action,
+                interaction_name::TEXT,
+                interaction_action::TEXT,
                 created_at_posix,
-                updated_at_posix,
-                deleted_at_posix 
+                updated_at_posix 
             FROM 
                 media_interaction 
             WHERE 
@@ -118,10 +123,7 @@ impl MediaInteractionDb for Postgres {
         let rows = db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json)
             .await?
             .into_iter()
-            .map(|r| {
-                let interaction: MediaInteraction = r.into();
-                interaction
-            })
+            .filter_map(|r| r.to_media_interaction())
             .collect::<Vec<MediaInteraction>>();
 
         Ok(rows)

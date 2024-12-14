@@ -6,7 +6,7 @@ use async_trait::async_trait;
 
 #[async_trait]
 pub trait MediaInteractionDb: Send + Sync {
-    async fn list_for_media(
+    async fn list_by_user_media(
         &self,
         user_id: &UserId,
         media_id: &MediaId,

@@ -70,7 +70,7 @@ pub async fn respond_interaction_form(
 
     let interactions = ctx
         .media_interaction_db
-        .list_for_media(&user_id, media_id)
+        .list_by_user_media(&user_id, media_id)
         .await?;
 
     let interaction_form = interaction_form_::derive(interactions);

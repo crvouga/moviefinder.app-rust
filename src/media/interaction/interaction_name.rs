@@ -1,11 +1,10 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{html::Elem, ui::icon};
+use crate::core::{html::Elem, random, ui::icon};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum InteractionName {
-    #[default]
     Liked,
     Disliked,
     Interested,
@@ -48,10 +47,22 @@ impl InteractionName {
             InteractionName::NotSeen => "Not Seen".to_string(),
         }
     }
-}
 
-impl From<String> for InteractionName {
-    fn from(value: String) -> Self {
+    pub fn random() -> Self {
+        let choice = random::choice(vec![
+            InteractionName::Liked,
+            InteractionName::Disliked,
+            InteractionName::Interested,
+            InteractionName::NotInterested,
+            InteractionName::Seen,
+            InteractionName::NotSeen,
+        ])
+        .unwrap();
+
+        choice
+    }
+
+    pub fn from_string(value: String) -> Option<Self> {
         let cleaned = value
             .trim()
             .to_lowercase()
@@ -61,13 +72,13 @@ impl From<String> for InteractionName {
             .join(" ");
 
         match cleaned.as_str() {
-            "liked" => InteractionName::Liked,
-            "disliked" => InteractionName::Disliked,
-            "interested" => InteractionName::Interested,
-            "not interested" => InteractionName::NotInterested,
-            "seen" => InteractionName::Seen,
-            "not seen" => InteractionName::NotSeen,
-            _ => InteractionName::default(),
+            "liked" => Some(InteractionName::Liked),
+            "disliked" => Some(InteractionName::Disliked),
+            "interested" => Some(InteractionName::Interested),
+            "not interested" => Some(InteractionName::NotInterested),
+            "seen" => Some(InteractionName::Seen),
+            "not seen" => Some(InteractionName::NotSeen),
+            _ => None,
         }
     }
 }
