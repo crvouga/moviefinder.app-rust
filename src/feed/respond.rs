@@ -11,6 +11,7 @@ use crate::{
     },
     ctx::Ctx,
     feed::feed_screen::put_feed,
+    media::interaction::interaction_form,
     req::Req,
     ui::route::Routable,
 };
@@ -93,6 +94,8 @@ pub async fn respond(
                 .await
                 .unwrap_or_default();
 
+            let user_id = r.user_id_result(ctx).await?;
+
             for feed_item in feed_items {
                 sse()
                     .event_merge_fragments()
@@ -101,6 +104,18 @@ pub async fn respond(
                     .data_fragments(view_slide(&feed_item))
                     .send(w)
                     .await?;
+
+                let media_id = feed_item.to_media_id();
+
+                if let Some(media_id) = media_id {
+                    interaction_form::respond::respond_interaction_form(
+                        ctx,
+                        w,
+                        user_id.clone(),
+                        vec![media_id],
+                    )
+                    .await?;
+                }
             }
 
             Ok(())

@@ -1,4 +1,10 @@
-use super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags_form, route::Route};
+use super::{
+    feed_::Feed,
+    feed_id::FeedId,
+    feed_item::{self, FeedItem},
+    feed_tags_form,
+    route::Route,
+};
 use crate::{
     core::{
         html::*,
@@ -8,6 +14,7 @@ use crate::{
         unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
+    media::interaction::interaction_form,
     req::Req,
     ui::{bottom_bar::BottomBar, route::Routable},
 };
@@ -55,7 +62,22 @@ pub async fn respond_screen_contents(
     };
 
     w.send_fragment(view_top_bar(&model)).await?;
+
     w.send_fragment(view_swiper(&model)).await?;
+
+    let user_id = r.user_id_result(ctx).await?;
+
+    for feed_item in &model.initial_feed_items {
+        if let Some(media_id) = feed_item.to_media_id() {
+            interaction_form::respond::respond_interaction_form(
+                ctx,
+                w,
+                user_id.clone(),
+                vec![media_id.clone()],
+            )
+            .await?;
+        }
+    }
 
     Ok(())
 }

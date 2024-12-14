@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::{
-        html::{button, children::text, div, Elem},
+        html::Elem,
         ui::bottom_bar_buttons::{BottomButton, BottomButtons},
     },
     media::{

@@ -3,7 +3,7 @@ use crate::{
         html::{button, div, Elem},
         ui::image::Image,
     },
-    media::{self, interaction::interaction_form, media_::Media},
+    media::{self, interaction::interaction_form, media_::Media, media_id::MediaId},
     ui::route::Routable,
 };
 
@@ -16,6 +16,12 @@ impl FeedItem {
     pub fn to_feed_index(self: &FeedItem) -> usize {
         match self {
             FeedItem::Media { feed_index, .. } => *feed_index,
+        }
+    }
+
+    pub fn to_media_id(self: &FeedItem) -> Option<MediaId> {
+        match self {
+            FeedItem::Media { media, .. } => Some(media.id.clone()),
         }
     }
 
@@ -49,7 +55,7 @@ impl FeedItem {
                         ),
                 )
                 .child(div().class("shrink-0 w-full border-t").child(
-                    interaction_form::respond::view_interaction_form_load(&media.id),
+                    interaction_form::respond::view_interaction_form(&media.id, None),
                 )),
         }
     }
