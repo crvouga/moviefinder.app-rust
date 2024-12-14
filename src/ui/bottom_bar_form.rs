@@ -57,7 +57,7 @@ impl BottomBarForm {
                     .view()
                     .id("bottom-bar-form-submit-button")
                     .map(|e| match self.submit_indicator {
-                        Some(ref indicator) => e.data_on(|b| b.click().sse(indicator)),
+                        Some(ref indicator) => e.data_indicator(&indicator),
                         None => e,
                     })
                     .type_("submit")

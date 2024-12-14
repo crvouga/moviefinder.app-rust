@@ -54,7 +54,7 @@ fn view_logout_drawer() -> Elem {
                 })
                 .data_indicator("is_submitting")
                 .id("logout-form")
-                .class("w-full h-full p-6 gap-6 flex flex-col items-center")
+                .class("w-full h-full flex flex-col items-center")
                 .child(
                     DrawerTitle::default()
                         .title("Logout of moviefinder.app?")
