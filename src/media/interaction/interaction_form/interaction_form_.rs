@@ -110,21 +110,34 @@ pub fn view_bottom_buttons(media_id: MediaId, interaction_form: Option<Interacti
     BottomButtons::default()
         .view()
         .map(|e| match interaction_form {
-            None => e,
-            Some(interaction_form) => e.children(
-                to_available_interactions(interaction_form)
-                    .iter()
-                    .map(|(interaction_name, interaction_action)| {
-                        view_interaction_button(
-                            interaction_action.clone(),
-                            interaction_name.clone(),
-                            media_id.clone(),
-                        )
-                    })
-                    .chain(view_empty_buttons().into_iter().take(4))
+            None => e.children(
+                view_disabled_buttons()
+                    .into_iter()
                     .take(4)
                     .collect::<Vec<Elem>>(),
             ),
+
+            Some(interaction_form) => {
+                let available_interactions = to_available_interactions(interaction_form);
+                e.children(
+                    available_interactions
+                        .iter()
+                        .map(|(interaction_name, interaction_action)| {
+                            view_interaction_button(
+                                interaction_action.clone(),
+                                interaction_name.clone(),
+                                media_id.clone(),
+                            )
+                        })
+                        .chain(
+                            view_disabled_buttons()
+                                .into_iter()
+                                .skip(available_interactions.len()),
+                        )
+                        .take(4)
+                        .collect::<Vec<Elem>>(),
+                )
+            }
         })
 }
 
@@ -164,8 +177,14 @@ fn view_interaction_button(
         })
 }
 
-fn view_empty_buttons() -> Vec<Elem> {
+fn view_disabled_buttons() -> Vec<Elem> {
     vec![
+        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Seen)
+            .disabled(true)
+            .view(),
+        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::NotSeen)
+            .disabled(true)
+            .view(),
         view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Liked)
             .disabled(true)
             .view(),

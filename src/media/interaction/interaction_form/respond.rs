@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use super::interaction_form_::{self, InteractionForm};
 use super::route::Route;
 use crate::core::html::{div, Elem};
@@ -11,6 +9,7 @@ use crate::media::interaction::interaction_id::MediaInteractionId;
 use crate::media::media_id::MediaId;
 use crate::user::user_id::UserId;
 use crate::{core::http::response_writer::ResponseWriter, ctx::Ctx, req::Req};
+use std::collections::HashMap;
 
 pub async fn respond(
     ctx: &Ctx,
@@ -71,19 +70,7 @@ pub async fn respond_interaction_form(
     user_id: UserId,
     media_ids: Vec<MediaId>,
 ) -> Result<(), std::io::Error> {
-    let mut interactions_by_media_id: BTreeMap<MediaId, Vec<MediaInteraction>> =
-        media_ids.iter().map(|id| (id.clone(), vec![])).collect();
-
-    for i in ctx
-        .media_interaction_db
-        .list_by_user_media(&user_id, &media_ids.iter().collect())
-        .await?
-    {
-        interactions_by_media_id
-            .entry(i.media_id.clone())
-            .or_default()
-            .push(i);
-    }
+    let interactions_by_media_id = get_interactions_by_media_id(ctx, user_id, media_ids).await;
 
     for (media_id, interactions) in interactions_by_media_id {
         let interaction_form = interaction_form_::derive(interactions);
@@ -93,6 +80,32 @@ pub async fn respond_interaction_form(
     }
 
     Ok(())
+}
+
+async fn get_interactions_by_media_id(
+    ctx: &Ctx,
+    user_id: UserId,
+    media_ids: Vec<MediaId>,
+) -> HashMap<MediaId, Vec<MediaInteraction>> {
+    let mut interactions_by_media_id = media_ids
+        .iter()
+        .map(|id| (id.clone(), vec![]))
+        .collect::<HashMap<MediaId, Vec<MediaInteraction>>>();
+
+    let all_interactions = ctx
+        .media_interaction_db
+        .list_by_user_media(&user_id, &media_ids.iter().collect())
+        .await
+        .unwrap_or_default();
+
+    for i in all_interactions {
+        interactions_by_media_id
+            .entry(i.media_id.clone())
+            .or_default()
+            .push(i);
+    }
+
+    interactions_by_media_id
 }
 
 fn to_form_id(media_id: &MediaId) -> String {
