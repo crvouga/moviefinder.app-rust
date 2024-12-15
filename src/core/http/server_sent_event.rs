@@ -28,7 +28,7 @@ impl ServerSentEvent {
 }
 
 impl ResponseWriter {
-    pub async fn write_sse_event(
+    async fn write_sse_event(
         &mut self,
         event: &str,
         data: Vec<&str>,
