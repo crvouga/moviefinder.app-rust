@@ -16,7 +16,7 @@ use crate::{
     },
     ctx::Ctx,
     debug,
-    media::interaction::interaction_form,
+    media::{interaction::interaction_form, media_id::MediaId},
     req::Req,
     ui::{bottom_bar::BottomBar, route::Routable},
 };
@@ -246,10 +246,20 @@ fn view_top_bar(model: &ViewModel) -> Elem {
 }
 
 fn view_slide_content_loading() -> Elem {
-    Image::new()
-        .view()
-        .src(" ")
-        .class("w-full h-full object-cover")
+    div()
+        .class("w-full h-full flex flex-col")
+        .child(
+            div().class("w-full flex-1").child(
+                Image::new()
+                    .view()
+                    .src(" ")
+                    .class("w-full h-full object-cover"),
+            ),
+        )
+        .child(interaction_form::respond::view_interaction_form(
+            &MediaId::default(),
+            None,
+        ))
 }
 
 pub fn view_screen() -> Elem {
@@ -325,7 +335,7 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
 
 fn view_slide_root() -> Elem {
     ui::swiper::slide()
-        .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative")
+        .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative overflow-hidden")
 }
 
 pub const BOTTOM_ID: &str = "feed-bottom";

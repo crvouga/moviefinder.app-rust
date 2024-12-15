@@ -42,7 +42,7 @@ impl BottomButton {
         button()
         .class_list(
             &[
-                    "flex flex-1 items-center justify-center gap-0.5 flex-col text-xs h-full cursor-pointer select-none active:opacity-75 transition-opacity",
+                    "flex flex-1 items-center justify-center gap-0.5 flex-col text-xs h-full cursor-pointer select-none active:opacity-75",
                     if self.active && !self.disabled {
                         "text-blue-500"
                     } else {

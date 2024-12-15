@@ -60,7 +60,7 @@ impl Toast {
         .child(
             div()
             .id("toast-content")
-            .class("w-full h-fit p-4 text-lg font-bold pointer-events-auto rounded shadow-xl overflow-hidden animate-slide-down items-center flex z-40")
+            .class("w-full h-fit p-4 text-lg font-bold pointer-events-auto rounded shadow-xl overflow-hidden animate-slide-down items-center flex z-50")
             .data_on(|b|
                     b.load()
                     .js(&format!("const duration = {}", duration_ms))

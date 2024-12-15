@@ -48,7 +48,7 @@ impl FeedItem {
                             Image::new()
                                 .view()
                                 .src(media.poster.to_highest_res())
-                                .class("w-full h-full object-cover")
+                                .class("w-full h-full object-cover z-0")
                                 .width("100%")
                                 .height("100%")
                                 .alt(media.title.as_str()),
