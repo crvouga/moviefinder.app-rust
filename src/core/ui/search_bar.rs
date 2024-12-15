@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::core::{datastar::datastar::js_dot_value, html::*, ui::icon::solid::spinner};
+use crate::core::{html::*, js::Js, ui::icon::solid::spinner};
 
 use super::icon;
 
@@ -33,7 +33,7 @@ impl SearchBar {
             .class(
                 "w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden px-5",
             )
-            .data_attributes("aria-busy", &js_dot_value(&self.indicator))
+            .data_attributes("aria-busy", &Js::dot_value(&self.indicator))
             .child(
                 div()
                     .class("h-full grid place-items-center pr-2")

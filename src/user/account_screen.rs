@@ -6,9 +6,9 @@ use super::{
 };
 use crate::{
     core::{
-        datastar::datastar::js_quote,
         html::*,
         http::response_writer::ResponseWriter,
+        js::Js,
         ui::{avatar::Avatar, button::Button, icon, spinner_page, top_bar::TopBar},
     },
     ctx::Ctx,
@@ -129,7 +129,7 @@ fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
                 .class("flex-1 flex items-center justify-start flex-col gap-6 p-6 w-full")
                 .child(
                     Avatar::default()
-                        .data_attributes_src(&js_quote(&profile.to_avatar_url()))
+                        .data_attributes_src(&Js::not(&profile.to_avatar_url()))
                         .class("size-36")
                         .view(),
                 )

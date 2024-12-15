@@ -11,6 +11,7 @@ pub mod html;
 pub mod http;
 pub mod human_friendly_base64;
 pub mod image_set;
+pub mod js;
 pub mod logger;
 pub mod mime_type;
 pub mod pagination;

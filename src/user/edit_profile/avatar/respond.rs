@@ -1,9 +1,9 @@
 use super::{form_state::FormState, route::Route};
 use crate::{
     core::{
-        datastar::datastar::{js_dot_value, js_not, js_quote},
         html::{div, fieldset, Elem},
         http::response_writer::ResponseWriter,
+        js::Js,
         random,
         ui::{
             avatar::Avatar, button::Button, icon, icon_button::IconButton, text_field::TextField,
@@ -49,7 +49,7 @@ pub async fn respond(
         Route::ClickedRandomSeed => {
             let avatar_seed_new = random::string(32);
 
-            w.send_signal(SIGNAL_AVATAR_SEED, &js_quote(&avatar_seed_new))
+            w.send_signal(SIGNAL_AVATAR_SEED, &Js::quote(&avatar_seed_new))
                 .await?;
 
             let profile = r.profile(ctx).await.unwrap_or_default();
@@ -99,8 +99,11 @@ async fn send_form_state(
     form_state: &FormState,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    w.send_signal(SIGNAL_AVATAR_SEED, &js_quote(&form_state.history.present()))
-        .await?;
+    w.send_signal(
+        SIGNAL_AVATAR_SEED,
+        &Js::quote(&form_state.history.present()),
+    )
+    .await?;
 
     w.send_signal(
         SIGNAL_AVATAR_SEED_CAN_UNDO,
@@ -128,7 +131,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                 .data_attributes_src(&format!(
                     "{}.value.trim().length === 0 ? null : {}",
                     SIGNAL_AVATAR_SEED,
-                    js_avatar_url(&js_dot_value(SIGNAL_AVATAR_SEED))
+                    js_avatar_url(&Js::dot_value(SIGNAL_AVATAR_SEED))
                 ))
                 .class("size-36")
                 .view(),
@@ -150,7 +153,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                             IconButton::default()
                                 .label("Undo".to_owned())
                                 .icon(|class: String| icon::solid::rotate_left(&class))
-                                .bind_disabled(js_not(&js_dot_value(SIGNAL_AVATAR_SEED_CAN_UNDO)))
+                                .bind_disabled(Js::not(&Js::dot_value(SIGNAL_AVATAR_SEED_CAN_UNDO)))
                                 .view()
                                 .data_on(|e| e.click().sse(&Route::ClickedUndoSeed.url())),
                         )
@@ -158,7 +161,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                             IconButton::default()
                                 .label("Redo".to_owned())
                                 .icon(|class| icon::solid::rotate_right(&class))
-                                .bind_disabled(js_not(&js_dot_value(SIGNAL_AVATAR_SEED_CAN_REDO)))
+                                .bind_disabled(Js::not(&Js::dot_value(SIGNAL_AVATAR_SEED_CAN_REDO)))
                                 .view()
                                 .data_on(|e| e.click().sse(&Route::ClickedRedoSeed.url())),
                         ),

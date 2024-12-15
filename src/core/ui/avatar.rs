@@ -1,6 +1,6 @@
 use crate::core::{
-    datastar::datastar::js_not,
     html::{children::text_unsafe, frag, img, span, Elem},
+    js::Js,
 };
 
 #[derive(Default)]
@@ -35,7 +35,7 @@ impl Avatar {
         .child(
             span()
                 .class(&class)
-                .data_show(&js_not(&js_is_string(&self.data_attributes_src)))
+                .data_show(&Js::not(&js_is_string(&self.data_attributes_src)))
                 .data_on(|b| {
                     if let Some(on_click) = &self.on_click {
                         b.click().js(on_click)

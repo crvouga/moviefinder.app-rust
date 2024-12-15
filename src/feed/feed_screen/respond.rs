@@ -7,6 +7,7 @@ use crate::{
         dynamic_data::DynamicData,
         html::*,
         http::{response_writer::ResponseWriter, server_sent_event::sse},
+        js::Js,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image, top_bar::TopBarRoot},
         unit_of_work::UnitOfWork,
@@ -48,7 +49,7 @@ pub async fn respond(
             })
             .url();
 
-            w.send_replace_url(&feed_url).await?;
+            w.send_script(&Js::replace_url(&feed_url)).await?;
 
             w.send_screen(view_screen()).await?;
 

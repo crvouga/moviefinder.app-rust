@@ -6,10 +6,10 @@ use super::{
 };
 use crate::{
     core::{
-        datastar::datastar::{js_assign, js_dot_value, js_empty_string, js_quote},
         dynamic_data::DynamicData,
         html::*,
         http::response_writer::ResponseWriter,
+        js::Js,
         phone_number::{country_code::PhoneNumerCountryCode, ensure_country_code},
         ui::{
             button::Button,
@@ -73,11 +73,11 @@ pub async fn respond(
             if phone_number_input.trim().is_empty() {
                 w.send_signal(
                     SIGNAL_PHONE_NUMBER_ERROR,
-                    &js_quote("Phone number is required"),
+                    &Js::quote("Phone number is required"),
                 )
                 .await?;
 
-                w.send_focus("input").await?;
+                w.send_script(&Js::focus("input")).await?;
 
                 return Ok(());
             }
@@ -103,10 +103,10 @@ pub async fn respond(
 
             match sent {
                 Err(SendCodeError::InvalidPhoneNumber(err)) => {
-                    w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, &js_quote(err.as_str()))
+                    w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, &Js::quote(err.as_str()))
                         .await?;
 
-                    w.send_focus("input").await?;
+                    w.send_script(&Js::focus("input")).await?;
 
                     Ok(())
                 }
@@ -131,7 +131,7 @@ pub async fn respond(
                     )
                     .await?;
 
-                    w.send_focus("input").await?;
+                    w.send_script(&Js::focus("input")).await?;
 
                     Ok(())
                 }
@@ -159,9 +159,9 @@ pub async fn respond(
 
             match verified {
                 Err(VerifyCodeError::InvalidCode(err)) => {
-                    w.send_signal(SIGNAL_CODE_ERROR, &js_quote(&err)).await?;
+                    w.send_signal(SIGNAL_CODE_ERROR, &Js::quote(&err)).await?;
 
-                    w.send_focus("input").await?;
+                    w.send_script(&Js::focus("input")).await?;
 
                     Ok(())
                 }
@@ -227,9 +227,9 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
                                         .type_("tel")
                                         .autocomplete("tel")
                                         .data_on(|d| {
-                                            d.input().js(&js_assign(
-                                                &js_dot_value(SIGNAL_PHONE_NUMBER_ERROR),
-                                                &js_empty_string(),
+                                            d.input().js(&Js::assign(
+                                                &Js::dot_value(SIGNAL_PHONE_NUMBER_ERROR),
+                                                &Js::empty_string(),
                                             ))
                                         })
                                 })
@@ -281,7 +281,7 @@ fn view_select_country_code_input(country_codes: Vec<PhoneNumerCountryCode>) -> 
         .map_select(|e| {
             e.data_bind(SIGNAL_COUNTRY_CODE).data_on(|d| {
                 d.change()
-                    .js(&js_assign(&js_dot_value(SIGNAL_COUNTRY_CODE_ERROR), ""))
+                    .js(&Js::assign(&Js::dot_value(SIGNAL_COUNTRY_CODE_ERROR), ""))
             })
         })
         .options(options)
@@ -328,9 +328,9 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
                         .placeholder("Enter code")
                         .map_input(|e| {
                             e.data_bind(SIGNAL_CODE).type_("tel").data_on(|d| {
-                                d.input().js(&js_assign(
-                                    &js_dot_value(SIGNAL_CODE_ERROR),
-                                    &js_empty_string(),
+                                d.input().js(&Js::assign(
+                                    &Js::dot_value(SIGNAL_CODE_ERROR),
+                                    &Js::empty_string(),
                                 ))
                             })
                         })

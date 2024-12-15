@@ -1,5 +1,5 @@
 use super::icon;
-use crate::core::{datastar::datastar::js_dot_value, html::*};
+use crate::core::{html::*, js::Js};
 
 #[derive(Debug, Default)]
 pub struct Button {
@@ -34,7 +34,7 @@ impl Button {
     }
 
     pub fn view(self) -> Elem {
-        let signal_indicator = js_dot_value(&self.indicator.clone().unwrap_or_default());
+        let signal_indicator = Js::dot_value(&self.indicator.clone().unwrap_or_default());
         let id = self.id.unwrap_or("".to_owned());
 
         button()

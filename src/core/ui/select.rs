@@ -1,6 +1,6 @@
 use crate::core::{
-    datastar::datastar::{js_dot_value, js_not},
     html::{children::text, div, label, option, select, span, Elem},
+    js::Js,
 };
 
 use super::icon;
@@ -47,7 +47,7 @@ impl Select {
     }
 
     fn signal_error(&self) -> String {
-        js_dot_value(&self.bind_error)
+        Js::dot_value(&self.bind_error)
     }
 
     fn signal_has_error(&self) -> String {
@@ -79,7 +79,7 @@ impl Select {
                         )
                         .class(
                             "border-neutral-700 focus:border-offset-2 focus:border-blue-500",
-                            &js_not(&signal_has_error),
+                            &Js::not(&signal_has_error),
                         )
                     })
                     .child(

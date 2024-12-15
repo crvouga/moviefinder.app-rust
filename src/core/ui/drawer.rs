@@ -1,10 +1,8 @@
 use children::text;
 
 use crate::core::html::*;
-use crate::core::{
-    datastar::datastar::js_dot_value,
-    html::{div, frag, Elem},
-};
+use crate::core::html::{div, frag, Elem};
+use crate::core::js::Js;
 
 #[derive(Default)]
 pub struct Drawer {
@@ -60,7 +58,7 @@ impl Drawer {
         .child(
             elem("drawer-element")
                 .data_show("is_loaded.value")
-                .data_attributes("open", &js_dot_value(&self.model_open))
+                .data_attributes("open", &Js::dot_value(&self.model_open))
                 .attr("open", initial_open)
                 .data_on(|b| b.e("close").js(&self.on_close))
                 .child(

@@ -1,6 +1,6 @@
 use crate::core::{
-    datastar::datastar::{js_dot_value, js_not},
     html::{button, children::text, div, input, label, span, Elem},
+    js::Js,
 };
 
 use super::icon;
@@ -35,7 +35,7 @@ impl TextField {
     }
 
     fn signal_error(&self) -> Option<String> {
-        self.bind_error.clone().map(|x| js_dot_value(&x))
+        self.bind_error.clone().map(|x| Js::dot_value(&x))
     }
 
     fn signal_has_error(&self) -> Option<String> {
@@ -64,7 +64,7 @@ impl TextField {
                         )
                         .maybe_class(
                             "border-neutral-700 focus:border-offset-2 focus:border-blue-500",
-                            &signal_has_error.map(|s| js_not(&s)),
+                            &signal_has_error.map(|s| Js::not(&s)),
                         )
                     })
                     .child(

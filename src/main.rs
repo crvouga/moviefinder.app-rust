@@ -1,6 +1,6 @@
 use core::{
-    datastar::datastar::js_console_error,
     http::{request::Request, response_writer::ResponseWriter},
+    js::Js,
     mime_type::mime_type,
 };
 use ctx::Ctx;
@@ -90,9 +90,7 @@ async fn respond(
         Err(e) => {
             let error_message = format!("Error: {:?}", e);
 
-            // error!(ctx.logger, "{}", error_message);
-
-            w.send_script(&js_console_error(&error_message)).await?;
+            w.send_script(&Js::console_error(&error_message)).await?;
         }
     }
 

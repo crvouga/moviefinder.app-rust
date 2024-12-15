@@ -1,8 +1,8 @@
 use super::icon;
 use crate::core::{
-    datastar::datastar::js_console_error,
     html::{button, div, unsafe_text, Elem},
     http::response_writer::ResponseWriter,
+    js::Js,
 };
 use std::time::Duration;
 
@@ -96,7 +96,7 @@ impl ResponseWriter {
 
     pub async fn send_toast_error(&mut self, message: &str) -> Result<(), std::io::Error> {
         self.send_toast(Toast::error(message)).await?;
-        self.send_script(&js_console_error(message)).await?;
+        self.send_script(&Js::console_error(message)).await?;
         Ok(())
     }
 }

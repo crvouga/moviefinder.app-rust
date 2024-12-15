@@ -9,6 +9,7 @@ use crate::core::{
         response_writer::ResponseWriter,
         server_sent_event::{sse, ServerSentEvent},
     },
+    js::Js,
     url_encoded,
 };
 
@@ -20,49 +21,14 @@ fn fallback_empty_string(value: &str) -> String {
     }
 }
 
-pub fn js_empty_string() -> String {
-    "''".to_string()
-}
+impl Js {
+    pub fn sse(url: &str) -> String {
+        "sse('URL', { method: 'post' })".replace("URL", url)
+    }
 
-pub fn js_sse(url: &str) -> String {
-    "sse('URL', { method: 'post' })".replace("URL", url)
-}
-
-pub fn js_dot_value(value: &str) -> String {
-    format!("{}.value", value)
-}
-
-// pub fn js_dot_length(value: &str) -> String {
-//     format!("{}.length", value)
-// }
-
-// pub fn js_eq(left: &str, right: &str) -> String {
-//     format!("{} === {}", left, right)
-// }
-
-pub fn js_assign(variable: &str, value: &str) -> String {
-    let value_final = fallback_empty_string(value);
-    format!("{} = {}", variable, value_final)
-}
-
-pub fn js_not(value: &str) -> String {
-    format!("!({})", value)
-}
-
-pub fn js_replace_url(url: &str) -> String {
-    format!("window.history.replaceState(null, '', '{}')", url)
-}
-
-pub fn js_push_url(url: &str) -> String {
-    format!("window.history.pushState(null, '', '{}')", url)
-}
-
-pub fn js_console_error(message: &str) -> String {
-    format!("console.error('{}')", message)
-}
-
-pub fn js_quote(value: &str) -> String {
-    format!("'{}'", value)
+    pub fn dot_value(value: &str) -> String {
+        format!("{}.value", value)
+    }
 }
 
 pub trait Attr {
@@ -121,7 +87,7 @@ impl DataIntersects {
     }
 
     pub fn sse(mut self, url: &str) -> Self {
-        self.actions.push(js_sse(url));
+        self.actions.push(Js::sse(url));
         self
     }
 }
@@ -263,17 +229,17 @@ impl DataOn {
     // }
 
     pub fn sse(mut self, url: &str) -> Self {
-        self.js.push(js_sse(url));
+        self.js.push(Js::sse(url));
         self
     }
 
-    pub fn js(mut self, script: &str) -> Self {
-        self.js.push(script.to_string());
+    pub fn js(mut self, js: &str) -> Self {
+        self.js.push(js.to_string());
         self
     }
 
     pub fn push_then_sse(self, url: &str) -> Self {
-        self.js(&js_push_url(url)).sse(url)
+        self.js(&Js::push_url(url)).sse(url)
     }
 }
 
@@ -370,47 +336,6 @@ impl Elem {
     }
 }
 
-// pub struct MergeFragment {
-//     sse: ServerSentEvent,
-//     fragment: Elem,
-// }
-
-// impl MergeFragment {
-//     pub fn new(sse: ServerSentEvent, fragment: Elem) -> Self {
-//         Self { fragment, sse }
-//     }
-
-//     pub fn fragment(&mut self, elem: Elem) -> &mut Self {
-//         self.sse.data_fragments(elem);
-//         self
-//     }
-
-//     pub fn merge_mode_outer(&mut self) -> &mut Self {
-//         self.sse.data_merge_mode_outer();
-//         self
-//     }
-
-//     pub fn merge_mode_before(&mut self) -> &mut Self {
-//         self.sse.data_merge_mode_before();
-//         self
-//     }
-
-//     pub fn selector(&mut self, selector: &str) -> &mut Self {
-//         self.sse.data_selector(selector);
-//         self
-//     }
-
-//     pub fn selector_id(&mut self, id: &str) -> &mut Self {
-//         self.sse.data_selector_id(id);
-//         self
-//     }
-
-//     pub fn only_if_missing(&mut self, value: bool) -> &mut Self {
-//         self.sse.data_only_if_missing(value);
-//         self
-//     }
-// }
-
 impl ServerSentEvent {
     // pub fn fragment(self, elem: Elem) -> MergeFragment {
     //     MergeFragment::new(self, elem)
@@ -481,20 +406,6 @@ impl ServerSentEvent {
         let data = format!("script {}", script);
         self.data(&data)
     }
-
-    // pub fn data_script_redirect(&mut self, url: &str) -> &mut Self {
-    //     let script = format!("window.location = '{}'", url);
-    //     self.data_script(&script)
-    // }
-
-    // pub fn data_script_push_url(&mut self, url: &str) -> &mut Self {
-    //     let script: String = format!("window.history.pushState(null, '', '{}')", url);
-    //     self.data_script(&script)
-    // }
-
-    // pub fn data_script_replace_url(&mut self, url: &str) -> &mut Self {
-    //     self.data_script(&js_replace_url(url))
-    // }
 }
 
 impl ResponseWriter {
@@ -527,12 +438,8 @@ impl ResponseWriter {
         self.send_signals(vec![(key, value)]).await
     }
 
-    pub async fn send_replace_url(&mut self, url: &str) -> Result<(), std::io::Error> {
-        self.send_script(&js_replace_url(url)).await
-    }
-
     pub async fn send_push_url(&mut self, url: &str) -> Result<(), std::io::Error> {
-        self.send_script(&js_push_url(url)).await
+        self.send_script(&Js::push_url(url)).await
     }
 
     pub async fn send_focus(&mut self, selector: &str) -> Result<(), std::io::Error> {

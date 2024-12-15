@@ -1,10 +1,10 @@
 use super::{avatar, route::Route};
 use crate::{
     core::{
-        datastar::datastar::js_quote,
         dynamic_data::DynamicData,
         html::{div, fieldset, form, Elem},
         http::response_writer::ResponseWriter,
+        js::Js,
         ui::{spinner_page, text_field::TextField, top_bar::TopBar},
         unit_of_work::uow,
     },
@@ -48,11 +48,11 @@ pub async fn respond(
             w.send_signals(vec![
                 (
                     SIGNAL_USERNAME,
-                    &js_quote(&profile.username.clone().to_string()),
+                    &Js::quote(&profile.username.clone().to_string()),
                 ),
                 (
                     SIGNAL_FULL_NAME,
-                    &js_quote(&profile.full_name.clone().unwrap_or_default()),
+                    &Js::quote(&profile.full_name.clone().unwrap_or_default()),
                 ),
             ])
             .await?;
