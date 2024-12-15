@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use super::interaction_form_::{self, InteractionForm};
 use super::route::Route;
 use crate::core::html::{div, Elem};
@@ -69,15 +71,19 @@ pub async fn respond_interaction_form(
     user_id: UserId,
     media_ids: Vec<MediaId>,
 ) -> Result<(), std::io::Error> {
-    let interactions_by_media_id = ctx
+    let mut interactions_by_media_id: BTreeMap<MediaId, Vec<MediaInteraction>> =
+        media_ids.iter().map(|id| (id.clone(), vec![])).collect();
+
+    for i in ctx
         .media_interaction_db
         .list_by_user_media(&user_id, &media_ids.iter().collect())
         .await?
-        .into_iter()
-        .fold(std::collections::BTreeMap::new(), |mut acc, i| {
-            acc.entry(i.media_id.clone()).or_insert(vec![]).push(i);
-            acc
-        });
+    {
+        interactions_by_media_id
+            .entry(i.media_id.clone())
+            .or_default()
+            .push(i);
+    }
 
     for (media_id, interactions) in interactions_by_media_id {
         let interaction_form = interaction_form_::derive(interactions);
