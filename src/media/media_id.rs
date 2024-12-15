@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::uuid;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Ord, PartialOrd)]
 pub struct MediaId(String);
 
 impl Default for MediaId {

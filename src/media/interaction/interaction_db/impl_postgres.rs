@@ -90,7 +90,7 @@ impl MediaInteractionDb for Postgres {
     async fn list_by_user_media(
         &self,
         user_id: &UserId,
-        media_id: &MediaId,
+        media_ids: &Vec<&MediaId>,
     ) -> Result<Vec<MediaInteraction>, std::io::Error> {
         let mut query = Sql::new(
             r#"
@@ -106,7 +106,7 @@ impl MediaInteractionDb for Postgres {
                 media_interaction 
             WHERE 
                     user_id = :user_id 
-                AND media_id = :media_id
+                AND media_id IN (:media_ids)
             "#,
         );
 
@@ -116,8 +116,13 @@ impl MediaInteractionDb for Postgres {
         );
 
         query.set(
-            "media_id",
-            SqlVarType::Primitive(SqlPrimitive::Text(media_id.as_str().to_string())),
+            "media_ids",
+            SqlVarType::Commas(
+                media_ids
+                    .iter()
+                    .map(|id| SqlPrimitive::Text(id.as_str().to_string()))
+                    .collect(),
+            ),
         );
 
         let rows = db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json)

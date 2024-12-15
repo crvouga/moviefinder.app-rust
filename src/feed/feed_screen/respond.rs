@@ -108,7 +108,7 @@ pub async fn respond(
 
             let user_id = r.user_id_result(ctx).await?;
 
-            for feed_item in feed_items {
+            for feed_item in &feed_items {
                 sse()
                     .event_merge_fragments()
                     .data_selector_id(BOTTOM_ID)
@@ -116,19 +116,15 @@ pub async fn respond(
                     .data_fragments(view_slide(&feed_item))
                     .send(w)
                     .await?;
-
-                let media_id = feed_item.to_media_id();
-
-                if let Some(media_id) = media_id {
-                    interaction_form::respond::respond_interaction_form(
-                        ctx,
-                        w,
-                        user_id.clone(),
-                        vec![media_id],
-                    )
-                    .await?;
-                }
             }
+
+            let media_ids = feed_items
+                .into_iter()
+                .filter_map(|feed_item| feed_item.to_media_id())
+                .collect();
+
+            interaction_form::respond::respond_interaction_form(ctx, w, user_id.clone(), media_ids)
+                .await?;
 
             Ok(())
         }
@@ -336,7 +332,7 @@ fn view_slide_root() -> Elem {
         .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative")
 }
 
-pub const BOTTOM_ID: &str = "load-more";
+pub const BOTTOM_ID: &str = "feed-bottom";
 
 fn view_slide_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem {
     view_slide_root()

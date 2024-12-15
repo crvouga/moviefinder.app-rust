@@ -34,14 +34,14 @@ mod tests {
 
             let before = f
                 .interaction_db
-                .list_by_user_media(&interaction.user_id, &interaction.media_id)
+                .list_by_user_media(&interaction.user_id, &vec![&interaction.media_id])
                 .await;
 
             let put = f.interaction_db.put(uow(), &interaction).await;
 
             let after = f
                 .interaction_db
-                .list_by_user_media(&interaction.user_id, &interaction.media_id)
+                .list_by_user_media(&interaction.user_id, &vec![&interaction.media_id])
                 .await;
 
             assert_eq!(before.unwrap(), vec![]);

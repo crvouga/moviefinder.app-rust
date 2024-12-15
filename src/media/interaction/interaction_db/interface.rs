@@ -9,7 +9,7 @@ pub trait MediaInteractionDb: Send + Sync {
     async fn list_by_user_media(
         &self,
         user_id: &UserId,
-        media_id: &MediaId,
+        media_ids: &Vec<&MediaId>,
     ) -> Result<Vec<MediaInteraction>, std::io::Error>;
     async fn put(
         &self,

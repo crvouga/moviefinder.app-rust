@@ -69,11 +69,21 @@ pub async fn respond_interaction_form(
     user_id: UserId,
     media_ids: Vec<MediaId>,
 ) -> Result<(), std::io::Error> {
-    for media_id in media_ids {
-        let interactions = ctx
-            .media_interaction_db
-            .list_by_user_media(&user_id, &media_id)
-            .await?;
+    let interactions_by_media_od = ctx
+        .media_interaction_db
+        .list_by_user_media(&user_id, &media_ids.iter().collect())
+        .await?
+        .into_iter()
+        .fold(std::collections::BTreeMap::new(), |mut acc, i| {
+            acc.entry(i.media_id.clone()).or_insert(vec![]).push(i);
+            acc
+        });
+
+    for (media_id, all_interactions) in interactions_by_media_od {
+        let interactions = all_interactions
+            .into_iter()
+            .filter(|i| i.media_id == media_id)
+            .collect();
 
         let interaction_form = interaction_form_::derive(interactions);
 
