@@ -233,6 +233,7 @@ fn view_selected(model: &ViewModel) -> Elem {
         )
         .child(
             button()
+                .type_("button")
                 .data_show("signal_selected_tags_ids.value?.length > 0")
                 .data_on(|b| {
                     b.click().js("signal_selected_tags_ids.value = []").sse(
@@ -253,7 +254,7 @@ fn view_screen(feed_id: &FeedId) -> Elem {
         .data_signal("signal_input_value", "''")
         .data_signal("signal_selected_tags_ids", "[]")
         .debug_signals(false)
-        .data_indicator("signal_is_updating_selected")
+        .data_indicator("signal_is_submitting")
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .data_on(|e| e.submit().prevent_default().sse(&Route::ClickedSave { feed_id: feed_id.clone() }.url()))
         .child(
@@ -291,6 +292,7 @@ fn view_bottom_bar(feed_id: FeedId) -> Elem {
             e.click()
                 .push_then_sse(&feed_screen::route::Route::FeedScreen { feed_id }.url())
         })
+        .submit_indicator("signal_is_submitting")
         .view()
 }
 
