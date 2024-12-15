@@ -147,8 +147,10 @@ async fn respond_fallback(
     r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    w.send_push_url(&feed_screen::route::Route::FeedScreenDefault.url())
-        .await?;
+    w.send_script(&Js::push_url(
+        &feed_screen::route::Route::FeedScreenDefault.url(),
+    ))
+    .await?;
 
     feed::respond::respond(
         &ctx,

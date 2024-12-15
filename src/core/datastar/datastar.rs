@@ -475,10 +475,6 @@ impl ResponseWriter {
         self.send_signals(vec![(key, value)]).await
     }
 
-    pub async fn send_push_url(&mut self, url: &str) -> Result<(), std::io::Error> {
-        self.send_script(&Js::push_url(url)).await
-    }
-
     pub async fn send_focus(&mut self, selector: &str) -> Result<(), std::io::Error> {
         sse()
             .event_execute_script()

@@ -123,12 +123,12 @@ pub async fn respond(
                     w.send_screen(view_screen_enter_code(&phone_number_input))
                         .await?;
 
-                    w.send_push_url(
+                    w.send_script(&Js::push_url(
                         &Route::ScreenCode {
                             phone_number: phone_number_input,
                         }
                         .url(),
-                    )
+                    ))
                     .await?;
 
                     w.send_script(&Js::focus("input")).await?;
