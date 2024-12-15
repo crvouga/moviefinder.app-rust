@@ -30,6 +30,10 @@ impl Js {
         format!("!({})", value)
     }
 
+    pub fn is_string(value: &str) -> String {
+        format!("(typeof ({}) === 'string')", value)
+    }
+
     pub fn replace_url(url: &str) -> String {
         format!("window.history.replaceState(null, '', '{}')", url)
     }
