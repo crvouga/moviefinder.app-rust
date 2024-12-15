@@ -51,7 +51,7 @@ pub async fn respond(
             })
             .url();
 
-            w.send_script(&Js::replace_url(&feed_url)).await?;
+            w.send_js(&Js::replace_url(&feed_url)).await?;
 
             w.send_screen(view_screen()).await?;
 

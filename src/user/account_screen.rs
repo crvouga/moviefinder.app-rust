@@ -22,7 +22,7 @@ pub async fn redirect_to(
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
 ) -> Result<(), std::io::Error> {
-    w.send_script(&Js::push_url(&Route::AccountScreen.url()))
+    w.send_js(&Js::push_url(&Route::AccountScreen.url()))
         .await?;
 
     respond(ctx, r, w, user_id).await?;

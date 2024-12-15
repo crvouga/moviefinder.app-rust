@@ -77,7 +77,7 @@ pub async fn respond(
                 )
                 .await?;
 
-                w.send_script(&Js::focus("input")).await?;
+                w.send_js(&Js::focus("input")).await?;
 
                 return Ok(());
             }
@@ -106,7 +106,7 @@ pub async fn respond(
                     w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, &Js::quote(err.as_str()))
                         .await?;
 
-                    w.send_script(&Js::focus("input")).await?;
+                    w.send_js(&Js::focus("input")).await?;
 
                     Ok(())
                 }
@@ -123,7 +123,7 @@ pub async fn respond(
                     w.send_screen(view_screen_enter_code(&phone_number_input))
                         .await?;
 
-                    w.send_script(&Js::push_url(
+                    w.send_js(&Js::push_url(
                         &Route::ScreenCode {
                             phone_number: phone_number_input,
                         }
@@ -131,7 +131,7 @@ pub async fn respond(
                     ))
                     .await?;
 
-                    w.send_script(&Js::focus("input")).await?;
+                    w.send_js(&Js::focus("input")).await?;
 
                     Ok(())
                 }
@@ -161,7 +161,7 @@ pub async fn respond(
                 Err(VerifyCodeError::InvalidCode(err)) => {
                     w.send_signal(SIGNAL_CODE_ERROR, &Js::quote(&err)).await?;
 
-                    w.send_script(&Js::focus("input")).await?;
+                    w.send_js(&Js::focus("input")).await?;
 
                     Ok(())
                 }
