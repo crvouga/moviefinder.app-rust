@@ -228,14 +228,13 @@ impl DataOn {
     //     self
     // }
 
-    pub fn sse(mut self, url: &str) -> Self {
-        self.js.push(Js::sse(url));
-        self
-    }
-
     pub fn js(mut self, js: &str) -> Self {
         self.js.push(js.to_string());
         self
+    }
+
+    pub fn sse(self, url: &str) -> Self {
+        self.js(&Js::sse(url))
     }
 
     pub fn push_then_sse(self, url: &str) -> Self {
@@ -413,7 +412,6 @@ impl ResponseWriter {
         sse()
             .event_merge_fragments()
             .data_fragments(elem)
-            // .data_merge_mode_outer()
             .send(self)
             .await
     }
