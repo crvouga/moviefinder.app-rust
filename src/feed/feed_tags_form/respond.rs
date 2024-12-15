@@ -253,7 +253,7 @@ fn view_screen(feed_id: &FeedId) -> Elem {
         .id("screen")
         .data_signal("signal_input_value", "''")
         .data_signal("signal_selected_tags_ids", "[]")
-        .debug_signals(false)
+        .child_signals_json(false)
         .data_indicator("signal_is_submitting")
         .class("w-full h-full flex flex-col overflow-hidden relative")
         .data_on(|e| e.submit().prevent_default().sse(&Route::ClickedSave { feed_id: feed_id.clone() }.url()))

@@ -69,7 +69,7 @@ pub async fn respond_interaction_form(
     user_id: UserId,
     media_ids: Vec<MediaId>,
 ) -> Result<(), std::io::Error> {
-    let interactions_by_media_od = ctx
+    let interactions_by_media_id = ctx
         .media_interaction_db
         .list_by_user_media(&user_id, &media_ids.iter().collect())
         .await?
@@ -79,12 +79,7 @@ pub async fn respond_interaction_form(
             acc
         });
 
-    for (media_id, all_interactions) in interactions_by_media_od {
-        let interactions = all_interactions
-            .into_iter()
-            .filter(|i| i.media_id == media_id)
-            .collect();
-
+    for (media_id, interactions) in interactions_by_media_id {
         let interaction_form = interaction_form_::derive(interactions);
 
         w.send_fragment(view_interaction_form(&media_id, Some(interaction_form)))
@@ -94,9 +89,13 @@ pub async fn respond_interaction_form(
     Ok(())
 }
 
+fn to_form_id(media_id: &MediaId) -> String {
+    format!("media-interaction-form-{}", media_id.as_str())
+}
+
 pub fn view_interaction_form(media_id: &MediaId, f: Option<InteractionForm>) -> Elem {
     div()
-        .id(&format!("media-interaction-form-{}", media_id.as_str()))
+        .id(&to_form_id(media_id))
         .class("h-fit w-full")
         .child(interaction_form_::view_bottom_buttons(media_id.clone(), f))
 }

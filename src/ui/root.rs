@@ -47,6 +47,7 @@ impl Root {
         .child(
             body()
             .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")            
+            .child_signals_json(false)
             .child(
                 div()
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col relative")

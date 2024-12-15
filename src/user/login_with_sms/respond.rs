@@ -197,7 +197,7 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
         .data_signal(SIGNAL_PHONE_NUMBER_ERROR, "")
         .data_signal(SIGNAL_COUNTRY_CODE, "")
         .data_signal(SIGNAL_COUNTRY_CODE_ERROR, "")
-        .debug_signals(false)
+        .child_signals_json(false)
         .data_on(|b| {
             b.submit()
                 .prevent_default()
@@ -296,7 +296,7 @@ fn view_screen_enter_code(phone_number: &str) -> Elem {
         .class("w-full h-full flex flex-col")
         .data_signal(SIGNAL_CODE, "''")
         .data_signal(SIGNAL_CODE_ERROR, "''")
-        .debug_signals(false)
+        .child_signals_json(false)
         .data_on(|b| {
             b.submit().prevent_default().sse(
                 &Route::ClickedVerifyCode {

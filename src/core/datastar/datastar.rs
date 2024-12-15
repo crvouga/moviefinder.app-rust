@@ -214,13 +214,13 @@ impl DataOn {
         }
     }
 
-    // pub fn store_changed(self) -> Self {
-    //     Self {
-    //         event: "store-changed".to_string(),
-    //         modifiers: vec![],
-    //         js: vec![],
-    //     }
-    // }
+    pub fn signals_changed(self) -> Self {
+        Self {
+            event: "signals-change".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
 
     // pub fn raf(self) -> Self {
     //     Self {
@@ -361,7 +361,7 @@ impl Elem {
     //     self.attr_unsafe(&format!("data-computed-{}", name), value)
     // }
 
-    pub fn debug_signals(self, debug: bool) -> Self {
+    pub fn child_signals_json(self, debug: bool) -> Self {
         if debug {
             self.child(code().child(pre().data_text("ctx.signals.JSON()")))
         } else {

@@ -12,6 +12,7 @@ use crate::{
         unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
+    debug,
     media::interaction::interaction_form,
     req::Req,
     ui::{bottom_bar::BottomBar, route::Routable},
@@ -116,15 +117,17 @@ pub async fn respond(
                     .data_fragments(view_slide(&feed_item))
                     .send(w)
                     .await?;
+
+                if let Some(media_id) = feed_item.to_media_id() {
+                    interaction_form::respond::respond_interaction_form(
+                        ctx,
+                        w,
+                        user_id.clone(),
+                        vec![media_id],
+                    )
+                    .await?;
+                }
             }
-
-            let media_ids = feed_items
-                .into_iter()
-                .filter_map(|feed_item| feed_item.to_media_id())
-                .collect();
-
-            interaction_form::respond::respond_interaction_form(ctx, w, user_id.clone(), media_ids)
-                .await?;
 
             Ok(())
         }
@@ -155,6 +158,8 @@ pub async fn respond_screen_contents(
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
+    debug!(ctx.logger, "respond_screen_contents feed: {:?}", feed);
+
     put_feed(ctx, &r.session_id, &feed).await?;
 
     let model = ViewModel {
@@ -174,6 +179,8 @@ pub async fn put_feed(
     session_id: &SessionId,
     feed: &Feed,
 ) -> Result<(), std::io::Error> {
+    debug!(ctx.logger, "put_feed: {:?}", feed);
+
     UnitOfWork::transact(|uow| async move {
         ctx.feed_db.put(uow.clone(), feed.clone()).await?;
 
@@ -248,8 +255,6 @@ pub fn view_screen() -> Elem {
     div()
         .id("screen")
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
-        .data_signal("signal_feed_index", "0")
-        .data_signal("signal_true", "true")
         .child(view_top_bar_loading())
         .child(view_swiper_loading())
         .child(view_bottom_bar())
@@ -270,6 +275,7 @@ fn view_tags(model: &ViewModel) -> Elem {
     div()
         .id("tags")
         .class("flex flex-row gap-2 p-4 flex-1 overflow-hidden")
+        .data_signal("signal_true", "true")
         .children(
             model
                 .feed
@@ -308,6 +314,7 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
         .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
+        .data_signal("signal_feed_index", &model.feed.start_index.to_string())
         .data_on(|b| b
                 .e("swiperslidechange")
                 .js("signal_feed_index.value = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")

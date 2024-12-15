@@ -52,7 +52,7 @@ fn view_logout_drawer() -> Elem {
                         .js("signal_is_drawer_open.value = false")
                         .sse(&Route::ClickedLogout.url())
                 })
-                .data_indicator("is_submitting")
+                .data_indicator("signal_is_submitting")
                 .id("logout-form")
                 .class("w-full h-full flex flex-col items-center")
                 .child(
@@ -63,9 +63,10 @@ fn view_logout_drawer() -> Elem {
                 .child(
                     BottomBarForm::default()
                         .on_cancel(|b| b.click().js("signal_is_drawer_open.value = false"))
-                        .submit_indicator("is_submitting")
+                        .submit_indicator("signal_is_submitting")
                         .submit_label("Logout")
-                        .view(),
+                        .view()
+                        .id("logout-form-bottom-bar"),
                 ),
         )
         .view()
