@@ -1,5 +1,9 @@
 #![allow(dead_code)]
 
+pub fn id(id: &str) -> String {
+    format!("#{}", id)
+}
+
 pub fn is_valid(selector: &str) -> bool {
     if selector.is_empty() {
         return false;

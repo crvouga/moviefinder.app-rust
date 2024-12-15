@@ -4,9 +4,11 @@ use super::{
 };
 use crate::{
     core::{
+        css,
+        datastar::datastar::fragments,
         dynamic_data::DynamicData,
         html::*,
-        http::{response_writer::ResponseWriter, server_sent_event::sse},
+        http::response_writer::ResponseWriter,
         js::Js,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image, top_bar::TopBarRoot},
@@ -96,7 +98,7 @@ pub async fn respond(
                 .unwrap_or_default();
 
             let feed_with_new_index: Feed = Feed {
-                start_index: signal_feed_index,
+                start_index: signal_feed_index + 1,
                 ..feed
             };
 
@@ -106,29 +108,27 @@ pub async fn respond(
 
             if feed_items.is_empty() {
                 w.send_fragment(view_slide_bottom_empty()).await?;
+
+                return Ok(());
+            }
+
+            for feed_item in &feed_items {
+                fragments(view_slide(&feed_item))
+                    .selector(&css::selector::id(BOTTOM_ID))
+                    .merge_mode_before()
+                    .send(w)
+                    .await?;
             }
 
             let user_id = r.user_id_result(ctx).await?;
 
-            for feed_item in &feed_items {
-                sse()
-                    .event_merge_fragments()
-                    .data_selector_id(BOTTOM_ID)
-                    .data_merge_mode_before()
-                    .data_fragments(view_slide(&feed_item))
-                    .send(w)
-                    .await?;
+            let media_ids = feed_items
+                .iter()
+                .filter_map(|feed_item| feed_item.to_media_id())
+                .collect::<Vec<_>>();
 
-                if let Some(media_id) = feed_item.to_media_id() {
-                    interaction_form::respond::respond_interaction_form(
-                        ctx,
-                        w,
-                        user_id.clone(),
-                        vec![media_id],
-                    )
-                    .await?;
-                }
-            }
+            interaction_form::respond::respond_interaction_form(ctx, w, user_id.clone(), media_ids)
+                .await?;
 
             Ok(())
         }
@@ -315,18 +315,12 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
         .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
-        .data_signal("signal_feed_index", &model.feed.start_index.to_string())
+        .data_signal("signal_feed_index", &(model.feed.start_index - 1).to_string())
         .data_on(|b| b
                 .e("swiperslidechange")
                 .js("signal_feed_index.value = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")
                 .sse(&Route::ChangedSlide { feed_id: model.feed_id.clone() }.url()))
-        .child(view_slides(&model.feed_id, &vec![]))
-}
-
-fn view_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
-    frag()
-        .children(feed_items.iter().map(view_slide).collect::<Vec<Elem>>())
-        .child(view_slide_bottom(feed_id))
+        .child(view_slide_bottom(&model.feed_id))
 }
 
 fn view_slide_root() -> Elem {

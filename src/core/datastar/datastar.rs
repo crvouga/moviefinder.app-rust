@@ -407,6 +407,45 @@ impl ServerSentEvent {
     }
 }
 
+pub struct Fragments {
+    sse: ServerSentEvent,
+}
+
+pub fn fragments(elem: Elem) -> Fragments {
+    Fragments::new(elem)
+}
+
+impl Fragments {
+    fn new(elem: Elem) -> Self {
+        Self {
+            sse: sse().event_merge_fragments().data_fragments(elem).clone(),
+        }
+    }
+
+    pub fn merge_mode(&mut self, mode: &str) -> &mut Self {
+        self.sse.data_merge_mode(mode);
+        self
+    }
+
+    pub fn merge_mode_outer(&mut self) -> &mut Self {
+        self.merge_mode("outer")
+    }
+
+    pub fn merge_mode_before(&mut self) -> &mut Self {
+        self.merge_mode("before")
+    }
+
+    pub fn selector(&mut self, selector: &str) -> &mut Self {
+        self.sse.data_selector(selector);
+        self
+    }
+
+    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+        self.sse.send(w).await?;
+        Ok(())
+    }
+}
+
 impl ResponseWriter {
     pub async fn send_fragment(&mut self, elem: Elem) -> Result<(), std::io::Error> {
         sse()
