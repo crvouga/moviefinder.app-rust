@@ -6,7 +6,7 @@ use crate::{
         ui::{error, image::Image, top_bar::TopBar},
     },
     ctx::Ctx,
-    feed,
+    feed::feed_screen,
     media::{media_::Media, media_db::interface::MediaQueryField},
     req::Req,
     ui::route::Routable,
@@ -85,7 +85,7 @@ impl ViewModel {
         };
 
         TopBar::default()
-            .back_url(feed::route::Route::FeedScreenDefault.url())
+            .back_url(feed_screen::route::Route::FeedScreenDefault.url())
             .title(title)
             .view()
             .id("top-bar")

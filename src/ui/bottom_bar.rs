@@ -6,7 +6,8 @@ use crate::{
             icon,
         },
     },
-    feed, route, user,
+    feed::feed_screen,
+    route, user,
 };
 
 use super::route::Routable;
@@ -48,9 +49,8 @@ impl BottomBar {
                         .active(self.active == Active::Home)
                         .view()
                         .data_on(|b| {
-                            b.click().push_then_sse(
-                                &route::Route::Feed(feed::route::Route::FeedScreenDefault).url(),
-                            )
+                            b.click()
+                                .push_then_sse(&feed_screen::route::Route::FeedScreenDefault.url())
                         }),
                 )
                 .child(

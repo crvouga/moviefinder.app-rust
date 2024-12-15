@@ -5,8 +5,8 @@ use core::{
 };
 use ctx::Ctx;
 use env::Env;
+use feed::feed_screen;
 use req::Req;
-use route::Route;
 use std::sync::Arc;
 use ui::{root, route::Routable};
 
@@ -78,7 +78,7 @@ async fn respond(
                 response_root(
                     &request,
                     &mut w,
-                    feed::route::Route::FeedScreenDefault.url(),
+                    feed_screen::route::Route::FeedScreenDefault.url(),
                 )
                 .await
             }
@@ -149,8 +149,14 @@ async fn respond_fallback(
     r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let fallback = feed::route::Route::FeedScreenDefault;
-    w.send_push_url(&Route::Feed(fallback).url()).await?;
+    w.send_push_url(&feed_screen::route::Route::FeedScreenDefault.url())
+        .await?;
 
-    feed::respond::respond(&ctx, r, &feed::route::Route::FeedScreenDefault, w).await
+    feed::respond::respond(
+        &ctx,
+        r,
+        &feed::route::Route::FeedScreen(feed_screen::route::Route::FeedScreenDefault),
+        w,
+    )
+    .await
 }
