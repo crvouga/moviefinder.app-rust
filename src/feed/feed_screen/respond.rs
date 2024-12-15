@@ -95,7 +95,7 @@ pub async fn respond(
                 .unwrap_or_default();
 
             let feed_with_new_index: Feed = Feed {
-                start_index: signal_feed_index + 1,
+                start_index: signal_feed_index,
                 ..feed
             };
 
@@ -323,15 +323,9 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
 }
 
 fn view_slides(feed_id: &FeedId, feed_items: &[FeedItem]) -> Elem {
-    let max_feed_index = feed_items
-        .iter()
-        .map(|feed_item| feed_item.to_feed_index())
-        .max()
-        .unwrap_or(0);
-
     frag()
         .children(feed_items.iter().map(view_slide).collect::<Vec<Elem>>())
-        .child(view_slide_bottom(feed_id, max_feed_index + 1))
+        .child(view_slide_bottom(feed_id))
 }
 
 fn view_slide_root() -> Elem {
@@ -341,14 +335,13 @@ fn view_slide_root() -> Elem {
 
 pub const BOTTOM_ID: &str = "feed-bottom";
 
-fn view_slide_bottom(feed_id: &FeedId, bottom_feed_index: usize) -> Elem {
+fn view_slide_bottom(feed_id: &FeedId) -> Elem {
     view_slide_root()
         .id(BOTTOM_ID)
         .data_intersects(|b| {
             b.sse(
                 &Route::IntersectedBottom {
                     feed_id: feed_id.clone(),
-                    bottom_feed_index,
                 }
                 .url(),
             )
