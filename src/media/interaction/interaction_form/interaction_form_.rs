@@ -148,6 +148,19 @@ fn is_selected(interaction_action: &InteractionAction) -> bool {
     }
 }
 
+fn to_id(
+    interaction_name: &InteractionName,
+    interaction_action: &InteractionAction,
+    disabled: bool,
+) -> String {
+    format!(
+        "{}-{}-{}",
+        interaction_name.to_name(),
+        interaction_action.to_string(),
+        disabled
+    )
+}
+
 fn view_interation_bottom_button(
     interaction_action: &InteractionAction,
     interaction_name: &InteractionName,
@@ -155,6 +168,7 @@ fn view_interation_bottom_button(
     BottomButton::default()
         .icon(interaction_name.view_icon(is_selected(interaction_action), "size-7"))
         .text(&interaction_name.to_name())
+        .id(&to_id(interaction_name, interaction_action, false))
 }
 
 fn view_interaction_button(
@@ -179,23 +193,19 @@ fn view_interaction_button(
 
 fn view_disabled_buttons() -> Vec<Elem> {
     vec![
-        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Seen)
-            .disabled(true)
-            .view(),
-        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::NotSeen)
-            .disabled(true)
-            .view(),
-        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Liked)
-            .disabled(true)
-            .view(),
-        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Disliked)
-            .disabled(true)
-            .view(),
-        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::Interested)
-            .disabled(true)
-            .view(),
-        view_interation_bottom_button(&InteractionAction::Add, &InteractionName::NotInterested)
-            .disabled(true)
-            .view(),
+        (&InteractionAction::Add, &InteractionName::Seen),
+        (&InteractionAction::Add, &InteractionName::NotSeen),
+        (&InteractionAction::Add, &InteractionName::Liked),
+        (&InteractionAction::Add, &InteractionName::Disliked),
+        (&InteractionAction::Add, &InteractionName::Interested),
+        (&InteractionAction::Add, &InteractionName::NotInterested),
     ]
+    .into_iter()
+    .map(|(action, name)| {
+        view_interation_bottom_button(action, name)
+            .disabled(true)
+            .view()
+            .id(&to_id(name, action, true))
+    })
+    .collect()
 }

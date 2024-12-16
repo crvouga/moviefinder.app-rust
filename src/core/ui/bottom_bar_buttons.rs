@@ -15,11 +15,17 @@ pub struct BottomButton {
     icon: Option<Elem>,
     active: bool,
     disabled: bool,
+    id: String,
 }
 
 impl BottomButton {
     pub fn text(mut self, text: &str) -> Self {
         self.text = text.to_string();
+        self
+    }
+
+    pub fn id(mut self, id: &str) -> Self {
+        self.id = id.to_string();
         self
     }
 
@@ -61,5 +67,6 @@ impl BottomButton {
         ).child_text(
             &self.text,
         )
+        .id(&self.id)
     }
 }
