@@ -1,9 +1,8 @@
 use children::text;
 
 use super::{
-    edit_profile::respond::view_open_edit_profile_screen_button, login_with_sms, logout,
-    route::Route, user_account::user_account_::UserAccount, user_id::UserId,
-    user_profile::user_profile_::UserProfile,
+    edit_profile, login_with_sms, logout, route::Route, user_account::user_account_::UserAccount,
+    user_id::UserId, user_profile::user_profile_::UserProfile,
 };
 use crate::{
     core::{
@@ -128,28 +127,38 @@ fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
             div()
                 .class("flex-1 flex items-center justify-start flex-col gap-6 p-6 w-full")
                 .child(
-                    Avatar::default()
-                        .data_attributes_src(&Js::quote(&profile.to_avatar_url()))
-                        .class("size-36")
-                        .view(),
+                    div()
+                        .class("w-full flex flex-col items-center gap-4")
+                        .child(
+                            Avatar::default()
+                                .data_attributes_src(&Js::quote(&profile.to_avatar_url()))
+                                .class("size-24")
+                                .view(),
+                        )
+                        .child(
+                            p().child(text(&profile.username.to_at_username()))
+                                .class("text-xl font-base w-full text-center"),
+                        ),
                 )
                 .child(
-                    p().child(text(&profile.username.to_string()))
-                        .class("text-3xl font-bold w-full text-center"),
-                )
-                .child(view_open_edit_profile_screen_button(
-                    profile.user_id.clone(),
-                ))
-                .child(
-                    Button::default()
-                        .color_primary()
-                        .label("Logout")
-                        .view()
-                        .class("w-full")
-                        .data_on(|b| {
-                            b.press_down()
-                                .sse(&Route::Logout(logout::route::Route::LogoutDrawer).url())
-                        }),
+                    div()
+                        .class("flex w-full gap-3 justify-center")
+                        .child(
+                            edit_profile::respond::view_open_edit_profile_screen_button(
+                                profile.user_id.clone(),
+                            )
+                            .color_gray()
+                            .size_small()
+                            .view()
+                            .class("w-full max-w-[200px]"),
+                        )
+                        .child(
+                            logout::respond::view_open_logout_drawer_button()
+                                .color_gray()
+                                .size_small()
+                                .view()
+                                .class("w-full max-w-[200px]"),
+                        ),
                 ),
         )
         .child(BottomBar::default().active_account().view())

@@ -132,16 +132,20 @@ fn view_screen_root() -> Elem {
         )
 }
 
-pub fn view_open_edit_profile_screen_button(user_id: UserId) -> Elem {
+pub fn view_open_edit_profile_screen_button(user_id: UserId) -> Button {
     Button::default()
         .color_primary()
         .label("Edit Profile")
         .indicator("signal_edit_profile_button_indicator")
-        .view()
-        .class("w-full")
-        .data_on(|b| {
-            b.press_down()
-                .push_then_sse(&Route::Screen { user_id }.url())
+        .map_button(move |e| {
+            e.data_on(|b| {
+                b.press_down().push_then_sse(
+                    &Route::Screen {
+                        user_id: user_id.clone(),
+                    }
+                    .url(),
+                )
+            })
         })
 }
 

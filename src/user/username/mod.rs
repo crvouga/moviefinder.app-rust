@@ -20,4 +20,8 @@ impl Username {
     pub fn to_string(&self) -> String {
         self.0.clone()
     }
+
+    pub fn to_at_username(&self) -> String {
+        format!("@{}", self.0)
+    }
 }

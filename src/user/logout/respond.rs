@@ -3,7 +3,10 @@ use crate::{
     core::{
         html::{form, Elem},
         http::response_writer::ResponseWriter,
-        ui::drawer::{Drawer, DrawerTitle},
+        ui::{
+            button::Button,
+            drawer::{Drawer, DrawerTitle},
+        },
         unit_of_work::uow,
     },
     ctx::Ctx,
@@ -37,6 +40,13 @@ pub async fn respond(
             Ok(())
         }
     }
+}
+
+pub fn view_open_logout_drawer_button() -> Button {
+    Button::default()
+        .color_primary()
+        .label("Logout")
+        .map_button(|e| e.data_on(|b| b.press_down().sse(&Route::LogoutDrawer.url())))
 }
 
 fn view_logout_drawer() -> Elem {

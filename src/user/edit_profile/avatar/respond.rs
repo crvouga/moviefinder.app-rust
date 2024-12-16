@@ -133,7 +133,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                     SIGNAL_AVATAR_SEED,
                     js_avatar_url(&Js::dot_value(SIGNAL_AVATAR_SEED))
                 ))
-                .class("size-36")
+                .class("size-24")
                 .view(),
         )
         .child(
