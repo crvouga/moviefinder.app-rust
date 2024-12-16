@@ -17,7 +17,7 @@ impl ListItemId {
 
 impl Default for ListItemId {
     fn default() -> Self {
-        ListItemId::new(&format!("user-{}", uuid::v4()))
+        ListItemId::new(&format!("list-item-id-{}", uuid::v4()))
     }
 }
 
