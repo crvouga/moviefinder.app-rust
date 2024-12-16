@@ -31,11 +31,13 @@ impl FeedItem {
                 media,
                 feed_index: _,
             } => div()
-                .class("w-full h-full max-h-full flex flex-col divide-y overflow-hidden")
+                .class("w-full h-full flex flex-col content-box")
                 .child(
                     Image::new()
                         .view()
-                        .class("w-full flex-1 overflow-hidden object-cover active:opacity-80 z-0 pointer-cursor")
+                        .class(
+                            "w-full flex-1 overflow-hidden object-cover pointer-cursor content-box border-none outline-none",
+                        )
                         .tab_index(0)
                         .role_button()
                         .data_on(|b| {

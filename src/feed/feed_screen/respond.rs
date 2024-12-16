@@ -1,3 +1,5 @@
+use std::cmp::max;
+
 use super::{
     super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags_form},
     route::Route,
@@ -325,7 +327,7 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .swiper_direction_vertical()
         .swiper_slides_per_view("1")
         .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
-        .data_signal("signal_feed_index", &(model.feed.start_index - 1).to_string())
+        .data_signal("signal_feed_index", &(max( (model.feed.start_index as i64) - 1, 0).to_string()))
         .data_on(|b| b
                 .e("swiperslidechange")
                 .js("signal_feed_index.value = parseInt(evt?.detail?.[0]?.slides?.[event?.detail?.[0]?.activeIndex]?.getAttribute?.('data-feed-index'), 10)")

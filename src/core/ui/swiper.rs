@@ -32,7 +32,7 @@ impl Direction {
 }
 
 pub fn container() -> Elem {
-    elem("swiper-container")
+    elem("swiper-container").attr("css-mode", "true")
 }
 
 pub fn slide() -> Elem {

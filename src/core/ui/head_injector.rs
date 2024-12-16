@@ -12,6 +12,7 @@ impl HeadInjector {
 
 impl Elem {
     pub fn src_head_injector(self) -> Self {
-        self.src("./head-injector-element.js")
+        self
+        // self.src("./head-injector-element.js")
     }
 }

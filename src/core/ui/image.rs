@@ -8,11 +8,7 @@ impl Image {
     }
 
     pub fn view(self) -> Elem {
-        img()
-            .class(
-                "w-full h-full object-cover bg-neutral-700 animate-pulse border-none outline-none",
-            )
-            .on_load("this.classList.remove('animate-pulse')")
+        img().class("w-full object-cover bg-neutral-700")
     }
 }
 
