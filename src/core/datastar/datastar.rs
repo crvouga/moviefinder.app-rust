@@ -306,9 +306,9 @@ impl Elem {
     //     self.attr_unsafe("data-ref", value)
     // }
 
-    pub fn data_signals(self, value: &str) -> Self {
-        self.attr_unsafe("data-signals", value)
-    }
+    // pub fn data_signals(self, value: &str) -> Self {
+    //     self.attr_unsafe("data-signals", value)
+    // }
 
     pub fn data_signal(self, key: &str, value: &str) -> Self {
         let value_final = &fallback_empty_string(value);
