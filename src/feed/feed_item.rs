@@ -1,8 +1,5 @@
 use crate::{
-    core::{
-        html::{button, div, Elem},
-        ui::image::Image,
-    },
+    core::html::{div, img, Elem},
     media::{self, interaction::interaction_form, media_::Media, media_id::MediaId},
     ui::route::Routable,
 };
@@ -31,10 +28,12 @@ impl FeedItem {
                 media,
                 feed_index: _,
             } => div()
-                .class("w-full h-full max-h-full overflow-hidden flex flex-col")
+                .class("w-full h-full max-h-full flex flex-col divide-y overflow-hidden")
                 .child(
-                    button()
-                        .class("w-full flex-1 overflow-hidden active:opacity-80")
+                    img()
+                        .class("w-full flex-1 overflow-hidden object-cover active:opacity-80 z-0 pointer-cursor")
+                        .tab_index(0)
+                        .role_button()
                         .data_on(|b| {
                             b.click().push_then_sse(
                                 &media::details::route::Route::MediaDetailsScreen {
@@ -44,18 +43,11 @@ impl FeedItem {
                             )
                         })
                         .aria_label("open media details")
-                        .child(
-                            Image::new()
-                                .view()
-                                .src(media.poster.to_highest_res())
-                                .class("w-full h-full object-cover z-0")
-                                .width("100%")
-                                .height("100%")
-                                .alt(media.title.as_str()),
-                        ),
+                        .src(media.poster.to_highest_res())
+                        .alt(media.title.as_str()),
                 )
-                .child(div().class("shrink-0 w-full border-t").child(
-                    interaction_form::respond::view_interaction_form(&media.id, None),
+                .child(interaction_form::respond::view_interaction_form(
+                    &media.id, None,
                 )),
         }
     }

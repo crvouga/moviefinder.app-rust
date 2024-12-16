@@ -144,6 +144,14 @@ impl Elem {
         self.attr("aria-label", value)
     }
 
+    pub fn role(self, value: &str) -> Self {
+        self.attr("role", value)
+    }
+
+    pub fn role_button(self) -> Self {
+        self.role("button")
+    }
+
     pub fn width(self, value: &str) -> Self {
         self.attr("width", value)
     }
