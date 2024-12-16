@@ -8,7 +8,7 @@ use env::Env;
 use feed::feed_screen;
 use req::Req;
 use std::sync::Arc;
-use ui::{root, route::Routable};
+use ui::{root, route::AppRoute};
 
 mod core;
 mod ctx;

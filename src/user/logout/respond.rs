@@ -11,7 +11,7 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::{bottom_bar_form::BottomBarForm, route::Routable},
+    ui::{bottom_bar_form::BottomBarForm, route::AppRoute},
     user::account_screen,
 };
 

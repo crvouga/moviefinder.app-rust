@@ -13,7 +13,7 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::{bottom_bar::BottomBar, route::Routable},
+    ui::{bottom_bar::BottomBar, route::AppRoute},
 };
 
 pub async fn redirect_to(

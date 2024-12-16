@@ -10,7 +10,7 @@ use crate::{
     route, user,
 };
 
-use super::route::Routable;
+use super::route::AppRoute;
 
 #[derive(PartialEq, Eq, Default)]
 pub enum Active {

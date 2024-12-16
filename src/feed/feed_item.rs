@@ -4,7 +4,7 @@ use crate::{
         ui::image::Image,
     },
     media::{self, interaction::interaction_form, media_::Media, media_id::MediaId},
-    ui::route::Routable,
+    ui::route::AppRoute,
 };
 
 #[derive(Debug, Clone)]

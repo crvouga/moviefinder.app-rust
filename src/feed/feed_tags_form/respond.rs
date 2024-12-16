@@ -11,7 +11,7 @@ use crate::{
     ctx::Ctx,
     feed::{feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},
     req::Req,
-    ui::{bottom_bar_form::BottomBarForm, route::Routable},
+    ui::{bottom_bar_form::BottomBarForm, route::AppRoute},
 };
 
 pub async fn respond(

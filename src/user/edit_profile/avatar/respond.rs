@@ -11,7 +11,7 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::route::Routable,
+    ui::route::AppRoute,
     user::user_profile::user_profile_::{js_avatar_url, UserProfile},
 };
 

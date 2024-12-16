@@ -1,7 +1,7 @@
 use crate::{
     core::{http::request::Request, human_friendly_base64},
     feed, media,
-    ui::route::Routable,
+    ui::route::AppRoute,
     user,
 };
 use serde::{Deserialize, Serialize};
@@ -19,25 +19,25 @@ impl Route {
     }
 }
 
-impl Routable for Route {
+impl AppRoute for Route {
     fn url(&self) -> String {
         human_friendly_base64::encode(self)
     }
 }
 
-impl Routable for feed::route::Route {
+impl AppRoute for feed::route::Route {
     fn url(&self) -> String {
         Route::Feed(self.clone()).url()
     }
 }
 
-impl Routable for user::route::Route {
+impl AppRoute for user::route::Route {
     fn url(&self) -> String {
         Route::User(self.clone()).url()
     }
 }
 
-impl Routable for media::route::Route {
+impl AppRoute for media::route::Route {
     fn url(&self) -> String {
         Route::Media(self.clone()).url()
     }

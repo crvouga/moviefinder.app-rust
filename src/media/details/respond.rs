@@ -9,7 +9,7 @@ use crate::{
     feed::feed_screen,
     media::{media_::Media, media_db::interface::MediaQueryField},
     req::Req,
-    ui::route::Routable,
+    ui::route::AppRoute,
 };
 
 use super::route::Route;

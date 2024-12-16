@@ -21,7 +21,7 @@ use crate::{
     ctx::Ctx,
     req::Req,
     route,
-    ui::route::Routable,
+    ui::route::AppRoute,
     user::{self, account_screen},
 };
 

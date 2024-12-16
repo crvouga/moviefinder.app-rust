@@ -1,4 +1,4 @@
-use crate::{ui::route::Routable, user::user_id::UserId};
+use crate::{ui::route::AppRoute, user::user_id::UserId};
 use serde::{Deserialize, Serialize};
 
 use super::avatar;
@@ -11,7 +11,7 @@ pub enum Route {
     Avatar(avatar::route::Route),
 }
 
-impl Routable for avatar::route::Route {
+impl AppRoute for avatar::route::Route {
     fn url(&self) -> String {
         Route::Avatar(self.clone()).url()
     }

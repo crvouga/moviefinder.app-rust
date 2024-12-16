@@ -20,7 +20,7 @@ use crate::{
     debug,
     media::{interaction::interaction_form, media_id::MediaId},
     req::Req,
-    ui::{bottom_bar::BottomBar, route::Routable},
+    ui::{bottom_bar::BottomBar, route::AppRoute},
 };
 
 pub const LIMIT: usize = 3;

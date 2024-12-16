@@ -1,3 +1,3 @@
-pub trait Routable {
+pub trait AppRoute {
     fn url(&self) -> String;
 }

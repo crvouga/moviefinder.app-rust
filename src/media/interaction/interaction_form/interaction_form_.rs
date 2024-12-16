@@ -11,7 +11,7 @@ use crate::{
         },
         media_id::MediaId,
     },
-    ui::route::Routable,
+    ui::route::AppRoute,
 };
 use serde::{Deserialize, Serialize};
 

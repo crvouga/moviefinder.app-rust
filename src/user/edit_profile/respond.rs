@@ -12,7 +12,7 @@ use crate::{
     req::Req,
     ui::{
         bottom_bar_form::{BottomBarForm, SIGNAL_IS_SUBMITTING},
-        route::Routable,
+        route::AppRoute,
     },
     user::{self, user_id::UserId, user_profile::user_profile_::UserProfile, username::Username},
 };
