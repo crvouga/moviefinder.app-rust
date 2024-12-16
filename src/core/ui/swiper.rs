@@ -9,7 +9,7 @@ impl Elem {
 
 pub fn container() -> Elem {
     elem("swiper-container")
-        .attr("css-mode", "false")
+        .attr("css-mode", "true")
         .attr("slides-per-view", "1")
         .attr("direction", "vertical")
 }
