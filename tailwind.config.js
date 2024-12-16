@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.rs", "./public/**/*.{html,js,css,svg}"],
   theme: {
     extend: {
+      spacing: {
+        bar: "4.25rem",
+      },
       colors: {
         placeholder: "#a3a3a3",
       },

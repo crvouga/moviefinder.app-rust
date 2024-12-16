@@ -31,7 +31,7 @@ impl SearchBar {
         let map_input = self.input.unwrap_or_else(|| Box::new(|x| x));
         label()
             .class(
-                "w-full h-20 shrink-0 border-b group flex items-center gap-2 overflow-hidden px-5",
+                "w-full h-bar shrink-0 border-b group flex items-center gap-2 overflow-hidden px-5",
             )
             .data_attributes("aria-busy", &Js::dot_value(&self.indicator))
             .child(

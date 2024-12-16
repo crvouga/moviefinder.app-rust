@@ -200,7 +200,7 @@ fn js_signal_is_checked(tag: &FeedTag) -> String {
 
 fn view_selected_root() -> Elem {
     div().id("selected").class(
-        "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-20 flex-wrap border-b",
+        "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-bar flex-wrap border-b",
     )
 }
 
