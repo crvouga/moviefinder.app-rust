@@ -134,13 +134,44 @@ impl DataOn {
             js: vec![],
         }
     }
-
     pub fn click(self) -> Self {
         Self {
             event: "click".to_string(),
             modifiers: vec![],
             js: vec![],
         }
+    }
+
+    pub fn mousedown(self) -> Self {
+        Self {
+            event: "mousedown".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
+
+    pub fn pointerdown(self) -> Self {
+        Self {
+            event: "pointerdown".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
+
+    pub fn pointerup(self) -> Self {
+        Self {
+            event: "pointerup".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
+
+    pub fn press_up(self) -> Self {
+        self.pointerup()
+    }
+
+    pub fn press_down(self) -> Self {
+        self.pointerdown()
     }
 
     // pub fn keydown(self) -> Self {

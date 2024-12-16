@@ -155,7 +155,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                                 .icon(|class: String| icon::solid::rotate_left(&class))
                                 .bind_disabled(Js::not(&Js::dot_value(SIGNAL_AVATAR_SEED_CAN_UNDO)))
                                 .view()
-                                .data_on(|e| e.click().sse(&Route::ClickedUndoSeed.url())),
+                                .data_on(|e| e.press_down().sse(&Route::ClickedUndoSeed.url())),
                         )
                         .child(
                             IconButton::default()
@@ -163,14 +163,14 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                                 .icon(|class| icon::solid::rotate_right(&class))
                                 .bind_disabled(Js::not(&Js::dot_value(SIGNAL_AVATAR_SEED_CAN_REDO)))
                                 .view()
-                                .data_on(|e| e.click().sse(&Route::ClickedRedoSeed.url())),
+                                .data_on(|e| e.press_down().sse(&Route::ClickedRedoSeed.url())),
                         ),
                 )
                 .child(
                     Button::default()
                         .label("Random seed")
                         .view()
-                        .data_on(|b| b.click().sse(&Route::ClickedRandomSeed.url())),
+                        .data_on(|b| b.press_down().sse(&Route::ClickedRandomSeed.url())),
                 ),
         )
 }

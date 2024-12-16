@@ -62,7 +62,7 @@ impl Select {
         label()
             .class("w-full flex flex-col gap-2")
             .for_(self.select_id.as_str())
-            .data_on(|e| e.click().js("const s = evt.target.querySelector('select'); s?.focus()"))
+            .data_on(|e| e.press_down().js("const s = evt.target.querySelector('select'); s?.focus()"))
             .child(
                 span()
                     .child(text(&self.label))

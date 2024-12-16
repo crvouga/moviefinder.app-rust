@@ -235,12 +235,14 @@ fn view_selected(model: &ViewModel) -> Elem {
                 .type_("button")
                 .data_show("signal_selected_tags_ids.value?.length > 0")
                 .data_on(|b| {
-                    b.click().js("signal_selected_tags_ids.value = []").sse(
-                        &Route::ClickedClear {
-                            feed_id: model.feed.feed_id.clone(),
-                        }
-                        .url(),
-                    )
+                    b.press_down()
+                        .js("signal_selected_tags_ids.value = []")
+                        .sse(
+                            &Route::ClickedClear {
+                                feed_id: model.feed.feed_id.clone(),
+                            }
+                            .url(),
+                        )
                 })
                 .class("underline text-secondary p-2")
                 .child_text("Clear"),
@@ -277,7 +279,7 @@ fn view_screen(feed_id: &FeedId) -> Elem {
 impl Elem {
     fn data_on_clicked_tag(self, tag_id: &str) -> Self {
         self.id(tag_id).data_on(|b| {
-            b.click()
+            b.press_down()
                 .js("const js_tag_id = evt.target.id")
                 .js("const e = new CustomEvent('clicked_tag', { bubbles: true, detail: { js_tag_id } })")
                 .js("evt.target.dispatchEvent(e)")
@@ -288,7 +290,7 @@ impl Elem {
 fn view_bottom_bar(feed_id: FeedId) -> Elem {
     BottomBarForm::default()
         .on_cancel(move |e| {
-            e.click()
+            e.press_down()
                 .push_then_sse(&feed_screen::route::Route::FeedScreen { feed_id }.url())
         })
         .submit_indicator("signal_is_submitting")

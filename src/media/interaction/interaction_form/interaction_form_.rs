@@ -180,7 +180,7 @@ fn view_interaction_button(
         .active(is_selected(&interaction_action))
         .view()
         .data_on(|e| {
-            e.click().sse(
+            e.press_down().sse(
                 &Route::Record {
                     interaction_action,
                     interaction_name,

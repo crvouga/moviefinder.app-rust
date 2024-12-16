@@ -228,7 +228,7 @@ fn view_top_bar_loading() -> Elem {
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root().data_on(|b| {
-        b.click().push_then_sse(
+        b.press_down().push_then_sse(
             &feed_tags_form::route::Route::FeedTagsFormScreen {
                 feed_id: feed_id.clone(),
             }

@@ -34,7 +34,7 @@ impl Avatar {
                 .data_show(&Js::not(&Js::is_string(&self.data_attributes_src)))
                 .data_on(|b| {
                     if let Some(on_click) = &self.on_click {
-                        b.click().js(on_click)
+                        b.press_down().js(on_click)
                     } else {
                         b
                     }
@@ -56,7 +56,7 @@ impl Avatar {
                 .data_show(&Js::is_string(&self.data_attributes_src))
                 .data_on(|b| {
                     if let Some(on_click) = &self.on_click {
-                        b.click().js(on_click)
+                        b.press_down().js(on_click)
                     } else {
                         b
                     }
