@@ -83,14 +83,14 @@ pub async fn verify_code(
 
     let session_new = existing_session.unwrap_or(UserSession::new(&user_id, &session_id));
 
-    transact_new_user(ctx, &account_new, &profile_new, &session_new)
+    transact_user_logged_in(ctx, &account_new, &profile_new, &session_new)
         .await
         .map_err(VerifyCodeError::Error)?;
 
     Ok(())
 }
 
-async fn transact_new_user(
+async fn transact_user_logged_in(
     ctx: &Ctx,
     account: &UserAccount,
     profile: &UserProfile,

@@ -30,7 +30,7 @@ impl Req {
         let user_id = self.user_id(ctx).await?;
 
         let profile = ctx
-            .user_profile_db
+            .UserProfileDb
             .find_one_by_user_id(&user_id)
             .await
             .unwrap_or_default()?;
