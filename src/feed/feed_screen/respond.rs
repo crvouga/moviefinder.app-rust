@@ -324,8 +324,6 @@ fn view_swiper(model: &ViewModel) -> Elem {
 
 fn view_swiper_container(model: &ViewModel) -> Elem {
     ui::swiper::container()
-        .swiper_direction_vertical()
-        .swiper_slides_per_view("1")
         .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
         .data_signal("signal_feed_index", &(max( (model.feed.start_index as i64) - 1, 0).to_string()))
         .data_on(|b| b

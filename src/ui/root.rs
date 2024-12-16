@@ -40,6 +40,7 @@ impl Root {
                 script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());"),
                 script().src_drawer_element().defer(),
                 script().src_swiper().defer(),
+                script().src_image_element().defer(),
             ])
         )
         .child(
