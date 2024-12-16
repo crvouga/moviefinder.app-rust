@@ -11,7 +11,7 @@ use crate::{
     ctx::Ctx,
     feed::{feed_::Feed, feed_id::FeedId, feed_screen, feed_tag::FeedTag},
     req::Req,
-    ui::{bottom_bar_form::BottomBarForm, route::AppRoute},
+    ui::{bottom_bar_form_buttons::BottomBarFormButtons, route::AppRoute},
 };
 
 pub async fn respond(
@@ -288,7 +288,7 @@ impl Elem {
 }
 
 fn view_bottom_bar(feed_id: FeedId) -> Elem {
-    BottomBarForm::default()
+    BottomBarFormButtons::default()
         .on_cancel(move |e| {
             e.press_down()
                 .push_then_sse(&feed_screen::route::Route::FeedScreen { feed_id }.url())

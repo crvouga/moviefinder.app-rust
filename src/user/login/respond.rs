@@ -7,7 +7,7 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::{bottom_bar_form::BottomBarForm, route::AppRoute},
+    ui::{bottom_bar_form_buttons::BottomBarFormButtons, route::AppRoute},
 };
 
 impl ResponseWriter {
@@ -55,7 +55,7 @@ fn view_must_login_drawer(message: &str) -> Elem {
                     DrawerBody::default().content(message).view()
                 })
                 .child(
-                    BottomBarForm::default()
+                    BottomBarFormButtons::default()
                         .on_cancel(|b| b.press_down().js("signal_is_drawer_open.value = false"))
                         .submit_label("Login")
                         .view(),

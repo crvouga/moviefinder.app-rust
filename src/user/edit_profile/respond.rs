@@ -11,7 +11,7 @@ use crate::{
     ctx::Ctx,
     req::Req,
     ui::{
-        bottom_bar_form::{BottomBarForm, SIGNAL_IS_SUBMITTING},
+        bottom_bar_form_buttons::{BottomBarFormButtons, SIGNAL_IS_SUBMITTING},
         route::AppRoute,
     },
     user::{self, user_id::UserId, user_profile::user_profile_::UserProfile, username::Username},
@@ -194,7 +194,7 @@ fn view_screen(profile: UserProfile) -> Elem {
                 ),
         )
         .child(
-            BottomBarForm::default()
+            BottomBarFormButtons::default()
                 .on_cancel(|e| {
                     e.press_down()
                         .push_then_sse(&user::route::Route::AccountScreen.url())

@@ -11,7 +11,7 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    ui::{bottom_bar_form::BottomBarForm, route::AppRoute},
+    ui::{bottom_bar_form_buttons::BottomBarFormButtons, route::AppRoute},
     user::account_screen,
 };
 
@@ -72,7 +72,7 @@ fn view_logout_drawer() -> Elem {
                         .view(),
                 )
                 .child(
-                    BottomBarForm::default()
+                    BottomBarFormButtons::default()
                         .on_cancel(|b| b.press_down().js("signal_is_drawer_open.value = false"))
                         .submit_indicator("signal_is_submitting")
                         .submit_label("Logout")

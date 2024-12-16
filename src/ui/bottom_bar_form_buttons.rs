@@ -7,13 +7,13 @@ use crate::core::{
 pub const SIGNAL_IS_SUBMITTING: &str = "signal_is_submitting";
 
 #[derive(Default)]
-pub struct BottomBarForm {
+pub struct BottomBarFormButtons {
     on_cancel: Option<Box<dyn FnOnce(DataOn) -> DataOn>>,
     submit_indicator: Option<String>,
     submit_label: Option<String>,
 }
 
-impl BottomBarForm {
+impl BottomBarFormButtons {
     pub fn on_cancel(mut self, on_cancel: impl FnOnce(DataOn) -> DataOn + 'static) -> Self {
         self.on_cancel = Some(Box::new(on_cancel));
         self
