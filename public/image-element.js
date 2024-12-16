@@ -1,6 +1,10 @@
 // @ts-check
 
 class ImageElement extends HTMLElement {
+  static get observedAttributes() {
+    return ["src", "alt"];
+  }
+
   constructor() {
     super();
     const shadow = this.attachShadow({ mode: "open" });
@@ -50,7 +54,6 @@ class ImageElement extends HTMLElement {
 
     this.image = document.createElement("img");
     this.image.className = "image";
-    this.image.alt = this.getAttribute("alt") || "";
 
     shadow.appendChild(style);
     shadow.appendChild(this.skeleton);
@@ -74,9 +77,29 @@ class ImageElement extends HTMLElement {
     this.observer.disconnect();
   }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      switch (name) {
+        case "src":
+          if (this.isConnected) {
+            this.loadImage();
+          }
+          break;
+        case "alt":
+          this.image.alt = newValue || "";
+          break;
+      }
+    }
+  }
+
   loadImage() {
-    this.image.src = this.getAttribute("src") ?? "";
-    this.image.addEventListener("load", () => this.onImageLoaded());
+    const src = this.getAttribute("src");
+    if (src) {
+      this.image.src = src;
+      this.image.addEventListener("load", () => this.onImageLoaded(), {
+        once: true,
+      });
+    }
   }
 
   onImageLoaded() {
