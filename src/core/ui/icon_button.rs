@@ -32,7 +32,7 @@ impl IconButton {
     pub fn view(self) -> Elem {
         let id = self.id.unwrap_or_default();
         let icon = if let Some(icon) = self.icon {
-            icon("size-10".to_owned())
+            icon("size-8".to_owned())
         } else {
             Elem::default()
         };

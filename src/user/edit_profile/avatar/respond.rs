@@ -169,8 +169,11 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                 .child(
                     Button::default()
                         .label("Random seed")
-                        .view()
-                        .data_on(|b| b.press_down().sse(&Route::ClickedRandomSeed.url())),
+                        .indicator("signal_indicator_random_seed")
+                        .map_button(|e| {
+                            e.data_on(|b| b.press_down().sse(&Route::ClickedRandomSeed.url()))
+                        })
+                        .view(),
                 ),
         )
 }
