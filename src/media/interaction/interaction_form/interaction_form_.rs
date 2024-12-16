@@ -111,7 +111,7 @@ pub fn view_bottom_buttons(media_id: MediaId, interaction_form: Option<Interacti
         .view()
         .map(|e| match interaction_form {
             None => e.children(
-                view_disabled_buttons()
+                view_disabled_interaction_buttons()
                     .into_iter()
                     .take(4)
                     .collect::<Vec<Elem>>(),
@@ -130,7 +130,7 @@ pub fn view_bottom_buttons(media_id: MediaId, interaction_form: Option<Interacti
                             )
                         })
                         .chain(
-                            view_disabled_buttons()
+                            view_disabled_interaction_buttons()
                                 .into_iter()
                                 .skip(available_interactions.len()),
                         )
@@ -191,7 +191,7 @@ fn view_interaction_button(
         })
 }
 
-fn view_disabled_buttons() -> Vec<Elem> {
+fn view_disabled_interaction_buttons() -> Vec<Elem> {
     vec![
         (&InteractionAction::Add, &InteractionName::Seen),
         (&InteractionAction::Add, &InteractionName::NotSeen),
