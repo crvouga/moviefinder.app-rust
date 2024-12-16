@@ -324,7 +324,7 @@ fn view_swiper(model: &ViewModel) -> Elem {
 
 fn view_swiper_container(model: &ViewModel) -> Elem {
     ui::swiper::container()
-        .class("h-full flex flex-col w-full items-center justify-center overflow-hidden")
+        .class("h-full w-full")
         .data_signal("signal_feed_index", &(max( (model.feed.start_index as i64) - 1, 0).to_string()))
         .data_on(|b| b
                 .e("swiperslidechange")
@@ -335,7 +335,6 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
 
 fn view_slide_root() -> Elem {
     ui::swiper::slide()
-        .class("w-full h-full flex flex-col items-center justify-center cursor-pointer relative overflow-hidden")
 }
 
 pub const BOTTOM_ID: &str = "feed-bottom";
