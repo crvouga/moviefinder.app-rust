@@ -11,11 +11,17 @@ pub struct BottomBarFormButtons {
     on_cancel: Option<Box<dyn FnOnce(DataOn) -> DataOn>>,
     submit_indicator: Option<String>,
     submit_label: Option<String>,
+    border: Option<bool>,
 }
 
 impl BottomBarFormButtons {
     pub fn on_cancel(mut self, on_cancel: impl FnOnce(DataOn) -> DataOn + 'static) -> Self {
         self.on_cancel = Some(Box::new(on_cancel));
+        self
+    }
+
+    pub fn border(mut self, border: bool) -> Self {
+        self.border = Some(border);
         self
     }
 
@@ -32,13 +38,15 @@ impl BottomBarFormButtons {
     pub fn view(self) -> Elem {
         let on_cancel = self.on_cancel.unwrap_or_else(|| Box::new(|d| d));
         let submit_label = self.submit_label.unwrap_or_else(|| "Submit".to_string());
+        let border = self.border.unwrap_or(true);
 
         div()
             .id("bottom-bar-form")
             .data_signal(SIGNAL_IS_SUBMITTING, "false")
             .class(
-                "flex-none flex flex-row items-center justify-center p-4 border-t gap-4 min-h-bar w-full",
+                "flex-none flex flex-row items-center justify-center p-4  gap-4 min-h-bar w-full",
             )
+            .class(if border { "border-t" } else { "" })
             .child(
                 Button::default()
                     .label("Cancel")
