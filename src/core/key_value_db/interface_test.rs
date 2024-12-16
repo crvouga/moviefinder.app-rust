@@ -4,12 +4,15 @@ mod tests {
     use serde::{Deserialize, Serialize};
 
     use crate::{
-        core::{unit_of_work::UnitOfWork, uuid},
-        fixture::BaseFixture,
-        key_value_db::{
-            impl_cached_postgres::CachedPostgres, impl_hash_map::HashMap, impl_postgres::Postgres,
-            interface::KeyValueDb,
+        core::{
+            key_value_db::{
+                impl_cached_postgres::CachedPostgres, impl_hash_map::HashMap,
+                impl_postgres::Postgres, interface::KeyValueDb,
+            },
+            unit_of_work::UnitOfWork,
+            uuid,
         },
+        fixture::BaseFixture,
     };
 
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

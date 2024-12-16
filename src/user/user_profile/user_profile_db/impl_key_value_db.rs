@@ -1,7 +1,6 @@
 use super::interface::UserProfileDb;
 use crate::{
-    core::unit_of_work::UnitOfWork,
-    key_value_db::interface::KeyValueDbRef,
+    core::{key_value_db::interface::KeyValueDbRef, unit_of_work::UnitOfWork},
     user::{user_id::UserId, user_profile::user_profile_::UserProfile},
 };
 use async_trait::async_trait;

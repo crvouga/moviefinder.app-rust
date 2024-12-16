@@ -1,7 +1,9 @@
 use super::interface::UserSessionDb;
 use crate::{
-    core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
-    key_value_db::interface::KeyValueDbRef,
+    core::{
+        key_value_db::interface::KeyValueDbRef, session::session_id::SessionId,
+        unit_of_work::UnitOfWork,
+    },
     user::user_session::user_session_::UserSession,
 };
 use async_trait::async_trait;

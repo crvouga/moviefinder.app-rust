@@ -1,7 +1,9 @@
 use crate::{
-    core::{session::session_id::SessionId, unit_of_work::UnitOfWork},
+    core::{
+        key_value_db::interface::KeyValueDbRef, session::session_id::SessionId,
+        unit_of_work::UnitOfWork,
+    },
     feed::feed_id::FeedId,
-    key_value_db::interface::KeyValueDbRef,
 };
 use async_trait::async_trait;
 

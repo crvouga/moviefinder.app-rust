@@ -1,8 +1,7 @@
 use super::interface::FeedDb;
 use crate::{
-    core::unit_of_work::UnitOfWork,
+    core::{key_value_db::interface::KeyValueDbRef, unit_of_work::UnitOfWork},
     feed::{feed_::Feed, feed_id::FeedId},
-    key_value_db::interface::KeyValueDbRef,
 };
 use async_trait::async_trait;
 

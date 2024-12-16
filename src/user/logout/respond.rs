@@ -46,6 +46,7 @@ pub fn view_open_logout_drawer_button() -> Button {
     Button::default()
         .color_primary()
         .label("Logout")
+        .indicator("signal_indicator_logout")
         .map_button(|e| e.data_on(|b| b.press_down().sse(&Route::LogoutDrawer.url())))
 }
 

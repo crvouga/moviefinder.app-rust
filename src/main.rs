@@ -15,7 +15,6 @@ mod ctx;
 mod env;
 mod feed;
 mod fixture;
-mod key_value_db;
 mod media;
 mod req;
 mod respond;
