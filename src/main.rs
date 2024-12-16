@@ -15,6 +15,7 @@ mod ctx;
 mod env;
 mod feed;
 mod fixture;
+mod list;
 mod media;
 mod req;
 mod respond;

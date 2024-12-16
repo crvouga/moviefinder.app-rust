@@ -34,7 +34,7 @@ impl Env {
             panic!("DATABASE_URL must be set");
         }
 
-        let simulate_latency_duration = Duration::from_millis(10);
+        let simulate_latency_duration = Duration::from_millis(150);
 
         let simulate_latency = if stage.is_local() {
             Some(simulate_latency_duration)

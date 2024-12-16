@@ -77,7 +77,7 @@ impl Ctx {
             CachedPostgres,
         }
 
-        let key_value_db_impl = KeyValueDbImpl::CachedPostgres;
+        let key_value_db_impl = KeyValueDbImpl::Postgres;
 
         info!(logger, "key value db impl: {:?}", key_value_db_impl);
 
