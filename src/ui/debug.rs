@@ -1,6 +1,7 @@
 use crate::core::html::{pre, unsafe_text, Elem};
 
 impl Elem {
+    #[allow(dead_code)]
     pub fn debug<T>(self, value: T, on: bool) -> Self
     where
         T: serde::Serialize,

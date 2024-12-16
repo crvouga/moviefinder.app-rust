@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use crate::core::random;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum InteractionAction {
@@ -9,6 +8,7 @@ pub enum InteractionAction {
 }
 
 impl InteractionAction {
+    #[allow(dead_code)]
     pub fn random() -> Self {
         random::choice(vec![InteractionAction::Add, InteractionAction::Retract]).unwrap()
     }

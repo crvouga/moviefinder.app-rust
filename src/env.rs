@@ -20,10 +20,6 @@ impl Env {
 
         core::env::load(".env").unwrap_or(());
 
-        if stage.is_local() || stage.is_test() {
-            core::env::load(".env.local").unwrap_or(());
-        }
-
         let tmdb_api_read_access_token = env::var("TMDB_API_READ_ACCESS_TOKEN").unwrap();
 
         let port = env::var("PORT").unwrap_or("3000".to_owned());

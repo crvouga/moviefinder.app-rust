@@ -210,13 +210,13 @@ impl DataOn {
         }
     }
 
-    pub fn signals_changed(self) -> Self {
-        Self {
-            event: "signals-change".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
+    // pub fn signals_changed(self) -> Self {
+    //     Self {
+    //         event: "signals-change".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
 
     // pub fn raf(self) -> Self {
     //     Self {
@@ -294,7 +294,8 @@ impl Attr for DataOn {
 
 impl Elem {
     pub fn src_datastar(self) -> Self {
-        self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
+        self.src("./datastar-0-21-3-a97359219fc18db5/datastar-0-21-3-a97359219fc18db5.js")
+        // .src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
     }
 
     pub fn data_bind(self, value: &str) -> Self {

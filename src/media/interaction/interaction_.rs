@@ -17,6 +17,7 @@ pub struct MediaInteraction {
 }
 
 impl MediaInteraction {
+    #[allow(dead_code)]
     pub fn random() -> Self {
         Self {
             id: MediaInteractionId::default(),

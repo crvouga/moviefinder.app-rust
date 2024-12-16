@@ -4,6 +4,9 @@ check: #
 run: #
   clear && export STAGE=local && just tw-build && npx kill-port 3000 && just watch
 
+ngrok: #
+  ngrok http 3000 --subdomain moviefinder
+
 watch: #
   cargo watch -x run
 

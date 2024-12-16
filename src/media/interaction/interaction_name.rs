@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{html::Elem, random, ui::icon};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Eq, Hash)]
 pub enum InteractionName {
     Liked,
     Disliked,

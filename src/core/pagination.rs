@@ -5,7 +5,7 @@ pub struct Pagination {
     pub offset: usize,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Paginated<T> {
     pub items: Vec<T>,
     pub total: usize,

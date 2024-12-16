@@ -1,5 +1,3 @@
-pub mod list_;
+pub mod core;
 pub mod list_db;
-pub mod list_id;
-pub mod list_item_id;
-pub mod list_joined;
+pub mod list_item_db;

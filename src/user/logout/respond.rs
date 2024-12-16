@@ -74,6 +74,7 @@ fn view_logout_drawer() -> Elem {
                 .child(
                     BottomBarFormButtons::default()
                         .on_cancel(|b| b.press_down().js("signal_is_drawer_open.value = false"))
+                        .border(false)
                         .submit_indicator("signal_is_submitting")
                         .submit_label("Logout")
                         .view()
