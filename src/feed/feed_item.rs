@@ -1,5 +1,8 @@
 use crate::{
-    core::html::{div, img, Elem},
+    core::{
+        html::{div, Elem},
+        ui::image::Image,
+    },
     media::{self, interaction::interaction_form, media_::Media, media_id::MediaId},
     ui::route::Routable,
 };
@@ -30,7 +33,8 @@ impl FeedItem {
             } => div()
                 .class("w-full h-full max-h-full flex flex-col divide-y overflow-hidden")
                 .child(
-                    img()
+                    Image::new()
+                        .view()
                         .class("w-full flex-1 overflow-hidden object-cover active:opacity-80 z-0 pointer-cursor")
                         .tab_index(0)
                         .role_button()

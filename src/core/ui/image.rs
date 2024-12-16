@@ -8,12 +8,17 @@ impl Image {
     }
 
     pub fn view(self) -> Elem {
-        elem("image-element")
+        img()
+            .class(
+                "w-full h-full object-cover bg-neutral-700 animate-pulse border-none outline-none",
+            )
+            .on_load("this.classList.remove('animate-pulse')")
     }
 }
 
 impl Elem {
     pub fn src_image_element(self) -> Self {
-        self.src("./image-element.js")
+        self
+        // self.src("./image-element.js")
     }
 }
