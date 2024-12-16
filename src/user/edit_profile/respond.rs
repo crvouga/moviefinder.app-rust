@@ -5,7 +5,7 @@ use crate::{
         html::{div, fieldset, form, Elem},
         http::response_writer::ResponseWriter,
         js::Js,
-        ui::{spinner_page, text_field::TextField, top_bar::TopBar},
+        ui::{button::Button, text_field::TextField, top_bar::TopBar},
         unit_of_work::uow,
     },
     ctx::Ctx,
@@ -14,7 +14,7 @@ use crate::{
         bottom_bar_form::{BottomBarForm, SIGNAL_IS_SUBMITTING},
         route::Routable,
     },
-    user::{self, user_profile::user_profile_::UserProfile, username::Username},
+    user::{self, user_id::UserId, user_profile::user_profile_::UserProfile, username::Username},
 };
 use std::time::Duration;
 
@@ -29,8 +29,6 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Screen { .. } => {
-            w.send_screen(view_screen_loading()).await?;
-
             let user_id = match r.user_id(ctx).await.clone() {
                 Some(user_id) => user_id,
                 None => return respond_failed_to_load(ctx, r, w).await,
@@ -134,8 +132,17 @@ fn view_screen_root() -> Elem {
         )
 }
 
-fn view_screen_loading() -> Elem {
-    view_screen_root().child(spinner_page::view())
+pub fn view_open_edit_profile_screen_button(user_id: UserId) -> Elem {
+    Button::default()
+        .color_primary()
+        .label("Edit Profile")
+        .indicator("signal_edit_profile_button_indicator")
+        .view()
+        .class("w-full")
+        .data_on(|b| {
+            b.press_down()
+                .push_then_sse(&Route::Screen { user_id }.url())
+        })
 }
 
 fn view_screen(profile: UserProfile) -> Elem {
