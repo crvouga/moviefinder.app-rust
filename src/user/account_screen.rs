@@ -108,12 +108,10 @@ fn view_logged_out() -> Elem {
                         .label("Login")
                         .color_primary()
                         .view()
-                        .id("logout")
+                        .id("login-button")
                         .data_on(|b| {
-                            b.press_down().push_then_sse(
-                                &Route::LoginWithSms(login_with_sms::route::Route::ScreenPhone)
-                                    .url(),
-                            )
+                            b.press_down()
+                                .push_then_sse(&login_with_sms::route::Route::ScreenPhone.url())
                         }),
                 ),
         )

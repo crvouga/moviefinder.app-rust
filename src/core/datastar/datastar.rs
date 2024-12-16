@@ -167,11 +167,11 @@ impl DataOn {
     }
 
     pub fn press_up(self) -> Self {
-        self.pointerup()
+        self.click()
     }
 
     pub fn press_down(self) -> Self {
-        self.pointerdown()
+        self.click()
     }
 
     // pub fn keydown(self) -> Self {
