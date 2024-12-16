@@ -433,7 +433,7 @@ impl ResponseWriter {
         self.send_signals(vec![(key, value)]).await
     }
 
-    pub async fn send_js(&mut self, script: &str) -> Result<(), std::io::Error> {
+    pub async fn send_script(&mut self, script: &str) -> Result<(), std::io::Error> {
         sse()
             .event_execute_script()
             .data_script(script)

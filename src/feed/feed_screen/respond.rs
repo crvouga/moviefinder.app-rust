@@ -53,7 +53,7 @@ pub async fn respond(
             })
             .url();
 
-            w.send_js(&Js::replace_url(&feed_url)).await?;
+            w.send_script(&Js::replace_url(&feed_url)).await?;
 
             w.send_screen(view_screen()).await?;
 
@@ -122,7 +122,7 @@ pub async fn respond(
                     .await?;
             }
 
-            let user_id = r.user_id_result(ctx).await?;
+            let user_id = r.user_id(ctx).await?;
 
             let media_ids = feed_items
                 .iter()

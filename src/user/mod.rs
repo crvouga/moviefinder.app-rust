@@ -3,6 +3,7 @@ pub mod edit_profile;
 pub mod login;
 pub mod login_with_sms;
 pub mod logout;
+pub mod req;
 pub mod respond;
 pub mod route;
 pub mod user_account;

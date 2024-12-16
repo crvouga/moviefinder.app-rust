@@ -24,7 +24,7 @@ pub async fn respond_initial(
     r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    let profile = r.profile(ctx).await.unwrap_or_default();
+    let profile = r.user_profile(ctx).await.unwrap_or_default();
 
     let mut form_state = FormState::get(&ctx, &profile).await;
 
@@ -52,7 +52,7 @@ pub async fn respond(
             w.send_signal(SIGNAL_AVATAR_SEED, &Js::quote(&avatar_seed_new))
                 .await?;
 
-            let profile = r.profile(ctx).await.unwrap_or_default();
+            let profile = r.user_profile(ctx).await.unwrap_or_default();
 
             let mut form_state = FormState::get(&ctx, &profile).await;
 
@@ -66,7 +66,7 @@ pub async fn respond(
         }
 
         Route::ClickedRedoSeed => {
-            let profile = r.profile(ctx).await.unwrap_or_default();
+            let profile = r.user_profile(ctx).await.unwrap_or_default();
 
             let mut form_state = FormState::get(&ctx, &profile).await;
 
@@ -80,7 +80,7 @@ pub async fn respond(
         }
 
         Route::ClickedUndoSeed => {
-            let profile = r.profile(ctx).await.unwrap_or_default();
+            let profile = r.user_profile(ctx).await.unwrap_or_default();
 
             let mut form_state = FormState::get(&ctx, &profile).await;
 

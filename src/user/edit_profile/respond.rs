@@ -29,7 +29,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Screen { .. } => {
-            let user_id = match r.user_id(ctx).await.clone() {
+            let user_id = match r.user_id(ctx).await.ok().clone() {
                 Some(user_id) => user_id,
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
@@ -73,7 +73,7 @@ pub async fn respond(
                 .get_first(avatar::respond::SIGNAL_AVATAR_SEED)
                 .unwrap_or_default();
 
-            let user_id = match r.user_id(ctx).await {
+            let user_id = match r.user_id(ctx).await.ok() {
                 Some(user_id) => user_id,
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
@@ -96,7 +96,7 @@ pub async fn respond(
 
             w.send_toast_dark("Profile updated").await?;
 
-            user::account_screen::redirect_to(ctx, r, w, &r.user_id(ctx).await).await?;
+            user::account_screen::redirect_to(ctx, r, w, &r.user_id(ctx).await.ok()).await?;
 
             Ok(())
         }

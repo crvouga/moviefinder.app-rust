@@ -89,7 +89,7 @@ async fn respond(
         Err(e) => {
             let error_message = format!("Error: {:?}", e);
 
-            w.send_js(&Js::console_error(&error_message)).await?;
+            w.send_script(&Js::console_error(&error_message)).await?;
         }
     }
 
@@ -146,7 +146,7 @@ async fn respond_fallback(
     r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    w.send_js(&Js::push_url(
+    w.send_script(&Js::push_url(
         &feed_screen::route::Route::FeedScreenDefault.url(),
     ))
     .await?;

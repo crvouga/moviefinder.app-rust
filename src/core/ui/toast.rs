@@ -96,7 +96,7 @@ impl ResponseWriter {
 
     pub async fn send_toast_error(&mut self, message: &str) -> Result<(), std::io::Error> {
         self.send_toast(Toast::error(message)).await?;
-        self.send_js(&Js::console_error(message)).await?;
+        self.send_script(&Js::console_error(message)).await?;
         Ok(())
     }
 }

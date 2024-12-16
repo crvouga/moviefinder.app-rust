@@ -19,7 +19,7 @@ pub async fn respond(
 ) -> Result<(), std::io::Error> {
     match route {
         Route::Form { media_id } => {
-            let user_id = r.user_id_result(ctx).await?;
+            let user_id = r.user_id(ctx).await?;
 
             respond_interaction_form(ctx, w, user_id, vec![media_id.clone()]).await?;
 
@@ -30,7 +30,7 @@ pub async fn respond(
             interaction_name,
             media_id,
         } => {
-            let maybe_user_id = r.user_id(ctx).await;
+            let maybe_user_id = r.user_id(ctx).await.ok();
 
             let user_id = match maybe_user_id {
                 Some(user_id) => user_id,
@@ -56,7 +56,7 @@ pub async fn respond(
                 .put(uow(), &interaction_new)
                 .await?;
 
-            let user_id = r.user_id_result(ctx).await?;
+            let user_id = r.user_id(ctx).await?;
 
             respond_interaction_form(ctx, w, user_id, vec![media_id.clone()]).await?;
 
