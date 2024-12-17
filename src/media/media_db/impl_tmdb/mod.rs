@@ -1,10 +1,6 @@
 use super::interface::{MediaDb, MediaQuery};
 use crate::{
-    core::{
-        logger::interface::{Logger, LoggerDyn},
-        pagination::Paginated,
-        tmdb_api::TmdbApi,
-    },
+    core::{logger::interface::LoggerDyn, pagination::Paginated, tmdb_api::TmdbApi},
     info,
     media::media_::Media,
 };

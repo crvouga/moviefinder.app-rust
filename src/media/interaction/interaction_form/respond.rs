@@ -51,7 +51,7 @@ pub async fn respond(
                 user_id,
             };
 
-            info!(ctx.logger, "interaction_new: {:?}", interaction_new);
+            info!(ctx.log, "interaction_new: {:?}", interaction_new);
 
             ctx.media_interaction_db
                 .put(uow(), &interaction_new)

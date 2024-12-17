@@ -21,7 +21,7 @@ mod tests {
 
         fixtures.push(Fixture {
             form_state_db: Box::new(FeedTagsFormStateDb::new(
-                base.ctx.logger.noop(),
+                base.ctx.log.noop(),
                 base.ctx.key_value_db,
             )),
         });

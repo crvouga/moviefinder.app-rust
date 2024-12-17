@@ -161,7 +161,7 @@ pub async fn respond_screen_contents(
 
     let feed = ctx.feed_db.get_else_default(feed_id.clone()).await;
 
-    debug!(ctx.logger, "respond_screen_contents feed: {:?}", feed);
+    debug!(ctx.log, "respond_screen_contents feed: {:?}", feed);
 
     put_feed(ctx, &r.session_id, &feed).await?;
 
@@ -182,7 +182,7 @@ pub async fn put_feed(
     session_id: &SessionId,
     feed: &Feed,
 ) -> Result<(), std::io::Error> {
-    debug!(ctx.logger, "put_feed: {:?}", feed);
+    debug!(ctx.log, "put_feed: {:?}", feed);
 
     UnitOfWork::transact(|uow| async move {
         ctx.feed_db.put(uow.clone(), feed.clone()).await?;

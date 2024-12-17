@@ -46,14 +46,14 @@ mod tests {
         if base_fixture.env.test_env.is_integration() {
             fixtures.push(Fixture {
                 key_value_db: Box::new(Postgres::new(
-                    base_fixture.ctx.logger.clone(),
+                    base_fixture.ctx.log.clone(),
                     base_fixture.ctx.db_conn_sql.clone(),
                 )),
             });
 
             fixtures.push(Fixture {
                 key_value_db: Box::new(CachedPostgres::new(
-                    base_fixture.ctx.logger.clone(),
+                    base_fixture.ctx.log.clone(),
                     base_fixture.ctx.db_conn_sql.clone(),
                 )),
             });

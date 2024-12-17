@@ -39,10 +39,10 @@ use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Ctx {
+    pub log: LoggerDyn,
     pub key_value_db: KeyValueDbDyn,
     pub db_conn_sql: DbConnSqlDyn,
     pub http_client: HttpClientDyn,
-    pub logger: LoggerDyn,
     pub tmdb_api: Arc<TmdbApi>,
     pub twilio_api: Arc<TwilioApi>,
     pub media_genre_db: Arc<dyn MediaGenreDb>,
@@ -62,17 +62,17 @@ pub struct Ctx {
 
 impl Ctx {
     pub async fn new(env: &Env) -> Ctx {
-        let logger = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
+        let log = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
 
-        info!(logger, "env stage: {:?}", env.stage);
+        info!(log, "env stage: {:?}", env.stage);
 
         let http_client = Arc::new(
-            http::client::impl_reqwest::ImplReqwest::new(logger.clone())
+            http::client::impl_reqwest::ImplReqwest::new(log.clone())
                 .simulate_latency(env.simulate_latency),
         );
 
         let db_conn_sql = Arc::new(
-            db_conn_sql::impl_postgres::Postgres::new(logger.noop(), &env.database_url)
+            db_conn_sql::impl_postgres::Postgres::new(log.noop(), &env.database_url)
                 .await
                 .unwrap()
                 .simulate_latency(env.simulate_latency),
@@ -87,17 +87,17 @@ impl Ctx {
 
         let key_value_db_impl = KeyValueDbImpl::Postgres;
 
-        info!(logger, "key value db impl: {:?}", key_value_db_impl);
+        info!(log, "key value db impl: {:?}", key_value_db_impl);
 
         let key_value_db: Arc<dyn KeyValueDb> = match key_value_db_impl {
             KeyValueDbImpl::CachedPostgres => {
                 Arc::new(key_value_db::impl_cached_postgres::CachedPostgres::new(
-                    logger.clone(),
+                    log.clone(),
                     db_conn_sql.clone(),
                 ))
             }
             KeyValueDbImpl::Postgres => Arc::new(key_value_db::impl_postgres::Postgres::new(
-                logger.clone(),
+                log.clone(),
                 db_conn_sql.clone(),
             )),
             KeyValueDbImpl::HashMap => Arc::new(key_value_db::impl_hash_map::HashMap::new()),
@@ -108,10 +108,7 @@ impl Ctx {
             env.tmdb_api_read_access_token.clone(),
         ));
 
-        let media_db = Arc::new(media_db::impl_tmdb::Tmdb::new(
-            logger.noop(),
-            tmdb_api.clone(),
-        ));
+        let media_db = Arc::new(media_db::impl_tmdb::Tmdb::new(log.noop(), tmdb_api.clone()));
 
         let media_interaction_db = Arc::new(
             media::interaction::interaction_db::impl_postgres::Postgres::new(db_conn_sql.clone()),
@@ -120,7 +117,7 @@ impl Ctx {
         let genre_db = Arc::new(genre_db::impl_tmdb::Tmdb::new(tmdb_api.clone()));
 
         let person_db = Arc::new(person_db::impl_tmdb::Tmdb::new(
-            logger.clone(),
+            log.clone(),
             tmdb_api.clone(),
         ));
 
@@ -139,7 +136,7 @@ impl Ctx {
 
         let feed_tags_form_state_db = Arc::new(
             feed::feed_tags_form::form_state_db::FeedTagsFormStateDb::new(
-                logger.clone(),
+                log.clone(),
                 key_value_db.clone(),
             ),
         );
@@ -163,7 +160,7 @@ impl Ctx {
             VerifySmsImpl::Twilio
         };
 
-        info!(logger, "verify sms impl: {:?}", verify_sms_impl);
+        info!(log, "verify sms impl: {:?}", verify_sms_impl);
 
         let verify_sms: Arc<dyn VerifySms> = match verify_sms_impl {
             VerifySmsImpl::Twilio => {
@@ -189,7 +186,7 @@ impl Ctx {
         );
 
         Ctx {
-            logger,
+            log,
             twilio_api,
             http_client,
             key_value_db,
