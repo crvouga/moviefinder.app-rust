@@ -293,7 +293,7 @@ impl Attr for DataOn {
 }
 
 impl Elem {
-    pub fn src_datastar(self) -> Self {
+    pub fn src_datastar_cdn(self) -> Self {
         self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
             .type_module()
     }

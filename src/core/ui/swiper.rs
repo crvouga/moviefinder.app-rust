@@ -1,7 +1,7 @@
 use crate::core::html::*;
 
 impl Elem {
-    pub fn src_swiper(self) -> Self {
+    pub fn src_swiper_cdn(self) -> Self {
         self.src("https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js")
         // self.src("./swiper-element.js")
     }
