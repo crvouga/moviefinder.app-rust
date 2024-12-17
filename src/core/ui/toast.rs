@@ -49,7 +49,7 @@ impl Toast {
     pub fn view_root() -> Elem {
         div()
             .id("toast")
-            .class("absolute inset-0 pointer-events-none p-6 w-full h-full")
+            .class("absolute inset-0 pointer-events-none p-6 w-full h-full z-50")
     }
 
     pub fn view(self) -> Elem {
