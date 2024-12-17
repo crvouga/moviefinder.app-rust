@@ -57,10 +57,7 @@ mod tests {
 
             let uow = UnitOfWork::new();
 
-            f.user_session_db
-                .put(uow.clone(), &session)
-                .await
-                .unwrap();
+            f.user_session_db.put(uow.clone(), &session).await.unwrap();
 
             let before = f
                 .user_session_db

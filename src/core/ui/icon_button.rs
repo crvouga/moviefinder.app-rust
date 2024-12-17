@@ -3,7 +3,7 @@ use crate::core::html::*;
 #[derive(Default)]
 pub struct IconButton {
     label: String,
-    icon: Option<Box<dyn Fn(String) -> Elem>>,
+    icon: Option<Box<dyn FnOnce(String) -> Elem>>,
     id: Option<String>,
     bind_disabled: Option<String>,
 }
@@ -14,7 +14,7 @@ impl IconButton {
         self
     }
 
-    pub fn icon(mut self, icon: impl Fn(String) -> Elem + 'static) -> Self {
+    pub fn icon(mut self, icon: impl FnOnce(String) -> Elem + 'static) -> Self {
         self.icon = Some(Box::new(icon));
         self
     }

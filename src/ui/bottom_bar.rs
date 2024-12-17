@@ -2,7 +2,7 @@ use crate::{
     core::{
         html::{div, Elem},
         ui::{
-            bottom_bar_buttons::{BottomButton, BottomButtons},
+            button_group::{ButtonGroupMember, ButtonGroup},
             icon,
         },
     },
@@ -40,10 +40,10 @@ impl BottomBar {
 
     pub fn view(self) -> Elem {
         div().class("w-full").child(
-            BottomButtons::default()
+            ButtonGroup::default()
                 .view()
                 .child(
-                    BottomButton::default()
+                    ButtonGroupMember::default()
                         .text("Home")
                         .icon(icon::solid::home("size-6"))
                         .active(self.active == Active::Home)
@@ -54,7 +54,7 @@ impl BottomBar {
                         }),
                 )
                 .child(
-                    BottomButton::default()
+                    ButtonGroupMember::default()
                         .text("Account")
                         .icon(icon::solid::user_circle("size-6"))
                         .active(self.active == Active::Account)

@@ -1,16 +1,37 @@
 use crate::core::html::*;
 
 #[derive(Default)]
-pub struct BottomButtons {}
+pub struct ButtonGroup {
+    orientation: ButtonGroupOrientation,
+}
 
-impl BottomButtons {
+#[derive(Default)]
+pub enum ButtonGroupOrientation {
+    #[default]
+    Horizontal,
+    Vertical,
+}
+
+impl ButtonGroup {
+    pub fn orientation(mut self, orientation: ButtonGroupOrientation) -> Self {
+        self.orientation = orientation;
+        self
+    }
+    pub fn orientation_vertical(self) -> Self {
+        self.orientation(ButtonGroupOrientation::Vertical)
+    }
     pub fn view(self) -> Elem {
-        div().class("flex items-center justify-center w-full border-t h-bar")
+        div()
+            .class("flex items-center justify-center w-full border-t")
+            .class(match self.orientation {
+                ButtonGroupOrientation::Horizontal => "flex-row min-h-bar",
+                ButtonGroupOrientation::Vertical => "flex-col",
+            })
     }
 }
 
 #[derive(Default)]
-pub struct BottomButton {
+pub struct ButtonGroupMember {
     text: String,
     icon: Option<Elem>,
     active: bool,
@@ -18,7 +39,7 @@ pub struct BottomButton {
     id: String,
 }
 
-impl BottomButton {
+impl ButtonGroupMember {
     pub fn text(mut self, text: &str) -> Self {
         self.text = text.to_string();
         self

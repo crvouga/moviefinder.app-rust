@@ -58,11 +58,7 @@ impl UserAccountDb for KeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn put(
-        &self,
-        uow: UnitOfWork,
-        account: &UserAccount,
-    ) -> Result<(), std::io::Error> {
+    async fn put(&self, uow: UnitOfWork, account: &UserAccount) -> Result<(), std::io::Error> {
         let user_id = account.user_id.as_str().to_string();
         let phone_number = account.phone_number.clone();
 

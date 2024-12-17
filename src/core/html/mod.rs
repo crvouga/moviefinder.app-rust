@@ -47,6 +47,14 @@ impl Elem {
         self
     }
 
+    pub fn remove(self, should_remove: bool) -> Self {
+        if should_remove {
+            Self::Frag(vec![])
+        } else {
+            self
+        }
+    }
+
     pub fn button(self) -> Self {
         self.tag_name("button")
     }

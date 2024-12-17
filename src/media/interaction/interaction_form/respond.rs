@@ -1,5 +1,6 @@
 use super::interaction_form_::{self, InteractionForm};
 use super::route::Route;
+use super::view_buttons::view_interaction_form_buttons;
 use crate::core::html::{div, Elem};
 use crate::core::posix::Posix;
 use crate::core::unit_of_work::uow;
@@ -116,5 +117,5 @@ pub fn view_interaction_form(media_id: &MediaId, f: Option<InteractionForm>) -> 
     div()
         .id(&to_form_id(media_id))
         .class("h-fit w-full shrink-0")
-        .child(interaction_form_::view_bottom_buttons(media_id.clone(), f))
+        .child(view_interaction_form_buttons(media_id.clone(), f))
 }

@@ -1,4 +1,4 @@
-use super::interface::{ListItemDb, ListItemQuery, ListItemQueryField};
+use super::interface::ListItemDb;
 use crate::{
     core::{
         pagination::Paginated,
@@ -6,11 +6,7 @@ use crate::{
         unit_of_work::UnitOfWork,
     },
     list::{
-        core::{
-            list::{List, ListVariant},
-            list_id::ListId,
-            list_item::ListItem,
-        },
+        core::{list::ListVariant, list_id::ListId, list_item::ListItem},
         list_db::interface::{ListDb, ListQueryField},
     },
     media::interaction::interaction_db::interface::MediaInteractionDb,

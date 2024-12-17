@@ -1,7 +1,7 @@
 pub mod alert;
 pub mod avatar;
-pub mod bottom_bar_buttons;
 pub mod button;
+pub mod button_group;
 pub mod chip;
 pub mod drawer;
 pub mod error;
