@@ -294,8 +294,8 @@ impl Attr for DataOn {
 
 impl Elem {
     pub fn src_datastar(self) -> Self {
-        // self.src("./datastar-0-21-3-a97359219fc18db5/datastar-0-21-3-a97359219fc18db5.js")
         self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
+            .type_module()
     }
 
     pub fn data_bind(self, value: &str) -> Self {

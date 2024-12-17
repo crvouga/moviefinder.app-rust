@@ -41,6 +41,10 @@ impl Elem {
         self.attr("type", type_)
     }
 
+    pub fn type_module(self) -> Self {
+        self.type_("module")
+    }
+
     pub fn autocomplete(self, value: &str) -> Self {
         self.attr("autocomplete", value)
     }

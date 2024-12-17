@@ -1,6 +1,6 @@
 use crate::{
     core::{
-        logger::interface::{Logger, LoggerDyn},
+        logger::interface::LoggerDyn,
         pagination::Paginated,
         query::{QueryFilter, QueryOp},
         tmdb_api::{self, config::TmdbConfig, person::PersonResult, TMDB_PAGE_SIZE},

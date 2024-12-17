@@ -1,10 +1,6 @@
 use crate::core::{html::Elem, http::server_sent_event::ServerSentEvent};
 
 impl ServerSentEvent {
-    // pub fn fragment(self, elem: Elem) -> MergeFragment {
-    //     MergeFragment::new(self, elem)
-    // }
-
     pub fn event_merge_fragments(&mut self) -> &mut Self {
         self.event("datastar-merge-fragments")
     }
@@ -31,10 +27,6 @@ impl ServerSentEvent {
 
     pub fn data_selector(&mut self, selector: &str) -> &mut Self {
         self.data(&format!("selector {}", selector))
-    }
-
-    pub fn data_selector_id(&mut self, id: &str) -> &mut Self {
-        self.data_selector(&format!("#{}", id))
     }
 
     pub fn data_fragments(&mut self, elem: Elem) -> &mut Self {
