@@ -1,7 +1,7 @@
 use super::interface::UserSessionDb;
 use crate::{
     core::{
-        key_value_db::interface::KeyValueDbRef, session::session_id::SessionId,
+        key_value_db::interface::KeyValueDbDyn, session::session_id::SessionId,
         unit_of_work::UnitOfWork,
     },
     user::user_session::user_session_::UserSession,
@@ -9,12 +9,12 @@ use crate::{
 use async_trait::async_trait;
 
 pub struct KeyValueDb {
-    session_by_session_id: KeyValueDbRef,
-    session_id_by_user_id: KeyValueDbRef,
+    session_by_session_id: KeyValueDbDyn,
+    session_id_by_user_id: KeyValueDbDyn,
 }
 
 impl KeyValueDb {
-    pub fn new(key_value_db: KeyValueDbRef) -> Self {
+    pub fn new(key_value_db: KeyValueDbDyn) -> Self {
         Self {
             session_by_session_id: key_value_db
                 .clone()

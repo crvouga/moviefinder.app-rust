@@ -4,7 +4,7 @@ use async_trait::async_trait;
 
 use crate::{core::tmdb_api::TmdbApi, media::genre::genre::Genre};
 
-use super::interface::GenreDb;
+use super::interface::MediaGenreDb;
 
 pub struct Tmdb {
     tmdb_api: Arc<TmdbApi>,
@@ -17,7 +17,7 @@ impl Tmdb {
 }
 
 #[async_trait]
-impl GenreDb for Tmdb {
+impl MediaGenreDb for Tmdb {
     async fn get_all(&self) -> Result<Vec<Genre>, String> {
         let movie_genres = self
             .tmdb_api

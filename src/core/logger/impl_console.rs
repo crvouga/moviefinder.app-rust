@@ -1,4 +1,4 @@
-use super::interface::Logger;
+use super::interface::{Logger, LoggerDyn};
 use std::fmt;
 use std::sync::Arc;
 
@@ -47,7 +47,7 @@ impl Logger for ConsoleLogger {
         println!("[error] {} {}\n", self.namespace_str, message);
     }
 
-    fn child(&self, name: &str) -> Arc<dyn Logger> {
+    fn child(&self, name: &str) -> LoggerDyn {
         if self.noop {
             return Arc::new(self.clone());
         }
@@ -56,7 +56,7 @@ impl Logger for ConsoleLogger {
         Arc::new(ConsoleLogger::new(namespace_new))
     }
 
-    fn noop(&self) -> Arc<dyn Logger> {
+    fn noop(&self) -> LoggerDyn {
         Arc::new(ConsoleLogger {
             noop: true,
             namespace: vec![],

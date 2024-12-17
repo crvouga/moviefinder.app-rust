@@ -1,10 +1,16 @@
 #![allow(dead_code)]
 use crate::{
     core::{
-        db_conn_sql::{self, interface::DbConnSql},
-        http::client::HttpClient,
-        key_value_db::{self, interface::KeyValueDb},
-        logger::{impl_console::ConsoleLogger, interface::Logger},
+        db_conn_sql::{self, interface::DbConnSqlDyn},
+        http::{self, client::HttpClientDyn},
+        key_value_db::{
+            self,
+            interface::{KeyValueDb, KeyValueDbDyn},
+        },
+        logger::{
+            impl_console::ConsoleLogger,
+            interface::{Logger, LoggerDyn},
+        },
         phone_number::{self, country_code::country_code_db::interface::PhoneNumberCountryCodeDb},
         tmdb_api::{self, TmdbApi},
         twilio_api::TwilioApi,
@@ -17,10 +23,10 @@ use crate::{
     info,
     media::{
         self,
-        genre::genre_db::{self, interface::GenreDb},
+        genre::genre_db::{self, interface::MediaGenreDb},
         interaction::interaction_db::interface::MediaInteractionDb,
         media_db::{self, interface::MediaDb},
-        person::person_db::{self, interface::PersonDb},
+        person::person_db::{self, interface::MediaPersonDb},
     },
     user::{
         login_with_sms::verify_sms::{self, interface::VerifySms},
@@ -33,21 +39,21 @@ use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Ctx {
-    pub key_value_db: Arc<dyn KeyValueDb>,
-    pub db_conn_sql: Arc<dyn DbConnSql>,
-    pub http_client: Arc<HttpClient>,
+    pub key_value_db: KeyValueDbDyn,
+    pub db_conn_sql: DbConnSqlDyn,
+    pub http_client: HttpClientDyn,
+    pub logger: LoggerDyn,
     pub tmdb_api: Arc<TmdbApi>,
     pub twilio_api: Arc<TwilioApi>,
-    pub genre_db: Arc<dyn GenreDb>,
-    pub person_db: Arc<dyn PersonDb>,
+    pub media_genre_db: Arc<dyn MediaGenreDb>,
+    pub media_person_db: Arc<dyn MediaPersonDb>,
     pub media_db: Arc<dyn MediaDb>,
     pub media_interaction_db: Arc<dyn MediaInteractionDb>,
-    pub logger: Arc<dyn Logger>,
     pub feed_db: Arc<dyn FeedDb>,
     pub feed_tags_db: Arc<dyn FeedTagDb>,
     pub feed_session_mapping_db: Arc<dyn FeedSessionMappingDb>,
     pub feed_tags_form_state_db: Arc<FeedTagsFormStateDb>,
-    pub verify_sms: Arc<dyn VerifySms>,
+    pub user_verify_sms: Arc<dyn VerifySms>,
     pub user_account_db: Arc<dyn UserAccountDb>,
     pub user_profile_db: Arc<dyn UserProfileDb>,
     pub user_session_db: Arc<dyn UserSessionDb>,
@@ -60,8 +66,10 @@ impl Ctx {
 
         info!(logger, "env stage: {:?}", env.stage);
 
-        let http_client =
-            Arc::new(HttpClient::new(logger.clone()).simulate_latency(env.simulate_latency));
+        let http_client = Arc::new(
+            http::client::impl_reqwest::ImplReqwest::new(logger.clone())
+                .simulate_latency(env.simulate_latency),
+        );
 
         let db_conn_sql = Arc::new(
             db_conn_sql::impl_postgres::Postgres::new(logger.noop(), &env.database_url)
@@ -187,15 +195,15 @@ impl Ctx {
             key_value_db,
             db_conn_sql,
             tmdb_api,
-            genre_db,
-            person_db,
+            media_genre_db: genre_db,
+            media_person_db: person_db,
             media_db,
             media_interaction_db,
             feed_db,
             feed_tags_db,
             feed_session_mapping_db,
             feed_tags_form_state_db,
-            verify_sms,
+            user_verify_sms: verify_sms,
             user_account_db,
             user_profile_db,
             user_session_db,

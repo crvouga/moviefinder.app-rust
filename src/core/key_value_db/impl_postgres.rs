@@ -1,10 +1,8 @@
-use std::{sync::Arc, vec};
-
 use super::interface::{to_namespaced_key, KeyValueDb};
 use crate::{
     core::{
-        db_conn_sql::{self, interface::DbConnSqlRef},
-        logger::interface::Logger,
+        db_conn_sql::{self, interface::DbConnSqlDyn},
+        logger::interface::LoggerDyn,
         sql::{Sql, SqlPrimitive, SqlVarType},
         unit_of_work::UnitOfWork,
     },
@@ -13,15 +11,16 @@ use crate::{
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::vec;
 
 pub struct Postgres {
-    db_conn_sql: DbConnSqlRef,
+    db_conn_sql: DbConnSqlDyn,
     namespace: Vec<String>,
-    logger: Arc<dyn Logger>,
+    logger: LoggerDyn,
 }
 
 impl Postgres {
-    pub fn new(logger: Arc<dyn Logger>, db_conn_sql: DbConnSqlRef) -> Self {
+    pub fn new(logger: LoggerDyn, db_conn_sql: DbConnSqlDyn) -> Self {
         Self {
             logger: logger.child("key_value_db_postgres"),
             db_conn_sql,

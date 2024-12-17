@@ -1,24 +1,21 @@
-use std::{sync::Arc, time::Duration};
-
-use async_trait::async_trait;
-use serde_json::{self, Value};
-use tokio_postgres::{self, Client, Error, NoTls};
-
+use super::interface::DbConnSql;
 use crate::{
-    core::{logger::interface::Logger, sql::Sql},
+    core::{logger::interface::LoggerDyn, sql::Sql},
     debug, error,
 };
-
-use super::interface::DbConnSql;
+use async_trait::async_trait;
+use serde_json::{self, Value};
+use std::time::Duration;
+use tokio_postgres::{self, Client, Error, NoTls};
 
 pub struct Postgres {
     client: tokio_postgres::Client,
     simulate_latency: Option<Duration>,
-    logger: Arc<dyn Logger>,
+    logger: LoggerDyn,
 }
 
 impl Postgres {
-    pub async fn new(logger_parent: Arc<dyn Logger>, database_url: &str) -> Result<Self, String> {
+    pub async fn new(logger_parent: LoggerDyn, database_url: &str) -> Result<Self, String> {
         if database_url.trim().is_empty() {
             return Err("Database URL is empty".to_string());
         }

@@ -1,34 +1,38 @@
+use crate::core::http::method;
+use crate::core::http::request::Request;
 use crate::core::http::response::Response;
-use crate::core::logger::interface::Logger;
+use crate::core::logger::interface::LoggerDyn;
 use crate::core::url::Url;
 use crate::debug;
+use async_trait::async_trait;
 use reqwest::header::{HeaderName, HeaderValue};
 use reqwest::Client;
 use std::collections::HashMap;
-use std::sync::Arc;
 use tokio::time::Duration;
 
-use super::request::Request;
+use super::HttpClient;
 
-pub struct HttpClient {
+pub struct ImplReqwest {
     simulate_latency: Option<Duration>,
-    logger: Arc<dyn Logger>,
+    logger: LoggerDyn,
 }
 
-impl HttpClient {
-    pub fn new(logger: Arc<dyn Logger>) -> Self {
+impl ImplReqwest {
+    pub fn new(logger: LoggerDyn) -> Self {
         Self {
             simulate_latency: None,
             logger: logger.child("http_client"),
         }
     }
-
     pub fn simulate_latency(mut self, duration: Option<Duration>) -> Self {
         self.simulate_latency = duration;
         self
     }
+}
 
-    pub async fn send(&self, request: Request) -> Result<Response, std::io::Error> {
+#[async_trait]
+impl HttpClient for ImplReqwest {
+    async fn send(&self, request: Request) -> Result<Response, std::io::Error> {
         debug!(self.logger, "send {:?}", request);
 
         if let Some(dur) = self.simulate_latency {
@@ -70,18 +74,18 @@ impl Request {
     }
 }
 
-impl Into<reqwest::Method> for super::method::Method {
+impl Into<reqwest::Method> for method::Method {
     fn into(self) -> reqwest::Method {
         match self {
-            super::method::Method::Get => reqwest::Method::GET,
-            super::method::Method::Post => reqwest::Method::POST,
-            super::method::Method::Put => reqwest::Method::PUT,
-            super::method::Method::Delete => reqwest::Method::DELETE,
-            super::method::Method::Patch => reqwest::Method::PATCH,
-            super::method::Method::Options => reqwest::Method::OPTIONS,
-            super::method::Method::Head => reqwest::Method::HEAD,
-            super::method::Method::Connect => reqwest::Method::CONNECT,
-            super::method::Method::Trace => reqwest::Method::TRACE,
+            method::Method::Get => reqwest::Method::GET,
+            method::Method::Post => reqwest::Method::POST,
+            method::Method::Put => reqwest::Method::PUT,
+            method::Method::Delete => reqwest::Method::DELETE,
+            method::Method::Patch => reqwest::Method::PATCH,
+            method::Method::Options => reqwest::Method::OPTIONS,
+            method::Method::Head => reqwest::Method::HEAD,
+            method::Method::Connect => reqwest::Method::CONNECT,
+            method::Method::Trace => reqwest::Method::TRACE,
         }
     }
 }

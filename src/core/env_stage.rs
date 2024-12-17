@@ -28,6 +28,7 @@ impl EnvStage {
         *self == EnvStage::Local
     }
 
+    #[allow(dead_code)]
     pub fn is_test(&self) -> bool {
         *self == EnvStage::Test
     }

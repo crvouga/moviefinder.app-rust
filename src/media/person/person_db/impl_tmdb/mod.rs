@@ -1,6 +1,6 @@
 use crate::{
     core::{
-        logger::interface::Logger,
+        logger::interface::{Logger, LoggerDyn},
         pagination::Paginated,
         query::{QueryFilter, QueryOp},
         tmdb_api::{self, config::TmdbConfig, person::PersonResult, TMDB_PAGE_SIZE},
@@ -11,15 +11,15 @@ use crate::{
 use async_trait::async_trait;
 use std::sync::Arc;
 
-use super::interface::{PersonDb, PersonQuery, PersonQueryField};
+use super::interface::{MediaPersonDb, PersonQuery, PersonQueryField};
 
 pub struct Tmdb {
     tmdb_api: Arc<tmdb_api::TmdbApi>,
-    logger: Arc<dyn Logger>,
+    logger: LoggerDyn,
 }
 
 impl Tmdb {
-    pub fn new(logger: Arc<dyn Logger>, tmdb_api: Arc<tmdb_api::TmdbApi>) -> Tmdb {
+    pub fn new(logger: LoggerDyn, tmdb_api: Arc<tmdb_api::TmdbApi>) -> Tmdb {
         let logger = logger.child("impl_tmdb");
         Tmdb { tmdb_api, logger }
     }
@@ -93,7 +93,7 @@ impl Tmdb {
 }
 
 #[async_trait]
-impl PersonDb for Tmdb {
+impl MediaPersonDb for Tmdb {
     async fn query(&self, query: PersonQuery) -> Result<Paginated<Person>, String> {
         debug!(self.logger, "query {:?}", query);
 

@@ -2,12 +2,12 @@
 use crate::{
     env,
     fixture::BaseFixture,
-    media::person::person_db::{impl_tmdb, interface::PersonDb},
+    media::person::person_db::{impl_tmdb, interface::MediaPersonDb},
 };
 
 #[cfg(test)]
 pub struct Fixture {
-    pub person_db: Box<dyn PersonDb>,
+    pub person_db: Box<dyn MediaPersonDb>,
 }
 
 #[cfg(test)]

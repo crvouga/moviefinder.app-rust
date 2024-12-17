@@ -1,17 +1,17 @@
 use super::interface::UserAccountDb;
 use crate::{
-    core::{key_value_db::interface::KeyValueDbRef, unit_of_work::UnitOfWork},
+    core::{key_value_db::interface::KeyValueDbDyn, unit_of_work::UnitOfWork},
     user::{user_account::user_account_::UserAccount, user_id::UserId},
 };
 use async_trait::async_trait;
 
 pub struct KeyValueDb {
-    account_by_user_id: KeyValueDbRef,
-    user_id_by_phone_number: KeyValueDbRef,
+    account_by_user_id: KeyValueDbDyn,
+    user_id_by_phone_number: KeyValueDbDyn,
 }
 
 impl KeyValueDb {
-    pub fn new(key_value_db: KeyValueDbRef) -> Self {
+    pub fn new(key_value_db: KeyValueDbDyn) -> Self {
         Self {
             account_by_user_id: key_value_db
                 .clone()

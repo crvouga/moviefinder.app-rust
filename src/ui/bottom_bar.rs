@@ -2,7 +2,7 @@ use crate::{
     core::{
         html::{div, Elem},
         ui::{
-            button_group::{ButtonGroupMember, ButtonGroup},
+            button_group::{ButtonGroup, ButtonGroupMember},
             icon,
         },
     },

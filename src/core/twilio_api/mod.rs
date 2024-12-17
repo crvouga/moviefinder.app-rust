@@ -1,11 +1,9 @@
-use super::base64;
-use crate::core::http::client::HttpClient;
-use std::sync::Arc;
+use super::{base64, http::client::HttpClientDyn};
 
 pub mod verify;
 
 pub struct TwilioApi {
-    http_client: Arc<HttpClient>,
+    http_client: HttpClientDyn,
     twilio_service_sid: String,
     twilio_auth_token: String,
     twilio_account_sid: String,
@@ -13,7 +11,7 @@ pub struct TwilioApi {
 
 impl TwilioApi {
     pub fn new(
-        http_client: Arc<HttpClient>,
+        http_client: HttpClientDyn,
         twilio_service_sid: String,
         twilio_auth_token: String,
         twilio_account_sid: String,

@@ -23,8 +23,8 @@ mod tests {
 
         fixtures.push(Fixture {
             feed_tag_db: Box::new(feed_tag_db::impl_poly::Poly::new(
-                base.ctx.genre_db,
-                base.ctx.person_db,
+                base.ctx.media_genre_db,
+                base.ctx.media_person_db,
             )),
         });
 

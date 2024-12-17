@@ -9,10 +9,10 @@ pub struct IconButton {
 }
 
 impl IconButton {
-    pub fn id(mut self, id: &str) -> Self {
-        self.id = Some(id.to_string());
-        self
-    }
+    // pub fn id(mut self, id: &str) -> Self {
+    //     self.id = Some(id.to_string());
+    //     self
+    // }
 
     pub fn icon(mut self, icon: impl FnOnce(String) -> Elem + 'static) -> Self {
         self.icon = Some(Box::new(icon));

@@ -14,6 +14,7 @@ where
     T: Clone,
 {
     /// Creates a new history with the given present state.
+    #[allow(dead_code)]
     pub fn new(present: T) -> Self {
         Self {
             past: Vec::new(),

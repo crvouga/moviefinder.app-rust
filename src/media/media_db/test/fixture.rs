@@ -3,7 +3,7 @@ use crate::{
     env,
     fixture::BaseFixture,
     media::{
-        genre::{genre_db::interface::GenreDb, genre_id::GenreId},
+        genre::{genre_db::interface::MediaGenreDb, genre_id::GenreId},
         media_db::{impl_tmdb, interface::MediaDb},
     },
 };
@@ -13,7 +13,7 @@ use std::sync::Arc;
 #[cfg(test)]
 pub struct Fixture {
     pub media_db: Box<dyn MediaDb>,
-    pub genre_db: Arc<dyn GenreDb>,
+    pub genre_db: Arc<dyn MediaGenreDb>,
 }
 
 #[cfg(test)]
@@ -43,7 +43,7 @@ pub async fn fixtures() -> Vec<Fixture> {
                 base_fixture.ctx.logger.clone(),
                 base_fixture.ctx.tmdb_api.clone(),
             )),
-            genre_db: base_fixture.ctx.genre_db,
+            genre_db: base_fixture.ctx.media_genre_db,
         };
 
         fixtures.push(fixture);

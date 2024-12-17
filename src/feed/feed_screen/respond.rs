@@ -109,7 +109,7 @@ pub async fn respond(
                 .unwrap_or_default();
 
             if feed_items.is_empty() {
-                w.send_fragment(view_slide_bottom_empty()).await?;
+                fragments(view_slide_bottom_empty()).send(w).await?;
 
                 return Ok(());
             }

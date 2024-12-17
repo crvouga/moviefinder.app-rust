@@ -12,6 +12,6 @@ pub enum PersonQueryField {
 pub type PersonQuery = Query<PersonQueryField>;
 
 #[async_trait]
-pub trait PersonDb: Send + Sync {
+pub trait MediaPersonDb: Send + Sync {
     async fn query(&self, query: PersonQuery) -> Result<Paginated<Person>, String>;
 }

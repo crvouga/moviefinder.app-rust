@@ -9,4 +9,4 @@ pub trait DbConnSql: Send + Sync {
     async fn query(&self, query: &Sql) -> Result<Vec<Value>, Error>;
 }
 
-pub type DbConnSqlRef = Arc<dyn DbConnSql>;
+pub type DbConnSqlDyn = Arc<dyn DbConnSql>;

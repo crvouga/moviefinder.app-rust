@@ -17,4 +17,4 @@ pub fn to_namespaced_key(namespace: &[String], key: &str) -> String {
     namespace.join(SEPARATOR) + SEPARATOR + key
 }
 
-pub type KeyValueDbRef = Arc<dyn KeyValueDb>;
+pub type KeyValueDbDyn = Arc<dyn KeyValueDb>;

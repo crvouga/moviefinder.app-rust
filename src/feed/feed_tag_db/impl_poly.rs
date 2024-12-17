@@ -7,18 +7,18 @@ use crate::{
         query::{Query, QueryFilter, QueryOp},
     },
     feed::feed_tag::FeedTag,
-    media::genre::genre_db::interface::GenreDb,
-    media::person::person_db::interface::{PersonDb, PersonQueryField},
+    media::genre::genre_db::interface::MediaGenreDb,
+    media::person::person_db::interface::{MediaPersonDb, PersonQueryField},
 };
 use async_trait::async_trait;
 
 pub struct Poly {
-    genre_db: Arc<dyn GenreDb>,
-    person_db: Arc<dyn PersonDb>,
+    genre_db: Arc<dyn MediaGenreDb>,
+    person_db: Arc<dyn MediaPersonDb>,
 }
 
 impl Poly {
-    pub fn new(genre_db: Arc<dyn GenreDb>, person_db: Arc<dyn PersonDb>) -> Self {
+    pub fn new(genre_db: Arc<dyn MediaGenreDb>, person_db: Arc<dyn MediaPersonDb>) -> Self {
         Self {
             genre_db,
             person_db,

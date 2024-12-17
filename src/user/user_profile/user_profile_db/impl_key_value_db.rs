@@ -1,17 +1,17 @@
 use super::interface::UserProfileDb;
 use crate::{
-    core::{key_value_db::interface::KeyValueDbRef, unit_of_work::UnitOfWork},
+    core::{key_value_db::interface::KeyValueDbDyn, unit_of_work::UnitOfWork},
     user::{user_id::UserId, user_profile::user_profile_::UserProfile},
 };
 use async_trait::async_trait;
 
 pub struct KeyValueDb {
-    profile_by_user_id: KeyValueDbRef,
-    user_id_by_username: KeyValueDbRef,
+    profile_by_user_id: KeyValueDbDyn,
+    user_id_by_username: KeyValueDbDyn,
 }
 
 impl KeyValueDb {
-    pub fn new(key_value_db: KeyValueDbRef) -> Self {
+    pub fn new(key_value_db: KeyValueDbDyn) -> Self {
         Self {
             profile_by_user_id: key_value_db
                 .clone()

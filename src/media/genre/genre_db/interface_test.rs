@@ -6,11 +6,11 @@ mod tests {
     use crate::{
         env::TestEnv,
         fixture::BaseFixture,
-        media::genre::genre_db::{impl_tmdb::Tmdb, interface::GenreDb},
+        media::genre::genre_db::{impl_tmdb::Tmdb, interface::MediaGenreDb},
     };
 
     struct Fixture {
-        genre_db: Arc<dyn GenreDb + 'static>,
+        genre_db: Arc<dyn MediaGenreDb + 'static>,
     }
 
     async fn fixtures() -> Vec<Fixture> {

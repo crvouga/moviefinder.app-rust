@@ -5,9 +5,11 @@ pub trait Logger: Send + Sync {
     fn info(&self, args: fmt::Arguments);
     fn debug(&self, args: fmt::Arguments);
     fn error(&self, args: fmt::Arguments);
-    fn child(&self, name: &str) -> Arc<dyn Logger>;
-    fn noop(&self) -> Arc<dyn Logger>;
+    fn child(&self, name: &str) -> LoggerDyn;
+    fn noop(&self) -> LoggerDyn;
 }
+
+pub type LoggerDyn = Arc<dyn Logger>;
 
 #[macro_export]
 macro_rules! info {

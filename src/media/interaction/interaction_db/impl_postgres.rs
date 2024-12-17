@@ -1,7 +1,7 @@
 use super::interface::MediaInteractionDb;
 use crate::{
     core::{
-        db_conn_sql::{self, interface::DbConnSqlRef},
+        db_conn_sql::{self, interface::DbConnSqlDyn},
         sql::{Sql, SqlPrimitive, SqlVarType},
         unit_of_work::UnitOfWork,
     },
@@ -18,11 +18,11 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 pub struct Postgres {
-    db_conn_sql: DbConnSqlRef,
+    db_conn_sql: DbConnSqlDyn,
 }
 
 impl Postgres {
-    pub fn new(db_conn_sql: DbConnSqlRef) -> Self {
+    pub fn new(db_conn_sql: DbConnSqlDyn) -> Self {
         Self { db_conn_sql }
     }
 }

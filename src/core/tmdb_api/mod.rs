@@ -1,10 +1,10 @@
 use super::{
     dynamic_data::DynamicData,
-    http::method::Method,
+    http::{client::HttpClientDyn, method::Method},
     url::{query_params::QueryParams, Url},
 };
-use crate::core::http::{client::HttpClient, form_data::FormData, request::Request};
-use std::{collections::HashMap, sync::Arc};
+use crate::core::http::{form_data::FormData, request::Request};
+use std::collections::HashMap;
 
 pub mod config;
 pub mod discover_movie;
@@ -14,14 +14,13 @@ pub mod person;
 pub mod person_popular;
 pub mod person_search;
 
-#[derive(Clone)]
 pub struct TmdbApi {
     tmdb_api_read_access_token: String,
-    http_client: Arc<HttpClient>,
+    http_client: HttpClientDyn,
 }
 
 impl TmdbApi {
-    pub fn new(http_client: Arc<HttpClient>, tmdb_api_read_access_token: String) -> TmdbApi {
+    pub fn new(http_client: HttpClientDyn, tmdb_api_read_access_token: String) -> TmdbApi {
         TmdbApi {
             http_client,
             tmdb_api_read_access_token,

@@ -29,14 +29,6 @@ impl ServerSentEvent {
         self.data(&format!("mergeMode {}", mode))
     }
 
-    pub fn data_merge_mode_outer(&mut self) -> &mut Self {
-        self.data_merge_mode("outer")
-    }
-
-    pub fn data_merge_mode_before(&mut self) -> &mut Self {
-        self.data_merge_mode("before")
-    }
-
     pub fn data_selector(&mut self, selector: &str) -> &mut Self {
         self.data(&format!("selector {}", selector))
     }

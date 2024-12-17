@@ -36,11 +36,11 @@ impl ImageSet {
         }
     }
 
-    pub fn to_lowest_res(&self) -> &str {
-        let maybe_src = self.lowest_to_highest_res.first();
-        match maybe_src {
-            Some(src) => src,
-            None => "",
-        }
-    }
+    // pub fn to_lowest_res(&self) -> &str {
+    //     let maybe_src = self.lowest_to_highest_res.first();
+    //     match maybe_src {
+    //         Some(src) => src,
+    //         None => "",
+    //     }
+    // }
 }

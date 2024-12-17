@@ -1,16 +1,16 @@
 use super::interface::FeedDb;
 use crate::{
-    core::{key_value_db::interface::KeyValueDbRef, unit_of_work::UnitOfWork},
+    core::{key_value_db::interface::KeyValueDbDyn, unit_of_work::UnitOfWork},
     feed::{feed_::Feed, feed_id::FeedId},
 };
 use async_trait::async_trait;
 
 pub struct KeyValueDb {
-    key_value_db: KeyValueDbRef,
+    key_value_db: KeyValueDbDyn,
 }
 
 impl KeyValueDb {
-    pub fn new(key_value_db: KeyValueDbRef) -> Self {
+    pub fn new(key_value_db: KeyValueDbDyn) -> Self {
         Self {
             key_value_db: key_value_db.child(vec!["feed".to_string()]).into(),
         }

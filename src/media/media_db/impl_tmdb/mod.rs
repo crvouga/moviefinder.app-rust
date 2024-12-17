@@ -1,6 +1,10 @@
 use super::interface::{MediaDb, MediaQuery};
 use crate::{
-    core::{logger::interface::Logger, pagination::Paginated, tmdb_api::TmdbApi},
+    core::{
+        logger::interface::{Logger, LoggerDyn},
+        pagination::Paginated,
+        tmdb_api::TmdbApi,
+    },
     info,
     media::media_::Media,
 };
@@ -12,11 +16,11 @@ pub mod tmdb_query_plan;
 pub mod tmdb_query_plan_item;
 pub struct Tmdb {
     tmdb_api: Arc<TmdbApi>,
-    logger: Arc<dyn Logger>,
+    logger: LoggerDyn,
 }
 
 impl Tmdb {
-    pub fn new(logger: Arc<dyn Logger>, tmdb_api: Arc<TmdbApi>) -> Tmdb {
+    pub fn new(logger: LoggerDyn, tmdb_api: Arc<TmdbApi>) -> Tmdb {
         let logger_new = logger.child("impl_tmdb");
         Tmdb {
             tmdb_api,

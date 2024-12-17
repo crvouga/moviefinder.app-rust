@@ -142,33 +142,33 @@ impl DataOn {
         }
     }
 
-    pub fn mousedown(self) -> Self {
-        Self {
-            event: "mousedown".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
+    // pub fn mousedown(self) -> Self {
+    //     Self {
+    //         event: "mousedown".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
 
-    pub fn pointerdown(self) -> Self {
-        Self {
-            event: "pointerdown".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
+    // pub fn pointerdown(self) -> Self {
+    //     Self {
+    //         event: "pointerdown".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
 
-    pub fn pointerup(self) -> Self {
-        Self {
-            event: "pointerup".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
+    // pub fn pointerup(self) -> Self {
+    //     Self {
+    //         event: "pointerup".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
 
-    pub fn press_up(self) -> Self {
-        self.click()
-    }
+    // pub fn press_up(self) -> Self {
+    //     self.click()
+    // }
 
     pub fn press_down(self) -> Self {
         self.click()
@@ -294,8 +294,8 @@ impl Attr for DataOn {
 
 impl Elem {
     pub fn src_datastar(self) -> Self {
-        self.src("./datastar-0-21-3-a97359219fc18db5/datastar-0-21-3-a97359219fc18db5.js")
-        // .src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
+        // self.src("./datastar-0-21-3-a97359219fc18db5/datastar-0-21-3-a97359219fc18db5.js")
+        self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
     }
 
     pub fn data_bind(self, value: &str) -> Self {
@@ -386,9 +386,9 @@ impl Fragments {
         self
     }
 
-    pub fn merge_mode_outer(&mut self) -> &mut Self {
-        self.merge_mode("outer")
-    }
+    // pub fn merge_mode_outer(&mut self) -> &mut Self {
+    //     self.merge_mode("outer")
+    // }
 
     pub fn merge_mode_before(&mut self) -> &mut Self {
         self.merge_mode("before")

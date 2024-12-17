@@ -19,7 +19,7 @@ pub async fn send_code(ctx: &Ctx, phone_number: &str) -> Result<(), SendCodeErro
         ));
     }
 
-    ctx.verify_sms
+    ctx.user_verify_sms
         .send_code(&phone_number)
         .await
         .map_err(|e| match e {
@@ -47,7 +47,7 @@ pub async fn verify_code(
         return Err(VerifyCodeError::InvalidCode("Code is required".to_string()));
     }
 
-    ctx.verify_sms
+    ctx.user_verify_sms
         .verify_code(&phone_number, &code_input)
         .await
         .map_err(|e| match e {
