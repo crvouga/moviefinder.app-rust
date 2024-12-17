@@ -1,4 +1,4 @@
-use super::{base64, http::client::HttpClientDyn};
+use super::{base::base64, http::client::HttpClientDyn};
 
 pub mod verify;
 

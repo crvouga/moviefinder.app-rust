@@ -6,7 +6,7 @@ const SEPARATOR: &str = "___";
 pub fn encode<T: Serialize + Clone>(data: T) -> String {
     let encoded = serde_json::to_string(&data).unwrap_or("".to_owned());
 
-    let base_64_encoded = core::base64::encode(&encoded);
+    let base_64_encoded = core::base::base64::encode(&encoded);
 
     let human_friendly = to_human_friendly_str(data);
 
@@ -22,7 +22,7 @@ pub fn decode<T: for<'de> Deserialize<'de>>(encoded_data: &str) -> Result<T, Str
 
     let second = separated.get(1).unwrap_or(&"");
 
-    let decoded_str = core::base64::decode(second)?;
+    let decoded_str = core::base::base64::decode(second)?;
 
     serde_json::from_str(&decoded_str).map_err(|e| e.to_string())
 }

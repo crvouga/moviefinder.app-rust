@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::{
-        base32,
+        base::base32,
         query::{QueryFilter, QueryOp},
         ui::chip::{Chip, ChipSize},
     },

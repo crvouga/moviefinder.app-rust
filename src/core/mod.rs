@@ -1,5 +1,4 @@
-pub mod base32;
-pub mod base64;
+pub mod base;
 pub mod css;
 pub mod datastar;
 pub mod db_conn_sql;

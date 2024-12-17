@@ -29,6 +29,7 @@
     "Reswap",
     "retarget",
     "serde",
+    "splitn",
     "sslmode",
     "stylesheet",
     "swiperslidechange",
