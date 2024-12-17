@@ -10,7 +10,7 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         js::Js,
-        phone_number::{country_code::PhoneNumerCountryCode, ensure_country_code},
+        phone_number::{country_code::PhoneNumberCountryCode, ensure_country_code},
         ui::{
             button::Button,
             select::{Select, SelectOption},
@@ -190,7 +190,7 @@ pub async fn respond(
     }
 }
 
-fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
+fn view_screen_enter_phone(country_codes: Vec<PhoneNumberCountryCode>) -> Elem {
     form()
         .class("w-full h-full flex flex-col")
         .data_signal(SIGNAL_PHONE_NUMBER, "")
@@ -253,7 +253,7 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
         )
 }
 
-fn view_select_country_code_input(country_codes: Vec<PhoneNumerCountryCode>) -> Elem {
+fn view_select_country_code_input(country_codes: Vec<PhoneNumberCountryCode>) -> Elem {
     let options: Vec<SelectOption> = country_codes
         .iter()
         .map(|c| {

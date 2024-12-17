@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 pub mod country_code_db;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PhoneNumerCountryCode {
+pub struct PhoneNumberCountryCode {
     pub alpha2: String,
     pub alpha3: String,
     pub country_code: String,
@@ -12,7 +12,7 @@ pub struct PhoneNumerCountryCode {
     pub phone_number_lengths: Vec<u8>,
 }
 
-impl PhoneNumerCountryCode {
+impl PhoneNumberCountryCode {
     pub fn to_emoji(&self) -> Option<String> {
         let country = self.alpha2.as_str();
 
@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn test_to_emoji() {
-        let country_code = PhoneNumerCountryCode {
+        let country_code = PhoneNumberCountryCode {
             alpha2: "US".to_string(),
             alpha3: "USA".to_string(),
             country_code: "1".to_string(),
