@@ -61,7 +61,7 @@ impl UserSessionDb for KeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn upsert(&self, uow: UnitOfWork, session: &UserSession) -> Result<(), std::io::Error> {
+    async fn put(&self, uow: UnitOfWork, session: &UserSession) -> Result<(), std::io::Error> {
         let session_id = session.session_id.as_str().to_string();
         let user_id = session.user_id.as_str().to_string();
 

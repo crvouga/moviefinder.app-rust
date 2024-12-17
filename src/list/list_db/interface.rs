@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 pub enum ListQueryField {
     #[default]
     UserId,
+    ListId,
 }
 
 pub type ListQuery = Query<ListQueryField>;
@@ -16,5 +17,5 @@ pub type ListQuery = Query<ListQueryField>;
 #[async_trait]
 pub trait ListDb: Send + Sync {
     async fn query(&self, query: ListQuery) -> Result<Paginated<List>, std::io::Error>;
-    async fn upsert(&self, uow: UnitOfWork, list: List) -> Result<(), std::io::Error>;
+    async fn put(&self, uow: UnitOfWork, list: List) -> Result<(), std::io::Error>;
 }

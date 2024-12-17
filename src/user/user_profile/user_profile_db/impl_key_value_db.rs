@@ -44,11 +44,7 @@ impl UserProfileDb for KeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn upsert_one(
-        &self,
-        uow: UnitOfWork,
-        profile: &UserProfile,
-    ) -> Result<(), std::io::Error> {
+    async fn put(&self, uow: UnitOfWork, profile: &UserProfile) -> Result<(), std::io::Error> {
         let user_id = profile.user_id.as_str().to_string();
         let username = profile.username.clone();
 

@@ -97,15 +97,11 @@ async fn transact_user_logged_in(
     session: &UserSession,
 ) -> Result<(), std::io::Error> {
     UnitOfWork::transact(|uow: UnitOfWork| async move {
-        ctx.user_account_db
-            .upsert_one(uow.clone(), &account)
-            .await?;
+        ctx.user_account_db.put(uow.clone(), &account).await?;
 
-        ctx.user_profile_db
-            .upsert_one(uow.clone(), &profile)
-            .await?;
+        ctx.user_profile_db.put(uow.clone(), &profile).await?;
 
-        ctx.user_session_db.upsert(uow.clone(), &session).await?;
+        ctx.user_session_db.put(uow.clone(), &session).await?;
 
         Ok(())
     })

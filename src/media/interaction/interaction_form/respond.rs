@@ -94,7 +94,7 @@ async fn get_interactions_by_media_id(
 
     let all_interactions = ctx
         .media_interaction_db
-        .list_by_user_media(&user_id, &media_ids.iter().collect())
+        .find_by_user_id_and_media_ids(&user_id, &media_ids.iter().collect())
         .await
         .unwrap_or_default();
 

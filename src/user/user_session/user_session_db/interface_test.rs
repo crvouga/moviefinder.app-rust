@@ -38,7 +38,7 @@ mod tests {
                 .user_session_db
                 .find_by_session_id(&session.session_id)
                 .await;
-            let put = f.user_session_db.upsert(uow, &session).await;
+            let put = f.user_session_db.put(uow, &session).await;
             let after = f
                 .user_session_db
                 .find_by_session_id(&session.session_id)
@@ -58,7 +58,7 @@ mod tests {
             let uow = UnitOfWork::new();
 
             f.user_session_db
-                .upsert(uow.clone(), &session)
+                .put(uow.clone(), &session)
                 .await
                 .unwrap();
 

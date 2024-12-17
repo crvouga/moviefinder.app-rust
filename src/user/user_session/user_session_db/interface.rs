@@ -14,6 +14,6 @@ pub trait UserSessionDb: Send + Sync {
         &self,
         session_id: &SessionId,
     ) -> Result<Option<UserSession>, std::io::Error>;
-    async fn upsert(&self, uow: UnitOfWork, session: &UserSession) -> Result<(), std::io::Error>;
+    async fn put(&self, uow: UnitOfWork, session: &UserSession) -> Result<(), std::io::Error>;
     async fn zap(&self, uow: UnitOfWork, session_id: &SessionId) -> Result<(), std::io::Error>;
 }

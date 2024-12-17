@@ -16,9 +16,5 @@ pub trait UserAccountDb: Send + Sync {
         user_id: &UserId,
     ) -> Result<Option<UserAccount>, std::io::Error>;
 
-    async fn upsert_one(
-        &self,
-        uow: UnitOfWork,
-        account: &UserAccount,
-    ) -> Result<(), std::io::Error>;
+    async fn put(&self, uow: UnitOfWork, account: &UserAccount) -> Result<(), std::io::Error>;
 }

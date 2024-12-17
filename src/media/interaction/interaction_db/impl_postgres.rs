@@ -87,7 +87,7 @@ fn parse_row_json(value: serde_json::Value) -> Result<Row, std::io::Error> {
 
 #[async_trait]
 impl MediaInteractionDb for Postgres {
-    async fn list_by_user_media(
+    async fn find_by_user_id_and_media_ids(
         &self,
         user_id: &UserId,
         media_ids: &Vec<&MediaId>,
@@ -133,6 +133,49 @@ impl MediaInteractionDb for Postgres {
 
         Ok(rows)
     }
+
+    async fn find_by_user_id_and_interaction_name(
+        &self,
+        user_id: &UserId,
+        interaction_name: &InteractionName,
+    ) -> Result<Vec<MediaInteraction>, std::io::Error> {
+        let mut query = Sql::new(
+            r#"
+            SELECT 
+                id,
+                media_id,
+                user_id,
+                interaction_name::TEXT,
+                interaction_action::TEXT,
+                created_at_posix,
+                updated_at_posix 
+            FROM 
+                media_interaction 
+            WHERE 
+                    user_id = :user_id 
+                AND interaction_name = :interaction_name
+            "#,
+        );
+
+        query.set(
+            "user_id",
+            SqlVarType::Primitive(SqlPrimitive::Text(user_id.as_str().to_string())),
+        );
+
+        query.set(
+            "interaction_name",
+            SqlVarType::Primitive(SqlPrimitive::Text(interaction_name.to_postgres_enum())),
+        );
+
+        let rows = db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json)
+            .await?
+            .into_iter()
+            .filter_map(|r| r.to_media_interaction())
+            .collect::<Vec<MediaInteraction>>();
+
+        Ok(rows)
+    }
+
     async fn put(
         &self,
         uow: UnitOfWork,

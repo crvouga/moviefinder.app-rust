@@ -58,7 +58,7 @@ impl UserAccountDb for KeyValueDb {
         Ok(Some(parsed))
     }
 
-    async fn upsert_one(
+    async fn put(
         &self,
         uow: UnitOfWork,
         account: &UserAccount,

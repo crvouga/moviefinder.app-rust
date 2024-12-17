@@ -92,7 +92,7 @@ pub async fn respond(
                 ..profile_existing
             };
 
-            ctx.user_profile_db.upsert_one(uow(), &profile_new).await?;
+            ctx.user_profile_db.put(uow(), &profile_new).await?;
 
             w.send_toast_dark("Profile updated").await?;
 

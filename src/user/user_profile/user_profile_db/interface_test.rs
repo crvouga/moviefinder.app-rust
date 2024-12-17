@@ -38,7 +38,7 @@ mod tests {
                 .user_profile_db
                 .find_one_by_user_id(&profile.user_id)
                 .await;
-            let put = f.user_profile_db.upsert_one(uow, &profile).await;
+            let put = f.user_profile_db.put(uow, &profile).await;
             let after = f
                 .user_profile_db
                 .find_one_by_user_id(&profile.user_id)
