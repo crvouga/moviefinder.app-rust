@@ -30,7 +30,7 @@ impl Js {
         format!("!({})", value)
     }
 
-    pub fn is_string(value: &str) -> String {
+    pub fn is_str(value: &str) -> String {
         format!("(typeof ({}) === 'string')", value)
     }
 
@@ -50,7 +50,7 @@ impl Js {
         format!("console.error('{}')", message)
     }
 
-    pub fn quote(value: &str) -> String {
+    pub fn str(value: &str) -> String {
         format!("'{}'", value)
     }
 }

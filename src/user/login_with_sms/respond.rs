@@ -73,7 +73,7 @@ pub async fn respond(
             if phone_number_input.trim().is_empty() {
                 w.send_signal(
                     SIGNAL_PHONE_NUMBER_ERROR,
-                    &Js::quote("Phone number is required"),
+                    &Js::str("Phone number is required"),
                 )
                 .await?;
 
@@ -103,7 +103,7 @@ pub async fn respond(
 
             match sent {
                 Err(SendCodeError::InvalidPhoneNumber(err)) => {
-                    w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, &Js::quote(err.as_str()))
+                    w.send_signal(SIGNAL_PHONE_NUMBER_ERROR, &Js::str(err.as_str()))
                         .await?;
 
                     w.send_script(&Js::focus("input")).await?;
@@ -159,7 +159,7 @@ pub async fn respond(
 
             match verified {
                 Err(VerifyCodeError::InvalidCode(err)) => {
-                    w.send_signal(SIGNAL_CODE_ERROR, &Js::quote(&err)).await?;
+                    w.send_signal(SIGNAL_CODE_ERROR, &Js::str(&err)).await?;
 
                     w.send_script(&Js::focus("input")).await?;
 

@@ -131,7 +131,7 @@ fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
                         .class("w-full flex flex-col items-center gap-4")
                         .child(
                             Avatar::default()
-                                .data_attributes_src(&Js::quote(&profile.to_avatar_url()))
+                                .data_attributes_src(&Js::str(&profile.to_avatar_url()))
                                 .class("size-24")
                                 .view(),
                         )

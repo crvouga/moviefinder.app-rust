@@ -49,7 +49,7 @@ pub async fn respond(
         Route::ClickedRandomSeed => {
             let avatar_seed_new = random::string(32);
 
-            w.send_signal(SIGNAL_AVATAR_SEED, &Js::quote(&avatar_seed_new))
+            w.send_signal(SIGNAL_AVATAR_SEED, &Js::str(&avatar_seed_new))
                 .await?;
 
             let profile = r.user_profile(ctx).await.unwrap_or_default();
@@ -99,24 +99,18 @@ async fn send_form_state(
     form_state: &FormState,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
-    w.send_signal(
-        SIGNAL_AVATAR_SEED,
-        &Js::quote(&form_state.history.present()),
-    )
+    w.send_signals(vec![
+        (SIGNAL_AVATAR_SEED, &Js::str(&form_state.history.present())),
+        (
+            SIGNAL_AVATAR_SEED_CAN_UNDO,
+            &form_state.history.can_undo().to_string(),
+        ),
+        (
+            SIGNAL_AVATAR_SEED_CAN_REDO,
+            &form_state.history.can_redo().to_string(),
+        ),
+    ])
     .await?;
-
-    w.send_signal(
-        SIGNAL_AVATAR_SEED_CAN_UNDO,
-        &form_state.history.can_undo().to_string(),
-    )
-    .await?;
-
-    w.send_signal(
-        SIGNAL_AVATAR_SEED_CAN_REDO,
-        &form_state.history.can_redo().to_string(),
-    )
-    .await?;
-
     Ok(())
 }
 
@@ -170,6 +164,7 @@ pub fn view_fieldset(_profile: &UserProfile) -> Elem {
                     Button::default()
                         .label("Random seed")
                         .indicator("signal_indicator_random_seed")
+                        .size_small()
                         .map_button(|e| {
                             e.data_on(|b| b.press_down().sse(&Route::ClickedRandomSeed.url()))
                         })

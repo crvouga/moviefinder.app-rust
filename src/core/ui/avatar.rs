@@ -31,7 +31,7 @@ impl Avatar {
         .child(
             span()
                 .class(&class)
-                .data_show(&Js::not(&Js::is_string(&self.data_attributes_src)))
+                .data_show(&Js::not(&Js::is_str(&self.data_attributes_src)))
                 .data_on(|b| {
                     if let Some(on_click) = &self.on_click {
                         b.press_down().js(on_click)
@@ -53,7 +53,7 @@ impl Avatar {
                 .alt("avatar")
                 .class(&class)
                 .data_attributes("src", &self.data_attributes_src)
-                .data_show(&Js::is_string(&self.data_attributes_src))
+                .data_show(&Js::is_str(&self.data_attributes_src))
                 .data_on(|b| {
                     if let Some(on_click) = &self.on_click {
                         b.press_down().js(on_click)

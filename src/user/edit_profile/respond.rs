@@ -46,11 +46,11 @@ pub async fn respond(
             w.send_signals(vec![
                 (
                     SIGNAL_USERNAME,
-                    &Js::quote(&profile.username.clone().to_string()),
+                    &Js::str(&profile.username.clone().to_string()),
                 ),
                 (
                     SIGNAL_FULL_NAME,
-                    &Js::quote(&profile.full_name.clone().unwrap_or_default()),
+                    &Js::str(&profile.full_name.clone().unwrap_or_default()),
                 ),
             ])
             .await?;
