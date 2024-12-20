@@ -4,8 +4,8 @@ use super::{
 };
 use crate::{
     core::{
-        html::Elem,
-        ui::button_group::{ButtonGroup, ButtonGroupMember},
+        html::{div, Elem},
+        ui::button_group::ButtonGroupMember,
     },
     media::{
         interaction::{interaction_action::InteractionAction, interaction_name::InteractionName},
@@ -18,12 +18,11 @@ pub fn view_interaction_form_buttons(
     media_id: MediaId,
     interaction_form: Option<InteractionForm>,
 ) -> Elem {
-    ButtonGroup::default()
-        .orientation_vertical()
-        .view()
+    div()
+        .class("flex flex-col")
         .map(|e| match interaction_form {
             None => e.children(
-                view_disabled_interaction_buttons()
+                view_interaction_buttons_disabled()
                     .into_iter()
                     .take(4)
                     .collect::<Vec<Elem>>(),
@@ -36,14 +35,14 @@ pub fn view_interaction_form_buttons(
                     available_interactions
                         .iter()
                         .map(|(interaction_name, interaction_action)| {
-                            view_interaction_button(
+                            view_interaction_button_enabled(
                                 interaction_action.clone(),
                                 interaction_name.clone(),
                                 media_id.clone(),
                             )
                         })
                         .chain(
-                            view_disabled_interaction_buttons()
+                            view_interaction_buttons_disabled()
                                 .into_iter()
                                 .skip(available_interactions.len()),
                         )
@@ -74,7 +73,7 @@ fn to_id(
     )
 }
 
-fn view_interation_bottom_button(
+fn view_interaction_bottom(
     interaction_action: &InteractionAction,
     interaction_name: &InteractionName,
 ) -> ButtonGroupMember {
@@ -84,12 +83,12 @@ fn view_interation_bottom_button(
         .id(&to_id(interaction_name, interaction_action, false))
 }
 
-fn view_interaction_button(
+fn view_interaction_button_enabled(
     interaction_action: InteractionAction,
     interaction_name: InteractionName,
     media_id: MediaId,
 ) -> Elem {
-    view_interation_bottom_button(&interaction_action, &interaction_name)
+    view_interaction_bottom(&interaction_action, &interaction_name)
         .active(is_selected(&interaction_action))
         .view()
         .data_on(|e| {
@@ -104,7 +103,7 @@ fn view_interaction_button(
         })
 }
 
-fn view_disabled_interaction_buttons() -> Vec<Elem> {
+fn view_interaction_buttons_disabled() -> Vec<Elem> {
     vec![
         (&InteractionAction::Add, &InteractionName::Seen),
         (&InteractionAction::Add, &InteractionName::NotSeen),
@@ -115,7 +114,7 @@ fn view_disabled_interaction_buttons() -> Vec<Elem> {
     ]
     .into_iter()
     .map(|(action, name)| {
-        view_interation_bottom_button(action, name)
+        view_interaction_bottom(action, name)
             .disabled(true)
             .view()
             .id(&to_id(name, action, true))

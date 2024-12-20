@@ -245,23 +245,6 @@ fn view_top_bar(model: &ViewModel) -> Elem {
         .child(view_open_controls_button())
 }
 
-fn view_slide_content_loading() -> Elem {
-    div()
-        .class("w-full h-full flex flex-col")
-        .child(
-            div().class("w-full flex-1").child(
-                Image::new()
-                    .view()
-                    .src(" ")
-                    .class("w-full h-full object-cover"),
-            ),
-        )
-        .child(interaction_form::respond::view_interaction_form(
-            &MediaId::default(),
-            None,
-        ))
-}
-
 pub fn view_screen() -> Elem {
     div()
         .id("screen")
@@ -369,13 +352,24 @@ pub fn view_slide(feed_item: &FeedItem) -> Elem {
         .child(view_slide_content(feed_item))
 }
 
+fn view_slide_content_loading() -> Elem {
+    div().class("w-full h-full flex flex-col").child(
+        div().class("w-full flex-1").child(
+            Image::new()
+                .view()
+                .src(" ")
+                .class("w-full h-full object-cover"),
+        ),
+    )
+}
+
 pub fn view_slide_content(feed_item: &FeedItem) -> Elem {
     match feed_item {
         FeedItem::Media {
             media,
             feed_index: _,
         } => div()
-            .class("w-full h-full flex flex-col content-box")
+            .class("w-full h-full flex flex-col content-box relative")
             .child(
                 Image::new()
                     .view()
@@ -396,8 +390,12 @@ pub fn view_slide_content(feed_item: &FeedItem) -> Elem {
                     .src(media.poster.to_highest_res())
                     .alt(media.title.as_str()),
             )
-            .child(interaction_form::respond::view_interaction_form(
-                &media.id, None,
-            )),
+            .child(
+                div()
+                .class("absolute bottom-0 right-0")
+                .child(
+                    interaction_form::respond::view_interaction_form(&media.id, None)
+                )
+            ),
     }
 }
