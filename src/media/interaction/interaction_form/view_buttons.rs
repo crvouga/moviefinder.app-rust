@@ -17,18 +17,20 @@ use crate::{
     ui::route::AppRoute,
 };
 
+fn view_width() -> Elem {
+    div()
+        .class("select-none opacity-0")
+        .aria_hidden_true()
+        .child_text(&"_".repeat(to_max_display_string_length()))
+}
+
 pub fn view_interaction_form_buttons(
     media_id: MediaId,
     interaction_form: Option<InteractionForm>,
 ) -> Elem {
     div()
-        .class("flex flex-col gap-2 pb-3")
-        .child(
-            div()
-                .class("select-none opacity-0")
-                .aria_hidden_true()
-                .child_text(&"a".repeat(to_max_display_string_length())),
-        )
+        .class("flex flex-col gap-2 pb-4")
+        .child(view_width())
         .map(|e| match interaction_form {
             None => e.children(
                 view_interaction_buttons_disabled()
@@ -66,12 +68,7 @@ fn is_selected(action: &InteractionAction) -> bool {
 }
 
 fn to_id(name: &InteractionName, action: &InteractionAction, disabled: bool) -> String {
-    format!(
-        "{}-{}-{}",
-        name.to_display_string(),
-        action.to_string(),
-        disabled
-    )
+    format!("{:?}-{:?}-{}", name, action, disabled)
 }
 
 fn view_interaction_button(
@@ -79,7 +76,7 @@ fn view_interaction_button(
     name: &InteractionName,
 ) -> LabelledIconButton {
     LabelledIconButton::default()
-        .icon(name.view_icon(is_selected(action), "size-8"))
+        .icon(name.view_icon(is_selected(action), "size-9"))
         .text(&name.to_display_string())
         .id(&to_id(name, action, false))
 }

@@ -391,9 +391,7 @@ pub fn view_slide_content(feed_item: &FeedItem) -> Elem {
                     .alt(media.title.as_str()),
             )
             .child(
-                div()
-                .class("absolute bottom-0 right-0")
-                .child(
+                div().class("absolute bottom-0 right-0").child(
                     interaction_form::respond::view_interaction_form(&media.id, None)
                 )
             ),
