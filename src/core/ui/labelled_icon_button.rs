@@ -48,7 +48,7 @@ impl LabelledIconButton {
         .id(&self.id)
         .child(
             div()
-            .class("flex flex-1 items-center justify-center gap-0.5 flex-col h-full cursor-pointer select-none active:opacity-75 p-2 overflow-hidden bg-black/40 rounded-full aspect-square")
+            .class("flex flex-1 items-center justify-center gap-0.5 flex-col h-full cursor-pointer select-none active:opacity-75 p-2 overflow-hidden bg-black/30 rounded-full aspect-square")
             .class(
                 if self.active && !self.disabled {
                     "text-blue-500"
@@ -59,7 +59,7 @@ impl LabelledIconButton {
             .disabled(self.disabled)
             .child(self.icon.clone().unwrap_or_else(|| frag()))
         ).child(
-            span().class("bg-black/40 rounded text-xs w-fit px-1 py-0.5").child_text(&self.text)
+            span().class("bg-black/30 rounded text-xs w-fit px-1 py-0.5").child_text(&self.text)
         )
     }
 }
