@@ -9,23 +9,23 @@ pub struct ButtonGroup {
 pub enum ButtonGroupOrientation {
     #[default]
     Horizontal,
-    Vertical,
+    // Vertical,
 }
 
 impl ButtonGroup {
-    pub fn orientation(mut self, orientation: ButtonGroupOrientation) -> Self {
-        self.orientation = orientation;
-        self
-    }
-    pub fn orientation_vertical(self) -> Self {
-        self.orientation(ButtonGroupOrientation::Vertical)
-    }
+    // pub fn orientation(mut self, orientation: ButtonGroupOrientation) -> Self {
+    //     self.orientation = orientation;
+    //     self
+    // }
+    // pub fn orientation_vertical(self) -> Self {
+    //     self.orientation(ButtonGroupOrientation::Vertical)
+    // }
     pub fn view(self) -> Elem {
         div()
             .class("flex items-center justify-center w-full border-t")
             .class(match self.orientation {
                 ButtonGroupOrientation::Horizontal => "flex-row min-h-bar",
-                ButtonGroupOrientation::Vertical => "flex-col",
+                // ButtonGroupOrientation::Vertical => "flex-col",
             })
     }
 }
@@ -45,15 +45,15 @@ impl ButtonGroupMember {
         self
     }
 
-    pub fn id(mut self, id: &str) -> Self {
-        self.id = id.to_string();
-        self
-    }
+    // pub fn id(mut self, id: &str) -> Self {
+    //     self.id = id.to_string();
+    //     self
+    // }
 
-    pub fn disabled(mut self, disabled: bool) -> Self {
-        self.disabled = disabled;
-        self
-    }
+    // pub fn disabled(mut self, disabled: bool) -> Self {
+    //     self.disabled = disabled;
+    //     self
+    // }
 
     pub fn icon(mut self, icon: Elem) -> Self {
         self.icon = Some(icon);
