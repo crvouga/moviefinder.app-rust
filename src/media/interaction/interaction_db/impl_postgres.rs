@@ -41,20 +41,20 @@ struct Row {
 
 impl Row {
     fn to_media_interaction(self) -> Option<MediaInteraction> {
-        let interaction_name =
-            InteractionName::from_string(self.interaction_name.unwrap_or_default())?;
+        let name = InteractionName::from_string(self.interaction_name.unwrap_or_default())?;
 
-        let interaction_action =
-            InteractionAction::from_string(self.interaction_action.unwrap_or_default())?;
+        let action = InteractionAction::from_string(self.interaction_action.unwrap_or_default())?;
 
-        Some(MediaInteraction {
-            interaction_name,
-            interaction_action,
+        let interaction = MediaInteraction {
+            interaction_name: name,
+            interaction_action: action,
             id: self.id.unwrap_or_default().into(),
             media_id: self.media_id.unwrap_or_default().into(),
             user_id: self.user_id.unwrap_or_default().into(),
             created_at_posix: self.created_at_posix.unwrap_or_default().into(),
-        })
+        };
+
+        Some(interaction)
     }
 }
 

@@ -31,8 +31,11 @@ db-down: #
 db-new: #
   npx dbmate -e DATABASE_URL new ${name}
 
-test: #
+test-int: #
   clear && STAGE=test TEST_ENV=int cargo test
+
+test-unit: #
+  clear && STAGE=test TEST_ENV=unit cargo test
 
 cloc: #
   npx cloc src

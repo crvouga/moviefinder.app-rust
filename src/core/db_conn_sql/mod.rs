@@ -5,6 +5,7 @@ use std::{fmt::Debug, io::Error};
 
 use super::unit_of_work::UnitOfWork;
 
+pub mod impl_noop;
 pub mod impl_postgres;
 pub mod interface;
 

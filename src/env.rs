@@ -10,7 +10,6 @@ pub struct Env {
     pub twilio_auth_token: String,
     pub twilio_account_sid: String,
     pub stage: EnvStage,
-    #[cfg(test)]
     pub test_env: TestEnv,
 }
 
@@ -38,7 +37,6 @@ impl Env {
             None
         };
 
-        #[cfg(test)]
         let test_env = TestEnv::from_str(&env::var("TEST_ENV").unwrap_or("".to_string()));
 
         let twilio_account_sid = env::var("TWILIO_ACCOUNT_SID").unwrap();
@@ -56,7 +54,6 @@ impl Env {
             twilio_auth_token,
             twilio_service_sid,
             stage,
-            #[cfg(test)]
             test_env,
         };
 
@@ -64,7 +61,6 @@ impl Env {
     }
 }
 
-#[cfg(test)]
 #[derive(PartialEq, Eq, Clone)]
 pub enum TestEnv {
     Unit,
@@ -72,14 +68,16 @@ pub enum TestEnv {
     None,
 }
 
-#[cfg(test)]
 impl TestEnv {
     pub fn is_integration(&self) -> bool {
         self == &TestEnv::Integration
     }
+
+    pub fn is_unit(&self) -> bool {
+        self == &TestEnv::Unit
+    }
 }
 
-#[cfg(test)]
 impl TestEnv {
     pub fn from_str(s: &str) -> TestEnv {
         let cleaned = s.to_ascii_lowercase();

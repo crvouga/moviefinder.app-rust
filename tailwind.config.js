@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       spacing: {
-        bar: "4.5rem",
+        bar: "5rem",
       },
       colors: {
         placeholder: "#a3a3a3",

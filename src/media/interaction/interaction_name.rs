@@ -48,6 +48,17 @@ impl InteractionName {
         }
     }
 
+    pub fn to_machine_string(&self) -> String {
+        match self {
+            InteractionName::Liked => "liked".to_string(),
+            InteractionName::Disliked => "disliked".to_string(),
+            InteractionName::Seen => "seen".to_string(),
+            InteractionName::NotSeen => "not-seen".to_string(),
+            InteractionName::Interested => "interested".to_string(),
+            InteractionName::NotInterested => "not-interested".to_string(),
+        }
+    }
+
     pub fn random() -> Self {
         let choice = random::choice(vec![
             InteractionName::Liked,

@@ -3,10 +3,7 @@ use crate::{
     core::{
         db_conn_sql::{self, interface::DbConnSqlDyn},
         http::{self, client::HttpClientDyn},
-        key_value_db::{
-            self,
-            interface::{KeyValueDb, KeyValueDbDyn},
-        },
+        key_value_db::{self, interface::KeyValueDbDyn},
         logger::{
             impl_console::ConsoleLogger,
             interface::{Logger, LoggerDyn},
@@ -66,17 +63,47 @@ impl Ctx {
 
         info!(log, "env stage: {:?}", env.stage);
 
-        let http_client = Arc::new(
-            http::client::impl_reqwest::ImplReqwest::new(log.clone())
-                .simulate_latency(env.simulate_latency),
-        );
+        #[derive(Debug)]
+        enum HttpClientImpl {
+            Noop,
+            Reqwest,
+        }
 
-        let db_conn_sql = Arc::new(
-            db_conn_sql::impl_postgres::Postgres::new(log.noop(), &env.database_url)
-                .await
-                .unwrap()
-                .simulate_latency(env.simulate_latency),
-        );
+        let http_client_impl = if env.test_env.is_unit() {
+            HttpClientImpl::Noop
+        } else {
+            HttpClientImpl::Reqwest
+        };
+
+        let http_client: HttpClientDyn = match http_client_impl {
+            HttpClientImpl::Noop => Arc::new(http::client::impl_noop::ImplNoop::new()),
+            HttpClientImpl::Reqwest => Arc::new(
+                http::client::impl_reqwest::ImplReqwest::new(log.clone())
+                    .simulate_latency(env.simulate_latency),
+            ),
+        };
+
+        #[derive(Debug)]
+        enum DbConnSqlImpl {
+            Noop,
+            Postgres,
+        }
+
+        let db_conn_sql_impl = if env.test_env.is_unit() {
+            DbConnSqlImpl::Noop
+        } else {
+            DbConnSqlImpl::Postgres
+        };
+
+        let db_conn_sql: DbConnSqlDyn = match db_conn_sql_impl {
+            DbConnSqlImpl::Noop => Arc::new(db_conn_sql::impl_noop::ImplNoop::new()),
+            DbConnSqlImpl::Postgres => Arc::new(
+                db_conn_sql::impl_postgres::Postgres::new(log.noop(), &env.database_url)
+                    .await
+                    .unwrap()
+                    .simulate_latency(env.simulate_latency),
+            ),
+        };
 
         #[derive(Debug)]
         enum KeyValueDbImpl {
@@ -85,11 +112,15 @@ impl Ctx {
             CachedPostgres,
         }
 
-        let key_value_db_impl = KeyValueDbImpl::Postgres;
+        let key_value_db_impl = if env.test_env.is_unit() {
+            KeyValueDbImpl::HashMap
+        } else {
+            KeyValueDbImpl::Postgres
+        };
 
         info!(log, "key value db impl: {:?}", key_value_db_impl);
 
-        let key_value_db: Arc<dyn KeyValueDb> = match key_value_db_impl {
+        let key_value_db: KeyValueDbDyn = match key_value_db_impl {
             KeyValueDbImpl::CachedPostgres => {
                 Arc::new(key_value_db::impl_cached_postgres::CachedPostgres::new(
                     log.clone(),

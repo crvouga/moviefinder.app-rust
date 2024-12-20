@@ -4,6 +4,7 @@ use crate::core::http::request::Request;
 use crate::core::http::response::Response;
 use async_trait::async_trait;
 
+pub mod impl_noop;
 pub mod impl_reqwest;
 
 #[async_trait]

@@ -18,11 +18,13 @@ mod tests {
 
         let base = BaseFixture::new().await;
 
-        fixtures.push(Fixture {
-            interaction_db: Box::new(interaction_db::impl_postgres::Postgres::new(
-                base.ctx.db_conn_sql.clone(),
-            )),
-        });
+        if base.env.test_env.is_integration() {
+            fixtures.push(Fixture {
+                interaction_db: Box::new(interaction_db::impl_postgres::Postgres::new(
+                    base.ctx.db_conn_sql.clone(),
+                )),
+            });
+        }
 
         fixtures
     }

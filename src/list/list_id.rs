@@ -10,9 +10,9 @@ impl ListId {
         Self(id.to_string())
     }
 
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
+    // pub fn as_str(&self) -> &str {
+    //     &self.0
+    // }
 }
 
 impl Default for ListId {
