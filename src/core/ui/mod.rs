@@ -9,6 +9,7 @@ pub mod head_injector;
 pub mod icon;
 pub mod icon_button;
 pub mod image;
+pub mod labelled_icon_button;
 pub mod search_bar;
 pub mod select;
 pub mod spinner_page;

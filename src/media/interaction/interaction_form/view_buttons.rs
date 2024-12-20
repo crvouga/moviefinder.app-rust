@@ -5,7 +5,7 @@ use super::{
 use crate::{
     core::{
         html::{div, Elem},
-        ui::button_group::ButtonGroupMember,
+        ui::labelled_icon_button::LabelledIconButton,
     },
     media::{
         interaction::{interaction_action::InteractionAction, interaction_name::InteractionName},
@@ -34,12 +34,8 @@ pub fn view_interaction_form_buttons(
                 e.children(
                     available_interactions
                         .iter()
-                        .map(|(interaction_name, interaction_action)| {
-                            view_interaction_button_enabled(
-                                interaction_action.clone(),
-                                interaction_name.clone(),
-                                media_id.clone(),
-                            )
+                        .map(|(name, action)| {
+                            view_interaction_button_enabled(&action, &name, &media_id)
                         })
                         .chain(
                             view_interaction_buttons_disabled()
@@ -53,54 +49,52 @@ pub fn view_interaction_form_buttons(
         })
 }
 
-fn is_selected(interaction_action: &InteractionAction) -> bool {
-    match interaction_action {
+fn is_selected(action: &InteractionAction) -> bool {
+    match action {
         InteractionAction::Add => false,
         InteractionAction::Retract => true,
     }
 }
 
-fn to_id(
-    interaction_name: &InteractionName,
-    interaction_action: &InteractionAction,
-    disabled: bool,
-) -> String {
-    format!(
-        "{}-{}-{}",
-        interaction_name.to_name(),
-        interaction_action.to_string(),
-        disabled
-    )
+fn to_id(name: &InteractionName, action: &InteractionAction, disabled: bool) -> String {
+    format!("{}-{}-{}", name.to_name(), action.to_string(), disabled)
 }
 
-fn view_interaction_bottom(
-    interaction_action: &InteractionAction,
-    interaction_name: &InteractionName,
-) -> ButtonGroupMember {
-    ButtonGroupMember::default()
-        .icon(interaction_name.view_icon(is_selected(interaction_action), "size-7"))
-        .text(&interaction_name.to_name())
-        .id(&to_id(interaction_name, interaction_action, false))
+fn view_interaction_button(
+    action: &InteractionAction,
+    name: &InteractionName,
+) -> LabelledIconButton {
+    LabelledIconButton::default()
+        .icon(name.view_icon(is_selected(action), "size-7"))
+        .text(&name.to_name())
+        .id(&to_id(name, action, false))
 }
 
 fn view_interaction_button_enabled(
-    interaction_action: InteractionAction,
-    interaction_name: InteractionName,
-    media_id: MediaId,
+    action: &InteractionAction,
+    name: &InteractionName,
+    media_id: &MediaId,
 ) -> Elem {
-    view_interaction_bottom(&interaction_action, &interaction_name)
-        .active(is_selected(&interaction_action))
+    view_interaction_button(&action, &name)
+        .active(is_selected(&action))
         .view()
         .data_on(|e| {
             e.press_down().sse(
                 &Route::Record {
-                    interaction_action,
-                    interaction_name,
-                    media_id,
+                    interaction_action: action.clone(),
+                    interaction_name: name.clone(),
+                    media_id: media_id.clone(),
                 }
                 .url(),
             )
         })
+}
+
+fn view_interaction_button_disabled(action: &InteractionAction, name: &InteractionName) -> Elem {
+    view_interaction_button(action, name)
+        .disabled(true)
+        .view()
+        .id(&to_id(name, action, true))
 }
 
 fn view_interaction_buttons_disabled() -> Vec<Elem> {
@@ -113,11 +107,6 @@ fn view_interaction_buttons_disabled() -> Vec<Elem> {
         (&InteractionAction::Add, &InteractionName::NotInterested),
     ]
     .into_iter()
-    .map(|(action, name)| {
-        view_interaction_bottom(action, name)
-            .disabled(true)
-            .view()
-            .id(&to_id(name, action, true))
-    })
+    .map(|(action, name)| view_interaction_button_disabled(action, name))
     .collect()
 }

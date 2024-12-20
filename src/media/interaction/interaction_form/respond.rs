@@ -113,9 +113,9 @@ fn to_form_id(media_id: &MediaId) -> String {
     format!("media-interaction-form-{}", media_id.as_str())
 }
 
-pub fn view_interaction_form(media_id: &MediaId, f: Option<InteractionForm>) -> Elem {
+pub fn view_interaction_form(media_id: &MediaId, form: Option<InteractionForm>) -> Elem {
     div()
         .id(&to_form_id(media_id))
         .class("h-fit w-full shrink-0")
-        .child(view_interaction_form_buttons(media_id.clone(), f))
+        .child(view_interaction_form_buttons(media_id.clone(), form))
 }
