@@ -1,11 +1,4 @@
-use crate::{
-    core::{
-        html::{div, Elem},
-        ui::image::Image,
-    },
-    media::{self, interaction::interaction_form, media_::Media, media_id::MediaId},
-    ui::route::AppRoute,
-};
+use crate::media::{media_::Media, media_id::MediaId};
 
 #[derive(Debug, Clone)]
 pub enum FeedItem {
