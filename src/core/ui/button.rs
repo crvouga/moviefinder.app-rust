@@ -58,7 +58,7 @@ impl Button {
         button()
         .id(&id)
         .class("group relative flex items-center justify-center rounded font-bold text-white")
-        .class("enabled:hover:opacity-80 enabled:active:opacity-60")
+        .class("enabled:hover:opacity-80 enabled:active:opacity-active")
         .class("disabled:opacity-80 disabled:cursor-not-allowed")
         .class("aria-busy:opacity-100 aria-busy:cursor-wait")
         .class(&self.size.to_class())

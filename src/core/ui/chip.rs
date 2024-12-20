@@ -60,7 +60,7 @@ impl Chip {
             .disabled(self.disabled)
             .class("shrink-0 flex items-center justify-center cursor-pointer font-bold rounded-full w-fit border border-neutral-800 disabled:cursor-not-allowed enabled:cursor-pointer select-none truncate whitespace-nowrap bg-white")
             .data_class(|c|c
-                .class("bg-white text-black enabled:active:opacity-80", &dollar_signal_selected)
+                .class("bg-white text-black enabled:active:opacity-active", &dollar_signal_selected)
                 .class("bg-neutral-800 text-white", &dollar_signal_not_selected)
             )
             .class(&self.size.to_text_size())

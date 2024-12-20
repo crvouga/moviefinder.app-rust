@@ -40,7 +40,7 @@ impl IconButton {
         button()
             .id(&id)
             .class("group relative flex items-center p-3 text-lg font-bold text-white rounded-full")
-            .class("enabled:active:opacity-60")
+            .class("enabled:active:opacity-active")
             .class("disabled:opacity-40 disabled:cursor-not-allowed")
             .class("rounded bg-transparent")
             .type_("button")

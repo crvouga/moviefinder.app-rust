@@ -16,6 +16,9 @@ module.exports = {
         secondary: "#d4d4d8",
         muted: "#a3a3a3",
       },
+      opacity: {
+        active: "0.8",
+      },
     },
   },
   plugins: [],
