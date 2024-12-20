@@ -39,7 +39,7 @@ impl LabelledIconButton {
         button()
         .class("flex flex-col gap-1 items-center justify-center")
         .class("active:opacity-active")
-        .class(    
+        .class(
             if self.disabled {
                 "opacity-30 pointer-events-none cursor-not-allowed"
             } else {

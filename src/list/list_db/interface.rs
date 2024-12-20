@@ -1,6 +1,6 @@
 use crate::{
-    core::{pagination::Paginated, query::Query, unit_of_work::UnitOfWork},
-    list::core::list::List,
+    core::{pagination::Paginated, query::Query},
+    list::list::List,
 };
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -17,5 +17,4 @@ pub type ListQuery = Query<ListQueryField>;
 #[async_trait]
 pub trait ListDb: Send + Sync {
     async fn query(&self, query: ListQuery) -> Result<Paginated<List>, std::io::Error>;
-    async fn put(&self, uow: UnitOfWork, list: List) -> Result<(), std::io::Error>;
 }
