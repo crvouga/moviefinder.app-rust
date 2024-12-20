@@ -142,6 +142,14 @@ impl DataOn {
         }
     }
 
+    // pub fn double_click(self) -> Self {
+    //     Self {
+    //         event: "dblclick".to_string(),
+    //         modifiers: vec![],
+    //         js: vec![],
+    //     }
+    // }
+
     // pub fn mousedown(self) -> Self {
     //     Self {
     //         event: "mousedown".to_string(),
