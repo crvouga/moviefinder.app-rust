@@ -69,6 +69,7 @@ pub enum TestEnv {
 }
 
 impl TestEnv {
+    #[allow(dead_code)]
     pub fn is_integration(&self) -> bool {
         self == &TestEnv::Integration
     }
