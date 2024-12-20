@@ -37,23 +37,25 @@ impl LabelledIconButton {
 
     pub fn view(&self) -> Elem {
         button()
-        .class_list(&[
-            "flex flex-col gap-1 items-center justify-center",
-            if self.active && !self.disabled {
-                "text-blue-500"
-            } else {
-                ""
-            },
+        .class("flex flex-col gap-1 items-center justify-center")
+        .class(    
             if self.disabled {
                 "opacity-30 pointer-events-none cursor-not-allowed"
             } else {
                 ""
             },
-        ])
+        )
         .id(&self.id)
         .child(
             div()
             .class("flex flex-1 items-center justify-center gap-0.5 flex-col h-full cursor-pointer select-none active:opacity-75 p-3 overflow-hidden bg-black/50 rounded-full aspect-square")
+            .class(
+                if self.active && !self.disabled {
+                    "text-blue-500"
+                } else {
+                    ""
+                },
+            )
             .disabled(self.disabled)
             .child(self.icon.clone().unwrap_or_else(|| frag()))
         ).child(

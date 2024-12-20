@@ -79,7 +79,7 @@ fn view_interaction_button(
     name: &InteractionName,
 ) -> LabelledIconButton {
     LabelledIconButton::default()
-        .icon(name.view_icon(is_selected(action), "size-7"))
+        .icon(name.view_icon(is_selected(action), "size-8"))
         .text(&name.to_display_string())
         .id(&to_id(name, action, false))
 }
