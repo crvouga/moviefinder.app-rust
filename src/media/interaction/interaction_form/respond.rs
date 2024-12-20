@@ -27,8 +27,8 @@ pub async fn respond(
             Ok(())
         }
         Route::Record {
-            interaction_action,
-            interaction_name,
+            action: interaction_action,
+            name: interaction_name,
             media_id,
         } => {
             let maybe_user_id = r.user_id(ctx).await.ok();
@@ -114,8 +114,5 @@ fn to_form_id(media_id: &MediaId) -> String {
 }
 
 pub fn view_interaction_form(media_id: &MediaId, form: Option<InteractionForm>) -> Elem {
-    div()
-        .id(&to_form_id(media_id))
-        .class("h-fit w-full shrink-0")
-        .child(view_interaction_form_buttons(media_id.clone(), form))
+    view_interaction_form_buttons(media_id.clone(), form).id(&to_form_id(media_id))
 }

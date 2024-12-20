@@ -37,12 +37,12 @@ impl InteractionName {
         }
     }
 
-    pub fn to_name(&self) -> String {
+    pub fn to_display_string(&self) -> String {
         match self {
             InteractionName::Liked => "Liked".to_string(),
             InteractionName::Disliked => "Disliked".to_string(),
-            InteractionName::Interested => "Interested".to_string(),
-            InteractionName::NotInterested => "Uninterested".to_string(),
+            InteractionName::Interested => "Looks Good".to_string(),
+            InteractionName::NotInterested => "Looks Bad".to_string(),
             InteractionName::Seen => "Seen".to_string(),
             InteractionName::NotSeen => "Not Seen".to_string(),
         }
@@ -81,4 +81,19 @@ impl InteractionName {
             _ => None,
         }
     }
+}
+
+pub fn to_max_display_string_length() -> usize {
+    vec![
+        InteractionName::Liked,
+        InteractionName::Disliked,
+        InteractionName::Interested,
+        InteractionName::NotInterested,
+        InteractionName::Seen,
+        InteractionName::NotSeen,
+    ]
+    .iter()
+    .map(|name| name.to_display_string().len())
+    .max()
+    .unwrap_or_default()
 }

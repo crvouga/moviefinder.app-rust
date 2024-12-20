@@ -36,6 +36,6 @@ impl InteractionName {
     }
 
     pub fn to_list_id(&self, user_id: UserId) -> ListId {
-        ListId::new(&format!("{}-{}", user_id.as_str(), self.to_name()))
+        ListId::new(&format!("{}-{}", user_id.as_str(), self.to_display_string()))
     }
 }

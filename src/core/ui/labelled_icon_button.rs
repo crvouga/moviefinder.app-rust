@@ -1,4 +1,4 @@
-use crate::core::html::{button, frag, Elem};
+use crate::core::html::{button, div, frag, span, Elem};
 
 #[derive(Default)]
 pub struct LabelledIconButton {
@@ -37,24 +37,27 @@ impl LabelledIconButton {
 
     pub fn view(&self) -> Elem {
         button()
-        .class_list(
-            &[
-                    "flex flex-1 items-center justify-center gap-0.5 flex-col text-sm h-full cursor-pointer select-none active:opacity-75 size-20 overflow-hidden bg-black/50 rounded-full aspect-square",
-                    if self.active && !self.disabled {
-                        "text-blue-500"
-                    } else {
-                        ""
-                    },
-                    if self.disabled {
-                        "opacity-30 pointer-events-none cursor-not-allowed"
-                    } else {
-                        ""
-                    },
-                ]
-        )
-        .disabled(self.disabled)
-        .child(self.icon.clone().unwrap_or_else(|| frag())
-        ).child_text(&self.text)
+        .class_list(&[
+            "flex flex-col gap-1 items-center justify-center",
+            if self.active && !self.disabled {
+                "text-blue-500"
+            } else {
+                ""
+            },
+            if self.disabled {
+                "opacity-30 pointer-events-none cursor-not-allowed"
+            } else {
+                ""
+            },
+        ])
         .id(&self.id)
+        .child(
+            div()
+            .class("flex flex-1 items-center justify-center gap-0.5 flex-col h-full cursor-pointer select-none active:opacity-75 p-3 overflow-hidden bg-black/50 rounded-full aspect-square")
+            .disabled(self.disabled)
+            .child(self.icon.clone().unwrap_or_else(|| frag()))
+        ).child(
+            span().class("bg-black/50 rounded text-xs w-fit p-0.5").child_text(&self.text)
+        )
     }
 }

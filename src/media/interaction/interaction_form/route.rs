@@ -12,7 +12,7 @@ pub enum Route {
     },
     Record {
         media_id: MediaId,
-        interaction_name: InteractionName,
-        interaction_action: InteractionAction,
+        name: InteractionName,
+        action: InteractionAction,
     },
 }

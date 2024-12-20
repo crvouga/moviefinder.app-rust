@@ -2,7 +2,7 @@ check: #
   clear && cargo check && cargo fmt
 
 run: #
-  clear && export STAGE=local && just tw-build && npx kill-port 3000 && just watch
+  clear && export STAGE=local && just tw-build && just watch
 
 ngrok: #
   ngrok http 3000 --subdomain moviefinder

@@ -148,6 +148,18 @@ impl Elem {
         self.attr("aria-label", value)
     }
 
+    pub fn aria_hidden(self, value: bool) -> Self {
+        if value {
+            self.attr("aria-hidden", "true")
+        } else {
+            self
+        }
+    }
+
+    pub fn aria_hidden_true(self) -> Self {
+        self.aria_hidden(true)
+    }
+
     pub fn role(self, value: &str) -> Self {
         self.attr("role", value)
     }

@@ -8,7 +8,10 @@ use crate::{
         ui::labelled_icon_button::LabelledIconButton,
     },
     media::{
-        interaction::{interaction_action::InteractionAction, interaction_name::InteractionName},
+        interaction::{
+            interaction_action::InteractionAction,
+            interaction_name::{to_max_display_string_length, InteractionName},
+        },
         media_id::MediaId,
     },
     ui::route::AppRoute,
@@ -19,7 +22,13 @@ pub fn view_interaction_form_buttons(
     interaction_form: Option<InteractionForm>,
 ) -> Elem {
     div()
-        .class("flex flex-col")
+        .class("flex flex-col gap-2 pb-3")
+        .child(
+            div()
+                .class("select-none opacity-0")
+                .aria_hidden_true()
+                .child_text(&"a".repeat(to_max_display_string_length())),
+        )
         .map(|e| match interaction_form {
             None => e.children(
                 view_interaction_buttons_disabled()
@@ -57,7 +66,12 @@ fn is_selected(action: &InteractionAction) -> bool {
 }
 
 fn to_id(name: &InteractionName, action: &InteractionAction, disabled: bool) -> String {
-    format!("{}-{}-{}", name.to_name(), action.to_string(), disabled)
+    format!(
+        "{}-{}-{}",
+        name.to_display_string(),
+        action.to_string(),
+        disabled
+    )
 }
 
 fn view_interaction_button(
@@ -66,7 +80,7 @@ fn view_interaction_button(
 ) -> LabelledIconButton {
     LabelledIconButton::default()
         .icon(name.view_icon(is_selected(action), "size-7"))
-        .text(&name.to_name())
+        .text(&name.to_display_string())
         .id(&to_id(name, action, false))
 }
 
@@ -81,8 +95,8 @@ fn view_interaction_button_enabled(
         .data_on(|e| {
             e.press_down().sse(
                 &Route::Record {
-                    interaction_action: action.clone(),
-                    interaction_name: name.clone(),
+                    action: action.clone(),
+                    name: name.clone(),
                     media_id: media_id.clone(),
                 }
                 .url(),
