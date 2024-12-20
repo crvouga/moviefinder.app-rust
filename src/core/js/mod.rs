@@ -46,9 +46,9 @@ impl Js {
         format!("document.querySelector('{}').focus()", selector)
     }
 
-    pub fn console_log(message: &str) -> String {
-        format!("console.log('{}')", message)
-    }
+    // pub fn console_log(message: &str) -> String {
+    //     format!("console.log('{}')", message)
+    // }
 
     pub fn console_error(message: &str) -> String {
         format!("console.error('{}')", message)
