@@ -16,25 +16,17 @@ pub enum InteractionName {
 
 impl InteractionName {
     pub fn view_icon(&self, selected: bool, class: &str) -> Elem {
-        match self {
-            InteractionName::Liked => match selected {
-                true => icon::solid::thumbs_up(class),
-                false => icon::outlined::thumbs_up(class),
-            },
-            InteractionName::Disliked => match selected {
-                true => icon::solid::thumbs_down(class),
-                false => icon::outlined::thumbs_down(class),
-            },
-            InteractionName::Interested => icon::solid::check(class),
-            InteractionName::NotInterested => icon::solid::x_mark(class),
-            InteractionName::Seen => match selected {
-                true => icon::solid::eye(class),
-                false => icon::outlined::eye(class),
-            },
-            InteractionName::NotSeen => match selected {
-                true => icon::solid::eye_slash(class),
-                false => icon::outlined::eye_slash(class),
-            },
+        match (self, selected) {
+            (InteractionName::Liked, true) => icon::solid::thumbs_up(class),
+            (InteractionName::Liked, false) => icon::outlined::thumbs_up(class),
+            (InteractionName::Disliked, true) => icon::solid::thumbs_down(class),
+            (InteractionName::Disliked, false) => icon::outlined::thumbs_down(class),
+            (InteractionName::Interested, _) => icon::solid::check(class),
+            (InteractionName::NotInterested, _) => icon::solid::x_mark(class),
+            (InteractionName::Seen, true) => icon::solid::eye(class),
+            (InteractionName::Seen, false) => icon::outlined::eye(class),
+            (InteractionName::NotSeen, true) => icon::solid::eye_slash(class),
+            (InteractionName::NotSeen, false) => icon::outlined::eye_slash(class),
         }
     }
 
@@ -61,17 +53,7 @@ impl InteractionName {
     }
 
     pub fn random() -> Self {
-        let choice = random::choice(vec![
-            InteractionName::Liked,
-            InteractionName::Disliked,
-            InteractionName::Interested,
-            InteractionName::NotInterested,
-            InteractionName::Seen,
-            InteractionName::NotSeen,
-        ])
-        .unwrap();
-
-        choice
+        random::choice(to_all_interaction_names()).unwrap_or(InteractionName::Liked)
     }
 
     pub fn from_string(value: String) -> Option<Self> {
@@ -83,29 +65,49 @@ impl InteractionName {
             .collect::<Vec<&str>>()
             .join(" ");
 
-        match cleaned.as_str() {
-            "liked" => Some(InteractionName::Liked),
-            "disliked" => Some(InteractionName::Disliked),
-            "interested" => Some(InteractionName::Interested),
-            "not interested" => Some(InteractionName::NotInterested),
-            "seen" => Some(InteractionName::Seen),
-            "not seen" => Some(InteractionName::NotSeen),
-            _ => None,
+        if cleaned.contains("like") {
+            return Some(InteractionName::Liked);
         }
+
+        if cleaned.contains("dislike") {
+            return Some(InteractionName::Disliked);
+        }
+
+        if cleaned.contains("not") && cleaned.contains("interested") {
+            return Some(InteractionName::NotInterested);
+        }
+
+        if cleaned.contains("interested") {
+            return Some(InteractionName::Interested);
+        }
+
+        if cleaned.contains("not") && cleaned.contains("seen") {
+            return Some(InteractionName::NotSeen);
+        }
+
+        if cleaned.contains("seen") {
+            return Some(InteractionName::Seen);
+        }
+
+        None
     }
 }
 
-pub fn to_max_display_string_length() -> usize {
+pub fn to_all_interaction_names() -> Vec<InteractionName> {
     vec![
+        InteractionName::Seen,
+        InteractionName::NotSeen,
         InteractionName::Liked,
         InteractionName::Disliked,
         InteractionName::Interested,
         InteractionName::NotInterested,
-        InteractionName::Seen,
-        InteractionName::NotSeen,
     ]
-    .iter()
-    .map(|name| name.to_display_string().len())
-    .max()
-    .unwrap_or_default()
+}
+
+pub fn to_max_display_string_length() -> usize {
+    to_all_interaction_names()
+        .iter()
+        .map(|name| name.to_display_string().len())
+        .max()
+        .unwrap_or_default()
 }

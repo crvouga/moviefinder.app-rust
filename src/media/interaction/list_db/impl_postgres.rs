@@ -2,7 +2,10 @@ use super::interface::MediaInteractionListDb;
 use crate::{
     core::{db_conn_sql::interface::DbConnSqlDyn, posix::Posix},
     list::{list::List, list_variant::ListVariant},
-    media::interaction::{interaction_name::InteractionName, list::MediaInteractionList},
+    media::interaction::{
+        interaction_name::{to_all_interaction_names, InteractionName},
+        list::MediaInteractionList,
+    },
     user::user_id::UserId,
 };
 use async_trait::async_trait;
@@ -15,10 +18,7 @@ pub struct ImplPostgres {
 impl ImplPostgres {
     #[allow(dead_code)]
     pub fn new(db_conn_sql: DbConnSqlDyn) -> Self {
-        Self {
-            //
-            db_conn_sql,
-        }
+        Self { db_conn_sql }
     }
 }
 
@@ -28,16 +28,7 @@ impl MediaInteractionListDb for ImplPostgres {
         &self,
         user_id: UserId,
     ) -> Result<Vec<MediaInteractionList>, std::io::Error> {
-        let all_interaction_names = vec![
-            InteractionName::Seen,
-            InteractionName::NotSeen,
-            InteractionName::Liked,
-            InteractionName::Disliked,
-            InteractionName::Interested,
-            InteractionName::NotInterested,
-        ];
-
-        let lists = all_interaction_names
+        let lists = to_all_interaction_names()
             .iter()
             .map(|name| MediaInteractionList {
                 user_id: user_id.clone(),

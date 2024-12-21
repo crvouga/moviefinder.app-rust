@@ -21,7 +21,7 @@ pub trait MediaInteractionDb: Send + Sync {
     ) -> Result<Vec<MediaInteraction>, std::io::Error>;
     async fn put(
         &self,
-        uow: UnitOfWork,
+        u: UnitOfWork,
         interaction: &MediaInteraction,
     ) -> Result<(), std::io::Error>;
 }
