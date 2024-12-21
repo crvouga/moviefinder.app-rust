@@ -13,6 +13,7 @@ use crate::{
     user::user_id::UserId,
 };
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 
 pub struct ImplPostgres {
     #[allow(dead_code)]
@@ -37,7 +38,7 @@ impl MediaInteractionListItemDb for ImplPostgres {
         user_id: UserId,
         interaction_name: InteractionName,
     ) -> Result<Paginated<ListItem>, std::io::Error> {
-        let mut query = Sql::new(
+        let mut base_query = Sql::new(
             r#"
             WITH latest_interactions AS (
                 SELECT DISTINCT ON (user_id, interaction_name, media_id)
@@ -46,7 +47,7 @@ impl MediaInteractionListItemDb for ImplPostgres {
                     user_id, 
                     interaction_name, 
                     interaction_action, 
-                    created_at_posix
+                    created_at_posix             
                 FROM media_interaction
                 WHERE   interaction_name::TEXT = :interaction_name
                 AND     user_id = :user_id
@@ -59,7 +60,8 @@ impl MediaInteractionListItemDb for ImplPostgres {
                 mi.interaction_name::TEXT,
                 mi.interaction_action::TEXT,
                 mi.created_at_posix,
-                mi.updated_at_posix
+                mi.updated_at_posix, 
+                COUNT(*) OVER() AS total_count
             FROM media_interaction mi
             JOIN latest_interactions li
                 ON mi.user_id = li.user_id
@@ -70,17 +72,67 @@ impl MediaInteractionListItemDb for ImplPostgres {
             "#,
         );
 
-        query.set(
+        base_query.set(
             "interaction_name",
             SqlVarType::Primitive(SqlPrimitive::Text(interaction_name.to_postgres_enum())),
         );
 
-        query.set(
+        base_query.set(
             "user_id",
             SqlVarType::Primitive(SqlPrimitive::Text(user_id.as_str().to_string())),
         );
 
-        println!("query:\n{}", query.to_string());
+        let total_query = Sql::new(&format!(
+            r#"
+                SELECT COUNT(*) AS total_count
+                FROM ({}) AS subquery
+            "#,
+            base_query.to_string().as_str()
+        ));
+
+        #[derive(Debug, Deserialize, Serialize)]
+        struct TotalCount {
+            total_count: i64,
+        }
+
+        impl TotalCount {
+            fn from_json(value: serde_json::Value) -> Result<Self, std::io::Error> {
+                serde_json::from_value(value)
+                    .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+            }
+        }
+
+        let rows = db_conn_sql::query(
+            self.db_conn_sql.clone(),
+            &total_query,
+            TotalCount::from_json,
+        )
+        .await?;
+
+        let total = rows
+            .first()
+            .and_then(|x| Some(x.total_count))
+            .unwrap_or_default() as usize;
+
+        let mut query = Sql::new(&format!(
+            r#"
+            {}
+            ORDER BY created_at_posix DESC
+            LIMIT :limit
+            OFFSET :offset
+            "#,
+            base_query.to_string().as_str()
+        ));
+
+        query.set(
+            "limit",
+            SqlVarType::Primitive(SqlPrimitive::Number(limit as f64)),
+        );
+
+        query.set(
+            "offset",
+            SqlVarType::Primitive(SqlPrimitive::Number(offset as f64)),
+        );
 
         let rows = db_conn_sql::query(
             self.db_conn_sql.clone(),
@@ -89,16 +141,10 @@ impl MediaInteractionListItemDb for ImplPostgres {
         )
         .await?;
 
-        for row in &rows {
-            println!("row: {:?}", row);
-        }
-
         let rows = rows
             .into_iter()
             .filter_map(|r| r.to_media_interaction())
             .collect::<Vec<MediaInteraction>>();
-
-        let total = rows.len();
 
         let items = rows
             .into_iter()

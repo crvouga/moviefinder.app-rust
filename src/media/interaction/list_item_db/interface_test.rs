@@ -160,4 +160,83 @@ mod tests {
             assert_eq!(list_items.total, 1);
         }
     }
+
+    #[tokio::test]
+    async fn test_pagination() {
+        for f in fixtures().await {
+            let user_id = UserId::default();
+            let interaction_name = InteractionName::Liked;
+
+            let interactions: Vec<MediaInteraction> = (0..15)
+                .map(|_| MediaInteraction::random_add(interaction_name.clone(), user_id.clone()))
+                .collect();
+
+            let u = uow();
+
+            // Add interactions to the database
+            for i in interactions {
+                f.media_interaction_db.put(u.clone(), &i).await.unwrap();
+            }
+
+            // Test pagination with limit 5 and offset 0
+            let list_items_page_1 = f
+                .list_item_db
+                .find_by_user_id_and_interaction_name(
+                    5, // limit
+                    0, // offset
+                    user_id.clone(),
+                    interaction_name.clone(),
+                )
+                .await
+                .unwrap();
+
+            assert_eq!(list_items_page_1.items.len(), 5);
+            assert_eq!(list_items_page_1.total, 15);
+
+            // Test pagination with limit 5 and offset 5
+            let list_items_page_2 = f
+                .list_item_db
+                .find_by_user_id_and_interaction_name(
+                    5, // limit
+                    5, // offset
+                    user_id.clone(),
+                    interaction_name.clone(),
+                )
+                .await
+                .unwrap();
+
+            assert_eq!(list_items_page_2.items.len(), 5);
+            assert_eq!(list_items_page_2.total, 15);
+
+            // Test pagination with limit 5 and offset 10
+            let list_items_page_3 = f
+                .list_item_db
+                .find_by_user_id_and_interaction_name(
+                    5,  // limit
+                    10, // offset
+                    user_id.clone(),
+                    interaction_name.clone(),
+                )
+                .await
+                .unwrap();
+
+            assert_eq!(list_items_page_3.items.len(), 5);
+            assert_eq!(list_items_page_3.total, 15);
+
+            // Test pagination with limit 5 and offset 15 (no items left)
+            let list_items_page_4 = f
+                .list_item_db
+                .find_by_user_id_and_interaction_name(
+                    5,  // limit
+                    15, // offset
+                    user_id.clone(),
+                    interaction_name.clone(),
+                )
+                .await
+                .unwrap();
+
+            assert_eq!(list_items_page_4.items.len(), 0);
+            assert_eq!(list_items_page_4.total, 15);
+        }
+    }
 }
