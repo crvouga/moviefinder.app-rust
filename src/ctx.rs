@@ -21,7 +21,11 @@ use crate::{
     media::{
         self,
         genre::genre_db::{self, interface::MediaGenreDb},
-        interaction::interaction_db::interface::MediaInteractionDb,
+        interaction::{
+            interaction_db::interface::MediaInteractionDb,
+            list_db::interface::MediaInteractionListDb,
+            list_item_db::interface::MediaInteractionListItemDb,
+        },
         media_db::{self, interface::MediaDb},
         person::person_db::{self, interface::MediaPersonDb},
     },
@@ -46,6 +50,8 @@ pub struct Ctx {
     pub media_person_db: Arc<dyn MediaPersonDb>,
     pub media_db: Arc<dyn MediaDb>,
     pub media_interaction_db: Arc<dyn MediaInteractionDb>,
+    pub media_interaction_list_db: Arc<dyn MediaInteractionListDb>,
+    pub media_interaction_list_item_db: Arc<dyn MediaInteractionListItemDb>,
     pub feed_db: Arc<dyn FeedDb>,
     pub feed_tags_db: Arc<dyn FeedTagDb>,
     pub feed_session_mapping_db: Arc<dyn FeedSessionMappingDb>,
@@ -145,9 +151,17 @@ impl Ctx {
             media::interaction::interaction_db::impl_postgres::Postgres::new(db_conn_sql.clone()),
         );
 
-        let genre_db = Arc::new(genre_db::impl_tmdb::Tmdb::new(tmdb_api.clone()));
+        let media_interaction_list_db = Arc::new(
+            media::interaction::list_db::impl_postgres::ImplPostgres::new(db_conn_sql.clone()),
+        );
 
-        let person_db = Arc::new(person_db::impl_tmdb::Tmdb::new(
+        let media_interaction_list_item_db = Arc::new(
+            media::interaction::list_item_db::impl_postgres::ImplPostgres::new(db_conn_sql.clone()),
+        );
+
+        let media_genre_db = Arc::new(genre_db::impl_tmdb::Tmdb::new(tmdb_api.clone()));
+
+        let media_person_db = Arc::new(person_db::impl_tmdb::Tmdb::new(
             log.clone(),
             tmdb_api.clone(),
         ));
@@ -157,8 +171,8 @@ impl Ctx {
         ));
 
         let feed_tags_db = Arc::new(feed::feed_tag_db::impl_poly::Poly::new(
-            genre_db.clone(),
-            person_db.clone(),
+            media_genre_db.clone(),
+            media_person_db.clone(),
         ));
 
         let feed_session_mapping_db = Arc::new(
@@ -193,7 +207,7 @@ impl Ctx {
 
         info!(log, "verify sms impl: {:?}", verify_sms_impl);
 
-        let verify_sms: Arc<dyn VerifySms> = match verify_sms_impl {
+        let user_verify_sms: Arc<dyn VerifySms> = match verify_sms_impl {
             VerifySmsImpl::Twilio => {
                 Arc::new(verify_sms::impl_twilio::Twilio::new(twilio_api.clone()))
             }
@@ -223,15 +237,17 @@ impl Ctx {
             key_value_db,
             db_conn_sql,
             tmdb_api,
-            media_genre_db: genre_db,
-            media_person_db: person_db,
             media_db,
+            media_genre_db,
+            media_person_db,
             media_interaction_db,
+            media_interaction_list_db,
+            media_interaction_list_item_db,
             feed_db,
             feed_tags_db,
             feed_session_mapping_db,
             feed_tags_form_state_db,
-            user_verify_sms: verify_sms,
+            user_verify_sms,
             user_account_db,
             user_profile_db,
             user_session_db,

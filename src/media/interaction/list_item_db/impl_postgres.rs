@@ -60,8 +60,7 @@ impl MediaInteractionListItemDb for ImplPostgres {
                 mi.interaction_name::TEXT,
                 mi.interaction_action::TEXT,
                 mi.created_at_posix,
-                mi.updated_at_posix, 
-                COUNT(*) OVER() AS total_count
+                mi.updated_at_posix
             FROM media_interaction mi
             JOIN latest_interactions li
                 ON mi.user_id = li.user_id
