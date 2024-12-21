@@ -39,18 +39,34 @@ impl MediaInteractionListItemDb for ImplPostgres {
     ) -> Result<Paginated<ListItem>, std::io::Error> {
         let mut query = Sql::new(
             r#"
+            WITH latest_interactions AS (
+                SELECT
+                    user_id,
+                    interaction_name,
+                    ARRAY_AGG(interaction_action),
+                    media_id,
+                    MAX(created_at_posix) AS created_at_posix
+                FROM media_interaction
+                WHERE 
+                    interaction_name::TEXT = :interaction_name 
+                    AND user_id = :user_id
+                GROUP BY user_id, interaction_name, media_id
+            )
             SELECT
-                id,
-                media_id,
-                user_id,
-                interaction_name::TEXT,
-                interaction_action::TEXT,
-                created_at_posix,
-                updated_at_posix            
-            FROM media_interaction
-            WHERE 
-                    interaction_name = :interaction_name 
-                AND user_id = :user_id
+                mi.id,
+                mi.media_id,
+                mi.user_id,
+                mi.interaction_name::TEXT,
+                mi.interaction_action::TEXT,
+                mi.created_at_posix,
+                mi.updated_at_posix
+            FROM media_interaction mi
+            JOIN latest_interactions li
+                ON mi.user_id = li.user_id
+                AND mi.media_id = li.media_id
+                AND mi.created_at_posix = li.created_at_posix
+                AND mi.interaction_name = li.interaction_name
+            WHERE mi.interaction_action = 'add'
             "#,
         );
 

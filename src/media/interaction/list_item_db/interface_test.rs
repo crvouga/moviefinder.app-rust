@@ -11,7 +11,7 @@ mod tests {
         },
         user::user_id::UserId,
     };
-    use std::sync::Arc;
+    use std::{sync::Arc, time::Duration};
 
     struct Fixture {
         list_item_db: Arc<dyn MediaInteractionListItemDb>,
@@ -67,6 +67,51 @@ mod tests {
 
             assert_eq!(list_items.items.len(), 3);
             assert_eq!(list_items.total, 3);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_not_including_retracted_interactions() {
+        for f in fixtures().await {
+            let user_id = UserId::default();
+
+            let interaction_name = InteractionName::Liked;
+
+            let mut interactions = vec![];
+
+            let first_interaction =
+                MediaInteraction::random_add(interaction_name.clone(), user_id.clone());
+            interactions.push(first_interaction.clone());
+
+            let second_interaction = MediaInteraction {
+                created_at_posix: first_interaction
+                    .created_at_posix
+                    .future(Duration::from_secs(1)),
+                media_id: first_interaction.media_id.clone(),
+                user_id: first_interaction.user_id.clone(),
+                ..MediaInteraction::random_retract(interaction_name.clone(), user_id.clone())
+            };
+            interactions.push(second_interaction.clone());
+
+            let u = uow();
+
+            for i in interactions {
+                f.media_interaction_db.put(u.clone(), &i).await.unwrap();
+            }
+
+            let list_items = f
+                .list_item_db
+                .find_by_user_id_and_interaction_name(
+                    10,
+                    0,
+                    user_id.clone(),
+                    interaction_name.clone(),
+                )
+                .await
+                .unwrap();
+
+            assert_eq!(list_items.items.len(), 0);
+            assert_eq!(list_items.total, 0);
         }
     }
 }

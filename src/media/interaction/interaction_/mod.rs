@@ -40,4 +40,14 @@ impl MediaInteraction {
             ..MediaInteraction::random()
         }
     }
+
+    #[allow(dead_code)]
+    pub fn random_retract(interaction_name: InteractionName, user_id: UserId) -> MediaInteraction {
+        MediaInteraction {
+            interaction_action: InteractionAction::Retract,
+            user_id,
+            interaction_name,
+            ..MediaInteraction::random()
+        }
+    }
 }

@@ -1,4 +1,4 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +15,12 @@ impl Posix {
             .expect("Time went backwards");
         let now = since_epoch.as_secs() as i64;
         Self(now)
+    }
+
+    #[allow(dead_code)]
+    pub fn future(&self, duration: Duration) -> Self {
+        let future = self.0 + duration.as_secs() as i64;
+        Self(future)
     }
 
     pub fn as_i64(&self) -> i64 {
