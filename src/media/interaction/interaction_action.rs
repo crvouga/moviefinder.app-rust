@@ -15,6 +15,15 @@ impl InteractionAction {
 }
 
 impl InteractionAction {
+    pub fn to_postgres_enum(&self) -> String {
+        match self {
+            InteractionAction::Add => "add".to_string(),
+            InteractionAction::Retract => "retract".to_string(),
+        }
+    }
+}
+
+impl InteractionAction {
     pub fn from_string(value: String) -> Option<Self> {
         let cleaned = value
             .trim()
@@ -24,10 +33,14 @@ impl InteractionAction {
             .collect::<Vec<&str>>()
             .join(" ");
 
-        match cleaned.as_str() {
-            "add" => Some(InteractionAction::Add),
-            "retract" => Some(InteractionAction::Retract),
-            _ => None,
+        if cleaned.contains("retract") {
+            return Some(InteractionAction::Retract);
         }
+
+        if cleaned.contains("add") {
+            return Some(InteractionAction::Add);
+        }
+
+        None
     }
 }

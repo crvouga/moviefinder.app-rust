@@ -6,6 +6,8 @@ use super::{
 };
 use crate::{core::posix::Posix, media::media_id::MediaId, user::user_id::UserId};
 
+pub mod postgres;
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct MediaInteraction {
     pub id: MediaInteractionId,
@@ -26,6 +28,16 @@ impl MediaInteraction {
             created_at_posix: Posix::default(),
             interaction_name: InteractionName::random(),
             interaction_action: InteractionAction::random(),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn random_add(interaction_name: InteractionName, user_id: UserId) -> MediaInteraction {
+        MediaInteraction {
+            interaction_action: InteractionAction::Add,
+            user_id,
+            interaction_name,
+            ..MediaInteraction::random()
         }
     }
 }

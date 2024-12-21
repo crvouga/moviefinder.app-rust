@@ -5,7 +5,7 @@ use crate::{
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait ListItemDb: Send + Sync {
+pub trait MediaInteractionListItemDb: Send + Sync {
     async fn find_by_user_id_and_interaction_name(
         &self,
         limit: usize,

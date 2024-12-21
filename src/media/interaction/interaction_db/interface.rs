@@ -13,6 +13,7 @@ pub trait MediaInteractionDb: Send + Sync {
         user_id: &UserId,
         media_ids: &Vec<&MediaId>,
     ) -> Result<Vec<MediaInteraction>, std::io::Error>;
+    #[allow(dead_code)]
     async fn find_by_user_id_and_interaction_name(
         &self,
         user_id: &UserId,

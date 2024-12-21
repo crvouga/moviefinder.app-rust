@@ -7,7 +7,7 @@ use crate::{
     },
     media::{
         interaction::{
-            interaction_::MediaInteraction, interaction_action::InteractionAction,
+            interaction_::{postgres::MediaInteractionPostgresRow, MediaInteraction},
             interaction_name::InteractionName,
         },
         media_id::MediaId,
@@ -15,7 +15,6 @@ use crate::{
     user::user_id::UserId,
 };
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
 
 pub struct Postgres {
     db_conn_sql: DbConnSqlDyn,
@@ -25,64 +24,6 @@ impl Postgres {
     pub fn new(db_conn_sql: DbConnSqlDyn) -> Self {
         Self { db_conn_sql }
     }
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-struct Row {
-    id: Option<String>,
-    media_id: Option<String>,
-    user_id: Option<String>,
-    interaction_name: Option<String>,
-    interaction_action: Option<String>,
-    created_at_posix: Option<i64>,
-    updated_at_posix: Option<i64>,
-    deleted_at_posix: Option<i64>,
-}
-
-impl Row {
-    fn to_media_interaction(self) -> Option<MediaInteraction> {
-        let name = InteractionName::from_string(self.interaction_name.unwrap_or_default())?;
-
-        let action = InteractionAction::from_string(self.interaction_action.unwrap_or_default())?;
-
-        let interaction = MediaInteraction {
-            interaction_name: name,
-            interaction_action: action,
-            id: self.id.unwrap_or_default().into(),
-            media_id: self.media_id.unwrap_or_default().into(),
-            user_id: self.user_id.unwrap_or_default().into(),
-            created_at_posix: self.created_at_posix.unwrap_or_default().into(),
-        };
-
-        Some(interaction)
-    }
-}
-
-impl InteractionName {
-    fn to_postgres_enum(&self) -> String {
-        match self {
-            InteractionName::Liked => "liked".to_string(),
-            InteractionName::Disliked => "disliked".to_string(),
-            InteractionName::Interested => "interested".to_string(),
-            InteractionName::NotInterested => "not-interested".to_string(),
-            InteractionName::Seen => "seen".to_string(),
-            InteractionName::NotSeen => "not-seen".to_string(),
-        }
-    }
-}
-
-impl InteractionAction {
-    fn to_postgres_enum(&self) -> String {
-        match self {
-            InteractionAction::Add => "add".to_string(),
-            InteractionAction::Retract => "retract".to_string(),
-        }
-    }
-}
-
-fn parse_row_json(value: serde_json::Value) -> Result<Row, std::io::Error> {
-    serde_json::from_value(value)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
 }
 
 #[async_trait]
@@ -125,11 +66,15 @@ impl MediaInteractionDb for Postgres {
             ),
         );
 
-        let rows = db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json)
-            .await?
-            .into_iter()
-            .filter_map(|r| r.to_media_interaction())
-            .collect::<Vec<MediaInteraction>>();
+        let rows = db_conn_sql::query(
+            self.db_conn_sql.clone(),
+            &query,
+            MediaInteractionPostgresRow::from_json,
+        )
+        .await?
+        .into_iter()
+        .filter_map(|r| r.to_media_interaction())
+        .collect::<Vec<MediaInteraction>>();
 
         Ok(rows)
     }
@@ -167,11 +112,15 @@ impl MediaInteractionDb for Postgres {
             SqlVarType::Primitive(SqlPrimitive::Text(interaction_name.to_postgres_enum())),
         );
 
-        let rows = db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json)
-            .await?
-            .into_iter()
-            .filter_map(|r| r.to_media_interaction())
-            .collect::<Vec<MediaInteraction>>();
+        let rows = db_conn_sql::query(
+            self.db_conn_sql.clone(),
+            &query,
+            MediaInteractionPostgresRow::from_json,
+        )
+        .await?
+        .into_iter()
+        .filter_map(|r| r.to_media_interaction())
+        .collect::<Vec<MediaInteraction>>();
 
         Ok(rows)
     }
