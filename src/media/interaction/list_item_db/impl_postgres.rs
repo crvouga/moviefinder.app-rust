@@ -40,17 +40,17 @@ impl MediaInteractionListItemDb for ImplPostgres {
         let mut query = Sql::new(
             r#"
             WITH latest_interactions AS (
-                SELECT
-                    user_id,
-                    interaction_name,
-                    ARRAY_AGG(interaction_action),
-                    media_id,
-                    MAX(created_at_posix) AS created_at_posix
+                SELECT DISTINCT ON (user_id, interaction_name, media_id)
+                    id, 
+                    media_id, 
+                    user_id, 
+                    interaction_name, 
+                    interaction_action, 
+                    created_at_posix
                 FROM media_interaction
-                WHERE 
-                    interaction_name::TEXT = :interaction_name 
-                    AND user_id = :user_id
-                GROUP BY user_id, interaction_name, media_id
+                WHERE   interaction_name::TEXT = :interaction_name
+                AND     user_id = :user_id
+                ORDER BY user_id ASC, interaction_name ASC, media_id ASC, created_at_posix DESC
             )
             SELECT
                 mi.id,
