@@ -1,10 +1,8 @@
-use serde::{Deserialize, Serialize};
-
+use super::MediaInteraction;
 use crate::media::interaction::{
     interaction_action::InteractionAction, interaction_name::InteractionName,
 };
-
-use super::MediaInteraction;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct MediaInteractionPostgresRow {
@@ -19,11 +17,6 @@ pub struct MediaInteractionPostgresRow {
 }
 
 impl MediaInteractionPostgresRow {
-    pub fn from_json(value: serde_json::Value) -> Result<Self, std::io::Error> {
-        serde_json::from_value(value)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
-    }
-
     pub fn to_media_interaction(self) -> Option<MediaInteraction> {
         let name = InteractionName::from_string(self.interaction_name.unwrap_or_default())?;
 

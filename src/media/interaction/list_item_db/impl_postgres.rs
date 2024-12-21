@@ -94,19 +94,8 @@ impl MediaInteractionListItemDb for ImplPostgres {
             total_count: i64,
         }
 
-        impl TotalCount {
-            fn from_json(value: serde_json::Value) -> Result<Self, std::io::Error> {
-                serde_json::from_value(value)
-                    .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
-            }
-        }
-
-        let rows = db_conn_sql::query(
-            self.db_conn_sql.clone(),
-            &total_query,
-            TotalCount::from_json,
-        )
-        .await?;
+        let rows: Vec<TotalCount> =
+            db_conn_sql::query(self.db_conn_sql.clone(), &total_query).await?;
 
         let total = rows
             .first()
@@ -133,12 +122,8 @@ impl MediaInteractionListItemDb for ImplPostgres {
             SqlVarType::Primitive(SqlPrimitive::Number(offset as f64)),
         );
 
-        let rows = db_conn_sql::query(
-            self.db_conn_sql.clone(),
-            &query,
-            MediaInteractionPostgresRow::from_json,
-        )
-        .await?;
+        let rows: Vec<MediaInteractionPostgresRow> =
+            db_conn_sql::query(self.db_conn_sql.clone(), &query).await?;
 
         let rows = rows
             .into_iter()

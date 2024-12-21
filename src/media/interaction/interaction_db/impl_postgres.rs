@@ -66,15 +66,11 @@ impl MediaInteractionDb for Postgres {
             ),
         );
 
-        let rows = db_conn_sql::query(
-            self.db_conn_sql.clone(),
-            &query,
-            MediaInteractionPostgresRow::from_json,
-        )
-        .await?
-        .into_iter()
-        .filter_map(|r| r.to_media_interaction())
-        .collect::<Vec<MediaInteraction>>();
+        let rows = db_conn_sql::query(self.db_conn_sql.clone(), &query)
+            .await?
+            .into_iter()
+            .filter_map(|r: MediaInteractionPostgresRow| r.to_media_interaction())
+            .collect::<Vec<MediaInteraction>>();
 
         Ok(rows)
     }
@@ -112,15 +108,11 @@ impl MediaInteractionDb for Postgres {
             SqlVarType::Primitive(SqlPrimitive::Text(interaction_name.to_postgres_enum())),
         );
 
-        let rows = db_conn_sql::query(
-            self.db_conn_sql.clone(),
-            &query,
-            MediaInteractionPostgresRow::from_json,
-        )
-        .await?
-        .into_iter()
-        .filter_map(|r| r.to_media_interaction())
-        .collect::<Vec<MediaInteraction>>();
+        let rows = db_conn_sql::query(self.db_conn_sql.clone(), &query)
+            .await?
+            .into_iter()
+            .filter_map(|r: MediaInteractionPostgresRow| r.to_media_interaction())
+            .collect::<Vec<MediaInteraction>>();
 
         Ok(rows)
     }

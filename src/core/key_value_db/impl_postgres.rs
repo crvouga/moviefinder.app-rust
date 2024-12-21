@@ -10,7 +10,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::vec;
 
 pub struct Postgres {
@@ -37,11 +36,6 @@ struct Row {
     updated_at_posix: Option<i64>,
 }
 
-fn parse_row_json(value: Value) -> Result<Row, std::io::Error> {
-    serde_json::from_value(value)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
-}
-
 #[async_trait]
 impl KeyValueDb for Postgres {
     async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
@@ -52,7 +46,7 @@ impl KeyValueDb for Postgres {
             "key",
             SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
         );
-        let queried = db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json).await?;
+        let queried: Vec<Row> = db_conn_sql::query(self.db_conn_sql.clone(), &query).await?;
         let value = queried.first().and_then(|row| row.value.clone());
 
         debug!(self.logger, "get key={}", key);
@@ -82,12 +76,12 @@ impl KeyValueDb for Postgres {
 
         debug!(self.logger, "put key={}", key);
 
-        let old_value = db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json)
+        let old_value = db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &query)
             .await?
             .first()
             .and_then(|row| row.value.clone());
 
-        db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json).await?;
+        db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &query).await?;
 
         let db_conn_sql = self.db_conn_sql.clone();
         let namespace = self.namespace.clone();
@@ -103,7 +97,7 @@ impl KeyValueDb for Postgres {
                         SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
                     );
 
-                    db_conn_sql::query(db_conn_sql, &query, parse_row_json)
+                    db_conn_sql::query::<Row>(db_conn_sql, &query)
                         .await
                         .map(|_| ())
                 }
@@ -128,7 +122,7 @@ impl KeyValueDb for Postgres {
                         SqlVarType::Primitive(SqlPrimitive::Text(value.to_string())),
                     );
 
-                    db_conn_sql::query(db_conn_sql, &query, parse_row_json)
+                    db_conn_sql::query::<Row>(db_conn_sql, &query)
                         .await
                         .map(|_| ())
                 }
@@ -156,7 +150,7 @@ impl KeyValueDb for Postgres {
         let key = key.to_string();
         let old_value = self.get(&key).await?;
 
-        db_conn_sql::query(self.db_conn_sql.clone(), &query, parse_row_json).await?;
+        db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &query).await?;
 
         uow.register_rollback(move || async move {
             if old_value.is_some() {
@@ -179,7 +173,7 @@ impl KeyValueDb for Postgres {
                     SqlVarType::Primitive(SqlPrimitive::Text(old_value.unwrap())),
                 );
 
-                db_conn_sql::query(db_conn_sql, &query, parse_row_json)
+                db_conn_sql::query::<Row>(db_conn_sql, &query)
                     .await
                     .map(|_| ())
             } else {
