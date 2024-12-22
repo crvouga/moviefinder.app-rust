@@ -23,8 +23,10 @@ use crate::{
         genre::genre_db::{self, interface::MediaGenreDb},
         interaction::{
             interaction_db::interface::MediaInteractionDb,
-            list_db::interface::MediaInteractionListDb,
-            list_item_db::interface::MediaInteractionListItemDb,
+            list::{
+                list_db::interface::MediaInteractionListDb,
+                list_item_db::interface::MediaInteractionListItemDb,
+            },
         },
         media_db::{self, interface::MediaDb},
         person::person_db::{self, interface::MediaPersonDb},
@@ -152,11 +154,15 @@ impl Ctx {
         );
 
         let media_interaction_list_db = Arc::new(
-            media::interaction::list_db::impl_postgres::ImplPostgres::new(db_conn_sql.clone()),
+            media::interaction::list::list_db::impl_postgres::ImplPostgres::new(
+                db_conn_sql.clone(),
+            ),
         );
 
         let media_interaction_list_item_db = Arc::new(
-            media::interaction::list_item_db::impl_postgres::ImplPostgres::new(db_conn_sql.clone()),
+            media::interaction::list::list_item_db::impl_postgres::ImplPostgres::new(
+                db_conn_sql.clone(),
+            ),
         );
 
         let media_genre_db = Arc::new(genre_db::impl_tmdb::Tmdb::new(tmdb_api.clone()));

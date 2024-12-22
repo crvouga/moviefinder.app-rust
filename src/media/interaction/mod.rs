@@ -5,5 +5,3 @@ pub mod interaction_form;
 pub mod interaction_id;
 pub mod interaction_name;
 pub mod list;
-pub mod list_db;
-pub mod list_item_db;

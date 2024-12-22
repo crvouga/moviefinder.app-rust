@@ -2,7 +2,9 @@ use super::interface::MediaInteractionListDb;
 use crate::{
     core::{db_conn_sql::interface::DbConnSqlDyn, posix::Posix},
     list::{list::List, list_variant::ListVariant},
-    media::interaction::{interaction_name::to_all_interaction_names, list::MediaInteractionList},
+    media::interaction::{
+        interaction_name::to_all_interaction_names, list::list_::MediaInteractionList,
+    },
     user::user_id::UserId,
 };
 use async_trait::async_trait;

@@ -1,5 +1,6 @@
-use crate::{media::interaction::list::MediaInteractionList, user::user_id::UserId};
 use async_trait::async_trait;
+
+use crate::{media::interaction::list::list_::MediaInteractionList, user::user_id::UserId};
 
 #[async_trait]
 pub trait MediaInteractionListDb: Send + Sync {
