@@ -24,36 +24,37 @@ pub async fn respond(
                 .find_by_user_id(user_id.clone())
                 .await?;
 
-            w.send_fragment(view_interaction_lists(Some(interaction_lists)))
+            w.send_fragment(view_lists_section(user_id.clone(), Some(interaction_lists)))
                 .await?;
 
             Ok(())
         }
 
         Route::ListScreen { user_id, name } => {
-            println!("{:?} {:?} ", user_id, name);
+            w.send_screen(view_list_screen()).await?;
 
-            let list_item = ctx
+            let list_items = ctx
                 .media_interaction_list_item_db
-                .find_by_user_id_and_interaction_name(0, 100, user_id.clone(), name.clone())
+                .find_by_user_id_and_interaction_name(0, 10_000, user_id.clone(), name.clone())
                 .await?;
-
-            println!("{:?} ", list_item);
 
             Ok(())
         }
     }
 }
 
-pub fn view_lists_section(user_id: UserId) -> Elem {
+pub fn view_lists_section(user_id: UserId, lists: Option<Vec<MediaInteractionList>>) -> Elem {
     div()
         .id("interaction-lists-section")
         .class("w-full flex flex-col")
-        .data_on(|e| e.load().sse(&Route::ListsSection { user_id }.url()))
-        .child(view_interaction_lists(None))
+        .map(|e| match lists {
+            None => e.data_on(|e| e.load().sse(&Route::ListsSection { user_id }.url())),
+            Some(_) => e,
+        })
+        .child(view_lists(lists))
         .child(div().class("w-full h-32"))
 }
 
-pub fn view_interaction_lists(lists: Option<Vec<MediaInteractionList>>) -> Elem {
-    view_lists(lists).id("interaction-lists")
+fn view_list_screen() -> Elem {
+    div().child_text("List")
 }

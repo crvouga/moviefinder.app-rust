@@ -131,6 +131,7 @@ fn view_screen_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem 
                 .child(view_profile_header(_account, profile))
                 .child(interaction_list::respond::view_lists_section(
                     profile.user_id.clone(),
+                    None,
                 )),
         )
         .child(BottomBar::default().active_account().view())
