@@ -12,6 +12,7 @@ use crate::{
         ui::{avatar::Avatar, button::Button, icon, spinner_page, top_bar::TopBar},
     },
     ctx::Ctx,
+    media::interaction::interaction_list,
     req::Req,
     ui::{bottom_bar::BottomBar, route::AppRoute},
 };
@@ -121,45 +122,54 @@ fn view_logged_out() -> Elem {
 fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
     div()
         .id("account")
-        .class("w-full flex-1 flex items-center justify-center flex-col")
+        .class("w-full h-full flex-1 flex items-center justify-center flex-col")
         .child(TopBar::default().title("Account").view())
+        .child(view_profile_header(_account, profile))
         .child(
             div()
-                .class("flex-1 flex items-center justify-start flex-col gap-6 p-6 w-full")
-                .child(
-                    div()
-                        .class("w-full flex flex-col items-center gap-4")
-                        .child(
-                            Avatar::default()
-                                .data_attributes_src(&Js::str(&profile.to_avatar_url()))
-                                .class("size-24")
-                                .view(),
-                        )
-                        .child(
-                            p().child(text(&profile.username.to_at_username()))
-                                .class("text-xl font-base w-full text-center"),
-                        ),
-                )
-                .child(
-                    div()
-                        .class("flex w-full gap-3 justify-center")
-                        .child(
-                            edit_profile::respond::view_open_edit_profile_screen_button(
-                                profile.user_id.clone(),
-                            )
-                            .color_gray()
-                            .size_small()
-                            .view()
-                            .class("w-full max-w-[200px]"),
-                        )
-                        .child(
-                            logout::respond::view_open_logout_drawer_button()
-                                .color_gray()
-                                .size_small()
-                                .view()
-                                .class("w-full max-w-[200px]"),
-                        ),
-                ),
+                .class("w-full flex-1")
+                .child(interaction_list::respond::view_lists_section(
+                    profile.user_id.clone(),
+                )),
         )
         .child(BottomBar::default().active_account().view())
+}
+
+fn view_profile_header(_account: &UserAccount, profile: &UserProfile) -> Elem {
+    div()
+        .class("flex items-center justify-start flex-col gap-6 p-6 w-full")
+        .child(
+            div()
+                .class("w-full flex flex-col items-center gap-4")
+                .child(
+                    Avatar::default()
+                        .data_attributes_src(&Js::str(&profile.to_avatar_url()))
+                        .class("size-24")
+                        .view(),
+                )
+                .child(
+                    p().child(text(&profile.username.to_at_username()))
+                        .class("text-xl font-base w-full text-center"),
+                ),
+        )
+        .child(
+            div()
+                .class("flex w-full gap-3 justify-center")
+                .child(
+                    edit_profile::respond::view_open_edit_profile_screen_button(
+                        profile.user_id.clone(),
+                    )
+                    .color_gray()
+                    .size_small()
+                    .view()
+                    .class("w-full max-w-[200px]"),
+                )
+                .child(
+                    logout::respond::view_open_logout_drawer_button()
+                        .color_gray()
+                        .size_small()
+                        .view()
+                        .class("w-full max-w-[200px]"),
+                ),
+        )
 }

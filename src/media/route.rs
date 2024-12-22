@@ -23,3 +23,9 @@ impl AppRoute for interaction_form::route::Route {
         Route::InteractionForm(self.clone()).url()
     }
 }
+
+impl AppRoute for interaction_list::route::Route {
+    fn url(&self) -> String {
+        Route::InteractionList(self.clone()).url()
+    }
+}

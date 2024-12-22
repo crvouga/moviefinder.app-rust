@@ -122,7 +122,7 @@ fn to_form_id(media_id: &MediaId) -> String {
 }
 
 pub fn view(media_id: &MediaId, form: Option<InteractionForm>) -> Elem {
-    view_interaction_form_buttons(media_id.clone(), form).id(&to_form_id(media_id))
+    view_icon_buttons(media_id.clone(), form).id(&to_form_id(media_id))
 }
 
 fn view_width() -> Elem {
@@ -132,16 +132,13 @@ fn view_width() -> Elem {
         .child_text(&"_".repeat(to_max_display_string_length()))
 }
 
-fn view_interaction_form_buttons(
-    media_id: MediaId,
-    interaction_form: Option<InteractionForm>,
-) -> Elem {
+fn view_icon_buttons(media_id: MediaId, interaction_form: Option<InteractionForm>) -> Elem {
     div()
         .class("flex flex-col gap-2 pb-4")
         .child(view_width())
         .map(|e| match interaction_form {
             None => e.children(
-                view_interaction_buttons_disabled()
+                view_buttons_disabled()
                     .into_iter()
                     .take(4)
                     .collect::<Vec<Elem>>(),
@@ -153,11 +150,9 @@ fn view_interaction_form_buttons(
                 e.children(
                     available_interactions
                         .iter()
-                        .map(|(name, action)| {
-                            view_interaction_button_enabled(&action, &name, &media_id)
-                        })
+                        .map(|(name, action)| view_icon_button_enabled(&action, &name, &media_id))
                         .chain(
-                            view_interaction_buttons_disabled()
+                            view_buttons_disabled()
                                 .into_iter()
                                 .skip(available_interactions.len()),
                         )
@@ -179,22 +174,19 @@ fn to_id(name: &InteractionName, action: &InteractionAction, disabled: bool) -> 
     format!("{:?}-{:?}-{}", name, action, disabled)
 }
 
-fn view_interaction_button(
-    action: &InteractionAction,
-    name: &InteractionName,
-) -> LabelledIconButton {
+fn view_icon_button_base(action: &InteractionAction, name: &InteractionName) -> LabelledIconButton {
     LabelledIconButton::default()
         .icon(name.view_icon(is_selected(action), "size-9"))
         .text(&name.to_display_string())
         .id(&to_id(name, action, false))
 }
 
-fn view_interaction_button_enabled(
+fn view_icon_button_enabled(
     action: &InteractionAction,
     name: &InteractionName,
     media_id: &MediaId,
 ) -> Elem {
-    view_interaction_button(&action, &name)
+    view_icon_button_base(&action, &name)
         .active(is_selected(&action))
         .view()
         .data_on(|e| {
@@ -209,14 +201,14 @@ fn view_interaction_button_enabled(
         })
 }
 
-fn view_interaction_button_disabled(action: &InteractionAction, name: &InteractionName) -> Elem {
-    view_interaction_button(action, name)
+fn view_icon_button_disabled(action: &InteractionAction, name: &InteractionName) -> Elem {
+    view_icon_button_base(action, name)
         .disabled(true)
         .view()
         .id(&to_id(name, action, true))
 }
 
-fn view_interaction_buttons_disabled() -> Vec<Elem> {
+fn view_buttons_disabled() -> Vec<Elem> {
     vec![
         (&InteractionAction::Add, &InteractionName::Seen),
         (&InteractionAction::Add, &InteractionName::NotSeen),
@@ -226,6 +218,6 @@ fn view_interaction_buttons_disabled() -> Vec<Elem> {
         (&InteractionAction::Add, &InteractionName::NotInterested),
     ]
     .into_iter()
-    .map(|(action, name)| view_interaction_button_disabled(action, name))
+    .map(|(action, name)| view_icon_button_disabled(action, name))
     .collect()
 }
