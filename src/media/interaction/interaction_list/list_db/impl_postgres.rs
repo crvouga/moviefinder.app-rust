@@ -3,7 +3,7 @@ use crate::{
     core::{db_conn_sql::interface::DbConnSqlDyn, posix::Posix},
     list::{list::List, list_variant::ListVariant},
     media::interaction::{
-        interaction_name::to_all_interaction_names, list::list_::MediaInteractionList,
+        interaction_list::list_::MediaInteractionList, interaction_name::to_all_interaction_names,
     },
     user::user_id::UserId,
 };

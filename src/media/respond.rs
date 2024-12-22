@@ -1,6 +1,9 @@
+use super::{
+    details,
+    interaction::{interaction_form, interaction_list},
+    route::Route,
+};
 use crate::{core::http::response_writer::ResponseWriter, ctx::Ctx, req::Req};
-
-use super::{details, interaction::interaction_form, route::Route};
 
 pub async fn respond(
     ctx: &Ctx,
@@ -11,5 +14,6 @@ pub async fn respond(
     match route {
         Route::Details(route) => details::respond::respond(ctx, r, route, w).await,
         Route::InteractionForm(route) => interaction_form::respond::respond(ctx, r, route, w).await,
+        Route::InteractionList(route) => interaction_list::respond::respond(ctx, r, route, w).await,
     }
 }

@@ -6,8 +6,8 @@ mod tests {
         media::interaction::{
             interaction_::MediaInteraction,
             interaction_db::interface::MediaInteractionDb,
+            interaction_list::list_db::{impl_postgres, interface::MediaInteractionListDb},
             interaction_name::InteractionName,
-            list::list_db::{impl_postgres, interface::MediaInteractionListDb},
         },
         user::user_id::UserId,
     };

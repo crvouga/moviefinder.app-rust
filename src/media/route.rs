@@ -1,10 +1,14 @@
-use super::{details, interaction::interaction_form};
+use super::{
+    details,
+    interaction::{interaction_form, interaction_list},
+};
 use crate::ui::route::AppRoute;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
     InteractionForm(interaction_form::route::Route),
+    InteractionList(interaction_list::route::Route),
     Details(details::route::Route),
 }
 
