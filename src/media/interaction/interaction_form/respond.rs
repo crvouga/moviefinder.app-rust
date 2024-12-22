@@ -1,6 +1,6 @@
+use super::interaction_form_::to_available_interactions;
 use super::interaction_form_::{self, InteractionForm};
 use super::route::Route;
-use super::view_buttons::view_interaction_form_buttons;
 use crate::core::html::Elem;
 use crate::core::posix::Posix;
 use crate::core::unit_of_work::uow;
@@ -10,6 +10,14 @@ use crate::media::interaction::interaction_id::MediaInteractionId;
 use crate::media::media_id::MediaId;
 use crate::user::user_id::UserId;
 use crate::{core::http::response_writer::ResponseWriter, ctx::Ctx, req::Req};
+use crate::{
+    core::{html::div, ui::labelled_icon_button::LabelledIconButton},
+    media::interaction::{
+        interaction_action::InteractionAction,
+        interaction_name::{to_max_display_string_length, InteractionName},
+    },
+    ui::route::AppRoute,
+};
 use std::collections::HashMap;
 
 pub async fn respond(
@@ -76,7 +84,7 @@ pub async fn respond_interaction_form(
     for (media_id, interactions) in interactions_by_media_id {
         let interaction_form = interaction_form_::derive(interactions);
 
-        w.send_fragment(view_interaction_form(&media_id, Some(interaction_form)))
+        w.send_fragment(view(&media_id, Some(interaction_form)))
             .await?;
     }
 
@@ -113,6 +121,111 @@ fn to_form_id(media_id: &MediaId) -> String {
     format!("media-interaction-form-{}", media_id.as_str())
 }
 
-pub fn view_interaction_form(media_id: &MediaId, form: Option<InteractionForm>) -> Elem {
+pub fn view(media_id: &MediaId, form: Option<InteractionForm>) -> Elem {
     view_interaction_form_buttons(media_id.clone(), form).id(&to_form_id(media_id))
+}
+
+fn view_width() -> Elem {
+    div()
+        .class("select-none opacity-0")
+        .aria_hidden_true()
+        .child_text(&"_".repeat(to_max_display_string_length()))
+}
+
+fn view_interaction_form_buttons(
+    media_id: MediaId,
+    interaction_form: Option<InteractionForm>,
+) -> Elem {
+    div()
+        .class("flex flex-col gap-2 pb-4")
+        .child(view_width())
+        .map(|e| match interaction_form {
+            None => e.children(
+                view_interaction_buttons_disabled()
+                    .into_iter()
+                    .take(4)
+                    .collect::<Vec<Elem>>(),
+            ),
+
+            Some(interaction_form) => {
+                let available_interactions = to_available_interactions(interaction_form);
+
+                e.children(
+                    available_interactions
+                        .iter()
+                        .map(|(name, action)| {
+                            view_interaction_button_enabled(&action, &name, &media_id)
+                        })
+                        .chain(
+                            view_interaction_buttons_disabled()
+                                .into_iter()
+                                .skip(available_interactions.len()),
+                        )
+                        .take(4)
+                        .collect::<Vec<Elem>>(),
+                )
+            }
+        })
+}
+
+fn is_selected(action: &InteractionAction) -> bool {
+    match action {
+        InteractionAction::Add => false,
+        InteractionAction::Retract => true,
+    }
+}
+
+fn to_id(name: &InteractionName, action: &InteractionAction, disabled: bool) -> String {
+    format!("{:?}-{:?}-{}", name, action, disabled)
+}
+
+fn view_interaction_button(
+    action: &InteractionAction,
+    name: &InteractionName,
+) -> LabelledIconButton {
+    LabelledIconButton::default()
+        .icon(name.view_icon(is_selected(action), "size-9"))
+        .text(&name.to_display_string())
+        .id(&to_id(name, action, false))
+}
+
+fn view_interaction_button_enabled(
+    action: &InteractionAction,
+    name: &InteractionName,
+    media_id: &MediaId,
+) -> Elem {
+    view_interaction_button(&action, &name)
+        .active(is_selected(&action))
+        .view()
+        .data_on(|e| {
+            e.press_down().sse(
+                &Route::Record {
+                    action: action.clone(),
+                    name: name.clone(),
+                    media_id: media_id.clone(),
+                }
+                .url(),
+            )
+        })
+}
+
+fn view_interaction_button_disabled(action: &InteractionAction, name: &InteractionName) -> Elem {
+    view_interaction_button(action, name)
+        .disabled(true)
+        .view()
+        .id(&to_id(name, action, true))
+}
+
+fn view_interaction_buttons_disabled() -> Vec<Elem> {
+    vec![
+        (&InteractionAction::Add, &InteractionName::Seen),
+        (&InteractionAction::Add, &InteractionName::NotSeen),
+        (&InteractionAction::Add, &InteractionName::Liked),
+        (&InteractionAction::Add, &InteractionName::Disliked),
+        (&InteractionAction::Add, &InteractionName::Interested),
+        (&InteractionAction::Add, &InteractionName::NotInterested),
+    ]
+    .into_iter()
+    .map(|(action, name)| view_interaction_button_disabled(action, name))
+    .collect()
 }

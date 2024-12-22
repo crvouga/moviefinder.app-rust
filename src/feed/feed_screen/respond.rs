@@ -392,7 +392,7 @@ pub fn view_slide_content(feed_item: &FeedItem) -> Elem {
             )
             .child(
                 div().class("absolute bottom-0 right-0").child(
-                    interaction_form::respond::view_interaction_form(&media.id, None)
+                    interaction_form::respond::view(&media.id, None)
                 )
             ),
     }
