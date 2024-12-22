@@ -1,7 +1,6 @@
 use crate::core::{html::Elem, random, ui::icon};
 use serde::{Deserialize, Serialize};
 
-pub mod list;
 pub mod postgres;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Eq, Hash)]

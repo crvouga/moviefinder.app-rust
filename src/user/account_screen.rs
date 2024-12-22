@@ -122,12 +122,12 @@ fn view_logged_out() -> Elem {
 fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
     div()
         .id("account")
-        .class("w-full h-full flex-1 flex items-center justify-center flex-col")
+        .class("w-full h-full flex-1 flex items-center justify-center flex-col overflow-hidden")
         .child(TopBar::default().title("Account").view())
-        .child(view_profile_header(_account, profile))
         .child(
             div()
-                .class("w-full flex-1")
+                .class("w-full flex-1 overflow-y-auto flex flex-col gap-3")
+                .child(view_profile_header(_account, profile))
                 .child(interaction_list::respond::view_lists_section(
                     profile.user_id.clone(),
                 )),

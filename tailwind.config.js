@@ -8,6 +8,7 @@ module.exports = {
       },
       colors: {
         placeholder: "#a3a3a3",
+        skeleton: "#3f3f46",
       },
       borderColor: {
         DEFAULT: "#3f3f46",

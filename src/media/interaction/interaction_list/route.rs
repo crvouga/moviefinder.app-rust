@@ -3,10 +3,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
-    Lists {
+    ListsSection {
         user_id: UserId,
     },
-    List {
+    ListScreen {
         user_id: UserId,
         name: InteractionName,
     },

@@ -5,9 +5,13 @@ use crate::{
         pagination::Paginated,
         sql::{Sql, SqlPrimitive, SqlVarType},
     },
-    list::list_item::{ListItem, ListItemVariant},
+    list::{
+        list::List,
+        list_item::{ListItem, ListItemVariant},
+    },
     media::interaction::{
         interaction_::{postgres::MediaInteractionPostgresRow, MediaInteraction},
+        interaction_list::list_::MediaInteractionList,
         interaction_name::InteractionName,
     },
     user::user_id::UserId,
@@ -38,6 +42,10 @@ impl MediaInteractionListItemDb for ImplPostgres {
         user_id: UserId,
         interaction_name: InteractionName,
     ) -> Result<Paginated<ListItem>, std::io::Error> {
+        let list = MediaInteractionList {
+            user_id: user_id.clone(),
+            interaction_name: interaction_name.clone(),
+        };
         let mut base_query = Sql::new(
             r#"
             WITH latest_interactions AS (
@@ -133,14 +141,14 @@ impl MediaInteractionListItemDb for ImplPostgres {
         let items = rows
             .into_iter()
             .map(|interaction| {
-                let list_id = interaction.interaction_name.to_list_id(user_id.clone());
+                let list_id = list.id();
                 let list_item_id = interaction
                     .interaction_name
                     .to_list_item_id(list_id.clone(), interaction.media_id.clone());
 
                 ListItem {
                     id: list_item_id,
-                    list_id: list_id.clone(),
+                    list_id,
                     created_at_posix: interaction.created_at_posix,
                     variant: ListItemVariant::Media(interaction.media_id),
                 }
