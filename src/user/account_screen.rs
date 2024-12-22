@@ -45,7 +45,7 @@ pub async fn respond(
         }
 
         Some(user_id) => {
-            w.send_screen(view_loading_screen()).await?;
+            w.send_screen(view_screen_loading()).await?;
 
             let maybe_account = ctx.user_account_db.find_one_by_user_id(&user_id).await?;
 
@@ -69,7 +69,8 @@ pub async fn respond(
                 }
             };
 
-            w.send_screen(view_logged_in(&account, &profile)).await?;
+            w.send_screen(view_screen_logged_in(&account, &profile))
+                .await?;
 
             Ok(())
         }
@@ -77,11 +78,11 @@ pub async fn respond(
 }
 
 async fn respond_screen_logged_out(w: &mut ResponseWriter) -> Result<(), std::io::Error> {
-    w.send_screen(view_logged_out()).await?;
+    w.send_screen(view_screen_logged_out()).await?;
     Ok(())
 }
 
-fn view_loading_screen() -> Elem {
+fn view_screen_loading() -> Elem {
     div()
         .id("loading")
         .class("w-full flex-1 flex items-center justify-center flex-col")
@@ -90,7 +91,7 @@ fn view_loading_screen() -> Elem {
         .child(BottomBar::default().active_account().view())
 }
 
-fn view_logged_out() -> Elem {
+fn view_screen_logged_out() -> Elem {
     div()
         .id("login-cta")
         .class("w-full flex-1 flex items-center justify-center flex-col")
@@ -119,7 +120,7 @@ fn view_logged_out() -> Elem {
         .child(BottomBar::default().active_account().view())
 }
 
-fn view_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
+fn view_screen_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
     div()
         .id("account")
         .class("w-full h-full flex-1 flex items-center justify-center flex-col overflow-hidden")

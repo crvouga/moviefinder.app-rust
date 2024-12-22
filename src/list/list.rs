@@ -38,6 +38,7 @@ fn view_list_loading() -> Elem {
 fn view_list<T: List>(list: T) -> Elem {
     view_list_root()
         .button()
+        .data_on(|e| e.click().push_then_sse(&list.details_url()))
         .class("active:opacity-50 cursor-pointer")
         .child(list.view_art(ART_CLASS))
         .child(p().child_text(&list.name()))
