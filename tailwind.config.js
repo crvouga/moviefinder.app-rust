@@ -18,7 +18,7 @@ module.exports = {
         muted: "#a3a3a3",
       },
       opacity: {
-        active: "0.8",
+        active: "0.5",
       },
     },
   },
