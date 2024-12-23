@@ -1,14 +1,16 @@
+use serde::{Deserialize, Serialize};
+
 use crate::{
     core::html::{div, Elem},
-    list::{list::List, list_id::ListId, list_item_id::ListItemId},
+    list::{list::List, list_id::ListId, list_item_id::ListItemId, list_screen},
     media::{interaction::interaction_name::InteractionName, media_id::MediaId},
     ui::route::AppRoute,
-    user::user_id::UserId,
+    user::{self, user_id::UserId},
 };
 
 use super::route::Route;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MediaInteractionList {
     pub interaction_name: InteractionName,
     pub user_id: UserId,
@@ -38,10 +40,13 @@ impl List for MediaInteractionList {
     }
 
     fn details_url(&self) -> String {
-        Route::ListScreen {
-            user_id: self.user_id.clone(),
-            name: self.interaction_name.clone(),
-        }
+        Route::ListScreen(list_screen::route::Route::Screen {
+            back_url: user::route::Route::AccountScreen.url(),
+            list: MediaInteractionList {
+                user_id: self.user_id.clone(),
+                interaction_name: self.interaction_name.clone(),
+            },
+        })
         .url()
     }
 }

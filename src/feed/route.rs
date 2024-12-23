@@ -1,8 +1,6 @@
-use serde::{Deserialize, Serialize};
-
-use crate::ui::route::AppRoute;
-
 use super::{feed_screen, feed_tags_form};
+use crate::ui::route::AppRoute;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {

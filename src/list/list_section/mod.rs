@@ -1,4 +1,4 @@
-use super::List;
+use super::list::List;
 use crate::core::{html::Elem, ui};
 use std::sync::Arc;
 

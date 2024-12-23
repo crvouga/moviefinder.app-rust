@@ -5,19 +5,21 @@ use crate::{
         http::response_writer::ResponseWriter,
     },
     ctx::Ctx,
-    list::{list::list_section::ListSection, list_screen::ListScreen},
+    list::{list_screen, list_section::ListSection},
     req::Req,
     ui::route::AppRoute,
-    user::{self, user_id::UserId},
+    user::user_id::UserId,
 };
 
 pub async fn respond(
     ctx: &Ctx,
-    _r: &Req,
+    r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
+        Route::ListScreen(route) => list_screen::respond::respond(ctx, r, route, w).await,
+
         Route::ListsSection { user_id } => {
             let interaction_lists = ctx
                 .media_interaction_list_db
@@ -29,34 +31,12 @@ pub async fn respond(
 
             Ok(())
         }
-
-        Route::ListScreen { user_id, name } => {
-            let list_screen = ListScreen::default()
-                .list(MediaInteractionList {
-                    interaction_name: name.clone(),
-                    user_id: user_id.clone(),
-                })
-                .back_url(user::route::Route::AccountScreen.url());
-
-            w.send_screen(list_screen.clone().view()).await?;
-
-            let list_items = ctx
-                .media_interaction_list_item_db
-                .find_by_user_id_and_interaction_name(0, 10_000, user_id.clone(), name.clone())
-                .await?;
-
-            list_screen
-                .respond_add_list_items(ctx, list_items, w)
-                .await?;
-
-            Ok(())
-        }
     }
 }
 
 pub fn view_lists_section(user_id: UserId, lists: Option<Vec<MediaInteractionList>>) -> Elem {
     div()
-        .id("interaction-lists-section")
+        .id("lists-section")
         .class("w-full flex flex-col")
         .map(|e| match lists {
             None => e.data_on(|e| e.load().sse(&Route::ListsSection { user_id }.url())),
