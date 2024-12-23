@@ -19,7 +19,7 @@ use crate::{
     req::Req,
 };
 
-use std::{collections::HashMap, fmt::Debug};
+use std::{fmt::Debug, vec};
 
 pub async fn respond<TList: MediaList + Debug>(
     list_screen_db: &impl MediaListScreenDb<TList>,
@@ -66,7 +66,7 @@ pub async fn respond<TList: MediaList + Debug>(
             let media = ctx
                 .media_db
                 .query(Query {
-                    limit: media_ids.len(),
+                    limit: media_ids.len() + 1,
                     offset: 0,
                     filter: QueryFilter::Or(
                         media_ids
@@ -83,10 +83,11 @@ pub async fn respond<TList: MediaList + Debug>(
                 })
                 .await
                 .unwrap_or_default()
-                .items
-                .iter()
-                .map(|media| (media.id.clone(), media.clone()))
-                .collect();
+                .items;
+
+            println!("list_items: {:?}", list_items);
+            println!("media_ids: {:?}", media_ids);
+            println!("media: {:?}", media);
 
             w.send_fragment(view_list_items(list_items, media)).await?;
 
@@ -126,13 +127,13 @@ pub fn view<T: MediaList>(model: ViewModel<T>) -> Elem {
                                 .child_text(&name.unwrap_or_default()),
                         ),
                 )
-                .child(view_list_items(RemoteResult::Loading, HashMap::new())),
+                .child(view_list_items(RemoteResult::Loading, vec![])),
         )
 }
 
 fn view_list_items(
     list_items: RemoteResult<Paginated<MediaListItem>, crate::core::error::Error>,
-    media: HashMap<MediaId, Media>,
+    media: Vec<Media>,
 ) -> Elem {
     div()
         .id("list-items")
@@ -156,9 +157,8 @@ fn view_list_items(
                     .into_iter()
                     .filter_map(|item| match item.variant {
                         MediaListItemVariant::Media(media_id) => {
-                            let m = media.get(&media_id).cloned();
-
-                            match m {
+                            let found = media.iter().find(|m| m.id == media_id).cloned();
+                            match found {
                                 Some(media) => Some(
                                     ListItem::default()
                                         .title(media.title)
@@ -170,7 +170,12 @@ fn view_list_items(
                                         })
                                         .view(),
                                 ),
-                                None => None,
+                                None => Some(
+                                    ListItem::default()
+                                        .title("...".to_owned())
+                                        .art(|class| Image::new().view().class(&class))
+                                        .view(),
+                                ),
                             }
                         }
                     })

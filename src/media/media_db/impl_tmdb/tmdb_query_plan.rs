@@ -11,7 +11,6 @@ use crate::{
         media_id::MediaId,
     },
 };
-use std::vec;
 
 #[derive(Debug, Clone, Default)]
 pub struct TmdbQueryPlan {
@@ -45,46 +44,53 @@ impl TmdbQueryPlan {
 
 impl From<MediaQuery> for TmdbQueryPlan {
     fn from(media_query: MediaQuery) -> TmdbQueryPlan {
-        let mut query_plan = TmdbQueryPlan::default();
+        to_tmdb_query_plan_step(media_query.clone(), media_query.filter.clone())
+    }
+}
 
-        match media_query.filter.clone() {
-            QueryFilter::None => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie {
-                    params: media_query.clone().into(),
-                };
-                query_plan.items.push(item);
-                query_plan
-            }
-            QueryFilter::Clause(field, operator, value) => match (field, operator, value) {
-                (MediaQueryField::MediaId, QueryOp::Eq, value) => {
-                    let media_id = MediaId::new(value);
-                    let item = TmdbQueryPlanItem::GetMovieDetails { media_id };
-                    query_plan.items.push(item);
-                    query_plan
-                }
+fn to_tmdb_query_plan_step(
+    media_query: MediaQuery,
+    filter: QueryFilter<MediaQueryField>,
+) -> TmdbQueryPlan {
+    let mut query_plan = TmdbQueryPlan::default();
 
-                _ => {
-                    let item = TmdbQueryPlanItem::GetDiscoverMovie {
-                        params: media_query.clone().into(),
-                    };
-                    query_plan.items.push(item);
-                    query_plan
-                }
-            },
-            QueryFilter::And(_filters) => {
+    match filter.clone() {
+        QueryFilter::None => {
+            let item = TmdbQueryPlanItem::GetDiscoverMovie {
+                params: media_query.clone().into(),
+            };
+            query_plan.items.push(item);
+            query_plan
+        }
+        QueryFilter::Clause(field, operator, value) => match (field, operator, value) {
+            (MediaQueryField::MediaId, QueryOp::Eq, value) => {
+                let media_id = MediaId::new(value);
+                let item = TmdbQueryPlanItem::GetMovieDetails { media_id };
+                query_plan.items.push(item);
+                query_plan
+            }
+
+            _ => {
                 let item = TmdbQueryPlanItem::GetDiscoverMovie {
                     params: media_query.clone().into(),
                 };
                 query_plan.items.push(item);
                 query_plan
             }
-            QueryFilter::Or(_filters) => {
-                let item = TmdbQueryPlanItem::GetDiscoverMovie {
-                    params: media_query.clone().into(),
-                };
-                query_plan.items.push(item);
-                query_plan
+        },
+        QueryFilter::And(_filters) => {
+            let item = TmdbQueryPlanItem::GetDiscoverMovie {
+                params: media_query.clone().into(),
+            };
+            query_plan.items.push(item);
+            query_plan
+        }
+        QueryFilter::Or(filters) => {
+            for f in filters {
+                let plan = to_tmdb_query_plan_step(media_query.clone(), f);
+                query_plan.items.extend(plan.items);
             }
+            query_plan
         }
     }
 }
