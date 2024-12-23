@@ -1,7 +1,6 @@
 use super::list_id::ListId;
 use crate::core::html::Elem;
 
-pub mod list_screen;
 pub mod list_section;
 
 pub trait List: Clone {
