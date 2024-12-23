@@ -33,7 +33,7 @@ impl UserSessionDb for KeyValueDb {
     // async fn find_by_user_id(
     //     &self,
     //     user_id: &UserId,
-    // ) -> Result<Option<UserSession>, std::io::Error> {
+    // ) -> Result<Option<UserSession>, crate::core::error::Error> {
     //     let maybe_session_id = self.session_id_by_user_id.get(user_id.as_str()).await?;
 
     //     let session_id = match maybe_session_id {
@@ -47,7 +47,7 @@ impl UserSessionDb for KeyValueDb {
     async fn find_by_session_id(
         &self,
         session_id: &SessionId,
-    ) -> Result<Option<UserSession>, std::io::Error> {
+    ) -> Result<Option<UserSession>, crate::core::error::Error> {
         let maybe_session = self.session_by_session_id.get(&session_id.as_str()).await?;
 
         let session = match maybe_session {
@@ -56,17 +56,21 @@ impl UserSessionDb for KeyValueDb {
         };
 
         let parsed = serde_json::from_str::<UserSession>(&session)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
+            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
 
         Ok(Some(parsed))
     }
 
-    async fn put(&self, uow: UnitOfWork, session: &UserSession) -> Result<(), std::io::Error> {
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        session: &UserSession,
+    ) -> Result<(), crate::core::error::Error> {
         let session_id = session.session_id.as_str().to_string();
         let user_id = session.user_id.as_str().to_string();
 
         let serialized = serde_json::to_string(session)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
+            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
 
         self.session_by_session_id
             .put(uow.clone(), &session_id, serialized.to_string())
@@ -79,7 +83,11 @@ impl UserSessionDb for KeyValueDb {
         Ok(())
     }
 
-    async fn zap(&self, uow: UnitOfWork, session_id: &SessionId) -> Result<(), std::io::Error> {
+    async fn zap(
+        &self,
+        uow: UnitOfWork,
+        session_id: &SessionId,
+    ) -> Result<(), crate::core::error::Error> {
         let session = self.find_by_session_id(session_id).await?;
 
         if let Some(session) = session {

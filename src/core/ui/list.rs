@@ -50,9 +50,15 @@ impl ListItem {
                     e.class("select-none pointer-events-none animate-pulse")
                         .child(div().class(ART_CLASS).class("bg-skeleton"))
                         .child(
-                            div()
-                                .class("bg-skeleton rounded")
-                                .child(p().class("text-transparent").child_text("Loading")),
+                            div().class("bg-skeleton rounded").child(
+                                p().class("text-transparent").child_text(
+                                    if self.title.is_empty() {
+                                        "Loading"
+                                    } else {
+                                        &self.title
+                                    },
+                                ),
+                            ),
                         )
                 } else {
                     e.class("active:opacity-active cursor-pointer")

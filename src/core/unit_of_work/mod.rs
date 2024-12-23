@@ -4,7 +4,9 @@ use tokio::sync::Mutex;
 struct UnitOfWorkInternal {
     rollback_functions: Vec<
         Box<
-            dyn FnOnce() -> Pin<Box<dyn Future<Output = Result<(), std::io::Error>> + Send>> + Send,
+            dyn FnOnce() -> Pin<
+                    Box<dyn Future<Output = Result<(), crate::core::error::Error>> + Send>,
+                > + Send,
         >,
     >,
     started: bool,
@@ -20,10 +22,9 @@ impl UnitOfWorkInternal {
         }
     }
 
-    pub async fn start(&mut self) -> Result<(), std::io::Error> {
+    pub async fn start(&mut self) -> Result<(), crate::core::error::Error> {
         if self.started {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            return Err(crate::core::error::Error::new(
                 "Transaction already started",
             ));
         }
@@ -31,16 +32,12 @@ impl UnitOfWorkInternal {
         Ok(())
     }
 
-    pub async fn commit(&mut self) -> Result<(), std::io::Error> {
+    pub async fn commit(&mut self) -> Result<(), crate::core::error::Error> {
         if !self.started {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "Transaction not started",
-            ));
+            return Err(crate::core::error::Error::new("Transaction not started"));
         }
         if self.committed {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            return Err(crate::core::error::Error::new(
                 "Transaction already committed",
             ));
         }
@@ -49,16 +46,12 @@ impl UnitOfWorkInternal {
         Ok(())
     }
 
-    pub async fn rollback(&mut self) -> Result<(), std::io::Error> {
+    pub async fn rollback(&mut self) -> Result<(), crate::core::error::Error> {
         if !self.started {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "Transaction not started",
-            ));
+            return Err(crate::core::error::Error::new("Transaction not started"));
         }
         if self.committed {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            return Err(crate::core::error::Error::new(
                 "Transaction already committed",
             ));
         }
@@ -71,17 +64,20 @@ impl UnitOfWorkInternal {
     pub fn register_rollback<F, Fut>(&mut self, f: F)
     where
         F: FnOnce() -> Fut + Send + 'static,
-        Fut: Future<Output = Result<(), std::io::Error>> + Send + 'static,
+        Fut: Future<Output = Result<(), crate::core::error::Error>> + Send + 'static,
     {
         self.rollback_functions.push(Self::box_future(f));
     }
 
     fn box_future<F, Fut>(
         f: F,
-    ) -> Box<dyn FnOnce() -> Pin<Box<dyn Future<Output = Result<(), std::io::Error>> + Send>> + Send>
+    ) -> Box<
+        dyn FnOnce() -> Pin<Box<dyn Future<Output = Result<(), crate::core::error::Error>> + Send>>
+            + Send,
+    >
     where
         F: FnOnce() -> Fut + Send + 'static,
-        Fut: Future<Output = Result<(), std::io::Error>> + Send + 'static,
+        Fut: Future<Output = Result<(), crate::core::error::Error>> + Send + 'static,
     {
         Box::new(move || Box::pin(f()))
     }
@@ -98,15 +94,15 @@ impl UnitOfWork {
         Self(Arc::new(Mutex::new(UnitOfWorkInternal::new())))
     }
 
-    pub async fn start(&self) -> Result<(), std::io::Error> {
+    pub async fn start(&self) -> Result<(), crate::core::error::Error> {
         self.0.lock().await.start().await
     }
 
-    pub async fn commit(&self) -> Result<(), std::io::Error> {
+    pub async fn commit(&self) -> Result<(), crate::core::error::Error> {
         self.0.lock().await.commit().await
     }
 
-    pub async fn rollback(&self) -> Result<(), std::io::Error> {
+    pub async fn rollback(&self) -> Result<(), crate::core::error::Error> {
         self.0.lock().await.rollback().await
     }
 
@@ -117,16 +113,16 @@ impl UnitOfWork {
     pub async fn register_rollback<F, Fut>(&self, f: F)
     where
         F: FnOnce() -> Fut + Send + 'static,
-        Fut: Future<Output = Result<(), std::io::Error>> + Send + 'static,
+        Fut: Future<Output = Result<(), crate::core::error::Error>> + Send + 'static,
     {
         self.0.lock().await.register_rollback(f);
     }
 
     pub async fn transact<'a, F>(
         transaction: impl FnOnce(UnitOfWork) -> F + 'a,
-    ) -> Result<(), std::io::Error>
+    ) -> Result<(), crate::core::error::Error>
     where
-        F: Future<Output = Result<(), std::io::Error>> + Send + 'a,
+        F: Future<Output = Result<(), crate::core::error::Error>> + Send + 'a,
     {
         let uow = UnitOfWork::new();
         uow.start().await?;

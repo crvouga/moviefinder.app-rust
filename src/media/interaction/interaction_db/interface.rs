@@ -12,16 +12,16 @@ pub trait MediaInteractionDb: Send + Sync {
         &self,
         user_id: &UserId,
         media_ids: &Vec<&MediaId>,
-    ) -> Result<Vec<MediaInteraction>, std::io::Error>;
+    ) -> Result<Vec<MediaInteraction>, crate::core::error::Error>;
     #[allow(dead_code)]
     async fn find_by_user_id_and_interaction_name(
         &self,
         user_id: &UserId,
         interaction_name: &InteractionName,
-    ) -> Result<Vec<MediaInteraction>, std::io::Error>;
+    ) -> Result<Vec<MediaInteraction>, crate::core::error::Error>;
     async fn put(
         &self,
         u: UnitOfWork,
         interaction: &MediaInteraction,
-    ) -> Result<(), std::io::Error>;
+    ) -> Result<(), crate::core::error::Error>;
 }

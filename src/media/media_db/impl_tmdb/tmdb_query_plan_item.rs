@@ -39,7 +39,7 @@ impl TmdbQueryPlanItem {
         &self,
         tmdb_api: &TmdbApi,
         tmdb_config: &TmdbConfig,
-    ) -> Result<Paginated<Media>, String> {
+    ) -> Result<Paginated<Media>, crate::core::error::Error> {
         match self {
             TmdbQueryPlanItem::GetMovieDetails { media_id } => {
                 let movie_details_response = tmdb_api.movie_details(media_id.as_str()).await?;
@@ -66,7 +66,7 @@ impl TmdbQueryPlanItem {
                     let result = request.await;
                     match result {
                         Ok(val) => discover_responses.push(val),
-                        Err(err) => return Err(err),
+                        Err(err) => return Err(crate::core::error::Error::new(err)),
                     }
                 }
 

@@ -47,7 +47,7 @@ impl Postgres {
 
 #[async_trait]
 impl DbConnSql for Postgres {
-    async fn query(&self, sql: &Sql) -> Result<Vec<Value>, std::io::Error> {
+    async fn query(&self, sql: &Sql) -> Result<Vec<Value>, crate::core::error::Error> {
         let start = std::time::Instant::now();
 
         if let Some(dur) = self.simulate_latency {
@@ -60,13 +60,13 @@ impl DbConnSql for Postgres {
             .client
             .query(&sql_str, &[])
             .await
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
+            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
 
         let mut results = vec![];
 
         let enum_types = fetch_enum_types(&self.client)
             .await
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
+            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
 
         for row in rows {
             let json = row_to_json(row, &enum_types)?;
@@ -103,7 +103,7 @@ async fn fetch_enum_types(client: &Client) -> Result<std::collections::HashSet<S
 fn row_to_json(
     row: tokio_postgres::Row,
     enum_types: &std::collections::HashSet<String>,
-) -> Result<Value, std::io::Error> {
+) -> Result<Value, crate::core::error::Error> {
     let mut json_obj = serde_json::Map::new();
 
     for (idx, column) in row.columns().iter().enumerate() {
@@ -116,10 +116,7 @@ fn row_to_json(
                 Ok(Some(value)) => Value::String(value),
                 Ok(None) => Value::Null,
                 Err(err) => {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        err.to_string(),
-                    ));
+                    return Err(crate::core::error::Error::new(err.to_string()));
                 }
             }
         } else {
@@ -129,10 +126,7 @@ fn row_to_json(
                     Ok(Some(value)) => Value::String(value),
                     Ok(None) => Value::Null,
                     Err(err) => {
-                        return Err(std::io::Error::new(
-                            std::io::ErrorKind::InvalidData,
-                            err.to_string(),
-                        ));
+                        return Err(crate::core::error::Error::new(err.to_string()));
                     }
                 },
                 // Handle integers
@@ -140,10 +134,7 @@ fn row_to_json(
                     Ok(Some(value)) => Value::Number(value.into()),
                     Ok(None) => Value::Null,
                     Err(err) => {
-                        return Err(std::io::Error::new(
-                            std::io::ErrorKind::InvalidData,
-                            err.to_string(),
-                        ));
+                        return Err(crate::core::error::Error::new(err.to_string()));
                     }
                 },
                 // Handle floating-point numbers
@@ -157,10 +148,7 @@ fn row_to_json(
                     }
                     Ok(None) => Value::Null,
                     Err(err) => {
-                        return Err(std::io::Error::new(
-                            std::io::ErrorKind::InvalidData,
-                            err.to_string(),
-                        ));
+                        return Err(crate::core::error::Error::new(err.to_string()));
                     }
                 },
                 // Handle booleans
@@ -168,10 +156,7 @@ fn row_to_json(
                     Ok(Some(value)) => Value::Bool(value),
                     Ok(None) => Value::Null,
                     Err(err) => {
-                        return Err(std::io::Error::new(
-                            std::io::ErrorKind::InvalidData,
-                            err.to_string(),
-                        ));
+                        return Err(crate::core::error::Error::new(err.to_string()));
                     }
                 },
                 // Default case for unsupported types

@@ -9,7 +9,10 @@ impl Random {}
 
 #[async_trait]
 impl MediaDb for Random {
-    async fn query(&self, _query: MediaQuery) -> Result<Paginated<media_::Media>, String> {
+    async fn query(
+        &self,
+        _query: MediaQuery,
+    ) -> Result<Paginated<media_::Media>, crate::core::error::Error> {
         let paginated = Paginated {
             items: vec![
                 media_::random(),
@@ -28,7 +31,9 @@ impl MediaDb for Random {
         };
 
         if random::bool() {
-            return Err("Something went wrong".to_string());
+            return Err(crate::core::error::Error::new(
+                "Something went wrong".to_string(),
+            ));
         }
 
         Ok(paginated)

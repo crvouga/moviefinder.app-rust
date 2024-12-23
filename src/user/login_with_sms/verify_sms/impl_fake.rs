@@ -26,7 +26,7 @@ impl VerifySms for Fake {
         }
 
         if SHOULD_ERROR_SEND_CODE {
-            let err = std::io::Error::new(std::io::ErrorKind::Other, "Sending code failed");
+            let err = crate::core::error::Error::new("Sending code failed");
             return Err(SendCodeError::Error(err));
         }
 
@@ -39,7 +39,7 @@ impl VerifySms for Fake {
         }
 
         if SHOULD_ERROR_VERIFY_CODE {
-            let err = std::io::Error::new(std::io::ErrorKind::Other, "Verifying code failed");
+            let err = crate::core::error::Error::new("Verifying code failed");
             return Err(VerifyCodeError::Error(err));
         }
 

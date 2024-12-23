@@ -32,7 +32,7 @@ impl MediaInteractionDb for Postgres {
         &self,
         user_id: &UserId,
         media_ids: &Vec<&MediaId>,
-    ) -> Result<Vec<MediaInteraction>, std::io::Error> {
+    ) -> Result<Vec<MediaInteraction>, crate::core::error::Error> {
         let mut query = Sql::new(
             r#"
             SELECT 
@@ -79,7 +79,7 @@ impl MediaInteractionDb for Postgres {
         &self,
         user_id: &UserId,
         interaction_name: &InteractionName,
-    ) -> Result<Vec<MediaInteraction>, std::io::Error> {
+    ) -> Result<Vec<MediaInteraction>, crate::core::error::Error> {
         let mut query = Sql::new(
             r#"
             SELECT 
@@ -121,7 +121,7 @@ impl MediaInteractionDb for Postgres {
         &self,
         uow: UnitOfWork,
         interaction: &MediaInteraction,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), crate::core::error::Error> {
         let mut query = Sql::new(
             r#"
             INSERT INTO media_interaction (

@@ -2,12 +2,12 @@ use async_trait::async_trait;
 
 pub enum SendCodeError {
     InvalidPhoneNumber,
-    Error(std::io::Error),
+    Error(crate::core::error::Error),
 }
 
 pub enum VerifyCodeError {
     WrongCode,
-    Error(std::io::Error),
+    Error(crate::core::error::Error),
 }
 
 #[async_trait]

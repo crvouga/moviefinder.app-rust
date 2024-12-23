@@ -30,7 +30,7 @@ impl UserProfileDb for KeyValueDb {
     async fn find_one_by_user_id(
         &self,
         user_id: &UserId,
-    ) -> Result<Option<UserProfile>, std::io::Error> {
+    ) -> Result<Option<UserProfile>, crate::core::error::Error> {
         let maybe_profile = self.profile_by_user_id.get(&user_id.as_str()).await?;
 
         let profile = match maybe_profile {
@@ -39,17 +39,21 @@ impl UserProfileDb for KeyValueDb {
         };
 
         let parsed = serde_json::from_str::<UserProfile>(&profile)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
+            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
 
         Ok(Some(parsed))
     }
 
-    async fn put(&self, uow: UnitOfWork, profile: &UserProfile) -> Result<(), std::io::Error> {
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        profile: &UserProfile,
+    ) -> Result<(), crate::core::error::Error> {
         let user_id = profile.user_id.as_str().to_string();
         let username = profile.username.clone();
 
         let serialized = serde_json::to_string(profile)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidData, err.to_string()))?;
+            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
 
         self.profile_by_user_id
             .put(uow.clone(), &user_id, serialized.to_string())

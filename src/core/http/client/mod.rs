@@ -9,7 +9,7 @@ pub mod impl_reqwest;
 
 #[async_trait]
 pub trait HttpClient: Send + Sync {
-    async fn send(&self, request: Request) -> Result<Response, std::io::Error>;
+    async fn send(&self, request: Request) -> Result<Response, crate::core::error::Error>;
 }
 
 pub type HttpClientDyn = Arc<dyn HttpClient>;

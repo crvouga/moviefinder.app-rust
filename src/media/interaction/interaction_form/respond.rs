@@ -25,7 +25,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::Form { media_id } => {
             let user_id = r.user_id(ctx).await?;
@@ -78,7 +78,7 @@ pub async fn respond_interaction_form(
     w: &mut ResponseWriter,
     user_id: UserId,
     media_ids: Vec<MediaId>,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     let interactions_by_media_id = get_interactions_by_media_id(ctx, user_id, media_ids).await;
 
     for (media_id, interactions) in interactions_by_media_id {

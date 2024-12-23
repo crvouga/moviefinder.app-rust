@@ -38,7 +38,7 @@ struct Row {
 
 #[async_trait]
 impl KeyValueDb for Postgres {
-    async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
+    async fn get(&self, key: &str) -> Result<Option<String>, crate::core::error::Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new("SELECT value FROM key_value WHERE key = :key");
@@ -54,7 +54,12 @@ impl KeyValueDb for Postgres {
         Ok(value)
     }
 
-    async fn put(&self, uow: UnitOfWork, key: &str, value: String) -> Result<(), std::io::Error> {
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        key: &str,
+        value: String,
+    ) -> Result<(), crate::core::error::Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new(
@@ -133,7 +138,7 @@ impl KeyValueDb for Postgres {
         Ok(())
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), std::io::Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), crate::core::error::Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new("DELETE FROM key_value WHERE key = :key");

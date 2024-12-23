@@ -9,12 +9,16 @@ pub trait UserAccountDb: Send + Sync {
     async fn find_one_by_phone_number(
         &self,
         phone_number: &str,
-    ) -> Result<Option<UserAccount>, std::io::Error>;
+    ) -> Result<Option<UserAccount>, crate::core::error::Error>;
 
     async fn find_one_by_user_id(
         &self,
         user_id: &UserId,
-    ) -> Result<Option<UserAccount>, std::io::Error>;
+    ) -> Result<Option<UserAccount>, crate::core::error::Error>;
 
-    async fn put(&self, uow: UnitOfWork, account: &UserAccount) -> Result<(), std::io::Error>;
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        account: &UserAccount,
+    ) -> Result<(), crate::core::error::Error>;
 }

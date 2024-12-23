@@ -7,7 +7,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::Feed(route) => feed::respond::respond(&ctx, r, route, w).await,
 

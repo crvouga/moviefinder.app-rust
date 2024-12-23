@@ -11,7 +11,10 @@ use crate::{
 };
 
 impl ResponseWriter {
-    pub async fn respond_login_drawer(&mut self, message: &str) -> Result<(), std::io::Error> {
+    pub async fn respond_login_drawer(
+        &mut self,
+        message: &str,
+    ) -> Result<(), crate::core::error::Error> {
         self.send_fragment(view_must_login_drawer(message)).await?;
 
         Ok(())
@@ -23,7 +26,7 @@ pub async fn respond(
     _r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::LoginDrawer => {
             w.send_fragment(view_must_login_drawer("")).await?;

@@ -23,7 +23,7 @@ pub async fn respond_initial(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     let profile = r.user_profile(ctx).await.unwrap_or_default();
 
     let mut form_state = FormState::get(&ctx, &profile).await;
@@ -44,7 +44,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::ClickedRandomSeed => {
             let avatar_seed_new = random::string(32);
@@ -98,7 +98,7 @@ pub async fn respond(
 async fn send_form_state(
     form_state: &FormState,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     w.send_signals(vec![
         (SIGNAL_AVATAR_SEED, &Js::str(&form_state.history.present())),
         (

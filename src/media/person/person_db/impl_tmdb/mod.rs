@@ -40,7 +40,7 @@ impl Tmdb {
         &self,
         query: &PersonQuery,
         search_query: &str,
-    ) -> Result<Paginated<Person>, String> {
+    ) -> Result<Paginated<Person>, crate::core::error::Error> {
         let tmdb_config = self.tmdb_api.config().await?;
 
         let page_based = query.to_page_based(TMDB_PAGE_SIZE);
@@ -67,7 +67,10 @@ impl Tmdb {
         })
     }
 
-    async fn person_popular(&self, query: &PersonQuery) -> Result<Paginated<Person>, String> {
+    async fn person_popular(
+        &self,
+        query: &PersonQuery,
+    ) -> Result<Paginated<Person>, crate::core::error::Error> {
         let tmdb_config = self.tmdb_api.config().await?;
 
         let page_based = query.to_page_based(TMDB_PAGE_SIZE);
@@ -94,7 +97,10 @@ impl Tmdb {
 
 #[async_trait]
 impl MediaPersonDb for Tmdb {
-    async fn query(&self, query: PersonQuery) -> Result<Paginated<Person>, String> {
+    async fn query(
+        &self,
+        query: PersonQuery,
+    ) -> Result<Paginated<Person>, crate::core::error::Error> {
         debug!(self.logger, "query {:?}", query);
 
         match &query.filter {

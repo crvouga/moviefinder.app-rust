@@ -27,7 +27,10 @@ impl FeedTagsFormStateDb {
         }
     }
 
-    pub async fn get(&self, feed_id: &FeedId) -> Result<Option<FormState>, std::io::Error> {
+    pub async fn get(
+        &self,
+        feed_id: &FeedId,
+    ) -> Result<Option<FormState>, crate::core::error::Error> {
         debug!(self.logger, "get {:?}", feed_id);
         let got = self.key_value_db.get(feed_id.as_str()).await.unwrap();
 
@@ -42,10 +45,14 @@ impl FeedTagsFormStateDb {
         Ok(Some(parsed))
     }
 
-    pub async fn put(&self, uow: UnitOfWork, form_state: &FormState) -> Result<(), std::io::Error> {
+    pub async fn put(
+        &self,
+        uow: UnitOfWork,
+        form_state: &FormState,
+    ) -> Result<(), crate::core::error::Error> {
         debug!(self.logger, "put {:?}", form_state);
         let value = serde_json::to_string(&form_state)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
+            .map_err(|e| crate::core::error::Error::new(e.to_string()))?;
 
         self.key_value_db
             .put(uow, form_state.feed_id.as_str(), value)

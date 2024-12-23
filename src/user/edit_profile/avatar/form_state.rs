@@ -35,7 +35,7 @@ impl FormState {
         ctx: &Ctx,
         profile: &UserProfile,
         form_state: &FormState,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), crate::core::error::Error> {
         let key = to_key(&profile);
 
         let encoded = serde_json::to_string(form_state).unwrap();

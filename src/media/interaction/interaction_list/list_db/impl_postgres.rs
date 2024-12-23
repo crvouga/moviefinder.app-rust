@@ -25,7 +25,7 @@ impl MediaInteractionListDb for ImplPostgres {
     async fn find_by_user_id(
         &self,
         user_id: UserId,
-    ) -> Result<Vec<MediaInteractionList>, std::io::Error> {
+    ) -> Result<Vec<MediaInteractionList>, crate::core::error::Error> {
         let lists = to_all_interaction_names()
             .iter()
             .map(|name| MediaInteractionList {

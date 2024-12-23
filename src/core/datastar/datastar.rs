@@ -407,14 +407,14 @@ impl Fragments {
         self
     }
 
-    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), crate::core::error::Error> {
         self.sse.send(w).await?;
         Ok(())
     }
 }
 
 impl ResponseWriter {
-    pub async fn send_fragment(&mut self, elem: Elem) -> Result<(), std::io::Error> {
+    pub async fn send_fragment(&mut self, elem: Elem) -> Result<(), crate::core::error::Error> {
         sse()
             .event_merge_fragments()
             .data_fragments(elem)
@@ -422,7 +422,10 @@ impl ResponseWriter {
             .await
     }
 
-    pub async fn send_signals(&mut self, signals: Vec<(&str, &str)>) -> Result<(), std::io::Error> {
+    pub async fn send_signals(
+        &mut self,
+        signals: Vec<(&str, &str)>,
+    ) -> Result<(), crate::core::error::Error> {
         let key_value_pairs = signals
             .iter()
             .map(|(k, v)| format!("{}: {}", k, v))
@@ -438,11 +441,15 @@ impl ResponseWriter {
             .await
     }
 
-    pub async fn send_signal(&mut self, key: &str, value: &str) -> Result<(), std::io::Error> {
+    pub async fn send_signal(
+        &mut self,
+        key: &str,
+        value: &str,
+    ) -> Result<(), crate::core::error::Error> {
         self.send_signals(vec![(key, value)]).await
     }
 
-    pub async fn send_script(&mut self, script: &str) -> Result<(), std::io::Error> {
+    pub async fn send_script(&mut self, script: &str) -> Result<(), crate::core::error::Error> {
         sse()
             .event_execute_script()
             .data_script(script)

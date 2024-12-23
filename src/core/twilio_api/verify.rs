@@ -9,12 +9,12 @@ use crate::core::url_encoded;
 
 pub enum VerifyCodeError {
     WrongCode,
-    Error(std::io::Error),
+    Error(crate::core::error::Error),
 }
 
 pub enum SendCodeError {
     InvalidPhoneNumber,
-    Error(std::io::Error),
+    Error(crate::core::error::Error),
 }
 
 impl TwilioApi {
@@ -70,8 +70,7 @@ impl TwilioApi {
                 return Err(SendCodeError::InvalidPhoneNumber);
             }
 
-            Err(SendCodeError::Error(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            Err(SendCodeError::Error(crate::core::error::Error::new(
                 format!(
                     "Failed to send code: {:?}",
                     String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
@@ -149,8 +148,7 @@ impl TwilioApi {
                 return Err(VerifyCodeError::WrongCode);
             }
 
-            Err(VerifyCodeError::Error(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            Err(VerifyCodeError::Error(crate::core::error::Error::new(
                 format!(
                     "Failed to verify code: {:?}",
                     String::from_utf8(response.body).unwrap_or("Unknown error".to_string())

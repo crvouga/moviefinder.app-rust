@@ -26,13 +26,18 @@ impl HashMap {
 
 #[async_trait]
 impl KeyValueDb for HashMap {
-    async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
+    async fn get(&self, key: &str) -> Result<Option<String>, crate::core::error::Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map = self.map.read().unwrap();
         Ok(map.get(&namespaced_key).cloned())
     }
 
-    async fn put(&self, uow: UnitOfWork, key: &str, value: String) -> Result<(), std::io::Error> {
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        key: &str,
+        value: String,
+    ) -> Result<(), crate::core::error::Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map_arc = Arc::clone(&self.map);
 
@@ -58,7 +63,7 @@ impl KeyValueDb for HashMap {
 
         Ok(())
     }
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), std::io::Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), crate::core::error::Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map_arc = Arc::clone(&self.map);
 

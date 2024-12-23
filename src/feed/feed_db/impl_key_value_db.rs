@@ -19,19 +19,19 @@ impl KeyValueDb {
 
 #[async_trait]
 impl FeedDb for KeyValueDb {
-    async fn get(&self, feed_id: FeedId) -> Result<Option<Feed>, std::io::Error> {
+    async fn get(&self, feed_id: FeedId) -> Result<Option<Feed>, crate::core::error::Error> {
         match self.key_value_db.get(feed_id.as_str()).await {
             Ok(Some(value)) => serde_json::from_str::<Feed>(&value)
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))
+                .map_err(|e| crate::core::error::Error::new(e.to_string()))
                 .map(Some),
             Ok(None) => Ok(None),
             Err(err) => Err(err),
         }
     }
 
-    async fn put(&self, uow: UnitOfWork, feed: Feed) -> Result<(), std::io::Error> {
+    async fn put(&self, uow: UnitOfWork, feed: Feed) -> Result<(), crate::core::error::Error> {
         let serialized = serde_json::to_string(&feed)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
+            .map_err(|e| crate::core::error::Error::new(e.to_string()))?;
 
         self.key_value_db
             .put(uow, feed.feed_id.as_str(), serialized)

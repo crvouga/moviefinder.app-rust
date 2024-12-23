@@ -26,7 +26,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::Screen { .. } => {
             let user_id = match r.user_id(ctx).await.ok().clone() {
@@ -109,7 +109,7 @@ async fn respond_failed_to_load(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     w.send_toast_dark("User not found. Try logging in again")
         .await?;
 

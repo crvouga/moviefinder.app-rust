@@ -10,5 +10,5 @@ pub trait MediaListScreenDb<TList: MediaList + Clone + 'static>: Send + Sync {
         &self,
         pagination: Pagination,
         list: TList,
-    ) -> Result<Paginated<MediaListItem>, std::io::Error>;
+    ) -> Result<Paginated<MediaListItem>, crate::core::error::Error>;
 }

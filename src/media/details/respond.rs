@@ -19,7 +19,7 @@ pub async fn respond(
     _r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::MediaDetailsScreen { media_id } => {
             let model = ViewModel::Loading;

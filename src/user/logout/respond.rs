@@ -20,7 +20,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::ClickedLogout => {
             ctx.user_session_db.zap(uow(), &r.session_id).await?;

@@ -22,7 +22,7 @@ pub async fn redirect_to(
     r: &Req,
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     w.send_script(&Js::push_url(&Route::AccountScreen.url()))
         .await?;
 
@@ -36,7 +36,7 @@ pub async fn respond(
     _r: &Req,
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match user_id {
         None => {
             respond_screen_logged_out(w).await?;
@@ -77,7 +77,9 @@ pub async fn respond(
     }
 }
 
-async fn respond_screen_logged_out(w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+async fn respond_screen_logged_out(
+    w: &mut ResponseWriter,
+) -> Result<(), crate::core::error::Error> {
     w.send_screen(view_screen_logged_out()).await?;
     Ok(())
 }

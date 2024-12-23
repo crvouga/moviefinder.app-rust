@@ -5,6 +5,7 @@ pub mod db_conn_sql;
 pub mod dynamic_data;
 pub mod env;
 pub mod env_stage;
+pub mod error;
 pub mod history;
 pub mod html;
 pub mod http;

@@ -34,7 +34,7 @@ pub async fn send_code(ctx: &Ctx, phone_number: &str) -> Result<(), SendCodeErro
 
 pub enum VerifyCodeError {
     InvalidCode(String),
-    Error(std::io::Error),
+    Error(crate::core::error::Error),
 }
 
 pub async fn verify_code(
@@ -95,7 +95,7 @@ async fn transact_user_logged_in(
     account: &UserAccount,
     profile: &UserProfile,
     session: &UserSession,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     UnitOfWork::transact(|uow: UnitOfWork| async move {
         ctx.user_account_db.put(uow.clone(), &account).await?;
 

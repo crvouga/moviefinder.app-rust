@@ -6,7 +6,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::AccountScreen => {
             account_screen::respond(ctx, r, w, &r.user_id(ctx).await.ok()).await

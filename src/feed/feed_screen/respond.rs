@@ -33,7 +33,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::FeedScreenDefault => {
             w.send_screen(view_screen()).await?;
@@ -140,7 +140,7 @@ pub async fn respond_feed_screen(
     r: &Req,
     w: &mut ResponseWriter,
     feed_id: &FeedId,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     w.send_screen(view_screen()).await?;
 
     respond_screen_contents(ctx, r, w, feed_id).await?;
@@ -153,7 +153,7 @@ pub async fn respond_screen_contents(
     r: &Req,
     w: &mut ResponseWriter,
     feed_id: &FeedId,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     w.send_fragment(view_top_bar_loading_with_link(&feed_id))
         .await?;
 
@@ -179,7 +179,7 @@ pub async fn put_feed(
     ctx: &Ctx,
     session_id: &SessionId,
     feed: &Feed,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     debug!(ctx.log, "put_feed: {:?}", feed);
 
     UnitOfWork::transact(|uow| async move {
@@ -196,7 +196,10 @@ pub async fn put_feed(
     Ok(())
 }
 
-pub async fn get_feed_items(ctx: &Ctx, feed: &Feed) -> Result<Vec<FeedItem>, String> {
+pub async fn get_feed_items(
+    ctx: &Ctx,
+    feed: &Feed,
+) -> Result<Vec<FeedItem>, crate::core::error::Error> {
     let query = feed.to_media_query(LIMIT);
 
     let paginated = ctx.media_db.query(query).await?;

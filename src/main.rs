@@ -42,7 +42,7 @@ async fn respond(
     ctx: Arc<Ctx>,
     request: Request,
     mut w: ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     request.write_session_id_cookie(&mut w);
 
     let maybe_route = request.route();
@@ -65,25 +65,26 @@ async fn respond(
         "{:?} session_id={:?} payload={:?}", maybe_route, r.session_id, r.payload
     );
 
-    let result: Result<(), std::io::Error> = match (maybe_route, request.is_datastar_request()) {
-        (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
+    let result: Result<(), crate::core::error::Error> =
+        match (maybe_route, request.is_datastar_request()) {
+            (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
-        (Some(route), false) => response_root(&request, &mut w, route.url()).await,
+            (Some(route), false) => response_root(&request, &mut w, route.url()).await,
 
-        (None, true) => respond_fallback(&ctx, &r, &mut w).await,
+            (None, true) => respond_fallback(&ctx, &r, &mut w).await,
 
-        (None, false) => match resolve_public_asset(&request.url.path).await {
-            Some(file_path) => response_public(&file_path, &request, &mut w).await,
-            None => {
-                response_root(
-                    &request,
-                    &mut w,
-                    feed_screen::route::Route::FeedScreenDefault.url(),
-                )
-                .await
-            }
-        },
-    };
+            (None, false) => match resolve_public_asset(&request.url.path).await {
+                Some(file_path) => response_public(&file_path, &request, &mut w).await,
+                None => {
+                    response_root(
+                        &request,
+                        &mut w,
+                        feed_screen::route::Route::FeedScreenDefault.url(),
+                    )
+                    .await
+                }
+            },
+        };
 
     match &result {
         Ok(_) => {}
@@ -103,7 +104,7 @@ async fn response_root(
     _r: &Request,
     w: &mut ResponseWriter,
     url: String,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     let html: &String = &root::Root::new(url).view().render_with_doctype();
 
     w.content("text/html", html.as_bytes()).await
@@ -131,7 +132,7 @@ async fn response_public(
     file_path: &str,
     _r: &Request,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     if let Ok(mut file) = tokio::fs::File::open(file_path).await {
         let mut buffer = Vec::new();
         tokio::io::AsyncReadExt::read_to_end(&mut file, &mut buffer).await?;
@@ -146,7 +147,7 @@ async fn respond_fallback(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     w.send_script(&Js::push_url(
         &feed_screen::route::Route::FeedScreenDefault.url(),
     ))

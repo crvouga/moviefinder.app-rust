@@ -31,15 +31,20 @@ impl CachedPostgres {
 
 #[async_trait]
 impl KeyValueDb for CachedPostgres {
-    async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
+    async fn get(&self, key: &str) -> Result<Option<String>, crate::core::error::Error> {
         self.impl_with_cache.get(key).await
     }
 
-    async fn put(&self, uow: UnitOfWork, key: &str, value: String) -> Result<(), std::io::Error> {
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        key: &str,
+        value: String,
+    ) -> Result<(), crate::core::error::Error> {
         self.impl_with_cache.put(uow, key, value).await
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), std::io::Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), crate::core::error::Error> {
         self.impl_with_cache.zap(uow, key).await
     }
 

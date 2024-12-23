@@ -25,7 +25,10 @@ impl KeyValueDb {
 
 #[async_trait]
 impl FeedSessionMappingDb for KeyValueDb {
-    async fn get(&self, session_id: SessionId) -> Result<Option<FeedId>, std::io::Error> {
+    async fn get(
+        &self,
+        session_id: SessionId,
+    ) -> Result<Option<FeedId>, crate::core::error::Error> {
         match self.key_value_db.get(session_id.as_str()).await {
             Ok(Some(value)) => Ok(Some(FeedId::new(&value))),
             Ok(None) => Ok(None),
@@ -38,7 +41,7 @@ impl FeedSessionMappingDb for KeyValueDb {
         uow: UnitOfWork,
         session_id: SessionId,
         feed_id: FeedId,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), crate::core::error::Error> {
         self.key_value_db
             .put(uow, session_id.as_str(), feed_id.as_str().to_string())
             .await?;

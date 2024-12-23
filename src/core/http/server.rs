@@ -10,10 +10,13 @@ use std::collections::HashMap;
 use tokio::io::AsyncReadExt;
 use tokio::net::{TcpListener, TcpStream};
 
-pub async fn start<F, Fut>(address: &str, handle_request: F) -> Result<(), std::io::Error>
+pub async fn start<F, Fut>(
+    address: &str,
+    handle_request: F,
+) -> Result<(), crate::core::error::Error>
 where
     F: Fn(Request, ResponseWriter) -> Fut + Send + Sync + 'static + Clone,
-    Fut: std::future::Future<Output = Result<(), std::io::Error>> + Send + 'static,
+    Fut: std::future::Future<Output = Result<(), crate::core::error::Error>> + Send + 'static,
 {
     let listener = TcpListener::bind(address).await?;
 
@@ -28,7 +31,7 @@ where
 async fn handle_connection<F, Fut>(mut stream: TcpStream, handle_request: F)
 where
     F: Fn(Request, ResponseWriter) -> Fut + Send + Sync + 'static,
-    Fut: std::future::Future<Output = Result<(), std::io::Error>> + Send + 'static,
+    Fut: std::future::Future<Output = Result<(), crate::core::error::Error>> + Send + 'static,
 {
     let buffer = read_http_request(&mut stream).await;
 

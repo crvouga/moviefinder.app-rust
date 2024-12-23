@@ -13,5 +13,8 @@ pub type PersonQuery = Query<PersonQueryField>;
 
 #[async_trait]
 pub trait MediaPersonDb: Send + Sync {
-    async fn query(&self, query: PersonQuery) -> Result<Paginated<Person>, String>;
+    async fn query(
+        &self,
+        query: PersonQuery,
+    ) -> Result<Paginated<Person>, crate::core::error::Error>;
 }

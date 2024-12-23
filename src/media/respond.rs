@@ -10,7 +10,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::Details(route) => details::respond::respond(ctx, r, route, w).await,
         Route::InteractionForm(route) => interaction_form::respond::respond(ctx, r, route, w).await,

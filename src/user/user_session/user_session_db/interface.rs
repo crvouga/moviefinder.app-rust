@@ -9,11 +9,19 @@ pub trait UserSessionDb: Send + Sync {
     // async fn find_by_user_id(
     //     &self,
     //     user_id: &UserId,
-    // ) -> Result<Option<UserSession>, std::io::Error>;
+    // ) -> Result<Option<UserSession>, crate::core::error::Error>;
     async fn find_by_session_id(
         &self,
         session_id: &SessionId,
-    ) -> Result<Option<UserSession>, std::io::Error>;
-    async fn put(&self, uow: UnitOfWork, session: &UserSession) -> Result<(), std::io::Error>;
-    async fn zap(&self, uow: UnitOfWork, session_id: &SessionId) -> Result<(), std::io::Error>;
+    ) -> Result<Option<UserSession>, crate::core::error::Error>;
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        session: &UserSession,
+    ) -> Result<(), crate::core::error::Error>;
+    async fn zap(
+        &self,
+        uow: UnitOfWork,
+        session_id: &SessionId,
+    ) -> Result<(), crate::core::error::Error>;
 }

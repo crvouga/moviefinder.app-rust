@@ -18,7 +18,7 @@ impl WithCache {
 
 #[async_trait]
 impl KeyValueDb for WithCache {
-    async fn get(&self, key: &str) -> Result<Option<String>, std::io::Error> {
+    async fn get(&self, key: &str) -> Result<Option<String>, crate::core::error::Error> {
         let got_cache = self.cache.get(key).await?;
 
         if let Some(value) = &got_cache {
@@ -36,13 +36,18 @@ impl KeyValueDb for WithCache {
         Ok(got_source)
     }
 
-    async fn put(&self, uow: UnitOfWork, key: &str, value: String) -> Result<(), std::io::Error> {
+    async fn put(
+        &self,
+        uow: UnitOfWork,
+        key: &str,
+        value: String,
+    ) -> Result<(), crate::core::error::Error> {
         self.source.put(uow.clone(), key, value.clone()).await?;
         self.cache.put(uow, key, value).await?;
         Ok(())
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), std::io::Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), crate::core::error::Error> {
         self.source.zap(uow.clone(), key).await?;
         self.cache.zap(uow, key).await?;
         Ok(())

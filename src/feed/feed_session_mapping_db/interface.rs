@@ -7,11 +7,12 @@ use crate::{
 
 #[async_trait]
 pub trait FeedSessionMappingDb: Send + Sync {
-    async fn get(&self, session_id: SessionId) -> Result<Option<FeedId>, std::io::Error>;
+    async fn get(&self, session_id: SessionId)
+        -> Result<Option<FeedId>, crate::core::error::Error>;
     async fn put(
         &self,
         uow: UnitOfWork,
         session_id: SessionId,
         feed_id: FeedId,
-    ) -> Result<(), std::io::Error>;
+    ) -> Result<(), crate::core::error::Error>;
 }

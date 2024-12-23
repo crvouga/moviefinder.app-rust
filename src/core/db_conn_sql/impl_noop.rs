@@ -13,7 +13,7 @@ impl ImplNoop {
 
 #[async_trait]
 impl DbConnSql for ImplNoop {
-    async fn query(&self, _sql: &Sql) -> Result<Vec<Value>, std::io::Error> {
+    async fn query(&self, _sql: &Sql) -> Result<Vec<Value>, crate::core::error::Error> {
         Ok(vec![])
     }
 }

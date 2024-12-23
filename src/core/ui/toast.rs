@@ -86,15 +86,21 @@ fn js_timeout(duration: Duration, js: &str) -> String {
 }
 
 impl ResponseWriter {
-    pub async fn send_toast(&mut self, toast: Toast) -> Result<(), std::io::Error> {
+    pub async fn send_toast(&mut self, toast: Toast) -> Result<(), crate::core::error::Error> {
         self.send_fragment(toast.view()).await
     }
 
-    pub async fn send_toast_dark(&mut self, message: &str) -> Result<(), std::io::Error> {
+    pub async fn send_toast_dark(
+        &mut self,
+        message: &str,
+    ) -> Result<(), crate::core::error::Error> {
         self.send_toast(Toast::dark(message)).await
     }
 
-    pub async fn send_toast_error(&mut self, message: &str) -> Result<(), std::io::Error> {
+    pub async fn send_toast_error(
+        &mut self,
+        message: &str,
+    ) -> Result<(), crate::core::error::Error> {
         self.send_toast(Toast::error(message)).await?;
         self.send_script(&Js::console_error(message)).await?;
         Ok(())

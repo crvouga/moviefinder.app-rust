@@ -21,7 +21,7 @@ impl ServerSentEvent {
         self
     }
 
-    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), std::io::Error> {
+    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), crate::core::error::Error> {
         w.write_sse_event(&self.event, self.data.iter().map(|s| s.as_str()).collect())
             .await
     }
@@ -32,7 +32,7 @@ impl ResponseWriter {
         &mut self,
         event: &str,
         data: Vec<&str>,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), crate::core::error::Error> {
         if !self.headers_sent {
             self.set_header("content-type", "text/event-stream");
             self.set_header("cache-control", "no-cache");

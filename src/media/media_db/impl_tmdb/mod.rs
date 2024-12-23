@@ -27,7 +27,10 @@ impl Tmdb {
 
 #[async_trait]
 impl MediaDb for Tmdb {
-    async fn query(&self, query: MediaQuery) -> Result<Paginated<Media>, String> {
+    async fn query(
+        &self,
+        query: MediaQuery,
+    ) -> Result<Paginated<Media>, crate::core::error::Error> {
         let tmdb_config = self.tmdb_api.config().await?;
 
         let query_plan: TmdbQueryPlan = query.clone().into();

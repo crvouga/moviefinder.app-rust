@@ -16,5 +16,6 @@ pub type MediaQuery = Query<MediaQueryField>;
 
 #[async_trait]
 pub trait MediaDb: Send + Sync {
-    async fn query(&self, query: MediaQuery) -> Result<Paginated<Media>, String>;
+    async fn query(&self, query: MediaQuery)
+        -> Result<Paginated<Media>, crate::core::error::Error>;
 }

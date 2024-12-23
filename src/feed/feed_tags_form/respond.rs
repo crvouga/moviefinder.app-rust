@@ -19,7 +19,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::FeedTagsFormScreen { feed_id } => {
             w.send_screen(view_screen(&feed_id)).await?;

@@ -1,26 +1,33 @@
 use super::{list_screen_db::MediaListScreenDb, route::Route};
 use crate::{
     core::{
-        html::{div, p, Elem},
+        html::{div, frag, p, Elem},
         http::response_writer::ResponseWriter,
         pagination::{Paginated, Pagination},
+        query::{Query, QueryFilter, QueryOp},
         remote_result::RemoteResult,
-        ui::{alert::Alert, list::List, spinner_block::SpinnerBlock, top_bar::TopBar},
+        ui::{
+            alert::Alert,
+            image::Image,
+            list::{List, ListItem},
+            top_bar::TopBar,
+        },
     },
     ctx::Ctx,
-    list::{list::MediaList, list_item::MediaListItem},
+    list::{list::MediaList, list_item::MediaListItem, list_item_variant::MediaListItemVariant},
+    media::{media_::Media, media_db::interface::MediaQueryField, media_id::MediaId},
     req::Req,
 };
 
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
 
 pub async fn respond<TList: MediaList + Debug>(
     list_screen_db: &impl MediaListScreenDb<TList>,
-    _ctx: &Ctx,
+    ctx: &Ctx,
     _r: &Req,
     route: &Route<TList>,
     w: &mut ResponseWriter,
-) -> Result<(), std::io::Error> {
+) -> Result<(), crate::core::error::Error> {
     match route {
         Route::IntersectedBottom { list } => {
             println!("IntersectedBottom: {:?}", list);
@@ -37,14 +44,51 @@ pub async fn respond<TList: MediaList + Debug>(
             let found = list_screen_db
                 .find_list_items(
                     Pagination {
-                        limit: 10,
+                        limit: 100,
                         offset: 0,
                     },
                     list.to_owned(),
                 )
                 .await;
 
-            w.send_fragment(view_list_items(found.into())).await?;
+            let list_items = found.clone().into();
+
+            let media_ids = found
+                .unwrap_or_default()
+                .items
+                .clone()
+                .iter()
+                .filter_map(|item| match item.variant.clone() {
+                    MediaListItemVariant::Media(media_id) => Some(media_id),
+                })
+                .collect::<Vec<MediaId>>();
+
+            let media = ctx
+                .media_db
+                .query(Query {
+                    limit: media_ids.len(),
+                    offset: 0,
+                    filter: QueryFilter::Or(
+                        media_ids
+                            .iter()
+                            .map(|id| {
+                                QueryFilter::Clause(
+                                    MediaQueryField::MediaId,
+                                    QueryOp::Eq,
+                                    id.as_str().to_owned(),
+                                )
+                            })
+                            .collect(),
+                    ),
+                })
+                .await
+                .unwrap_or_default()
+                .items
+                .iter()
+                .map(|media| (media.id.clone(), media.clone()))
+                .collect();
+
+            w.send_fragment(view_list_items(list_items, media)).await?;
 
             Ok(())
         }
@@ -72,7 +116,7 @@ pub fn view<T: MediaList>(model: ViewModel<T>) -> Elem {
         )
         .child(
             div()
-                .class("flex flex-col gap-6 w-full flex-1")
+                .class("flex flex-col gap-6 w-full flex-1 overflow-y-auto")
                 .child(
                     div()
                         .class("w-full flex items-center justify-center pt-12 flex-col gap-6 px-6")
@@ -82,22 +126,54 @@ pub fn view<T: MediaList>(model: ViewModel<T>) -> Elem {
                                 .child_text(&name.unwrap_or_default()),
                         ),
                 )
-                .child(view_list_items(RemoteResult::Loading)),
+                .child(view_list_items(RemoteResult::Loading, HashMap::new())),
         )
 }
 
-fn view_list_items(list_items: RemoteResult<Paginated<MediaListItem>, std::io::Error>) -> Elem {
+fn view_list_items(
+    list_items: RemoteResult<Paginated<MediaListItem>, crate::core::error::Error>,
+    media: HashMap<MediaId, Media>,
+) -> Elem {
     div()
         .id("list-items")
         .class("w-full flex flex-col gap-4")
         .child(match list_items {
-            RemoteResult::Loading => SpinnerBlock::default().view(),
             RemoteResult::Err(err) => Alert::error().label(&err.to_string()).view(),
+            RemoteResult::Loading => List::default().view().children(
+                (0..3)
+                    .map(|_| {
+                        ListItem::default()
+                            .title("Loading Loading Loading")
+                            .art(|_| frag())
+                            .skeleton(true)
+                            .view()
+                    })
+                    .collect(),
+            ),
             RemoteResult::Ok(list_items) => List::default().view().children(
                 list_items
                     .items
                     .into_iter()
-                    .map(|_item| div().child_text("hello"))
+                    .filter_map(|item| match item.variant {
+                        MediaListItemVariant::Media(media_id) => {
+                            let m = media.get(&media_id).cloned();
+
+                            match m {
+                                Some(media) => Some(
+                                    ListItem::default()
+                                        .title(media.title)
+                                        .art(move |class| {
+                                            Image::new()
+                                                .view()
+                                                .class(&class)
+                                                .src(media.poster.to_middle_res())
+                                        })
+                                        .view(),
+                                ),
+                                None => None,
+                            }
+                        }
+                    })
                     .collect(),
             ),
         })

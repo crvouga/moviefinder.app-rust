@@ -8,7 +8,7 @@ use crate::core::{
 const ID_SCREEN: &str = "screen";
 
 impl ResponseWriter {
-    pub async fn send_screen(&mut self, screen: Elem) -> Result<(), std::io::Error> {
+    pub async fn send_screen(&mut self, screen: Elem) -> Result<(), crate::core::error::Error> {
         self.send_fragment(screen.id(ID_SCREEN)).await?;
 
         Ok(())
