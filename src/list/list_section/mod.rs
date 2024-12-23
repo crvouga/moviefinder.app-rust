@@ -1,19 +1,19 @@
-use super::list::List;
+use super::list::MediaList;
 use crate::core::{html::Elem, ui};
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub struct ListSection<T: List + 'static> {
+pub struct ListSection<T: MediaList + 'static> {
     lists: Option<Vec<T>>,
 }
 
-impl<T: List + 'static> Default for ListSection<T> {
+impl<T: MediaList + 'static> Default for ListSection<T> {
     fn default() -> Self {
         Self { lists: None }
     }
 }
 
-impl<T: List + 'static> ListSection<T> {
+impl<T: MediaList + 'static> ListSection<T> {
     pub fn lists(mut self, lists: Option<Vec<T>>) -> Self {
         self.lists = lists;
         self

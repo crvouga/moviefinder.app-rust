@@ -1,15 +1,14 @@
 use crate::{
-    core::pagination::Paginated,
-    list::{list::List, list_item::ListItem},
+    core::pagination::{Paginated, Pagination},
+    list::{list::MediaList, list_item::MediaListItem},
 };
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait ListScreenDb<TList: List + Clone + 'static> {
+pub trait MediaListScreenDb<TList: MediaList + Clone + 'static>: Send + Sync {
     async fn find_list_items(
         &self,
-        offset: usize,
-        limit: usize,
+        pagination: Pagination,
         list: TList,
-    ) -> Result<Paginated<ListItem>, std::io::Error>;
+    ) -> Result<Paginated<MediaListItem>, std::io::Error>;
 }

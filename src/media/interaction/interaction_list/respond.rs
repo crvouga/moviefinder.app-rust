@@ -3,13 +3,19 @@ use crate::{
     core::{
         html::{div, Elem},
         http::response_writer::ResponseWriter,
+        pagination::{Paginated, Pagination},
     },
     ctx::Ctx,
-    list::{list_screen, list_section::ListSection},
+    list::{
+        list_item::MediaListItem,
+        list_screen::{self, list_screen_db::MediaListScreenDb},
+        list_section::ListSection,
+    },
     req::Req,
     ui::route::AppRoute,
     user::user_id::UserId,
 };
+use async_trait::async_trait;
 
 pub async fn respond(
     ctx: &Ctx,
@@ -18,7 +24,7 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), std::io::Error> {
     match route {
-        Route::ListScreen(route) => list_screen::respond::respond(ctx, r, route, w).await,
+        Route::ListScreen(route) => list_screen::respond::respond(ctx, ctx, r, route, w).await,
 
         Route::ListsSection { user_id } => {
             let interaction_lists = ctx
@@ -31,6 +37,19 @@ pub async fn respond(
 
             Ok(())
         }
+    }
+}
+
+#[async_trait]
+impl MediaListScreenDb<MediaInteractionList> for Ctx {
+    async fn find_list_items(
+        &self,
+        pagination: Pagination,
+        list: MediaInteractionList,
+    ) -> Result<Paginated<MediaListItem>, std::io::Error> {
+        self.media_interaction_list_item_db
+            .find_by_user_id_and_interaction_name(pagination, list.user_id, list.interaction_name)
+            .await
     }
 }
 

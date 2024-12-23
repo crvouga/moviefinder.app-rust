@@ -9,7 +9,7 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         js::Js,
-        ui::{avatar::Avatar, button::Button, icon, spinner_page, top_bar::TopBar},
+        ui::{avatar::Avatar, button::Button, icon, spinner_block::SpinnerBlock, top_bar::TopBar},
     },
     ctx::Ctx,
     media::interaction::interaction_list,
@@ -87,7 +87,7 @@ fn view_screen_loading() -> Elem {
         .id("loading")
         .class("w-full flex-1 flex items-center justify-center flex-col")
         .child(TopBar::default().title("Account").view())
-        .child(spinner_page::view())
+        .child(SpinnerBlock::default().view())
         .child(BottomBar::default().active_account().view())
 }
 

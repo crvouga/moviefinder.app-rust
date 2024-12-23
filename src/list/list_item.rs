@@ -1,35 +1,23 @@
-use super::{list_id::ListId, list_item_id::ListItemId};
-use crate::{
-    core::posix::Posix,
-    media::{interaction::interaction_::MediaInteraction, media_id::MediaId},
+use super::{
+    list_id::MediaListId, list_item_id::MediaListItemId, list_item_variant::MediaListItemVariant,
 };
+use crate::{core::posix::Posix, media::interaction::interaction_::MediaInteraction};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ListItem {
-    pub id: ListItemId,
-    pub list_id: ListId,
-    pub variant: ListItemVariant,
+pub struct MediaListItem {
+    pub id: MediaListItemId,
+    pub list_id: MediaListId,
+    pub variant: MediaListItemVariant,
     pub created_at_posix: Posix,
 }
 
-impl From<(ListId, MediaInteraction)> for ListItem {
-    fn from((list_id, interaction): (ListId, MediaInteraction)) -> Self {
+impl From<(MediaListId, MediaInteraction)> for MediaListItem {
+    fn from((list_id, interaction): (MediaListId, MediaInteraction)) -> Self {
         Self {
-            id: ListItemId::from_string(interaction.id.as_str()),
+            id: MediaListItemId::from_string(interaction.id.as_str()),
             list_id,
-            variant: ListItemVariant::Media(interaction.media_id),
+            variant: MediaListItemVariant::Media(interaction.media_id),
             created_at_posix: interaction.created_at_posix,
         }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ListItemVariant {
-    Media(MediaId),
-}
-
-impl Default for ListItemVariant {
-    fn default() -> Self {
-        ListItemVariant::Media(MediaId::default())
     }
 }

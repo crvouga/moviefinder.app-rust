@@ -1,6 +1,8 @@
 use crate::{
-    core::pagination::Paginated, list::list_item::ListItem,
-    media::interaction::interaction_name::InteractionName, user::user_id::UserId,
+    core::pagination::{Paginated, Pagination},
+    list::list_item::MediaListItem,
+    media::interaction::interaction_name::InteractionName,
+    user::user_id::UserId,
 };
 use async_trait::async_trait;
 
@@ -8,9 +10,8 @@ use async_trait::async_trait;
 pub trait MediaInteractionListItemDb: Send + Sync {
     async fn find_by_user_id_and_interaction_name(
         &self,
-        limit: usize,
-        offset: usize,
+        pagination: Pagination,
         user_id: UserId,
         interaction_name: InteractionName,
-    ) -> Result<Paginated<ListItem>, std::io::Error>;
+    ) -> Result<Paginated<MediaListItem>, std::io::Error>;
 }

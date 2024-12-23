@@ -2,13 +2,10 @@ use super::interface::MediaInteractionListItemDb;
 use crate::{
     core::{
         db_conn_sql::{self, interface::DbConnSqlDyn},
-        pagination::Paginated,
+        pagination::{Paginated, Pagination},
         sql::{Sql, SqlPrimitive, SqlVarType},
     },
-    list::{
-        list::List,
-        list_item::{ListItem, ListItemVariant},
-    },
+    list::{list::MediaList, list_item::MediaListItem, list_item_variant::MediaListItemVariant},
     media::interaction::{
         interaction_::{postgres::MediaInteractionPostgresRow, MediaInteraction},
         interaction_list::list_::MediaInteractionList,
@@ -37,11 +34,10 @@ impl ImplPostgres {
 impl MediaInteractionListItemDb for ImplPostgres {
     async fn find_by_user_id_and_interaction_name(
         &self,
-        limit: usize,
-        offset: usize,
+        pagination: Pagination,
         user_id: UserId,
         interaction_name: InteractionName,
-    ) -> Result<Paginated<ListItem>, std::io::Error> {
+    ) -> Result<Paginated<MediaListItem>, std::io::Error> {
         let list = MediaInteractionList {
             user_id: user_id.clone(),
             interaction_name: interaction_name.clone(),
@@ -122,12 +118,12 @@ impl MediaInteractionListItemDb for ImplPostgres {
 
         query.set(
             "limit",
-            SqlVarType::Primitive(SqlPrimitive::Number(limit as f64)),
+            SqlVarType::Primitive(SqlPrimitive::Number(pagination.limit as f64)),
         );
 
         query.set(
             "offset",
-            SqlVarType::Primitive(SqlPrimitive::Number(offset as f64)),
+            SqlVarType::Primitive(SqlPrimitive::Number(pagination.offset as f64)),
         );
 
         let rows: Vec<MediaInteractionPostgresRow> =
@@ -146,11 +142,11 @@ impl MediaInteractionListItemDb for ImplPostgres {
                     .interaction_name
                     .to_list_item_id(list_id.clone(), interaction.media_id.clone());
 
-                ListItem {
+                MediaListItem {
                     id: list_item_id,
                     list_id,
                     created_at_posix: interaction.created_at_posix,
-                    variant: ListItemVariant::Media(interaction.media_id),
+                    variant: MediaListItemVariant::Media(interaction.media_id),
                 }
             })
             .collect();
@@ -158,8 +154,8 @@ impl MediaInteractionListItemDb for ImplPostgres {
         let result = Ok(Paginated {
             total,
             items,
-            limit,
-            offset,
+            limit: pagination.limit,
+            offset: pagination.offset,
         });
 
         result

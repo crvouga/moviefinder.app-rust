@@ -5,7 +5,7 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         js::Js,
-        ui::{chip::ChipSize, search_bar::SearchBar, spinner_page},
+        ui::{chip::ChipSize, search_bar::SearchBar, spinner_block::SpinnerBlock},
         unit_of_work::UnitOfWork,
     },
     ctx::Ctx,
@@ -304,7 +304,7 @@ fn view_unselected_root() -> Elem {
 }
 
 fn view_unselected_loading() -> Elem {
-    view_unselected_root().child(spinner_page::view())
+    view_unselected_root().child(SpinnerBlock::default().view())
 }
 
 fn view_unselected(model: &ViewModel) -> Elem {

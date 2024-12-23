@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::html::{div, Elem},
-    list::{list::List, list_id::ListId, list_item_id::ListItemId, list_screen},
+    list::{list::MediaList, list_id::MediaListId, list_item_id::MediaListItemId, list_screen},
     media::{interaction::interaction_name::InteractionName, media_id::MediaId},
     ui::route::AppRoute,
     user::{self, user_id::UserId},
@@ -16,7 +16,7 @@ pub struct MediaInteractionList {
     pub user_id: UserId,
 }
 
-impl List for MediaInteractionList {
+impl MediaList for MediaInteractionList {
     fn view_art(&self, class: &str) -> Elem {
         div()
             .class("bg-gradient-to-br from-[#D38ABF] via-[#434EA9] to-[#07413A]")
@@ -28,10 +28,10 @@ impl List for MediaInteractionList {
             )
     }
 
-    fn id(&self) -> ListId {
+    fn id(&self) -> MediaListId {
         let name_str = self.interaction_name.to_machine_string();
         let list_id_str = format!("interaction-list-{}-{}", name_str, self.user_id.as_str());
-        let list_id = ListId::new(&list_id_str);
+        let list_id = MediaListId::new(&list_id_str);
         list_id
     }
 
@@ -52,7 +52,7 @@ impl List for MediaInteractionList {
 }
 
 impl InteractionName {
-    pub fn to_list_item_id(&self, list_id: ListId, media_id: MediaId) -> ListItemId {
+    pub fn to_list_item_id(&self, list_id: MediaListId, media_id: MediaId) -> MediaListItemId {
         let name_str = self.to_machine_string();
 
         let list_item_id_str = format!(
@@ -62,7 +62,7 @@ impl InteractionName {
             media_id.as_str()
         );
 
-        let list_item_id = ListItemId::from_string(&list_item_id_str);
+        let list_item_id = MediaListItemId::from_string(&list_item_id_str);
 
         list_item_id
     }

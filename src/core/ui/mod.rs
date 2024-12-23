@@ -13,7 +13,7 @@ pub mod labelled_icon_button;
 pub mod list;
 pub mod search_bar;
 pub mod select;
-pub mod spinner_page;
+pub mod spinner_block;
 pub mod swiper;
 pub mod text_field;
 pub mod toast;

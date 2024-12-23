@@ -19,6 +19,7 @@ pub mod phone_number;
 pub mod posix;
 pub mod query;
 pub mod random;
+pub mod remote_result;
 pub mod session;
 pub mod sql;
 pub mod struct_ext;

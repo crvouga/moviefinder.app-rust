@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        core::unit_of_work::uow,
+        core::{pagination::Pagination, unit_of_work::uow},
         fixture::BaseFixture,
         media::interaction::{
             interaction_::MediaInteraction,
@@ -61,8 +61,10 @@ mod tests {
             let list_items = f
                 .list_item_db
                 .find_by_user_id_and_interaction_name(
-                    10,
-                    0,
+                    Pagination {
+                        limit: 10,
+                        offset: 0,
+                    },
                     user_id.clone(),
                     interaction_name.clone(),
                 )
@@ -99,8 +101,10 @@ mod tests {
             let list_items = f
                 .list_item_db
                 .find_by_user_id_and_interaction_name(
-                    10,
-                    0,
+                    Pagination {
+                        limit: 10,
+                        offset: 0,
+                    },
                     first_interaction.user_id.clone(),
                     first_interaction.interaction_name.clone(),
                 )
@@ -150,8 +154,10 @@ mod tests {
             let list_items = f
                 .list_item_db
                 .find_by_user_id_and_interaction_name(
-                    10,
-                    0,
+                    Pagination {
+                        limit: 10,
+                        offset: 0,
+                    },
                     first_interaction.user_id.clone(),
                     first_interaction.interaction_name.clone(),
                 )
@@ -184,8 +190,10 @@ mod tests {
             let list_items_page_1 = f
                 .list_item_db
                 .find_by_user_id_and_interaction_name(
-                    5, // limit
-                    0, // offset
+                    Pagination {
+                        limit: 5,
+                        offset: 0,
+                    },
                     user_id.clone(),
                     interaction_name.clone(),
                 )
@@ -199,8 +207,10 @@ mod tests {
             let list_items_page_2 = f
                 .list_item_db
                 .find_by_user_id_and_interaction_name(
-                    5, // limit
-                    5, // offset
+                    Pagination {
+                        limit: 5,
+                        offset: 5,
+                    },
                     user_id.clone(),
                     interaction_name.clone(),
                 )
@@ -214,8 +224,10 @@ mod tests {
             let list_items_page_3 = f
                 .list_item_db
                 .find_by_user_id_and_interaction_name(
-                    5,  // limit
-                    10, // offset
+                    Pagination {
+                        limit: 5,
+                        offset: 10,
+                    },
                     user_id.clone(),
                     interaction_name.clone(),
                 )
@@ -229,8 +241,10 @@ mod tests {
             let list_items_page_4 = f
                 .list_item_db
                 .find_by_user_id_and_interaction_name(
-                    5,  // limit
-                    15, // offset
+                    Pagination {
+                        limit: 5,
+                        offset: 15,
+                    },
                     user_id.clone(),
                     interaction_name.clone(),
                 )
