@@ -63,7 +63,7 @@ impl ListItem {
                 } else {
                     e.class("active:opacity-active cursor-pointer")
                         .child(art(ART_CLASS.to_owned()))
-                        .child(p().child_text(&self.title))
+                        .child(p().class("text-left w-full").child_text(&self.title))
                 }
             })
     }
