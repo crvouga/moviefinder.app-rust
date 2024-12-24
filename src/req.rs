@@ -4,4 +4,5 @@ use crate::core::{dynamic_data::DynamicDataBTreeMap, session::session_id::Sessio
 pub struct Req {
     pub session_id: SessionId,
     pub payload: DynamicDataBTreeMap,
+    pub url: String,
 }

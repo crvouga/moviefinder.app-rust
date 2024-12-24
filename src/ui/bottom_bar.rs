@@ -50,7 +50,7 @@ impl BottomBar {
                         .view()
                         .data_on(|b| {
                             b.press_down()
-                                .push_then_sse(&feed_screen::route::Route::FeedScreenDefault.url())
+                                .push_url(&feed_screen::route::Route::FeedScreenDefault.url())
                         }),
                 )
                 .child(
@@ -60,7 +60,7 @@ impl BottomBar {
                         .active(self.active == Active::Account)
                         .view()
                         .data_on(|b| {
-                            b.press_down().push_then_sse(
+                            b.press_down().push_url(
                                 &route::Route::User(user::route::Route::AccountScreen).url(),
                             )
                         }),

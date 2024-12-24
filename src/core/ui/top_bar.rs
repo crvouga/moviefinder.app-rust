@@ -67,7 +67,7 @@ impl BackButton {
             .aria_label("go back")
             .type_("button")
             .map(|elem| match self.url {
-                Some(url) => elem.data_on(|b| b.press_down().push_then_sse(&url)),
+                Some(url) => elem.data_on(|b| b.press_down().push_url(&url)),
                 None => elem,
             })
             .child(icon::solid::back_arrow("size-6"))
@@ -96,7 +96,7 @@ impl CancelButton {
             .tab_index(0)
             .data_on(|b| {
                 b.press_down()
-                    .push_then_sse(&self.url.clone().unwrap_or("".to_string()))
+                    .push_url(&self.url.clone().unwrap_or("".to_string()))
             })
             .child(icon::solid::x_mark("size-8"))
     }

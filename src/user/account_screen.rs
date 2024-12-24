@@ -26,26 +26,31 @@ pub async fn redirect_to(
     w.send_script(&Js::push_url(&Route::AccountScreen.url()))
         .await?;
 
-    respond(ctx, r, w, user_id).await?;
+    let r = Req {
+        url: Route::AccountScreen.url(),
+        ..r.clone()
+    };
+
+    respond(ctx, &r, w, user_id).await?;
 
     Ok(())
 }
 
 pub async fn respond(
     ctx: &Ctx,
-    _r: &Req,
+    r: &Req,
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
 ) -> Result<(), crate::core::error::Error> {
     match user_id {
         None => {
-            respond_screen_logged_out(w).await?;
+            respond_screen_logged_out(r, w).await?;
 
             Ok(())
         }
 
         Some(user_id) => {
-            w.send_screen(view_screen_loading()).await?;
+            // w.send_screen(r, view_screen_loading()).await?;
 
             let maybe_account = ctx.user_account_db.find_one_by_user_id(&user_id).await?;
 
@@ -54,7 +59,7 @@ pub async fn respond(
                 None => {
                     w.send_toast_dark("Account not found. Try logging in again")
                         .await?;
-                    return respond_screen_logged_out(w).await;
+                    return respond_screen_logged_out(r, w).await;
                 }
             };
 
@@ -65,11 +70,11 @@ pub async fn respond(
                 None => {
                     w.send_toast_dark("Profile not found. Try logging in again")
                         .await?;
-                    return respond_screen_logged_out(w).await;
+                    return respond_screen_logged_out(r, w).await;
                 }
             };
 
-            w.send_screen(view_screen_logged_in(&account, &profile))
+            w.send_screen(r, view_screen_logged_in(&account, &profile))
                 .await?;
 
             Ok(())
@@ -78,13 +83,14 @@ pub async fn respond(
 }
 
 async fn respond_screen_logged_out(
+    r: &Req,
     w: &mut ResponseWriter,
 ) -> Result<(), crate::core::error::Error> {
-    w.send_screen(view_screen_logged_out()).await?;
+    w.send_screen(r, view_screen_logged_out()).await?;
     Ok(())
 }
 
-fn view_screen_loading() -> Elem {
+fn _view_screen_loading() -> Elem {
     div()
         .id("loading")
         .class("w-full flex-1 flex items-center justify-center flex-col")
@@ -115,7 +121,7 @@ fn view_screen_logged_out() -> Elem {
                         .id("login-button")
                         .data_on(|b| {
                             b.press_down()
-                                .push_then_sse(&login_with_sms::route::Route::ScreenPhone.url())
+                                .push_url(&login_with_sms::route::Route::ScreenPhone.url())
                         }),
                 ),
         )

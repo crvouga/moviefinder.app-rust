@@ -16,7 +16,7 @@ use super::route::Route;
 
 pub async fn respond(
     ctx: &Ctx,
-    _r: &Req,
+    r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
 ) -> Result<(), crate::core::error::Error> {
@@ -24,7 +24,7 @@ pub async fn respond(
         Route::MediaDetailsScreen { media_id } => {
             let model = ViewModel::Loading;
 
-            w.send_screen(model.view_screen()).await?;
+            w.send_screen(r, model.view_screen()).await?;
 
             let queried = ctx
                 .media_db
@@ -45,7 +45,7 @@ pub async fn respond(
 
             let media = match queried {
                 None => {
-                    w.send_screen(error::screen("Media not found")).await?;
+                    w.send_screen(r, error::screen("Media not found")).await?;
                     return Ok(());
                 }
                 Some(media) => media,
@@ -53,7 +53,7 @@ pub async fn respond(
 
             let model = ViewModel::Loaded { media };
 
-            w.send_screen(model.view_screen()).await?;
+            w.send_screen(r, model.view_screen()).await?;
 
             Ok(())
         }

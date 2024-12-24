@@ -52,12 +52,13 @@ async fn respond(
     let session_id = request.session_id();
 
     let r = Req {
-        payload: request.datastar_params(),
-        session_id: session_id,
+        payload: request.datastar_payload(),
+        session_id,
+        url: request.url.path.clone(),
     };
 
     if let None = maybe_route {
-        info!(ctx.log, "No route found for {:?}", request.url.path);
+        info!(ctx.log, "No route found for {:?}", r.url);
     }
 
     info!(
@@ -73,7 +74,7 @@ async fn respond(
 
             (None, true) => respond_fallback(&ctx, &r, &mut w).await,
 
-            (None, false) => match resolve_public_asset(&request.url.path).await {
+            (None, false) => match resolve_public_asset(&r.url).await {
                 Some(file_path) => response_public(&file_path, &request, &mut w).await,
                 None => {
                     response_root(

@@ -1,11 +1,11 @@
 #![allow(dead_code)]
-use std::collections::HashMap;
-use tokio::io::AsyncWriteExt;
-use tokio::net::TcpStream;
-
 use super::content_encoding::ContentEncoding;
 use super::set_header::SetHeader;
 use super::status_code;
+use crate::core::dynamic_data::{DynamicData, DynamicDataBTreeMap};
+use std::collections::HashMap;
+use tokio::io::AsyncWriteExt;
+use tokio::net::TcpStream;
 
 pub struct ResponseWriter {
     pub stream: TcpStream,
@@ -13,6 +13,7 @@ pub struct ResponseWriter {
     pub initial_headers: HashMap<String, String>,
     pub status_code: u16,
     pub content_encodings: Vec<ContentEncoding>,
+    pub state: DynamicDataBTreeMap,
 }
 
 impl ResponseWriter {
@@ -23,6 +24,7 @@ impl ResponseWriter {
             headers_sent: false,
             initial_headers: HashMap::new(),
             content_encodings: Vec::new(),
+            state: DynamicDataBTreeMap::empty(),
         }
     }
 

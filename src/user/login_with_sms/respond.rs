@@ -43,7 +43,7 @@ pub async fn respond(
         Route::ScreenPhone => {
             w.send_signal(SIGNAL_IS_SUBMITTING, "false").await?;
 
-            w.send_screen(view_screen_enter_phone(vec![])).await?;
+            w.send_screen(r, view_screen_enter_phone(vec![])).await?;
 
             let country_codes = ctx.phone_number_country_code_db.get_all().await;
 
@@ -120,16 +120,19 @@ pub async fn respond(
                     w.send_toast_dark(&format!("Code sent to {}", phone_number_input))
                         .await?;
 
-                    w.send_screen(view_screen_enter_code(&phone_number_input))
-                        .await?;
+                    let route_new = Route::ScreenCode {
+                        phone_number: phone_number_input.clone(),
+                    };
 
-                    w.send_script(&Js::push_url(
-                        &Route::ScreenCode {
-                            phone_number: phone_number_input,
-                        }
-                        .url(),
-                    ))
-                    .await?;
+                    w.send_script(&Js::push_url(&route_new.url())).await?;
+
+                    let r = Req {
+                        url: route_new.url(),
+                        ..r.clone()
+                    };
+
+                    w.send_screen(&r, view_screen_enter_code(&phone_number_input))
+                        .await?;
 
                     w.send_script(&Js::focus("input")).await?;
 
@@ -141,7 +144,8 @@ pub async fn respond(
         Route::ScreenCode { phone_number } => {
             w.send_signal(SIGNAL_IS_SUBMITTING, "false").await?;
 
-            w.send_screen(view_screen_enter_code(&phone_number)).await?;
+            w.send_screen(r, view_screen_enter_code(&phone_number))
+                .await?;
 
             Ok(())
         }

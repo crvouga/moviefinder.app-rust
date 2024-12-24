@@ -1,4 +1,4 @@
-use crate::{list::list_screen, user::user_id::UserId};
+use crate::{list::list_screen, ui::route::AppRoute, user::user_id::UserId};
 use serde::{Deserialize, Serialize};
 
 use super::list_::MediaInteractionList;
@@ -7,4 +7,10 @@ use super::list_::MediaInteractionList;
 pub enum Route {
     ListsSection { user_id: UserId },
     ListScreen(list_screen::route::Route<MediaInteractionList>),
+}
+
+impl AppRoute for list_screen::route::Route<MediaInteractionList> {
+    fn url(&self) -> String {
+        Route::ListScreen(self.clone()).url()
+    }
 }

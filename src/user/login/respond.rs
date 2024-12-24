@@ -47,7 +47,7 @@ fn view_must_login_drawer(message: &str) -> Elem {
                     e.submit()
                         .prevent_default()
                         .js("signal_is_drawer_open.value = false")
-                        .push_then_sse(&login_with_sms::route::Route::ScreenPhone.url())
+                        .push_url(&login_with_sms::route::Route::ScreenPhone.url())
                 })
                 .id("login-form")
                 .class("w-full h-full flex flex-col items-center")

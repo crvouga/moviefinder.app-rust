@@ -45,7 +45,7 @@ fn render_children(children: &[Elem], indent_level: usize) -> String {
 }
 
 fn render_attrs(attrs: &HashMap<String, String>) -> String {
-    attrs
+    let mut attr_strs = attrs
         .iter()
         .filter_map(|(name, value)| {
             let name_cleaned = name.trim();
@@ -55,8 +55,11 @@ fn render_attrs(attrs: &HashMap<String, String>) -> String {
                 Some(format!(" {}=\"{}\"", name_cleaned, value))
             }
         })
-        .collect::<Vec<String>>()
-        .join("")
+        .collect::<Vec<String>>();
+
+    attr_strs.sort();
+
+    attr_strs.join("")
 }
 
 fn append_doc_type(html: &str) -> String {

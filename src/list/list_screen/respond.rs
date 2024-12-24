@@ -24,7 +24,7 @@ use std::{fmt::Debug, vec};
 pub async fn respond<TList: MediaList + Debug>(
     list_screen_db: &impl MediaListScreenDb<TList>,
     ctx: &Ctx,
-    _r: &Req,
+    r: &Req,
     route: &Route<TList>,
     w: &mut ResponseWriter,
 ) -> Result<(), crate::core::error::Error> {
@@ -39,7 +39,7 @@ pub async fn respond<TList: MediaList + Debug>(
                 list: Some(list.clone()),
             };
 
-            w.send_screen(view(model)).await?;
+            w.send_screen(r, view(model)).await?;
 
             let found = list_screen_db
                 .find_list_items(
@@ -85,7 +85,10 @@ pub async fn respond<TList: MediaList + Debug>(
                 .unwrap_or_default()
                 .items;
 
-            w.send_fragment(view_list_items(list_items, media)).await?;
+            let namespace = to_namepsace(Some(list.clone()));
+
+            w.send_fragment(view_list_items(&namespace, list_items, media))
+                .await?;
 
             Ok(())
         }
@@ -98,8 +101,19 @@ pub struct ViewModel<TList: MediaList> {
     pub back_url: Option<String>,
 }
 
+fn to_namepsace<TList: MediaList>(list: Option<TList>) -> String {
+    let namespace: String = list.clone().map_or("list".to_string(), |l| {
+        let list = l.clone();
+        let id = list.id();
+        let id_str = id.to_string();
+        id_str
+    });
+    namespace
+}
+
 pub fn view<T: MediaList>(model: ViewModel<T>) -> Elem {
     let list = model.list.clone();
+    let namespace = to_namepsace(list.clone());
     let name = list.clone().map(|l| l.name());
     let art = list.map(|l| l.view_art("size-32 rounded shrink-0"));
 
@@ -123,16 +137,17 @@ pub fn view<T: MediaList>(model: ViewModel<T>) -> Elem {
                                 .child_text(&name.unwrap_or_default()),
                         ),
                 )
-                .child(view_list_items(RemoteResult::Loading, vec![])),
+                .child(view_list_items(&namespace, RemoteResult::Loading, vec![])),
         )
 }
 
 fn view_list_items(
+    namespace: &str,
     list_items: RemoteResult<Paginated<MediaListItem>, crate::core::error::Error>,
     media: Vec<Media>,
 ) -> Elem {
     div()
-        .id("list-items")
+        .id(&format!("list-items-{}", namespace))
         .class("w-full flex flex-col gap-4")
         .child(match list_items {
             RemoteResult::Err(err) => Alert::error().label(&err.to_string()).view(),

@@ -9,7 +9,6 @@ use crate::{
         dynamic_data::DynamicData,
         html::*,
         http::response_writer::ResponseWriter,
-        js::Js,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image, top_bar::TopBarRoot},
         unit_of_work::UnitOfWork,
@@ -36,7 +35,7 @@ pub async fn respond(
 ) -> Result<(), crate::core::error::Error> {
     match route {
         Route::FeedScreenDefault => {
-            w.send_screen(view_screen()).await?;
+            w.send_screen(r, view_screen()).await?;
 
             let maybe_feed_id = ctx
                 .feed_session_mapping_db
@@ -46,20 +45,15 @@ pub async fn respond(
 
             let feed_id = maybe_feed_id.unwrap_or_default();
 
-            let feed_url = (Route::FeedScreen {
-                feed_id: feed_id.clone(),
-            })
-            .url();
+            w.send_screen(r, view_screen()).await?;
 
-            w.send_script(&Js::replace_url(&feed_url)).await?;
+            respond_screen_contents(ctx, r, w, &feed_id).await?;
 
-            w.send_screen(view_screen()).await?;
-
-            respond_screen_contents(ctx, r, w, &feed_id).await
+            Ok(())
         }
 
         Route::FeedScreen { feed_id } => {
-            w.send_screen(view_screen()).await?;
+            w.send_screen(r, view_screen()).await?;
 
             respond_screen_contents(ctx, r, w, feed_id).await
         }
@@ -141,7 +135,7 @@ pub async fn respond_feed_screen(
     w: &mut ResponseWriter,
     feed_id: &FeedId,
 ) -> Result<(), crate::core::error::Error> {
-    w.send_screen(view_screen()).await?;
+    w.send_screen(r, view_screen()).await?;
 
     respond_screen_contents(ctx, r, w, feed_id).await?;
 
@@ -229,7 +223,7 @@ fn view_top_bar_loading() -> Elem {
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     view_top_bar_root().data_on(|b| {
-        b.press_down().push_then_sse(
+        b.press_down().push_url(
             &feed_tags_form::route::Route::FeedTagsFormScreen {
                 feed_id: feed_id.clone(),
             }
@@ -382,7 +376,7 @@ pub fn view_slide_content(feed_item: &FeedItem) -> Elem {
                     .tab_index(0)
                     .role_button()
                     .data_on(|b| {
-                        b.click().push_then_sse(
+                        b.click().push_url(
                             &media::details::route::Route::MediaDetailsScreen {
                                 media_id: media.id.clone(),
                             }

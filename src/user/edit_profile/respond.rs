@@ -41,7 +41,7 @@ pub async fn respond(
                 None => return respond_failed_to_load(ctx, r, w).await,
             };
 
-            w.send_screen(view_screen(profile.clone())).await?;
+            w.send_screen(r, view_screen(profile.clone())).await?;
 
             w.send_signals(vec![
                 (
@@ -139,7 +139,7 @@ pub fn view_open_edit_profile_screen_button(user_id: UserId) -> Button {
         .indicator("signal_edit_profile_button_indicator")
         .map_button(move |e| {
             e.data_on(|b| {
-                b.press_down().push_then_sse(
+                b.press_down().push_url(
                     &Route::Screen {
                         user_id: user_id.clone(),
                     }
@@ -197,7 +197,7 @@ fn view_screen(profile: UserProfile) -> Elem {
             BottomBarFormButtons::default()
                 .on_cancel(|e| {
                     e.press_down()
-                        .push_then_sse(&user::route::Route::AccountScreen.url())
+                        .push_url(&user::route::Route::AccountScreen.url())
                 })
                 .view()
                 .id("bottom-bar-form"),

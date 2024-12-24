@@ -21,6 +21,10 @@ impl Js {
     //     format!("{} === {}", left, right)
     // }
 
+    pub fn if_then_else(condition: &str, then: &str, else_: &str) -> String {
+        format!("{} ? {} : {}", condition, then, else_)
+    }
+
     pub fn assign(variable: &str, value: &str) -> String {
         let value_final = fallback_empty_string(value);
         format!("{} = {}", variable, value_final)

@@ -22,7 +22,7 @@ pub async fn respond(
 ) -> Result<(), crate::core::error::Error> {
     match route {
         Route::FeedTagsFormScreen { feed_id } => {
-            w.send_screen(view_screen(&feed_id)).await?;
+            w.send_screen(r, view_screen(&feed_id)).await?;
 
             let model = ViewModel::load(ctx, feed_id, "").await;
 
@@ -291,7 +291,7 @@ fn view_bottom_bar(feed_id: FeedId) -> Elem {
     BottomBarFormButtons::default()
         .on_cancel(move |e| {
             e.press_down()
-                .push_then_sse(&feed_screen::route::Route::FeedScreen { feed_id }.url())
+                .push_url(&feed_screen::route::Route::FeedScreen { feed_id }.url())
         })
         .submit_indicator("signal_is_submitting")
         .view()

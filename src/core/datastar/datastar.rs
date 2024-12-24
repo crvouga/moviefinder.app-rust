@@ -20,9 +20,17 @@ fn fallback_empty_string(value: &str) -> String {
     }
 }
 
+fn ensure_single_quotes(value: &str) -> String {
+    if value.starts_with('\'') && value.ends_with('\'') {
+        value.to_string()
+    } else {
+        format!("'{}'", value)
+    }
+}
+
 impl Js {
     pub fn sse(url: &str) -> String {
-        "sse('URL', { method: 'post' })".replace("URL", url)
+        "sse(URL, { method: 'post' })".replace("URL", url)
     }
 
     pub fn dot_value(value: &str) -> String {
@@ -86,7 +94,12 @@ impl DataIntersects {
     }
 
     pub fn sse(mut self, url: &str) -> Self {
-        self.actions.push(Js::sse(url));
+        self.actions.push(Js::sse(&ensure_single_quotes(url)));
+        self
+    }
+
+    pub fn js(mut self, js: &str) -> Self {
+        self.actions.push(js.to_string());
         self
     }
 }
@@ -137,6 +150,13 @@ impl DataOn {
     pub fn click(self) -> Self {
         Self {
             event: "click".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
+    pub fn pop_state(self) -> Self {
+        Self {
+            event: "popstate".to_string(),
             modifiers: vec![],
             js: vec![],
         }
@@ -261,10 +281,10 @@ impl DataOn {
     //     self
     // }
 
-    // pub fn window(mut self) -> Self {
-    //     self.modifiers.push("window".to_string());
-    //     self
-    // }
+    pub fn window(mut self) -> Self {
+        self.modifiers.push("window".to_string());
+        self
+    }
 
     pub fn js(mut self, js: &str) -> Self {
         self.js.push(js.to_string());
@@ -272,11 +292,15 @@ impl DataOn {
     }
 
     pub fn sse(self, url: &str) -> Self {
-        self.js(&Js::sse(url))
+        self.js(&Js::sse(&ensure_single_quotes(url)))
+    }
+
+    pub fn push_url(self, url: &str) -> Self {
+        self.js(&Js::push_url(url))
     }
 
     pub fn push_then_sse(self, url: &str) -> Self {
-        self.js(&Js::push_url(url)).sse(url)
+        self.push_url(url).sse(url)
     }
 }
 
@@ -310,9 +334,9 @@ impl Elem {
         self.attr_unsafe(&format!("data-bind-{}", value), "")
     }
 
-    // pub fn data_ref(self, value: &str) -> Self {
-    //     self.attr_unsafe("data-ref", value)
-    // }
+    pub fn data_ref(self, value: &str) -> Self {
+        self.attr_unsafe("data-ref", value)
+    }
 
     // pub fn data_signals(self, value: &str) -> Self {
     //     self.attr_unsafe("data-signals", value)
@@ -406,6 +430,10 @@ impl Fragments {
         self.merge_mode("before")
     }
 
+    pub fn merge_mode_append(&mut self) -> &mut Self {
+        self.merge_mode("append")
+    }
+
     pub fn selector(&mut self, selector: &str) -> &mut Self {
         self.sse.data_selector(selector);
         self
@@ -471,7 +499,7 @@ impl Request {
         header_value == "true"
     }
 
-    pub fn datastar_params(self: &Self) -> DynamicDataBTreeMap {
+    pub fn datastar_payload(self: &Self) -> DynamicDataBTreeMap {
         let datastar_params = self.url.query_params.get_first("datastar");
 
         if let Some(urlencoded_json) = datastar_params {

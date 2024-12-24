@@ -4,6 +4,28 @@ pub fn id(id: &str) -> String {
     format!("#{}", id)
 }
 
+pub fn to_valid_css_id_selector(id: &str) -> String {
+    let mut result = String::new();
+
+    // Iterate through each character in the input string
+    for c in id.chars() {
+        // If the character is invalid for CSS, escape it
+        if c.is_alphanumeric() || c == '-' || c == '_' || c == '.' {
+            result.push(c); // Allowed characters, add them directly
+        } else {
+            // Escape other characters
+            result.push_str(&format!("\\{:x}", c as u32));
+        }
+    }
+
+    // Ensure the selector doesn't start with a number
+    if result.starts_with(|c: char| c.is_digit(10)) {
+        result.insert(0, '_'); // Add an underscore if the string starts with a number
+    }
+
+    result
+}
+
 pub fn is_valid(selector: &str) -> bool {
     if selector.is_empty() {
         return false;
