@@ -91,7 +91,8 @@ async fn respond(
         Err(e) => {
             let error_message = format!("Error: {:?}", e);
 
-            w.send_script(&Js::console_error(&error_message)).await?;
+            w.send_script(&Js::console_error(&Js::quote(&error_message)))
+                .await?;
         }
     }
 

@@ -42,16 +42,20 @@ impl Js {
         format!("window.history.pushState(null, '', '{}')", url)
     }
 
+    pub fn quote(value: &str) -> String {
+        format!("'{}'", value)
+    }
+
     pub fn focus(selector: &str) -> String {
         format!("document.querySelector('{}').focus()", selector)
     }
 
-    // pub fn console_log(message: &str) -> String {
-    //     format!("console.log('{}')", message)
-    // }
+    pub fn console_log(message: &str) -> String {
+        format!("console.log({})", message)
+    }
 
     pub fn console_error(message: &str) -> String {
-        format!("console.error('{}')", message)
+        format!("console.error({})", message)
     }
 
     pub fn str(value: &str) -> String {

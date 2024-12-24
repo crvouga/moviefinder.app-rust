@@ -47,6 +47,7 @@ impl Root {
             body()
             .class("bg-black text-white flex flex-col items-center justify-center w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden")            
             .child_signals_json(false)
+            // .data_signal_location()
             .child(
                 div()
                     .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col relative")
@@ -55,5 +56,18 @@ impl Root {
                     .child(Drawer::view_root())
             )
         )
+    }
+}
+
+impl Elem {
+    pub fn data_signal_location(self) -> Self {
+        self.data_signal("signal_location", "location.pathname")
+            .data_on(|e| e
+                .load()
+                .js("const update_signal_location = () => ctx.signals.signal_location = location.pathname")
+                .js("window.addEventListener('popstate', update_signal_location)")
+                .js("window.addEventListener('pushstate', update_signal_location)")
+                .js("window.addEventListener('replacestate', update_signal_location)")
+            )
     }
 }

@@ -367,7 +367,11 @@ impl Elem {
 
     pub fn child_signals_json(self, debug: bool) -> Self {
         if debug {
-            self.child(code().child(pre().data_text("ctx.signals.JSON()")))
+            self.child(
+                code()
+                    .style("width: 100%; overflow: scroll; font-size: 12px;")
+                    .child(pre().data_text("ctx.signals.JSON()")),
+            )
         } else {
             self
         }

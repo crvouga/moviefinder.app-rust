@@ -102,7 +102,8 @@ impl ResponseWriter {
         message: &str,
     ) -> Result<(), crate::core::error::Error> {
         self.send_toast(Toast::error(message)).await?;
-        self.send_script(&Js::console_error(message)).await?;
+        self.send_script(&Js::console_error(&Js::quote(message)))
+            .await?;
         Ok(())
     }
 }
