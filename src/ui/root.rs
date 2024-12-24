@@ -37,10 +37,10 @@ impl Root {
                 link().rel("stylesheet").href("./output.css"),
                 link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
                 script().src_datastar_cdn().defer(),
-                script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());"),
                 script().src_drawer_element().defer(),
                 script().src_swiper_cdn().defer(),
                 script().src_image_element().defer(),
+                // script().child_text_unsafe("window.addEventListener('popstate', () => location.reload());"),
             ])
         )
         .child(

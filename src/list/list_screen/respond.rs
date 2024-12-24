@@ -85,10 +85,6 @@ pub async fn respond<TList: MediaList + Debug>(
                 .unwrap_or_default()
                 .items;
 
-            println!("list_items: {:?}", list_items);
-            println!("media_ids: {:?}", media_ids);
-            println!("media: {:?}", media);
-
             w.send_fragment(view_list_items(list_items, media)).await?;
 
             Ok(())
