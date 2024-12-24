@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub trait DynamicData {
     fn is_empty(&self) -> bool;
@@ -15,7 +15,7 @@ pub trait DynamicData {
 
     fn insert(&mut self, key: &str, value: String) -> Self;
 
-    fn from_hash_map(map: HashMap<String, String>) -> Self
+    fn from_btree_map(map: BTreeMap<String, String>) -> Self
     where
         Self: Sized,
     {
@@ -27,22 +27,22 @@ pub trait DynamicData {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default)]
-pub struct DynamicDataHashMap(pub HashMap<String, Vec<String>>);
+#[derive(Debug, Eq, PartialEq, Clone, Default, Hash)]
+pub struct DynamicDataBTreeMap(pub BTreeMap<String, Vec<String>>);
 
-impl From<HashMap<String, Vec<String>>> for DynamicDataHashMap {
-    fn from(map: HashMap<String, Vec<String>>) -> Self {
-        DynamicDataHashMap(map)
+impl From<BTreeMap<String, Vec<String>>> for DynamicDataBTreeMap {
+    fn from(map: BTreeMap<String, Vec<String>>) -> Self {
+        DynamicDataBTreeMap(map)
     }
 }
 
-impl DynamicData for DynamicDataHashMap {
+impl DynamicData for DynamicDataBTreeMap {
     fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
-    fn empty() -> DynamicDataHashMap {
-        DynamicDataHashMap(HashMap::new())
+    fn empty() -> DynamicDataBTreeMap {
+        DynamicDataBTreeMap(BTreeMap::new())
     }
 
     fn to_string(&self) -> String {
@@ -53,8 +53,8 @@ impl DynamicData for DynamicDataHashMap {
             .join("&")
     }
 
-    fn from_string(string: &str) -> DynamicDataHashMap {
-        let mut map = HashMap::new();
+    fn from_string(string: &str) -> DynamicDataBTreeMap {
+        let mut map = BTreeMap::new();
         for pair in string.split('&') {
             let mut parts = pair.split('=');
             let key: String = parts.next().unwrap_or("").to_string();
@@ -64,7 +64,7 @@ impl DynamicData for DynamicDataHashMap {
             let value = parts.next().unwrap_or("").to_string();
             map.entry(key).or_insert_with(Vec::new).push(value);
         }
-        DynamicDataHashMap(map)
+        DynamicDataBTreeMap(map)
     }
 
     fn get_first(&self, key: &str) -> Option<String> {
@@ -98,22 +98,22 @@ mod test {
     #[test]
     fn test_from_string() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = DynamicDataHashMap::from_string(form_string);
-        let mut expected_data = HashMap::new();
+        let form_data = DynamicDataBTreeMap::from_string(form_string);
+        let mut expected_data = BTreeMap::new();
         expected_data.insert("name".to_string(), vec!["John".to_string()]);
         expected_data.insert("age".to_string(), vec!["20".to_string()]);
         expected_data.insert(
             "hobby".to_string(),
             vec!["reading".to_string(), "coding".to_string()],
         );
-        let expected = DynamicDataHashMap(expected_data);
+        let expected = DynamicDataBTreeMap(expected_data);
         assert_eq!(form_data, expected);
     }
 
     #[test]
     fn test_get_first() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = DynamicDataHashMap::from_string(form_string);
+        let form_data = DynamicDataBTreeMap::from_string(form_string);
         assert_eq!(form_data.get_first("name"), Some("John".to_string()));
         assert_eq!(form_data.get_first("age"), Some("20".to_string()));
         assert_eq!(form_data.get_first("hobby"), Some("reading".to_string()));
@@ -122,7 +122,7 @@ mod test {
     #[test]
     fn test_get_all() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = DynamicDataHashMap::from_string(form_string);
+        let form_data = DynamicDataBTreeMap::from_string(form_string);
         assert_eq!(
             form_data.get_all("hobby"),
             Some(&vec!["reading".to_string(), "coding".to_string()])
@@ -132,7 +132,7 @@ mod test {
     #[test]
     fn test_to_string() {
         let form_string = "name=John&age=20&hobby=reading&hobby=coding";
-        let form_data = DynamicDataHashMap::from_string(form_string);
+        let form_data = DynamicDataBTreeMap::from_string(form_string);
         let result_string = form_data.to_string();
         assert!(result_string.contains("name=John"));
         assert!(result_string.contains("age=20"));

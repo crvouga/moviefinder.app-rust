@@ -1,16 +1,15 @@
-use std::collections::HashMap;
+use crate::core::dynamic_data::{DynamicData, DynamicDataBTreeMap};
+use std::collections::BTreeMap;
 
-use crate::core::dynamic_data::{DynamicData, DynamicDataHashMap};
-
-#[derive(Debug, Eq, PartialEq, Clone, Default)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Hash)]
 pub struct FormData {
-    pub params: DynamicDataHashMap,
+    pub params: DynamicDataBTreeMap,
 }
 
 impl DynamicData for FormData {
     fn empty() -> Self {
         FormData {
-            params: DynamicDataHashMap::empty(),
+            params: DynamicDataBTreeMap::empty(),
         }
     }
 
@@ -42,7 +41,7 @@ impl DynamicData for FormData {
     }
 
     fn from_string(string: &str) -> Self {
-        let mut map = HashMap::new();
+        let mut map = BTreeMap::new();
         for pair in string.split('&') {
             let mut parts = pair.split('=');
             let key: String = parts.next().unwrap_or("").to_string();
@@ -54,7 +53,7 @@ impl DynamicData for FormData {
         }
 
         FormData {
-            params: DynamicDataHashMap(map),
+            params: DynamicDataBTreeMap(map),
         }
     }
 }

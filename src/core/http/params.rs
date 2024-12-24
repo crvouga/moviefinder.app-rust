@@ -1,9 +1,9 @@
-use crate::core::dynamic_data::{DynamicData, DynamicDataHashMap};
+use crate::core::dynamic_data::{DynamicData, DynamicDataBTreeMap};
 
 use super::{content_type::ContentType, json_data::JsonData, method::Method, request::Request};
 
 impl Request {
-    pub fn params(&self) -> DynamicDataHashMap {
+    pub fn params(&self) -> DynamicDataBTreeMap {
         match self.method.clone() {
             Method::Get => self.url.query_params.params.clone(),
             Method::Post | Method::Patch | Method::Put => match self.content_type() {

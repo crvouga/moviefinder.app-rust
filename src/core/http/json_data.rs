@@ -1,17 +1,16 @@
+use crate::core::dynamic_data::{DynamicData, DynamicDataBTreeMap};
 use serde_json::Value;
-use std::collections::HashMap;
-
-use crate::core::dynamic_data::{DynamicData, DynamicDataHashMap};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct JsonData {
-    pub params: DynamicDataHashMap,
+    pub params: DynamicDataBTreeMap,
 }
 
 impl DynamicData for JsonData {
     fn empty() -> Self {
         JsonData {
-            params: DynamicDataHashMap::empty(),
+            params: DynamicDataBTreeMap::empty(),
         }
     }
 
@@ -49,7 +48,7 @@ impl DynamicData for JsonData {
     }
 
     fn from_string(string: &str) -> Self {
-        let mut map = HashMap::new();
+        let mut map = BTreeMap::new();
         if let Ok(json_value) = serde_json::from_str::<Value>(string) {
             if let Value::Object(obj) = json_value {
                 for (key, value) in obj {
@@ -74,7 +73,7 @@ impl DynamicData for JsonData {
         }
 
         JsonData {
-            params: DynamicDataHashMap(map),
+            params: DynamicDataBTreeMap(map),
         }
     }
 }

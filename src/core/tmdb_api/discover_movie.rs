@@ -77,7 +77,7 @@ pub struct DiscoverMovieParams {
 
 impl Into<QueryParams> for DiscoverMovieParams {
     fn into(self) -> QueryParams {
-        QueryParams::from_hash_map(struct_to_map(&self))
+        QueryParams::from_btree_map(struct_to_map(&self))
     }
 }
 

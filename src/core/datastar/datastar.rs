@@ -1,5 +1,5 @@
 use crate::core::{
-    dynamic_data::{DynamicData, DynamicDataHashMap},
+    dynamic_data::{DynamicData, DynamicDataBTreeMap},
     html::{code, pre, Elem},
     http::{
         json_data::JsonData,
@@ -467,7 +467,7 @@ impl Request {
         header_value == "true"
     }
 
-    pub fn datastar_params(self: &Self) -> DynamicDataHashMap {
+    pub fn datastar_params(self: &Self) -> DynamicDataBTreeMap {
         let datastar_params = self.url.query_params.get_first("datastar");
 
         if let Some(urlencoded_json) = datastar_params {

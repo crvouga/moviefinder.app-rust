@@ -2,7 +2,7 @@ use super::dynamic_data::DynamicData;
 
 pub mod query_params;
 
-#[derive(Debug, Eq, PartialEq, Clone, Default)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Hash)]
 pub struct Url {
     pub host: String,
     pub path: String,

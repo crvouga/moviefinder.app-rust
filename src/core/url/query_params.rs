@@ -1,19 +1,18 @@
-use std::collections::HashMap;
-
 use crate::core::{
-    dynamic_data::{DynamicData, DynamicDataHashMap},
+    dynamic_data::{DynamicData, DynamicDataBTreeMap},
     url_encoded,
 };
+use std::collections::BTreeMap;
 
-#[derive(Debug, Eq, PartialEq, Clone, Default)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Hash)]
 pub struct QueryParams {
-    pub params: DynamicDataHashMap,
+    pub params: DynamicDataBTreeMap,
 }
 
 impl DynamicData for QueryParams {
     fn empty() -> Self {
         QueryParams {
-            params: DynamicDataHashMap::empty(),
+            params: DynamicDataBTreeMap::empty(),
         }
     }
 
@@ -49,7 +48,7 @@ impl DynamicData for QueryParams {
     }
 
     fn from_string(string: &str) -> Self {
-        let mut map = HashMap::new();
+        let mut map = BTreeMap::new();
         for pair in string.split('&') {
             let mut parts = pair.split('=');
             let key: String = parts.next().unwrap_or("").to_string();
@@ -61,7 +60,7 @@ impl DynamicData for QueryParams {
         }
 
         QueryParams {
-            params: DynamicDataHashMap(map),
+            params: DynamicDataBTreeMap(map),
         }
     }
 }

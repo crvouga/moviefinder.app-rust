@@ -4,7 +4,7 @@ use super::{
     url::{query_params::QueryParams, Url},
 };
 use crate::core::http::{form_data::FormData, request::Request};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub mod config;
 pub mod discover_movie;
@@ -52,13 +52,13 @@ impl TmdbApi {
             },
             method,
             body: vec![],
-            cookies: HashMap::new(),
+            cookies: BTreeMap::new(),
             form_data: FormData::empty(),
         }
     }
 
-    pub fn to_base_headers(self: &TmdbApi) -> HashMap<String, String> {
-        let mut headers = HashMap::new();
+    pub fn to_base_headers(self: &TmdbApi) -> BTreeMap<String, String> {
+        let mut headers = BTreeMap::new();
         headers.insert(
             "Content-Type".to_string().to_ascii_lowercase(),
             "application/json".to_string(),

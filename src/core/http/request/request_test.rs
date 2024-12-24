@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     use crate::core::{
         dynamic_data::DynamicData,
@@ -42,7 +42,7 @@ mod tests {
                 query_params: Default::default(),
             },
             method: Method::Get,
-            headers: HashMap::from([("Host".to_string(), "customhost.com".to_string())]),
+            headers: BTreeMap::from([("Host".to_string(), "customhost.com".to_string())]),
             cookies: Default::default(),
             form_data: Default::default(),
             body: Vec::new(),
@@ -63,7 +63,7 @@ mod tests {
                 query_params: Default::default(),
             },
             method: Method::Get,
-            headers: HashMap::from([("accept-encoding".to_string(), "gzip, deflate".to_string())]),
+            headers: BTreeMap::from([("accept-encoding".to_string(), "gzip, deflate".to_string())]),
             cookies: Default::default(),
             form_data: Default::default(),
             body: Vec::new(),
@@ -86,7 +86,7 @@ mod tests {
                 query_params: Default::default(),
             },
             method: Method::Post,
-            headers: HashMap::from([
+            headers: BTreeMap::from([
                 ("Content-Type".to_string(), "application/json".to_string()),
                 ("Content-Length".to_string(), "18".to_string()),
             ]),

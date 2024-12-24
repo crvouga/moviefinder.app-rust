@@ -6,7 +6,7 @@ use crate::core::dynamic_data::DynamicData;
 use crate::core::url::query_params::QueryParams;
 use crate::core::url::Url;
 use crate::core::url_encoded;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use tokio::io::AsyncReadExt;
 use tokio::net::{TcpListener, TcpStream};
 
@@ -115,8 +115,8 @@ fn parse_request_line(request_line: &str) -> (Method, String) {
     (method, path)
 }
 
-fn parse_cookies(headers: &HashMap<String, String>) -> HashMap<String, String> {
-    let mut cookies = HashMap::new();
+fn parse_cookies(headers: &BTreeMap<String, String>) -> BTreeMap<String, String> {
+    let mut cookies = BTreeMap::new();
 
     if let Some(cookie_header) = headers.get("cookie") {
         for cookie in cookie_header.split("; ") {
@@ -129,7 +129,7 @@ fn parse_cookies(headers: &HashMap<String, String>) -> HashMap<String, String> {
     cookies
 }
 
-fn parse_form_data(headers: &HashMap<String, String>, body: &Vec<u8>) -> FormData {
+fn parse_form_data(headers: &BTreeMap<String, String>, body: &Vec<u8>) -> FormData {
     if !is_form_data_request(headers) {
         return FormData::empty();
     }
@@ -141,15 +141,15 @@ fn parse_form_data(headers: &HashMap<String, String>, body: &Vec<u8>) -> FormDat
     FormData::from_string(&decoded_body)
 }
 
-fn is_form_data_request(headers: &HashMap<String, String>) -> bool {
+fn is_form_data_request(headers: &BTreeMap<String, String>) -> bool {
     headers
         .get("content-type")
         .map(|content_type| content_type.starts_with("application/x-www-form-urlencoded"))
         .unwrap_or(false)
 }
 
-fn parse_headers(header_lines: &[&str]) -> (HashMap<String, String>, usize) {
-    let mut headers = HashMap::new();
+fn parse_headers(header_lines: &[&str]) -> (BTreeMap<String, String>, usize) {
+    let mut headers = BTreeMap::new();
     let mut content_length: usize = 0;
 
     for line in header_lines {

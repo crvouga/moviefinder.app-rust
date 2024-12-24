@@ -1,15 +1,15 @@
 use super::{content_encoding::ContentEncoding, form_data::FormData, method::Method};
 use crate::core::{dynamic_data::DynamicData, url::Url};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 mod request_test;
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub struct Request {
     pub url: Url,
     pub method: Method,
-    pub headers: HashMap<String, String>,
-    pub cookies: HashMap<String, String>,
+    pub headers: BTreeMap<String, String>,
+    pub cookies: BTreeMap<String, String>,
     pub form_data: FormData,
     pub body: Vec<u8>,
 }

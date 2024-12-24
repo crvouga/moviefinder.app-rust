@@ -1,11 +1,11 @@
 use serde::Serialize;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
-pub fn struct_to_map<T: Serialize>(input: &T) -> HashMap<String, String> {
+pub fn struct_to_map<T: Serialize>(input: &T) -> BTreeMap<String, String> {
     let json_value = serde_json::to_value(input).expect("Failed to serialize struct");
 
-    let mut map = HashMap::new();
+    let mut map = BTreeMap::new();
 
     if let Value::Object(obj) = json_value {
         for (key, value) in obj {
@@ -39,7 +39,7 @@ mod tests {
             field3: 123,
         };
 
-        let expected: HashMap<String, String> = vec![
+        let expected: BTreeMap<String, String> = vec![
             ("field1".to_string(), "Value1".to_string()),
             ("field2".to_string(), "Value2".to_string()),
             ("field3".to_string(), "123".to_string()),
