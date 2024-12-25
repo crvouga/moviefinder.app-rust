@@ -23,15 +23,14 @@ pub async fn redirect_to(
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
 ) -> Result<(), crate::core::error::Error> {
-    w.send_script(&Js::push_url(&Route::AccountScreen.url()))
-        .await?;
-
     let r = Req {
         url: Route::AccountScreen.url(),
         ..r.clone()
     };
 
     respond(ctx, &r, w, user_id).await?;
+
+    w.send_script(&Js::push_url(&r.url)).await?;
 
     Ok(())
 }

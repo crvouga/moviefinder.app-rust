@@ -17,6 +17,7 @@ use crate::{
     list::{list::MediaList, list_item::MediaListItem, list_item_variant::MediaListItemVariant},
     media::{media_::Media, media_db::interface::MediaQueryField, media_id::MediaId},
     req::Req,
+    ui::route::AppRoute,
 };
 
 use std::{fmt::Debug, vec};
@@ -152,7 +153,7 @@ fn view_list_items(
         .child(match list_items {
             RemoteResult::Err(err) => Alert::error().label(&err.to_string()).view(),
             RemoteResult::Loading => List::default().view().children(
-                (0..3)
+                (0..5)
                     .map(|_| {
                         ListItem::default()
                             .title("Loading Loading Loading")
@@ -170,17 +171,21 @@ fn view_list_items(
                         MediaListItemVariant::Media(media_id) => {
                             let found = media.iter().find(|m| m.id == media_id).cloned();
                             match found {
-                                Some(media) => Some(
-                                    ListItem::default()
-                                        .title(media.title)
-                                        .art(move |class| {
-                                            Image::new()
-                                                .view()
-                                                .class(&class)
-                                                .src(media.poster.to_middle_res())
-                                        })
-                                        .view(),
-                                ),
+                                Some(media) => {
+                                    let details_url = media.details_route().url();
+                                    Some(
+                                        ListItem::default()
+                                            .title(media.title)
+                                            .art(move |class| {
+                                                Image::new()
+                                                    .view()
+                                                    .class(&class)
+                                                    .src(media.poster.to_middle_res())
+                                            })
+                                            .view()
+                                            .data_on(|e| e.click().push_url(&details_url)),
+                                    )
+                                }
                                 None => Some(
                                     ListItem::default()
                                         .title("...".to_owned())

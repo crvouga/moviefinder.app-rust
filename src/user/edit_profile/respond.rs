@@ -98,6 +98,8 @@ pub async fn respond(
 
             user::account_screen::redirect_to(ctx, r, w, &r.user_id(ctx).await.ok()).await?;
 
+            w.send_signal(SIGNAL_IS_SUBMITTING, "false").await?;
+
             Ok(())
         }
 

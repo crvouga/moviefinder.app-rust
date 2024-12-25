@@ -68,9 +68,10 @@ pub async fn respond(
                 feed_id: feed_id.clone(),
             }
             .url();
-            w.send_script(&Js::push_url(&url_new)).await?;
 
             feed_screen::respond::respond_feed_screen(ctx, r, w, feed_id).await?;
+
+            w.send_script(&Js::push_url(&url_new)).await?;
 
             Ok(())
         }

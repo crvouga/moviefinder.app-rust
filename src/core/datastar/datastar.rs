@@ -102,6 +102,11 @@ impl DataIntersects {
         self.actions.push(js.to_string());
         self
     }
+
+    pub fn once(mut self) -> Self {
+        self.modifiers.push("once".to_string());
+        self
+    }
 }
 
 impl Attr for DataIntersects {
@@ -112,7 +117,7 @@ impl Attr for DataIntersects {
         let attr_str = if modifiers_str.is_empty() {
             event
         } else {
-            format!("{}.{}", event, modifiers_str)
+            format!("{}__{}", event, modifiers_str)
         };
         let key = format!("data-{}", attr_str);
         (key, value)
