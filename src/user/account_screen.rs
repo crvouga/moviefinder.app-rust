@@ -42,23 +42,18 @@ pub async fn respond(
     user_id: &Option<UserId>,
 ) -> Result<(), crate::core::error::Error> {
     match user_id {
-        None => {
-            respond_screen_logged_out(r, w).await?;
-
-            Ok(())
-        }
+        None => w.send_screen(r, view(ViewModel::LoggedOut)).await,
 
         Some(user_id) => {
-            // w.send_screen(r, view_screen_loading()).await?;
+            w.send_screen(r, view(ViewModel::Loading)).await?;
 
             let maybe_account = ctx.user_account_db.find_one_by_user_id(&user_id).await?;
 
             let account = match maybe_account {
                 Some(account) => account,
                 None => {
-                    w.send_toast_dark("Account not found. Try logging in again")
-                        .await?;
-                    return respond_screen_logged_out(r, w).await;
+                    return respond_failed_to_load(r, w, "Account not found. Try logging in again")
+                        .await
                 }
             };
 
@@ -67,13 +62,12 @@ pub async fn respond(
             let profile = match maybe_profile {
                 Some(profile) => profile,
                 None => {
-                    w.send_toast_dark("Profile not found. Try logging in again")
-                        .await?;
-                    return respond_screen_logged_out(r, w).await;
+                    return respond_failed_to_load(r, w, "Profile not found. Try logging in again")
+                        .await
                 }
             };
 
-            w.send_screen(r, view_screen_logged_in(&account, &profile))
+            w.send_screen(r, view(ViewModel::LoggedIn { account, profile }))
                 .await?;
 
             Ok(())
@@ -81,15 +75,34 @@ pub async fn respond(
     }
 }
 
-async fn respond_screen_logged_out(
+async fn respond_failed_to_load(
     r: &Req,
     w: &mut ResponseWriter,
+    message: &str,
 ) -> Result<(), crate::core::error::Error> {
-    w.send_screen(r, view_screen_logged_out()).await?;
+    w.send_toast_dark(message).await?;
+    w.send_screen(r, view(ViewModel::LoggedOut)).await?;
     Ok(())
 }
 
-fn _view_screen_loading() -> Elem {
+pub enum ViewModel {
+    Loading,
+    LoggedOut,
+    LoggedIn {
+        account: UserAccount,
+        profile: UserProfile,
+    },
+}
+
+fn view(model: ViewModel) -> Elem {
+    match model {
+        ViewModel::Loading => view_screen_loading(),
+        ViewModel::LoggedOut => view_screen_logged_out(),
+        ViewModel::LoggedIn { account, profile } => view_screen_logged_in(&account, &profile),
+    }
+}
+
+fn view_screen_loading() -> Elem {
     div()
         .id("loading")
         .class("w-full flex-1 flex items-center justify-center flex-col")
