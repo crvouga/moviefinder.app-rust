@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{history::History, unit_of_work::uow},
+    core::{history::History, key_value_db::interface::KeyValueDbExt, unit_of_work::uow},
     ctx::Ctx,
     user::user_profile::user_profile_::UserProfile,
 };
@@ -19,16 +19,11 @@ impl FormState {
     pub async fn get(ctx: &Ctx, profile: &UserProfile) -> FormState {
         let key = to_key(&profile);
 
-        let got = ctx
-            .key_value_db
-            .get(&key)
+        ctx.key_value_db
+            .get::<FormState>(&key)
             .await
             .unwrap_or_default()
-            .unwrap_or_default();
-
-        let decoded: FormState = serde_json::from_str(&got).unwrap_or_default();
-
-        decoded
+            .unwrap_or_default()
     }
 
     pub async fn put(
@@ -38,9 +33,7 @@ impl FormState {
     ) -> Result<(), crate::core::error::Error> {
         let key = to_key(&profile);
 
-        let encoded = serde_json::to_string(form_state).unwrap();
-
-        ctx.key_value_db.put(uow(), &key, encoded).await?;
+        ctx.key_value_db.put(uow(), &key, form_state).await?;
 
         Ok(())
     }

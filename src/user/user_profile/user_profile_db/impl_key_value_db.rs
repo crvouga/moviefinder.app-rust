@@ -1,6 +1,9 @@
 use super::interface::UserProfileDb;
 use crate::{
-    core::{key_value_db::interface::KeyValueDbDyn, unit_of_work::UnitOfWork},
+    core::{
+        key_value_db::interface::{KeyValueDbDyn, KeyValueDbExt},
+        unit_of_work::UnitOfWork,
+    },
     user::{user_id::UserId, user_profile::user_profile_::UserProfile},
 };
 use async_trait::async_trait;
@@ -31,17 +34,7 @@ impl UserProfileDb for KeyValueDb {
         &self,
         user_id: &UserId,
     ) -> Result<Option<UserProfile>, crate::core::error::Error> {
-        let maybe_profile = self.profile_by_user_id.get(&user_id.as_str()).await?;
-
-        let profile = match maybe_profile {
-            Some(profile) => profile,
-            None => return Ok(None),
-        };
-
-        let parsed = serde_json::from_str::<UserProfile>(&profile)
-            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
-
-        Ok(Some(parsed))
+        self.profile_by_user_id.get(&user_id.as_str()).await
     }
 
     async fn put(
@@ -52,15 +45,12 @@ impl UserProfileDb for KeyValueDb {
         let user_id = profile.user_id.as_str().to_string();
         let username = profile.username.clone();
 
-        let serialized = serde_json::to_string(profile)
-            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
-
         self.profile_by_user_id
-            .put(uow.clone(), &user_id, serialized.to_string())
+            .put(uow.clone(), &user_id, profile)
             .await?;
 
         self.user_id_by_username
-            .put(uow, &username.to_string(), user_id.to_string())
+            .put(uow, &username.to_string(), &user_id)
             .await?;
 
         Ok(())

@@ -1,7 +1,9 @@
 use super::form_state::FormState;
 use crate::{
     core::{
-        key_value_db::interface::KeyValueDb, logger::interface::Logger, unit_of_work::UnitOfWork,
+        key_value_db::interface::{KeyValueDb, KeyValueDbExt},
+        logger::interface::Logger,
+        unit_of_work::UnitOfWork,
     },
     debug,
     feed::feed_id::FeedId,
@@ -32,17 +34,7 @@ impl FeedTagsFormStateDb {
         feed_id: &FeedId,
     ) -> Result<Option<FormState>, crate::core::error::Error> {
         debug!(self.logger, "get {:?}", feed_id);
-        let got = self.key_value_db.get(feed_id.as_str()).await.unwrap();
-
-        if got.is_none() {
-            return Ok(None);
-        }
-
-        let parsed = serde_json::from_str(&got.unwrap())
-            .map_err(|e| e.to_string())
-            .unwrap();
-
-        Ok(Some(parsed))
+        self.key_value_db.get(feed_id.as_str()).await
     }
 
     pub async fn put(
@@ -51,11 +43,9 @@ impl FeedTagsFormStateDb {
         form_state: &FormState,
     ) -> Result<(), crate::core::error::Error> {
         debug!(self.logger, "put {:?}", form_state);
-        let value = serde_json::to_string(&form_state)
-            .map_err(|e| crate::core::error::Error::new(e.to_string()))?;
 
         self.key_value_db
-            .put(uow, form_state.feed_id.as_str(), value)
+            .put(uow, form_state.feed_id.as_str(), &form_state)
             .await
     }
 }

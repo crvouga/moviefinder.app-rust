@@ -99,6 +99,7 @@ impl Screen {
             .data_signal_location()
             .child(
                 SpinnerBlock::default()
+                    .label("Downloading screen...")
                     .view()
                     .class("absolute inset-0 pointer-events-none")
                     .data_show("!signal_loaded_screens.value.includes(signal_location.value)"),

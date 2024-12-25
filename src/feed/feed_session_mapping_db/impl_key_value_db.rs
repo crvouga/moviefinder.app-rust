@@ -1,6 +1,7 @@
 use crate::{
     core::{
-        key_value_db::interface::KeyValueDbDyn, session::session_id::SessionId,
+        key_value_db::interface::{KeyValueDbDyn, KeyValueDbExt},
+        session::session_id::SessionId,
         unit_of_work::UnitOfWork,
     },
     feed::feed_id::FeedId,
@@ -30,7 +31,7 @@ impl FeedSessionMappingDb for KeyValueDb {
         session_id: SessionId,
     ) -> Result<Option<FeedId>, crate::core::error::Error> {
         match self.key_value_db.get(session_id.as_str()).await {
-            Ok(Some(value)) => Ok(Some(FeedId::new(&value))),
+            Ok(Some(value)) => Ok(Some(value)),
             Ok(None) => Ok(None),
             Err(err) => Err(err),
         }
@@ -43,7 +44,7 @@ impl FeedSessionMappingDb for KeyValueDb {
         feed_id: FeedId,
     ) -> Result<(), crate::core::error::Error> {
         self.key_value_db
-            .put(uow, session_id.as_str(), feed_id.as_str().to_string())
+            .put(uow, session_id.as_str(), &feed_id)
             .await?;
         Ok(())
     }

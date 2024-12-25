@@ -12,6 +12,8 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::vec;
 
+use crate::core::error::Error;
+
 pub struct Postgres {
     db_conn_sql: DbConnSqlDyn,
     namespace: Vec<String>,
@@ -38,31 +40,49 @@ struct Row {
 
 #[async_trait]
 impl KeyValueDb for Postgres {
-    async fn get(&self, key: &str) -> Result<Option<String>, crate::core::error::Error> {
+    //
+    // 1) get_bytes:
+    //
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new("SELECT value FROM key_value WHERE key = :key");
         query.set(
             "key",
-            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
+            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key)),
         );
-        let queried: Vec<Row> = db_conn_sql::query(self.db_conn_sql.clone(), &query).await?;
-        let value = queried.first().and_then(|row| row.value.clone());
 
-        debug!(self.logger, "get key={}", key);
+        let rows: Vec<Row> = db_conn_sql::query(self.db_conn_sql.clone(), &query).await?;
+        let value_opt = rows.first().and_then(|row| row.value.clone());
 
-        Ok(value)
+        // Convert the stored string value into bytes
+        let bytes = value_opt.map(|s| s.into_bytes());
+        debug!(self.logger, "get_bytes key={}", key);
+
+        Ok(bytes)
     }
 
-    async fn put(
-        &self,
-        uow: UnitOfWork,
-        key: &str,
-        value: String,
-    ) -> Result<(), crate::core::error::Error> {
+    //
+    // 2) put_bytes:
+    //
+    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
+        let new_value_str = String::from_utf8_lossy(value).to_string();
 
-        let mut query = Sql::new(
+        // Grab the old value (if any) for rollback
+        let mut select_query = Sql::new("SELECT value FROM key_value WHERE key = :key");
+        select_query.set(
+            "key",
+            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.clone())),
+        );
+        let old_value = db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &select_query)
+            .await?
+            .first()
+            .and_then(|row| row.value.clone())
+            .map(|s| s.into_bytes()); // store old_value as bytes
+
+        // Upsert the new value
+        let mut upsert_query = Sql::new(
             r#"
             INSERT INTO key_value (key, value)
             VALUES (:key, :value)
@@ -70,47 +90,45 @@ impl KeyValueDb for Postgres {
             SET value = :value, updated_at_posix = EXTRACT(EPOCH FROM NOW())
             "#,
         );
-        query.set(
+        upsert_query.set(
             "key",
-            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
+            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.clone())),
         );
-        query.set(
+        upsert_query.set(
             "value",
-            SqlVarType::Primitive(SqlPrimitive::Text(value.to_string())),
+            SqlVarType::Primitive(SqlPrimitive::Text(new_value_str)),
         );
 
-        debug!(self.logger, "put key={}", key);
+        debug!(self.logger, "put_bytes key={}", key);
+        db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &upsert_query).await?;
 
-        let old_value = db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &query)
-            .await?
-            .first()
-            .and_then(|row| row.value.clone());
-
-        db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &query).await?;
-
+        //
+        // Register rollback closure
+        //
         let db_conn_sql = self.db_conn_sql.clone();
         let namespace = self.namespace.clone();
         let key = key.to_string();
         uow.register_rollback(move || async move {
             match old_value {
+                // If there was no old value, rollback means "delete"
                 None => {
                     let namespaced_key = to_namespaced_key(&namespace, &key);
-
-                    let mut query = Sql::new("DELETE FROM key_value WHERE key = :key");
-                    query.set(
+                    let mut delete_query = Sql::new("DELETE FROM key_value WHERE key = :key");
+                    delete_query.set(
                         "key",
-                        SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
+                        SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key)),
                     );
-
-                    db_conn_sql::query::<Row>(db_conn_sql, &query)
+                    db_conn_sql::query::<Row>(db_conn_sql.clone(), &delete_query)
                         .await
                         .map(|_| ())
                 }
 
-                Some(value) => {
+                // If there was an old value, rollback means "put it back"
+                Some(old_val_bytes) => {
                     let namespaced_key = to_namespaced_key(&namespace, &key);
+                    let old_val_str = String::from_utf8_lossy(&old_val_bytes).to_string();
 
-                    let mut query = Sql::new(
+                    let mut upsert_query = Sql::new(
                         r#"
                         INSERT INTO key_value (key, value)
                         VALUES (:key, :value)
@@ -118,16 +136,16 @@ impl KeyValueDb for Postgres {
                         SET value = :value, updated_at_posix = EXTRACT(EPOCH FROM NOW())
                         "#,
                     );
-                    query.set(
+                    upsert_query.set(
                         "key",
                         SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
                     );
-                    query.set(
+                    upsert_query.set(
                         "value",
-                        SqlVarType::Primitive(SqlPrimitive::Text(value.to_string())),
+                        SqlVarType::Primitive(SqlPrimitive::Text(old_val_str)),
                     );
 
-                    db_conn_sql::query::<Row>(db_conn_sql, &query)
+                    db_conn_sql::query::<Row>(db_conn_sql.clone(), &upsert_query)
                         .await
                         .map(|_| ())
                 }
@@ -138,30 +156,36 @@ impl KeyValueDb for Postgres {
         Ok(())
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), crate::core::error::Error> {
+    //
+    // 3) zap:
+    //
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
-        let mut query = Sql::new("DELETE FROM key_value WHERE key = :key");
+        // Grab the old value for rollback
+        let old_value = self.get_bytes(key).await?;
 
-        query.set(
+        let mut delete_query = Sql::new("DELETE FROM key_value WHERE key = :key");
+        delete_query.set(
             "key",
-            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
+            SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.clone())),
         );
 
         debug!(self.logger, "zap key={}", key);
+        db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &delete_query).await?;
 
+        //
+        // Register rollback closure
+        //
         let db_conn_sql = self.db_conn_sql.clone();
         let namespace = self.namespace.clone();
         let key = key.to_string();
-        let old_value = self.get(&key).await?;
-
-        db_conn_sql::query::<Row>(self.db_conn_sql.clone(), &query).await?;
-
         uow.register_rollback(move || async move {
-            if old_value.is_some() {
+            if let Some(old_val_bytes) = old_value {
                 let namespaced_key = to_namespaced_key(&namespace, &key);
+                let old_val_str = String::from_utf8_lossy(&old_val_bytes).to_string();
 
-                let mut query = Sql::new(
+                let mut upsert_query = Sql::new(
                     r#"
                     INSERT INTO key_value (key, value)
                     VALUES (:key, :value)
@@ -169,19 +193,20 @@ impl KeyValueDb for Postgres {
                     SET value = :value, updated_at_posix = EXTRACT(EPOCH FROM NOW())
                     "#,
                 );
-                query.set(
+                upsert_query.set(
                     "key",
                     SqlVarType::Primitive(SqlPrimitive::Text(namespaced_key.to_string())),
                 );
-                query.set(
+                upsert_query.set(
                     "value",
-                    SqlVarType::Primitive(SqlPrimitive::Text(old_value.unwrap())),
+                    SqlVarType::Primitive(SqlPrimitive::Text(old_val_str)),
                 );
 
-                db_conn_sql::query::<Row>(db_conn_sql, &query)
+                db_conn_sql::query::<Row>(db_conn_sql.clone(), &upsert_query)
                     .await
                     .map(|_| ())
             } else {
+                // If there was no old value, nothing to restore
                 Ok(())
             }
         })
@@ -190,6 +215,9 @@ impl KeyValueDb for Postgres {
         Ok(())
     }
 
+    //
+    // 4) child:
+    //
     fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
         let namespace_new = self
             .namespace
@@ -197,6 +225,7 @@ impl KeyValueDb for Postgres {
             .chain(namespace.iter())
             .cloned()
             .collect();
+
         Box::new(Postgres {
             db_conn_sql: self.db_conn_sql.clone(),
             namespace: namespace_new,

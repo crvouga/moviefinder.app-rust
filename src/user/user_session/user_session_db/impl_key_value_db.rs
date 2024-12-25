@@ -1,7 +1,8 @@
 use super::interface::UserSessionDb;
 use crate::{
     core::{
-        key_value_db::interface::KeyValueDbDyn, session::session_id::SessionId,
+        key_value_db::interface::{KeyValueDbDyn, KeyValueDbExt},
+        session::session_id::SessionId,
         unit_of_work::UnitOfWork,
     },
     user::user_session::user_session_::UserSession,
@@ -48,17 +49,9 @@ impl UserSessionDb for KeyValueDb {
         &self,
         session_id: &SessionId,
     ) -> Result<Option<UserSession>, crate::core::error::Error> {
-        let maybe_session = self.session_by_session_id.get(&session_id.as_str()).await?;
-
-        let session = match maybe_session {
-            Some(session) => session,
-            None => return Ok(None),
-        };
-
-        let parsed = serde_json::from_str::<UserSession>(&session)
-            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
-
-        Ok(Some(parsed))
+        self.session_by_session_id
+            .get::<UserSession>(session_id.as_str())
+            .await
     }
 
     async fn put(
@@ -69,15 +62,12 @@ impl UserSessionDb for KeyValueDb {
         let session_id = session.session_id.as_str().to_string();
         let user_id = session.user_id.as_str().to_string();
 
-        let serialized = serde_json::to_string(session)
-            .map_err(|err| crate::core::error::Error::new(err.to_string()))?;
-
         self.session_by_session_id
-            .put(uow.clone(), &session_id, serialized.to_string())
+            .put(uow.clone(), &session_id, &session)
             .await?;
 
         self.session_id_by_user_id
-            .put(uow.clone(), &user_id, session_id.to_string())
+            .put(uow.clone(), &user_id, &session.session_id)
             .await?;
 
         Ok(())

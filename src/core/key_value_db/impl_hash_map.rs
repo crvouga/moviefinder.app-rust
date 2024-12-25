@@ -1,14 +1,13 @@
+use super::interface::{to_namespaced_key, KeyValueDb};
+use crate::core::{error::Error, unit_of_work::UnitOfWork};
 use async_trait::async_trait;
 use std::sync::{Arc, RwLock};
-
-use crate::core::unit_of_work::UnitOfWork;
-
-use super::interface::{to_namespaced_key, KeyValueDb};
 
 #[derive(Clone)]
 pub struct HashMap {
     namespace: Vec<String>,
-    map: Arc<RwLock<std::collections::HashMap<String, String>>>,
+    // Store bytes instead of strings
+    map: Arc<RwLock<std::collections::HashMap<String, Vec<u8>>>>,
 }
 
 impl HashMap {
@@ -26,26 +25,23 @@ impl HashMap {
 
 #[async_trait]
 impl KeyValueDb for HashMap {
-    async fn get(&self, key: &str) -> Result<Option<String>, crate::core::error::Error> {
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map = self.map.read().unwrap();
         Ok(map.get(&namespaced_key).cloned())
     }
 
-    async fn put(
-        &self,
-        uow: UnitOfWork,
-        key: &str,
-        value: String,
-    ) -> Result<(), crate::core::error::Error> {
+    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map_arc = Arc::clone(&self.map);
 
         let old_value = {
             let mut map = map_arc.write().unwrap();
-            map.insert(namespaced_key.clone(), value)
+            // Insert the new value (clone so we own it)
+            map.insert(namespaced_key.clone(), value.to_vec())
         };
 
+        // Register rollback closure
         uow.register_rollback(move || {
             let map_arc = Arc::clone(&map_arc);
             let namespaced_key = namespaced_key.clone();
@@ -63,7 +59,8 @@ impl KeyValueDb for HashMap {
 
         Ok(())
     }
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), crate::core::error::Error> {
+
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error> {
         let namespaced_key = self.to_namespaced_key(key);
         let map_arc = Arc::clone(&self.map);
 
@@ -72,6 +69,7 @@ impl KeyValueDb for HashMap {
             map.remove(&namespaced_key)
         };
 
+        // Register rollback closure
         uow.register_rollback(move || {
             let map_arc = Arc::clone(&map_arc);
             let namespaced_key = namespaced_key.clone();
@@ -89,11 +87,11 @@ impl KeyValueDb for HashMap {
     }
 
     fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
-        let new_namespace = self
+        let new_namespace: Vec<String> = self
             .namespace
             .iter()
             .chain(namespace.iter())
-            .map(|s| s.to_string())
+            .cloned()
             .collect();
 
         Box::new(HashMap {
