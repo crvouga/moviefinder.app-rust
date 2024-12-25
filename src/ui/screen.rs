@@ -99,7 +99,6 @@ impl Screen {
             .data_signal_location()
             .child(
                 SpinnerBlock::default()
-                    .label("Downloading screen...")
                     .view()
                     .class("absolute inset-0 pointer-events-none")
                     .data_show("!signal_loaded_screens.value.includes(signal_location.value)"),
@@ -108,9 +107,24 @@ impl Screen {
 }
 
 impl Elem {
-    pub fn data_signal_location(self) -> Self {
+    pub fn preload_screen(self, _url: &str) -> Self {
+        self
+        // .data_on(|e| {
+        //     e.load().js(&Js::if_then_else(
+        //         &format!("!signal_preteched_screens.value.includes('{}')", url),
+        //         &Js::statments(vec![
+        //             format!("signal_preteched_screens.value = Array.from(new Set(signal_preteched_screens.value.concat(['{}')))", url),
+        //             Js::sse(&Js::quote(url)),
+        //         ]),
+        //         "null",
+        //     ))
+        // })
+    }
+
+    fn data_signal_location(self) -> Self {
         self.data_signal("signal_location", "location.pathname")
             .data_signal("signal_loaded_screens", "[]")
+            .data_signal("signal_preteched_screens", "[]")
             .data_on(|e| {
                 e.e("event_location_changed")
                     .js("signal_location.value = location.pathname")

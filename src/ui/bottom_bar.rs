@@ -48,6 +48,7 @@ impl BottomBar {
                         .icon(icon::solid::home("size-6"))
                         .active(self.active == Active::Home)
                         .view()
+                        .preload_screen(&feed_screen::route::Route::FeedScreenDefault.url())
                         .data_on(|b| {
                             b.press_down()
                                 .push_url(&feed_screen::route::Route::FeedScreenDefault.url())
@@ -59,6 +60,9 @@ impl BottomBar {
                         .icon(icon::solid::user_circle("size-6"))
                         .active(self.active == Active::Account)
                         .view()
+                        .preload_screen(
+                            &route::Route::User(user::route::Route::AccountScreen).url(),
+                        )
                         .data_on(|b| {
                             b.press_down().push_url(
                                 &route::Route::User(user::route::Route::AccountScreen).url(),

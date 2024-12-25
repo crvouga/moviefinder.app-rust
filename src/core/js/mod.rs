@@ -13,6 +13,10 @@ impl Js {
         "''".to_string()
     }
 
+    pub fn statments(statments: Vec<String>) -> String {
+        statments.join("; ")
+    }
+
     // pub fn dot_length(value: &str) -> String {
     //     format!("{}.length", value)
     // }

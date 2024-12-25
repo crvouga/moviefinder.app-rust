@@ -1,14 +1,14 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum RemoteResult<TOk, TErr> {
+pub enum RemoteResult<T, E> {
     Loading,
-    Ok(TOk),
-    Err(TErr),
+    Ok(T),
+    Err(E),
 }
 
-impl<TOk, TErr> From<Result<TOk, TErr>> for RemoteResult<TOk, TErr> {
-    fn from(result: Result<TOk, TErr>) -> Self {
+impl<T, E> From<Result<T, E>> for RemoteResult<T, E> {
+    fn from(result: Result<T, E>) -> Self {
         match result {
             Ok(ok) => RemoteResult::Ok(ok),
             Err(err) => RemoteResult::Err(err),
@@ -16,10 +16,10 @@ impl<TOk, TErr> From<Result<TOk, TErr>> for RemoteResult<TOk, TErr> {
     }
 }
 
-impl<TOk, TErr: Default> From<RemoteResult<TOk, TErr>> for Result<TOk, TErr> {
-    fn from(result: RemoteResult<TOk, TErr>) -> Self {
+impl<T, E: Default> From<RemoteResult<T, E>> for Result<T, E> {
+    fn from(result: RemoteResult<T, E>) -> Self {
         match result {
-            RemoteResult::Loading => Result::Err(TErr::default()),
+            RemoteResult::Loading => Result::Err(E::default()),
             RemoteResult::Ok(ok) => Result::Ok(ok),
             RemoteResult::Err(err) => Result::Err(err),
         }

@@ -94,9 +94,9 @@ pub async fn respond(
 
             ctx.user_profile_db.put(uow(), &profile_new).await?;
 
-            w.send_toast_dark("Profile updated").await?;
-
             user::account_screen::redirect_to(ctx, r, w, &r.user_id(ctx).await.ok()).await?;
+
+            w.send_toast_dark("Profile updated").await?;
 
             w.send_signal(SIGNAL_IS_SUBMITTING, "false").await?;
 

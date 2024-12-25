@@ -16,7 +16,7 @@ impl SpinnerBlock {
     pub fn view(self) -> Elem {
         div()
             .class("w-full h-full flex flex-col items-center justify-center gap-1.5")
-            .child(icon::solid::spinner("size-16 animate-spin"))
+            .child(icon::solid::spinner("size-16 animate-spin").id("spinner-block-spinner"))
             .child(match self.label {
                 Some(label) => span().class("text-xs text-muted").child_text(&label),
                 None => frag(),
