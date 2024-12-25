@@ -51,20 +51,22 @@ pub fn to_human_friendly_str<T: Serialize>(route: T) -> String {
         .replace(",", ".")
         .replace(" ", "")
         .replace("/", ".")
-        .split(".")
+        .split('.')
         .filter(|s| {
-            if s.starts_with('[') && s.ends_with(']') {
+            // Keep only strings that start with a capital letter and satisfy length limits.
+            let is_size_ok = if s.starts_with('[') && s.ends_with(']') {
                 let content = &s[1..s.len() - 1];
-                content.len() > 0 && content.len() < 50
+                !content.is_empty() && content.len() < 50
             } else {
-                s.len() > 0 && s.len() < 20
-            }
+                !s.is_empty() && s.len() < 20
+            };
+            let starts_with_capital = s.chars().next().map_or(false, |c| c.is_ascii_uppercase());
+            is_size_ok && starts_with_capital
         })
-        .collect::<Vec<&str>>()
+        .collect::<Vec<_>>()
         .join("-");
 
     human_friendly.truncate(100);
-
     human_friendly
 }
 

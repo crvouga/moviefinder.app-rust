@@ -149,6 +149,10 @@ pub fn div() -> Elem {
     elem("div")
 }
 
+pub fn main() -> Elem {
+    elem("main")
+}
+
 pub fn code() -> Elem {
     elem("code")
 }
