@@ -376,7 +376,7 @@ pub fn view_slide_content(feed_item: &FeedItem) -> Elem {
                     .tab_index(0)
                     .role_button()
                     .data_on(|b| {
-                        b.click().push_url(
+                        b.press_down().push_url(
                             &media::details::route::Route::MediaDetailsScreen {
                                 media_id: media.id.clone(),
                             }
