@@ -1,12 +1,12 @@
 use crate::media::media_id::MediaId;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum MediaListItemVariant {
+pub enum ListItemVariant {
     Media(MediaId),
 }
 
-impl Default for MediaListItemVariant {
+impl Default for ListItemVariant {
     fn default() -> Self {
-        MediaListItemVariant::Media(MediaId::default())
+        ListItemVariant::Media(MediaId::default())
     }
 }

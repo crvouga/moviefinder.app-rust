@@ -5,7 +5,7 @@ use crate::{
         pagination::{Paginated, Pagination},
         sql::{Sql, SqlPrimitive, SqlVarType},
     },
-    list::{list::MediaList, list_item::MediaListItem, list_item_variant::MediaListItemVariant},
+    list::{list::List, list_item::ListItem, list_item_variant::ListItemVariant},
     media::interaction::{
         interaction_::{postgres::MediaInteractionPostgresRow, MediaInteraction},
         interaction_list::list_::MediaInteractionList,
@@ -37,7 +37,7 @@ impl MediaInteractionListItemDb for ImplPostgres {
         pagination: Pagination,
         user_id: UserId,
         interaction_name: InteractionName,
-    ) -> Result<Paginated<MediaListItem>, crate::core::error::Error> {
+    ) -> Result<Paginated<ListItem>, crate::core::error::Error> {
         let list = MediaInteractionList {
             user_id: user_id.clone(),
             interaction_name: interaction_name.clone(),
@@ -142,11 +142,11 @@ impl MediaInteractionListItemDb for ImplPostgres {
                     .interaction_name
                     .to_list_item_id(list_id.clone(), interaction.media_id.clone());
 
-                MediaListItem {
+                ListItem {
                     id: list_item_id,
                     list_id,
                     created_at_posix: interaction.created_at_posix,
-                    variant: MediaListItemVariant::Media(interaction.media_id),
+                    variant: ListItemVariant::Media(interaction.media_id),
                 }
             })
             .collect();

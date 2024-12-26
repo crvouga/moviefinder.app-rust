@@ -1,6 +1,6 @@
 use crate::{
     core::pagination::{Paginated, Pagination},
-    list::list_item::MediaListItem,
+    list::list_item::ListItem,
     media::interaction::interaction_name::InteractionName,
     user::user_id::UserId,
 };
@@ -13,5 +13,5 @@ pub trait MediaInteractionListItemDb: Send + Sync {
         pagination: Pagination,
         user_id: UserId,
         interaction_name: InteractionName,
-    ) -> Result<Paginated<MediaListItem>, crate::core::error::Error>;
+    ) -> Result<Paginated<ListItem>, crate::core::error::Error>;
 }

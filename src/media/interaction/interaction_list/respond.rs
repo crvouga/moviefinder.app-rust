@@ -7,8 +7,8 @@ use crate::{
     },
     ctx::Ctx,
     list::{
-        list_item::MediaListItem,
-        list_screen::{self, list_screen_db::MediaListScreenDb},
+        list_item::ListItem,
+        list_screen::{self, list_screen_db::ListScreenDb},
         list_section::ListSection,
     },
     req::Req,
@@ -41,12 +41,12 @@ pub async fn respond(
 }
 
 #[async_trait]
-impl MediaListScreenDb<MediaInteractionList> for Ctx {
+impl ListScreenDb<MediaInteractionList> for Ctx {
     async fn find_list_items(
         &self,
         pagination: Pagination,
         list: MediaInteractionList,
-    ) -> Result<Paginated<MediaListItem>, crate::core::error::Error> {
+    ) -> Result<Paginated<ListItem>, crate::core::error::Error> {
         self.media_interaction_list_item_db
             .find_by_user_id_and_interaction_name(pagination, list.user_id, list.interaction_name)
             .await

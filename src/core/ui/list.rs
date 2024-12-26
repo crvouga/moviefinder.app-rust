@@ -1,16 +1,16 @@
 use crate::core::html::{button, div, frag, p, Elem};
 
 #[derive(Default)]
-pub struct List {}
+pub struct ViewList;
 
-impl List {
+impl ViewList {
     pub fn view(self) -> Elem {
         div().class("w-full flex flex-col")
     }
 }
 
 #[derive(Default)]
-pub struct ListItem {
+pub struct ViewListItem {
     art: Option<Box<dyn FnOnce(String) -> Elem>>,
     title: String,
     #[allow(dead_code)]
@@ -18,7 +18,7 @@ pub struct ListItem {
     skeleton: bool,
 }
 
-impl ListItem {
+impl ViewListItem {
     pub fn art(mut self, art: impl FnOnce(String) -> Elem + 'static) -> Self {
         self.art = Some(Box::new(art));
         self

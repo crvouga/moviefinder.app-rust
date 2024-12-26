@@ -1,22 +1,20 @@
-use super::{
-    list_id::MediaListId, list_item_id::MediaListItemId, list_item_variant::MediaListItemVariant,
-};
+use super::{list_id::ListId, list_item_id::ListItemId, list_item_variant::ListItemVariant};
 use crate::{core::posix::Posix, media::interaction::interaction_::MediaInteraction};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MediaListItem {
-    pub id: MediaListItemId,
-    pub list_id: MediaListId,
-    pub variant: MediaListItemVariant,
+pub struct ListItem {
+    pub id: ListItemId,
+    pub list_id: ListId,
+    pub variant: ListItemVariant,
     pub created_at_posix: Posix,
 }
 
-impl From<(MediaListId, MediaInteraction)> for MediaListItem {
-    fn from((list_id, interaction): (MediaListId, MediaInteraction)) -> Self {
+impl From<(ListId, MediaInteraction)> for ListItem {
+    fn from((list_id, interaction): (ListId, MediaInteraction)) -> Self {
         Self {
-            id: MediaListItemId::from_string(interaction.id.as_str()),
+            id: ListItemId::from_string(interaction.id.as_str()),
             list_id,
-            variant: MediaListItemVariant::Media(interaction.media_id),
+            variant: ListItemVariant::Media(interaction.media_id),
             created_at_posix: interaction.created_at_posix,
         }
     }

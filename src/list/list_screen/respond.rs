@@ -1,4 +1,4 @@
-use super::{list_screen_db::MediaListScreenDb, route::Route};
+use super::{list_screen_db::ListScreenDb, route::Route};
 use crate::{
     core::{
         html::{div, frag, p, Elem},
@@ -9,12 +9,12 @@ use crate::{
         ui::{
             alert::Alert,
             image::Image,
-            list::{List, ListItem},
+            list::{ViewList, ViewListItem},
             top_bar::TopBar,
         },
     },
     ctx::Ctx,
-    list::{list::MediaList, list_item::MediaListItem, list_item_variant::MediaListItemVariant},
+    list::{list::List, list_item::ListItem, list_item_variant::ListItemVariant},
     media::{media_::Media, media_db::interface::MediaQueryField, media_id::MediaId},
     req::Req,
     ui::route::AppRoute,
@@ -22,8 +22,8 @@ use crate::{
 
 use std::{fmt::Debug, vec};
 
-pub async fn respond<TList: MediaList + Debug>(
-    list_screen_db: &impl MediaListScreenDb<TList>,
+pub async fn respond<TList: List + Debug>(
+    list_screen_db: &impl ListScreenDb<TList>,
     ctx: &Ctx,
     r: &Req,
     route: &Route<TList>,
@@ -60,7 +60,7 @@ pub async fn respond<TList: MediaList + Debug>(
                 .clone()
                 .iter()
                 .filter_map(|item| match item.variant.clone() {
-                    MediaListItemVariant::Media(media_id) => Some(media_id),
+                    ListItemVariant::Media(media_id) => Some(media_id),
                 })
                 .collect::<Vec<MediaId>>();
 
@@ -97,12 +97,12 @@ pub async fn respond<TList: MediaList + Debug>(
 }
 
 #[derive(Clone, Default)]
-pub struct ViewModel<TList: MediaList> {
+pub struct ViewModel<TList: List> {
     pub list: Option<TList>,
     pub back_url: Option<String>,
 }
 
-fn to_namepsace<TList: MediaList>(list: Option<TList>) -> String {
+fn to_namepsace<TList: List>(list: Option<TList>) -> String {
     let namespace: String = list.clone().map_or("list".to_string(), |l| {
         let list = l.clone();
         let id = list.id();
@@ -112,7 +112,7 @@ fn to_namepsace<TList: MediaList>(list: Option<TList>) -> String {
     namespace
 }
 
-pub fn view<T: MediaList>(model: ViewModel<T>) -> Elem {
+pub fn view<T: List>(model: ViewModel<T>) -> Elem {
     let list = model.list.clone();
     let namespace = to_namepsace(list.clone());
     let name = list.clone().map(|l| l.name());
@@ -144,7 +144,7 @@ pub fn view<T: MediaList>(model: ViewModel<T>) -> Elem {
 
 fn view_list_items(
     namespace: &str,
-    list_items: RemoteResult<Paginated<MediaListItem>, crate::core::error::Error>,
+    list_items: RemoteResult<Paginated<ListItem>, crate::core::error::Error>,
     media: Vec<Media>,
 ) -> Elem {
     div()
@@ -152,10 +152,10 @@ fn view_list_items(
         .class("w-full flex flex-col gap-4")
         .child(match list_items {
             RemoteResult::Err(err) => Alert::error().label(&err.to_string()).view(),
-            RemoteResult::Loading => List::default().view().children(
+            RemoteResult::Loading => ViewList::default().view().children(
                 (0..5)
                     .map(|_| {
-                        ListItem::default()
+                        ViewListItem::default()
                             .title("Loading Loading Loading")
                             .art(|_| frag())
                             .skeleton(true)
@@ -163,18 +163,18 @@ fn view_list_items(
                     })
                     .collect(),
             ),
-            RemoteResult::Ok(list_items) => List::default().view().children(
+            RemoteResult::Ok(list_items) => ViewList::default().view().children(
                 list_items
                     .items
                     .into_iter()
                     .filter_map(|item| match item.variant {
-                        MediaListItemVariant::Media(media_id) => {
+                        ListItemVariant::Media(media_id) => {
                             let found = media.iter().find(|m| m.id == media_id).cloned();
                             match found {
                                 Some(media) => {
                                     let details_url = media.details_route().url();
                                     Some(
-                                        ListItem::default()
+                                        ViewListItem::default()
                                             .title(media.title)
                                             .art(move |class| {
                                                 Image::new()
@@ -187,7 +187,7 @@ fn view_list_items(
                                     )
                                 }
                                 None => Some(
-                                    ListItem::default()
+                                    ViewListItem::default()
                                         .title("...".to_owned())
                                         .art(|class| Image::new().view().class(&class))
                                         .view(),

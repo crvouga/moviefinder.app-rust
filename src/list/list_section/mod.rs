@@ -1,39 +1,39 @@
-use super::list::MediaList;
+use super::list::List;
 use crate::core::{html::Elem, ui};
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub struct ListSection<T: MediaList + 'static> {
+pub struct ListSection<T: List + 'static> {
     lists: Option<Vec<T>>,
 }
 
-impl<T: MediaList + 'static> Default for ListSection<T> {
+impl<T: List + 'static> Default for ListSection<T> {
     fn default() -> Self {
         Self { lists: None }
     }
 }
 
-impl<T: MediaList + 'static> ListSection<T> {
+impl<T: List + 'static> ListSection<T> {
     pub fn lists(mut self, lists: Option<Vec<T>>) -> Self {
         self.lists = lists;
         self
     }
 
     pub fn view(self) -> Elem {
-        ui::list::List::default()
+        ui::list::ViewList::default()
             .view()
             .id("list-section")
             .class("w-full flex flex-col")
             .children(match self.lists {
                 None => (0..6)
-                    .map(|_| ui::list::ListItem::default().skeleton(true).view())
+                    .map(|_| ui::list::ViewListItem::default().skeleton(true).view())
                     .collect(),
 
                 Some(lists) => lists
                     .into_iter()
                     .map(|list| {
                         let list = Arc::new(list);
-                        ui::list::ListItem::default()
+                        ui::list::ViewListItem::default()
                             .title(list.name())
                             .art({
                                 let list = list.clone();

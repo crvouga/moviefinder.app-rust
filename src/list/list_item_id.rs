@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::core::uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct MediaListItemId(String);
+pub struct ListItemId(String);
 
-impl MediaListItemId {
+impl ListItemId {
     pub fn from_string(id: &str) -> Self {
         Self(id.to_string())
     }
@@ -15,13 +15,13 @@ impl MediaListItemId {
     // }
 }
 
-impl Default for MediaListItemId {
+impl Default for ListItemId {
     fn default() -> Self {
-        MediaListItemId::from_string(&format!("list-item-id-{}", uuid::v4()))
+        ListItemId::from_string(&format!("list-item-id-{}", uuid::v4()))
     }
 }
 
-impl From<String> for MediaListItemId {
+impl From<String> for ListItemId {
     fn from(value: String) -> Self {
         Self::from_string(&value)
     }
