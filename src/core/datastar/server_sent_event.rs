@@ -1,4 +1,4 @@
-use crate::core::{html::Elem, http::server_sent_event::ServerSentEvent};
+use crate::core::{html::Html, http::server_sent_event::ServerSentEvent};
 
 impl ServerSentEvent {
     pub fn event_merge_fragments(&mut self) -> &mut Self {
@@ -29,7 +29,7 @@ impl ServerSentEvent {
         self.data(&format!("selector {}", selector))
     }
 
-    pub fn data_fragments(&mut self, elem: Elem) -> &mut Self {
+    pub fn data_fragments(&mut self, elem: Html) -> &mut Self {
         let rendered = elem.render();
 
         let data = format!("fragments {}", clean_html(&rendered));

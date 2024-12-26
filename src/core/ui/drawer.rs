@@ -1,18 +1,18 @@
 use children::text;
 
 use crate::core::html::*;
-use crate::core::html::{div, frag, Elem};
+use crate::core::html::{div, frag, Html};
 use crate::core::js::Js;
 
 #[derive(Default)]
 pub struct Drawer {
     model_open: String,
     initial_open: bool,
-    content: Option<Elem>,
+    content: Option<Html>,
     on_close: String,
 }
 
-impl Elem {
+impl Html {
     pub fn src_drawer_element(self) -> Self {
         self.src("./drawer-element.js")
     }
@@ -34,16 +34,16 @@ impl Drawer {
         self
     }
 
-    pub fn content(mut self, value: Elem) -> Self {
+    pub fn content(mut self, value: Html) -> Self {
         self.content = Some(value);
         self
     }
 
-    pub fn view_root() -> Elem {
+    pub fn view_root() -> Html {
         div().id("drawer-root")
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let initial_open = if self.initial_open { "true" } else { "false" };
 
         Self::view_root()
@@ -83,7 +83,7 @@ impl DrawerTitle {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         div()
             .class("text-3xl font-bold text-left w-full px-6 pt-6 pb-4")
             .child(text(&self.title))
@@ -101,7 +101,7 @@ impl DrawerBody {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         div()
             .class("text-base text-secondary font-normal text-left w-full px-6 pb-6")
             .child(text(&self.content))

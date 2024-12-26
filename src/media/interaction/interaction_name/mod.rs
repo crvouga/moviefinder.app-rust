@@ -1,4 +1,4 @@
-use crate::core::{html::Elem, random, ui::icon};
+use crate::core::{html::Html, random, ui::icon};
 use serde::{Deserialize, Serialize};
 
 pub mod postgres;
@@ -14,7 +14,7 @@ pub enum InteractionName {
 }
 
 impl InteractionName {
-    pub fn view_icon(&self, selected: bool, class: &str) -> Elem {
+    pub fn view_icon(&self, selected: bool, class: &str) -> Html {
         match (self, selected) {
             (InteractionName::Liked, true) => icon::solid::thumbs_up(class),
             (InteractionName::Liked, false) => icon::outlined::thumbs_up(class),

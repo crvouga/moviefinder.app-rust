@@ -8,7 +8,7 @@ pub struct Button {
     size: ButtonSize,
     indicator: Option<String>,
     id: Option<String>,
-    map_button: Option<Box<dyn Fn(Elem) -> Elem>>,
+    map_button: Option<Box<dyn Fn(Html) -> Html>>,
 }
 
 impl Button {
@@ -17,7 +17,7 @@ impl Button {
         self
     }
 
-    pub fn map_button(mut self, map_button: impl Fn(Elem) -> Elem + 'static) -> Self {
+    pub fn map_button(mut self, map_button: impl Fn(Html) -> Html + 'static) -> Self {
         self.map_button = Some(Box::new(map_button));
         self
     }
@@ -49,7 +49,7 @@ impl Button {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let signal_indicator = Js::dot_value(&self.indicator.clone().unwrap_or_default());
         let id = self.id.unwrap_or("".to_owned());
 
@@ -65,7 +65,7 @@ impl Button {
         .class(&self.color.to_class())
         .map(map_button)
         .type_("button")
-        .map(|e: Elem| {
+        .map(|e: Html| {
             if let Some(indicator) = self.indicator {
                 e.data_indicator(&indicator).data_attributes("aria-busy", &signal_indicator).data_attributes("disabled", &signal_indicator)
             } else {

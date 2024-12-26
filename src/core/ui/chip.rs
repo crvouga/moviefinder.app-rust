@@ -44,7 +44,7 @@ impl Chip {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let id: String = self.id.clone().to_lowercase();
         let signal_checked = if self.signal_checked.trim().is_empty() {
             "true".to_string()

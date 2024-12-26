@@ -3,7 +3,7 @@ use crate::core::html::*;
 
 use super::shared::BASE_CLASS;
 
-fn new(html: &str, class: &str) -> Elem {
+fn new(html: &str, class: &str) -> Html {
     let replaced: String = html.replace(
         "<svg ",
         &format!(
@@ -21,7 +21,7 @@ const THUMBS_UP: &str = r#"
 </svg>
 "#;
 
-pub fn thumbs_up(class: &str) -> Elem {
+pub fn thumbs_up(class: &str) -> Html {
     new(THUMBS_UP, class)
 }
 
@@ -31,7 +31,7 @@ const THUMBS_DOWN: &str = r#"
 </svg>
 "#;
 
-pub fn thumbs_down(class: &str) -> Elem {
+pub fn thumbs_down(class: &str) -> Html {
     new(THUMBS_DOWN, class)
 }
 
@@ -42,7 +42,7 @@ const EYE: &str = r#"
 </svg>
 "#;
 
-pub fn eye(class: &str) -> Elem {
+pub fn eye(class: &str) -> Html {
     new(EYE, class)
 }
 
@@ -52,6 +52,6 @@ const EYE_SLASH: &str = r#"
 </svg>
 "#;
 
-pub fn eye_slash(class: &str) -> Elem {
+pub fn eye_slash(class: &str) -> Html {
     new(EYE_SLASH, class)
 }

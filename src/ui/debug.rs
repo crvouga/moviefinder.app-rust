@@ -1,6 +1,6 @@
-use crate::core::html::{pre, unsafe_text, Elem};
+use crate::core::html::{pre, unsafe_text, Html};
 
-impl Elem {
+impl Html {
     #[allow(dead_code)]
     pub fn debug<T>(self, value: T, on: bool) -> Self
     where

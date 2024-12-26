@@ -5,12 +5,12 @@ use crate::core::html::*;
 pub struct HeadInjector {}
 
 impl HeadInjector {
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         elem("head-injector")
     }
 }
 
-impl Elem {
+impl Html {
     pub fn src_head_injector(self) -> Self {
         self
         // self.src("./head-injector-element.js")

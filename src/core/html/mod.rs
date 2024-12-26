@@ -7,28 +7,28 @@ mod escape;
 pub mod render;
 
 #[derive(Clone, Debug)]
-pub enum Elem {
+pub enum Html {
     Tag {
         tag_name: String,
         attrs: HashMap<String, String>,
-        children: Vec<Elem>,
+        children: Vec<Html>,
     },
-    Frag(Vec<Elem>),
+    Frag(Vec<Html>),
     Text(String),
 }
 
-impl Default for Elem {
+impl Default for Html {
     fn default() -> Self {
-        Elem::Frag(vec![])
+        Html::Frag(vec![])
     }
 }
 
-impl Elem {
-    pub fn map(self, f: impl FnOnce(Elem) -> Elem) -> Elem {
+impl Html {
+    pub fn map(self, f: impl FnOnce(Html) -> Html) -> Html {
         f(self)
     }
 
-    pub fn when(self, condition: bool, f: impl FnOnce(Elem) -> Elem) -> Elem {
+    pub fn when(self, condition: bool, f: impl FnOnce(Html) -> Html) -> Html {
         if condition {
             f(self)
         } else {
@@ -37,7 +37,7 @@ impl Elem {
     }
 
     pub fn tag_name(mut self, tag_name_new: &str) -> Self {
-        if let Elem::Tag {
+        if let Html::Tag {
             ref mut tag_name, ..
         } = self
         {
@@ -68,7 +68,7 @@ impl Elem {
 
         while let Some(elem) = stack.pop() {
             match elem {
-                Elem::Tag {
+                Html::Tag {
                     tag_name,
                     attrs,
                     mut children,
@@ -82,18 +82,18 @@ impl Elem {
                         stack.push(child);
                     }
 
-                    self = Elem::Tag {
+                    self = Html::Tag {
                         tag_name,
                         attrs: mapped_attrs,
                         children,
                     };
                 }
-                Elem::Frag(mut children) => {
+                Html::Frag(mut children) => {
                     for child in children.drain(..) {
                         stack.push(child);
                     }
 
-                    self = Elem::Frag(children);
+                    self = Html::Frag(children);
                 }
                 _ => {
                     self = elem;
@@ -105,118 +105,118 @@ impl Elem {
     }
 }
 
-pub fn unsafe_text(content: &str) -> Elem {
-    Elem::Text(content.to_string())
+pub fn unsafe_text(content: &str) -> Html {
+    Html::Text(content.to_string())
 }
 
-pub fn frag() -> Elem {
-    Elem::Frag(vec![])
+pub fn frag() -> Html {
+    Html::Frag(vec![])
 }
 
-pub fn elem(tag_name: &str) -> Elem {
-    Elem::Tag {
+pub fn elem(tag_name: &str) -> Html {
+    Html::Tag {
         tag_name: tag_name.to_string(),
         attrs: HashMap::new(),
         children: vec![],
     }
 }
 
-pub fn meta() -> Elem {
+pub fn meta() -> Html {
     elem("meta")
 }
 
-pub fn title() -> Elem {
+pub fn title() -> Html {
     elem("title")
 }
 
-pub fn slot(name: &str) -> Elem {
+pub fn slot(name: &str) -> Html {
     elem("slot").attr("name", name)
 }
 
-pub fn link() -> Elem {
+pub fn link() -> Html {
     elem("link")
 }
 
-pub fn script() -> Elem {
+pub fn script() -> Html {
     elem("script")
 }
 
-pub fn style() -> Elem {
+pub fn style() -> Html {
     elem("style")
 }
 
-pub fn div() -> Elem {
+pub fn div() -> Html {
     elem("div")
 }
 
-pub fn main() -> Elem {
+pub fn main() -> Html {
     elem("main")
 }
 
-pub fn code() -> Elem {
+pub fn code() -> Html {
     elem("code")
 }
 
-pub fn pre() -> Elem {
+pub fn pre() -> Html {
     elem("pre")
 }
 
-pub fn img() -> Elem {
+pub fn img() -> Html {
     elem("img")
 }
 
-pub fn form() -> Elem {
+pub fn form() -> Html {
     elem("form")
 }
 
-pub fn p() -> Elem {
+pub fn p() -> Html {
     elem("p")
 }
 
-pub fn button() -> Elem {
+pub fn button() -> Html {
     elem("button")
 }
 
-pub fn html() -> Elem {
+pub fn html() -> Html {
     elem("html")
 }
 
-pub fn head() -> Elem {
+pub fn head() -> Html {
     elem("head")
 }
 
-pub fn body() -> Elem {
+pub fn body() -> Html {
     elem("body")
 }
 
-pub fn a() -> Elem {
+pub fn a() -> Html {
     elem("a")
 }
 
-pub fn input() -> Elem {
+pub fn input() -> Html {
     elem("input")
 }
 
-pub fn label() -> Elem {
+pub fn label() -> Html {
     elem("label")
 }
 
-pub fn span() -> Elem {
+pub fn span() -> Html {
     elem("span")
 }
 
-pub fn select() -> Elem {
+pub fn select() -> Html {
     elem("select")
 }
 
-pub fn option() -> Elem {
+pub fn option() -> Html {
     elem("option")
 }
 
-pub fn fieldset() -> Elem {
+pub fn fieldset() -> Html {
     elem("fieldset")
 }
 
-pub fn legend() -> Elem {
+pub fn legend() -> Html {
     elem("legend")
 }

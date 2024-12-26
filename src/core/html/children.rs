@@ -1,14 +1,14 @@
-use super::{escape::escape, Elem};
+use super::{escape::escape, Html};
 
-pub fn text(value: &str) -> Elem {
-    Elem::Text(escape(value))
+pub fn text(value: &str) -> Html {
+    Html::Text(escape(value))
 }
 
-pub fn text_unsafe(value: &str) -> Elem {
-    Elem::Text(value.to_string())
+pub fn text_unsafe(value: &str) -> Html {
+    Html::Text(value.to_string())
 }
 
-impl Elem {
+impl Html {
     pub fn child_text(self, value: &str) -> Self {
         self.child(text(value))
     }
@@ -17,9 +17,9 @@ impl Elem {
         self.child(text_unsafe(value))
     }
 
-    pub fn children(mut self, children: Vec<Elem>) -> Self {
+    pub fn children(mut self, children: Vec<Html>) -> Self {
         match self {
-            Elem::Tag {
+            Html::Tag {
                 tag_name: _,
                 attrs: _,
                 children: ref mut children_prev,
@@ -28,17 +28,17 @@ impl Elem {
                     children_prev.push(child_new);
                 }
             }
-            Elem::Frag(ref mut children_prev) => {
+            Html::Frag(ref mut children_prev) => {
                 for child_new in children {
                     children_prev.push(child_new);
                 }
             }
-            Elem::Text(_) => (),
+            Html::Text(_) => (),
         }
         self
     }
 
-    pub fn child(self, child: Elem) -> Self {
+    pub fn child(self, child: Html) -> Self {
         self.children(vec![child])
     }
 }

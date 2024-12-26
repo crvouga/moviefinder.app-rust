@@ -1,7 +1,7 @@
 use super::interaction_form_::to_available_interactions;
 use super::interaction_form_::{self, InteractionForm};
 use super::route::Route;
-use crate::core::html::Elem;
+use crate::core::html::Html;
 use crate::core::posix::Posix;
 use crate::core::unit_of_work::uow;
 use crate::info;
@@ -121,18 +121,18 @@ fn to_form_id(media_id: &MediaId) -> String {
     format!("media-interaction-form-{}", media_id.as_str())
 }
 
-pub fn view(media_id: &MediaId, form: Option<InteractionForm>) -> Elem {
+pub fn view(media_id: &MediaId, form: Option<InteractionForm>) -> Html {
     view_icon_buttons(media_id.clone(), form).id(&to_form_id(media_id))
 }
 
-fn view_width() -> Elem {
+fn view_width() -> Html {
     div()
         .class("select-none opacity-0")
         .aria_hidden_true()
         .child_text(&"_".repeat(to_max_display_string_length()))
 }
 
-fn view_icon_buttons(media_id: MediaId, interaction_form: Option<InteractionForm>) -> Elem {
+fn view_icon_buttons(media_id: MediaId, interaction_form: Option<InteractionForm>) -> Html {
     div()
         .class("flex flex-col gap-2 pb-4")
         .child(view_width())
@@ -141,7 +141,7 @@ fn view_icon_buttons(media_id: MediaId, interaction_form: Option<InteractionForm
                 view_buttons_disabled()
                     .into_iter()
                     .take(4)
-                    .collect::<Vec<Elem>>(),
+                    .collect::<Vec<Html>>(),
             ),
 
             Some(interaction_form) => {
@@ -157,7 +157,7 @@ fn view_icon_buttons(media_id: MediaId, interaction_form: Option<InteractionForm
                                 .skip(available_interactions.len()),
                         )
                         .take(4)
-                        .collect::<Vec<Elem>>(),
+                        .collect::<Vec<Html>>(),
                 )
             }
         })
@@ -185,7 +185,7 @@ fn view_icon_button_enabled(
     action: &InteractionAction,
     name: &InteractionName,
     media_id: &MediaId,
-) -> Elem {
+) -> Html {
     view_icon_button_base(&action, &name)
         .active(is_selected(&action))
         .view()
@@ -201,14 +201,14 @@ fn view_icon_button_enabled(
         })
 }
 
-fn view_icon_button_disabled(action: &InteractionAction, name: &InteractionName) -> Elem {
+fn view_icon_button_disabled(action: &InteractionAction, name: &InteractionName) -> Html {
     view_icon_button_base(action, name)
         .disabled(true)
         .view()
         .id(&to_id(name, action, true))
 }
 
-fn view_buttons_disabled() -> Vec<Elem> {
+fn view_buttons_disabled() -> Vec<Html> {
     vec![
         (&InteractionAction::Add, &InteractionName::Seen),
         (&InteractionAction::Add, &InteractionName::NotSeen),

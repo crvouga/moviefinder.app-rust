@@ -1,6 +1,6 @@
 use crate::{
     core::{
-        html::{div, Elem},
+        html::{div, Html},
         ui::{
             button_group::{ButtonGroup, ButtonGroupMember},
             icon,
@@ -38,7 +38,7 @@ impl BottomBar {
         self.active(Active::Account)
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         div().class("w-full").child(
             ButtonGroup::default()
                 .view()

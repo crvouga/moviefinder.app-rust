@@ -1,9 +1,9 @@
-use crate::core::html::{button, div, frag, span, Elem};
+use crate::core::html::{button, div, frag, span, Html};
 
 #[derive(Default)]
 pub struct LabelledIconButton {
     text: String,
-    icon: Option<Elem>,
+    icon: Option<Html>,
     active: bool,
     disabled: bool,
     id: String,
@@ -25,7 +25,7 @@ impl LabelledIconButton {
         self
     }
 
-    pub fn icon(mut self, icon: Elem) -> Self {
+    pub fn icon(mut self, icon: Html) -> Self {
         self.icon = Some(icon);
         self
     }
@@ -35,7 +35,7 @@ impl LabelledIconButton {
         self
     }
 
-    pub fn view(&self) -> Elem {
+    pub fn view(&self) -> Html {
         button()
         .class("flex flex-col gap-1 items-center justify-center")
         .class("active:opacity-active")

@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use super::Elem;
+use super::Html;
 
-impl Elem {
+impl Html {
     pub fn render(&self) -> String {
         self.render_with_indent(0)
     }
@@ -14,7 +14,7 @@ impl Elem {
     pub fn render_with_indent(&self, indent_level: usize) -> String {
         let indent = "\t".repeat(indent_level);
         match self {
-            Elem::Tag {
+            Html::Tag {
                 tag_name,
                 attrs,
                 children,
@@ -30,13 +30,13 @@ impl Elem {
                     )
                 }
             }
-            Elem::Frag(children) => render_children(children, indent_level),
-            Elem::Text(content) => format!("{}{}\n", indent, content),
+            Html::Frag(children) => render_children(children, indent_level),
+            Html::Text(content) => format!("{}{}\n", indent, content),
         }
     }
 }
 
-fn render_children(children: &[Elem], indent_level: usize) -> String {
+fn render_children(children: &[Html], indent_level: usize) -> String {
     children
         .iter()
         .map(|child| child.render_with_indent(indent_level))

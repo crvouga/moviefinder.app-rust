@@ -1,5 +1,5 @@
 use crate::core::{
-    html::{children::text, div, label, option, select, span, Elem},
+    html::{children::text, div, label, option, select, span, Html},
     js::Js,
 };
 
@@ -12,7 +12,7 @@ pub struct Select {
     placeholder: String,
     options: Vec<SelectOption>,
     bind_error: String,
-    map_select: Option<Box<dyn Fn(Elem) -> Elem>>,
+    map_select: Option<Box<dyn Fn(Html) -> Html>>,
 }
 
 impl Select {
@@ -36,7 +36,7 @@ impl Select {
         self
     }
 
-    pub fn map_select(mut self, map_select: impl Fn(Elem) -> Elem + 'static) -> Self {
+    pub fn map_select(mut self, map_select: impl Fn(Html) -> Html + 'static) -> Self {
         self.map_select = Some(Box::new(map_select));
         self
     }
@@ -54,7 +54,7 @@ impl Select {
         format!("{}?.length > 0", self.signal_error())
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let signal_has_error = self.signal_has_error();
         let signal_error = self.signal_error();
         let map_select = self.map_select.unwrap_or_else(|| Box::new(|x| x));
@@ -124,7 +124,7 @@ impl SelectOption {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         option().value(&self.value).child(text(&self.label))
     }
 }

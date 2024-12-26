@@ -27,7 +27,7 @@ impl ResponseWriter {
     pub async fn send_screen(
         &mut self,
         r: &Req,
-        screen: Elem,
+        screen: Html,
     ) -> Result<(), crate::core::error::Error> {
         let url = ensure_leading_slash(&r.url);
 
@@ -92,7 +92,7 @@ impl ResponseWriter {
 pub struct Screen;
 
 impl Screen {
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         main()
             .id("screen")
             .class("w-full h-full flex flex-col overflow-hidden relative")
@@ -106,7 +106,7 @@ impl Screen {
     }
 }
 
-impl Elem {
+impl Html {
     pub fn preload_screen(self, _url: &str) -> Self {
         self
         // .data_on(|e| {

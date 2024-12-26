@@ -1,7 +1,7 @@
 use super::route::Route;
 use crate::{
     core::{
-        html::{form, Elem},
+        html::{form, Html},
         http::response_writer::ResponseWriter,
         ui::{
             button::Button,
@@ -50,7 +50,7 @@ pub fn view_open_logout_drawer_button() -> Button {
         .map_button(|e| e.data_on(|b| b.press_down().sse(&Route::LogoutDrawer.url())))
 }
 
-fn view_logout_drawer() -> Elem {
+fn view_logout_drawer() -> Html {
     Drawer::default()
         .model_open("signal_is_drawer_open")
         .initial_open(true)

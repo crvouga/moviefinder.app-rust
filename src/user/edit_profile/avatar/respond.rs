@@ -1,7 +1,7 @@
 use super::{form_state::FormState, route::Route};
 use crate::{
     core::{
-        html::{div, fieldset, Elem},
+        html::{div, fieldset, Html},
         http::response_writer::ResponseWriter,
         js::Js,
         random,
@@ -114,7 +114,7 @@ async fn send_form_state(
     Ok(())
 }
 
-pub fn view_fieldset(_profile: &UserProfile) -> Elem {
+pub fn view_fieldset(_profile: &UserProfile) -> Html {
     fieldset()
         .data_signal(SIGNAL_AVATAR_SEED, "''")
         .data_signal(SIGNAL_AVATAR_SEED_CAN_REDO, "false")

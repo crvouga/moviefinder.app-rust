@@ -1,6 +1,6 @@
 use crate::core::{
     dynamic_data::{DynamicData, DynamicDataBTreeMap},
-    html::{code, pre, Elem},
+    html::{code, pre, Html},
     http::{
         json_data::JsonData,
         request::Request,
@@ -329,7 +329,7 @@ impl Attr for DataOn {
     }
 }
 
-impl Elem {
+impl Html {
     pub fn src_datastar_cdn(self) -> Self {
         self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
             .type_module()
@@ -411,12 +411,12 @@ pub struct Fragments {
     sse: ServerSentEvent,
 }
 
-pub fn fragments(elem: Elem) -> Fragments {
+pub fn fragments(elem: Html) -> Fragments {
     Fragments::new(elem)
 }
 
 impl Fragments {
-    fn new(elem: Elem) -> Self {
+    fn new(elem: Html) -> Self {
         Self {
             sse: sse().event_merge_fragments().data_fragments(elem).clone(),
         }
@@ -451,7 +451,7 @@ impl Fragments {
 }
 
 impl ResponseWriter {
-    pub async fn send_fragment(&mut self, elem: Elem) -> Result<(), crate::core::error::Error> {
+    pub async fn send_fragment(&mut self, elem: Html) -> Result<(), crate::core::error::Error> {
         sse()
             .event_merge_fragments()
             .data_fragments(elem)

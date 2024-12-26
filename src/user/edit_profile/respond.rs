@@ -2,7 +2,7 @@ use super::{avatar, route::Route};
 use crate::{
     core::{
         dynamic_data::DynamicData,
-        html::{div, fieldset, form, Elem},
+        html::{div, fieldset, form, Html},
         http::response_writer::ResponseWriter,
         js::Js,
         ui::{button::Button, text_field::TextField, top_bar::TopBar},
@@ -120,7 +120,7 @@ async fn respond_failed_to_load(
     Ok(())
 }
 
-fn view_screen_root() -> Elem {
+fn view_screen_root() -> Html {
     form()
         .class("flex flex-col w-full flex-1 overflow-hidden")
         .data_signal(SIGNAL_USERNAME, "''")
@@ -151,7 +151,7 @@ pub fn view_open_edit_profile_screen_button(user_id: UserId) -> Button {
         })
 }
 
-fn view_screen(profile: UserProfile) -> Elem {
+fn view_screen(profile: UserProfile) -> Html {
     view_screen_root()
         .map(|e| {
             let route = Route::SubmittedForm {

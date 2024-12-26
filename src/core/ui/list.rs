@@ -1,17 +1,17 @@
-use crate::core::html::{button, div, frag, p, Elem};
+use crate::core::html::{button, div, frag, p, Html};
 
 #[derive(Default)]
 pub struct ViewList;
 
 impl ViewList {
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         div().class("w-full flex flex-col")
     }
 }
 
 #[derive(Default)]
 pub struct ViewListItem {
-    art: Option<Box<dyn FnOnce(String) -> Elem>>,
+    art: Option<Box<dyn FnOnce(String) -> Html>>,
     title: String,
     #[allow(dead_code)]
     subtitle: String,
@@ -19,7 +19,7 @@ pub struct ViewListItem {
 }
 
 impl ViewListItem {
-    pub fn art(mut self, art: impl FnOnce(String) -> Elem + 'static) -> Self {
+    pub fn art(mut self, art: impl FnOnce(String) -> Html + 'static) -> Self {
         self.art = Some(Box::new(art));
         self
     }
@@ -40,7 +40,7 @@ impl ViewListItem {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         const ART_CLASS: &str = "size-16 aspect-square rounded";
         let art = self.art.unwrap_or_else(|| Box::new(|_| frag()));
         button()

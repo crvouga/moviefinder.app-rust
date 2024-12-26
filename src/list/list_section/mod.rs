@@ -1,5 +1,5 @@
 use super::list::List;
-use crate::core::{html::Elem, ui};
+use crate::core::{html::Html, ui};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -19,7 +19,7 @@ impl<T: List + 'static> ListSection<T> {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         ui::list::ViewList::default()
             .view()
             .id("list-section")

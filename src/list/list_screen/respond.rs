@@ -1,7 +1,7 @@
 use super::{list_screen_db::ListScreenDb, route::Route};
 use crate::{
     core::{
-        html::{div, frag, p, Elem},
+        html::{div, frag, p, Html},
         http::response_writer::ResponseWriter,
         pagination::{Paginated, Pagination},
         query::{Query, QueryFilter, QueryOp},
@@ -112,7 +112,7 @@ fn to_namepsace<TList: List>(list: Option<TList>) -> String {
     namespace
 }
 
-pub fn view<T: List>(model: ViewModel<T>) -> Elem {
+pub fn view<T: List>(model: ViewModel<T>) -> Html {
     let list = model.list.clone();
     let namespace = to_namepsace(list.clone());
     let name = list.clone().map(|l| l.name());
@@ -146,7 +146,7 @@ fn view_list_items(
     namespace: &str,
     list_items: RemoteResult<Paginated<ListItem>, crate::core::error::Error>,
     media: Vec<Media>,
-) -> Elem {
+) -> Html {
     div()
         .id(&format!("list-items-{}", namespace))
         .class("w-full flex flex-col gap-4")

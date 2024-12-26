@@ -94,7 +94,7 @@ pub enum ViewModel {
     },
 }
 
-fn view(model: ViewModel) -> Elem {
+fn view(model: ViewModel) -> Html {
     match model {
         ViewModel::Loading => view_screen_loading(),
         ViewModel::LoggedOut => view_screen_logged_out(),
@@ -102,7 +102,7 @@ fn view(model: ViewModel) -> Elem {
     }
 }
 
-fn view_screen_loading() -> Elem {
+fn view_screen_loading() -> Html {
     div()
         .id("loading")
         .class("w-full flex-1 flex items-center justify-center flex-col")
@@ -111,7 +111,7 @@ fn view_screen_loading() -> Elem {
         .child(BottomBar::default().active_account().view())
 }
 
-fn view_screen_logged_out() -> Elem {
+fn view_screen_logged_out() -> Html {
     div()
         .id("login-cta")
         .class("w-full flex-1 flex items-center justify-center flex-col")
@@ -140,7 +140,7 @@ fn view_screen_logged_out() -> Elem {
         .child(BottomBar::default().active_account().view())
 }
 
-fn view_screen_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem {
+fn view_screen_logged_in(_account: &UserAccount, profile: &UserProfile) -> Html {
     div()
         .id("account")
         .class("w-full h-full flex-1 flex items-center justify-center flex-col overflow-hidden")
@@ -157,7 +157,7 @@ fn view_screen_logged_in(_account: &UserAccount, profile: &UserProfile) -> Elem 
         .child(BottomBar::default().active_account().view())
 }
 
-fn view_profile_header(_account: &UserAccount, profile: &UserProfile) -> Elem {
+fn view_profile_header(_account: &UserAccount, profile: &UserProfile) -> Html {
     div()
         .class("flex items-center justify-start flex-col gap-6 p-6 w-full")
         .child(

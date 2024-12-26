@@ -66,7 +66,7 @@ enum ViewModel {
 }
 
 impl ViewModel {
-    fn view_screen(&self) -> Elem {
+    fn view_screen(&self) -> Html {
         div()
             .class("flex flex-col")
             .child(self.view_top_bar())
@@ -78,7 +78,7 @@ impl ViewModel {
             )
     }
 
-    fn view_top_bar(&self) -> Elem {
+    fn view_top_bar(&self) -> Html {
         let title: &str = match self {
             ViewModel::Loading { .. } => " ",
             ViewModel::Loaded { media, .. } => &media.title,
@@ -91,7 +91,7 @@ impl ViewModel {
             .id("top-bar")
     }
 
-    fn view_backdrop(&self) -> Elem {
+    fn view_backdrop(&self) -> Html {
         let src: &str = match self {
             ViewModel::Loading { .. } => " ",
             ViewModel::Loaded { media, .. } => &media.backdrop.to_highest_res(),
@@ -108,7 +108,7 @@ impl ViewModel {
             )
     }
 
-    fn view_content(&self) -> Elem {
+    fn view_content(&self) -> Html {
         div()
             .id("content")
             .class("flex flex-col gap-4 items-center")
@@ -116,7 +116,7 @@ impl ViewModel {
             .child(self.view_content_description())
     }
 
-    fn view_content_title(&self) -> Elem {
+    fn view_content_title(&self) -> Html {
         match self {
             ViewModel::Loading { .. } => frag(),
             ViewModel::Loaded { media, .. } => div()
@@ -125,7 +125,7 @@ impl ViewModel {
         }
     }
 
-    fn view_content_description(&self) -> Elem {
+    fn view_content_description(&self) -> Html {
         match self {
             ViewModel::Loading { .. } => frag(),
             ViewModel::Loaded { media, .. } => p()

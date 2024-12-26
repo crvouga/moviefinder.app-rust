@@ -4,7 +4,7 @@ use crate::core::{html::*, ui::icon};
 pub struct TopBarRoot {}
 
 impl TopBarRoot {
-    pub fn view(&self) -> Elem {
+    pub fn view(&self) -> Html {
         div().class("flex items-center justify-center shrink-0 w-full border-b h-bar font-bold text-lg text-center truncate")
     }
 }
@@ -27,7 +27,7 @@ impl TopBar {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let back_button_elem = self
             .back_url
             .map_or(Empty::view(), |route| BackButton::new(route).view());
@@ -61,7 +61,7 @@ impl BackButton {
         }
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         button()
             .class("size-16 flex items-center justify-center")
             .aria_label("go back")
@@ -87,7 +87,7 @@ impl CancelButton {
         }
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         button()
             .class("size-16 flex items-center justify-center shrink-0")
             .class("disabled:opacity-80 disabled:cursor-not-allowed")
@@ -105,7 +105,7 @@ impl CancelButton {
 struct Title {}
 
 impl Title {
-    fn view(title: &str) -> Elem {
+    fn view(title: &str) -> Html {
         div()
             .class("flex-1 text-center flex items-center justify-center h-full truncate max-w-full")
             .child(div().class("w-full truncate").child_text(title))
@@ -115,7 +115,7 @@ impl Title {
 struct Empty {}
 
 impl Empty {
-    fn view() -> Elem {
+    fn view() -> Html {
         div().class("size-16")
     }
 }

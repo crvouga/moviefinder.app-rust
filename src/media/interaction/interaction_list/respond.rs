@@ -1,7 +1,7 @@
 use super::{list_::MediaInteractionList, route::Route};
 use crate::{
     core::{
-        html::{div, Elem},
+        html::{div, Html},
         http::response_writer::ResponseWriter,
         pagination::{Paginated, Pagination},
     },
@@ -53,7 +53,7 @@ impl ListScreenDb<MediaInteractionList> for Ctx {
     }
 }
 
-pub fn view_lists_section(user_id: UserId, lists: Option<Vec<MediaInteractionList>>) -> Elem {
+pub fn view_lists_section(user_id: UserId, lists: Option<Vec<MediaInteractionList>>) -> Html {
     div()
         .id("lists-section")
         .class("w-full flex flex-col")

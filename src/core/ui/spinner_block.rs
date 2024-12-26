@@ -1,4 +1,4 @@
-use crate::core::html::{div, frag, span, Elem};
+use crate::core::html::{div, frag, span, Html};
 
 use super::icon;
 
@@ -13,7 +13,7 @@ impl SpinnerBlock {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         div()
             .class("w-full h-full flex flex-col items-center justify-center gap-1.5")
             .child(icon::solid::spinner("size-16 animate-spin").id("spinner-block-spinner"))

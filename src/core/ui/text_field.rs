@@ -1,5 +1,5 @@
 use crate::core::{
-    html::{button, children::text, div, input, label, span, Elem},
+    html::{button, children::text, div, input, label, span, Html},
     js::Js,
 };
 
@@ -9,7 +9,7 @@ use super::icon;
 pub struct TextField {
     label: String,
     placeholder: String,
-    map_input: Option<Box<dyn Fn(Elem) -> Elem>>,
+    map_input: Option<Box<dyn Fn(Html) -> Html>>,
     bind_error: Option<String>,
 }
 
@@ -24,7 +24,7 @@ impl TextField {
         self
     }
 
-    pub fn map_input(mut self, map_input: impl Fn(Elem) -> Elem + 'static) -> Self {
+    pub fn map_input(mut self, map_input: impl Fn(Html) -> Html + 'static) -> Self {
         self.map_input = Some(Box::new(map_input));
         self
     }
@@ -42,7 +42,7 @@ impl TextField {
         self.signal_error().map(|x| format!("{}?.length > 0", x))
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let signal_has_error = self.signal_has_error();
         let signal_error = self.signal_error();
         let map_input = self.map_input.unwrap_or_else(|| Box::new(|x| x));

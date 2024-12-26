@@ -20,7 +20,7 @@ impl ButtonGroup {
     // pub fn orientation_vertical(self) -> Self {
     //     self.orientation(ButtonGroupOrientation::Vertical)
     // }
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         div()
             .class("flex items-center justify-center w-full border-t")
             .class(match self.orientation {
@@ -33,7 +33,7 @@ impl ButtonGroup {
 #[derive(Default)]
 pub struct ButtonGroupMember {
     text: String,
-    icon: Option<Elem>,
+    icon: Option<Html>,
     active: bool,
     disabled: bool,
     id: String,
@@ -55,7 +55,7 @@ impl ButtonGroupMember {
     //     self
     // }
 
-    pub fn icon(mut self, icon: Elem) -> Self {
+    pub fn icon(mut self, icon: Html) -> Self {
         self.icon = Some(icon);
         self
     }
@@ -65,7 +65,7 @@ impl ButtonGroupMember {
         self
     }
 
-    pub fn view(&self) -> Elem {
+    pub fn view(&self) -> Html {
         button()
         .class_list(
             &[

@@ -22,7 +22,7 @@ impl Alert {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         match self.variant {
             AlertVariant::Error => {
                 div()

@@ -1,6 +1,6 @@
 use super::icon;
 use crate::core::{
-    html::{button, div, unsafe_text, Elem},
+    html::{button, div, unsafe_text, Html},
     http::response_writer::ResponseWriter,
     js::Js,
 };
@@ -46,13 +46,13 @@ impl Toast {
         }
     }
 
-    pub fn view_root() -> Elem {
+    pub fn view_root() -> Html {
         div()
             .id("toast")
             .class("absolute inset-0 pointer-events-none p-6 w-full h-full z-50")
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let duration_ms = self.duration.as_millis();
         let js_close = "document.getElementById('toast-content').classList.replace('animate-slide-down', 'animate-slide-up')";
 

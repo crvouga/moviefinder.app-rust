@@ -3,7 +3,7 @@ use crate::core::html::*;
 #[derive(Default)]
 pub struct IconButton {
     label: String,
-    icon: Option<Box<dyn FnOnce(String) -> Elem>>,
+    icon: Option<Box<dyn FnOnce(String) -> Html>>,
     id: Option<String>,
     bind_disabled: Option<String>,
 }
@@ -14,7 +14,7 @@ impl IconButton {
     //     self
     // }
 
-    pub fn icon(mut self, icon: impl FnOnce(String) -> Elem + 'static) -> Self {
+    pub fn icon(mut self, icon: impl FnOnce(String) -> Html + 'static) -> Self {
         self.icon = Some(Box::new(icon));
         self
     }
@@ -29,12 +29,12 @@ impl IconButton {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let id = self.id.unwrap_or_default();
         let icon = if let Some(icon) = self.icon {
             icon("size-8".to_owned())
         } else {
-            Elem::default()
+            Html::default()
         };
 
         button()

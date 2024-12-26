@@ -1,6 +1,6 @@
 use crate::core::{
     datastar::datastar::DataOn,
-    html::{div, Elem},
+    html::{div, Html},
     ui::button::Button,
 };
 
@@ -35,7 +35,7 @@ impl BottomBarFormButtons {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let on_cancel = self.on_cancel.unwrap_or_else(|| Box::new(|d| d));
         let submit_label = self.submit_label.unwrap_or_else(|| "Submit".to_string());
         let border = self.border.unwrap_or(true);

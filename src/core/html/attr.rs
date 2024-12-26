@@ -1,9 +1,9 @@
 #![allow(dead_code)]
-use super::{escape::escape, Elem};
+use super::{escape::escape, Html};
 
-impl Elem {
+impl Html {
     pub fn attr_unsafe(mut self, name: &str, value: &str) -> Self {
-        if let Elem::Tag { ref mut attrs, .. } = self {
+        if let Html::Tag { ref mut attrs, .. } = self {
             attrs.insert(name.to_string(), value.to_string());
         }
         self
@@ -14,7 +14,7 @@ impl Elem {
     }
 
     pub fn class(mut self, value: &str) -> Self {
-        if let Elem::Tag { ref mut attrs, .. } = self {
+        if let Html::Tag { ref mut attrs, .. } = self {
             let class_existing = attrs.get("class").map_or("", |attr| attr.as_str());
 
             let class_new = if class_existing.is_empty() {

@@ -208,7 +208,7 @@ pub async fn get_feed_items(
     Ok(feed_items)
 }
 
-fn view_top_bar_root() -> Elem {
+fn view_top_bar_root() -> Html {
     TopBarRoot::default()
         .view()
         .button()
@@ -217,11 +217,11 @@ fn view_top_bar_root() -> Elem {
         .id("top-bar")
 }
 
-fn view_top_bar_loading() -> Elem {
+fn view_top_bar_loading() -> Html {
     view_top_bar_root().child(view_open_controls_button())
 }
 
-fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
+fn view_top_bar_link_root(feed_id: &FeedId) -> Html {
     view_top_bar_root().data_on(|b| {
         b.press_down().push_url(
             &feed_tags_form::route::Route::FeedTagsFormScreen {
@@ -232,17 +232,17 @@ fn view_top_bar_link_root(feed_id: &FeedId) -> Elem {
     })
 }
 
-fn view_top_bar_loading_with_link(feed_id: &FeedId) -> Elem {
+fn view_top_bar_loading_with_link(feed_id: &FeedId) -> Html {
     view_top_bar_link_root(&feed_id).child(view_open_controls_button())
 }
 
-fn view_top_bar(model: &ViewModel) -> Elem {
+fn view_top_bar(model: &ViewModel) -> Html {
     view_top_bar_link_root(&model.feed_id)
         .child(view_tags(&model))
         .child(view_open_controls_button())
 }
 
-pub fn view_screen() -> Elem {
+pub fn view_screen() -> Html {
     div()
         .id("screen")
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
@@ -251,7 +251,7 @@ pub fn view_screen() -> Elem {
         .child(view_bottom_bar())
 }
 
-fn view_open_controls_button() -> Elem {
+fn view_open_controls_button() -> Html {
     div()
         .class("absolute top-0 right-0 h-full flex items-center justify-center")
         .child(div().class("w-16 h-full from-transparent to-black bg-gradient-to-r"))
@@ -262,7 +262,7 @@ fn view_open_controls_button() -> Elem {
         )
 }
 
-fn view_tags(model: &ViewModel) -> Elem {
+fn view_tags(model: &ViewModel) -> Html {
     div()
         .id("tags")
         .class("flex flex-row gap-2 p-4 flex-1 overflow-hidden")
@@ -280,27 +280,27 @@ fn view_tags(model: &ViewModel) -> Elem {
                         .size(ChipSize::Small)
                         .view()
                 })
-                .collect::<Vec<Elem>>(),
+                .collect::<Vec<Html>>(),
         )
 }
 
-fn view_bottom_bar() -> Elem {
+fn view_bottom_bar() -> Html {
     BottomBar::default().active_home().view().id("bottom-bar")
 }
 
-fn view_swiper_root() -> Elem {
+fn view_swiper_root() -> Html {
     div().class("w-full flex-1 overflow-hidden").id("swiper")
 }
 
-fn view_swiper_loading() -> Elem {
+fn view_swiper_loading() -> Html {
     view_swiper_root().child(view_slide_content_loading())
 }
 
-fn view_swiper(model: &ViewModel) -> Elem {
+fn view_swiper(model: &ViewModel) -> Html {
     view_swiper_root().child(view_swiper_container(&model))
 }
 
-fn view_swiper_container(model: &ViewModel) -> Elem {
+fn view_swiper_container(model: &ViewModel) -> Html {
     ui::swiper::container()
         .class("h-full w-full")
         .data_signal("signal_feed_index", &(max( (model.feed.start_index as i64) - 1, 0).to_string()))
@@ -311,13 +311,13 @@ fn view_swiper_container(model: &ViewModel) -> Elem {
         .child(view_slide_bottom(&model.feed_id))
 }
 
-fn view_slide_root() -> Elem {
+fn view_slide_root() -> Html {
     ui::swiper::slide()
 }
 
 pub const BOTTOM_ID: &str = "feed-bottom";
 
-fn view_slide_bottom(feed_id: &FeedId) -> Elem {
+fn view_slide_bottom(feed_id: &FeedId) -> Html {
     view_slide_root()
         .id(BOTTOM_ID)
         .data_intersects(|b| {
@@ -331,7 +331,7 @@ fn view_slide_bottom(feed_id: &FeedId) -> Elem {
         .child(view_slide_content_loading())
 }
 
-pub fn view_slide_bottom_empty() -> Elem {
+pub fn view_slide_bottom_empty() -> Html {
     view_slide_root()
         .id(BOTTOM_ID)
         .class("w-full h-full flex items-center justify-center flex-col gap-4")
@@ -343,13 +343,13 @@ pub fn view_slide_bottom_empty() -> Elem {
         )
 }
 
-pub fn view_slide(feed_item: &FeedItem) -> Elem {
+pub fn view_slide(feed_item: &FeedItem) -> Html {
     view_slide_root()
         .attr("data-feed-index", &feed_item.to_feed_index().to_string())
         .child(view_slide_content(feed_item))
 }
 
-fn view_slide_content_loading() -> Elem {
+fn view_slide_content_loading() -> Html {
     div().class("w-full h-full flex flex-col").child(
         div().class("w-full flex-1").child(
             Image::new()
@@ -360,7 +360,7 @@ fn view_slide_content_loading() -> Elem {
     )
 }
 
-pub fn view_slide_content(feed_item: &FeedItem) -> Elem {
+pub fn view_slide_content(feed_item: &FeedItem) -> Html {
     match feed_item {
         FeedItem::Media {
             media,

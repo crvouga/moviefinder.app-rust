@@ -175,7 +175,7 @@ impl Req {
     }
 }
 
-fn view_search_input(feed_id: &FeedId) -> Elem {
+fn view_search_input(feed_id: &FeedId) -> Html {
     SearchBar::default()
         .url(
             &Route::InputtedSearch {
@@ -199,17 +199,17 @@ fn js_signal_is_checked(tag: &FeedTag) -> String {
     )
 }
 
-fn view_selected_root() -> Elem {
+fn view_selected_root() -> Html {
     div().id("selected").class(
         "flex-none flex flex-row items-center justify-start p-4 gap-2 min-h-bar flex-wrap border-b",
     )
 }
 
-fn view_selected_loading() -> Elem {
+fn view_selected_loading() -> Html {
     view_selected_root().child(div().class("text-muted").child_text("Loading..."))
 }
 
-fn view_selected(model: &ViewModel) -> Elem {
+fn view_selected(model: &ViewModel) -> Html {
     view_selected_root()
         .child(
             div()
@@ -229,7 +229,7 @@ fn view_selected(model: &ViewModel) -> Elem {
                         .data_show(&js_signal_is_checked(tag))
                         .data_on_clicked_tag(&tag.encode())
                 })
-                .collect::<Vec<Elem>>(),
+                .collect::<Vec<Html>>(),
         )
         .child(
             button()
@@ -250,7 +250,7 @@ fn view_selected(model: &ViewModel) -> Elem {
         )
 }
 
-fn view_screen(feed_id: &FeedId) -> Elem {
+fn view_screen(feed_id: &FeedId) -> Html {
     form()
         .id("screen")
         .data_signal("signal_input_value", "''")
@@ -277,7 +277,7 @@ fn view_screen(feed_id: &FeedId) -> Elem {
         )
 }
 
-impl Elem {
+impl Html {
     fn data_on_clicked_tag(self, tag_id: &str) -> Self {
         self.id(tag_id).data_on(|b| {
             b.press_down()
@@ -288,7 +288,7 @@ impl Elem {
     }
 }
 
-fn view_bottom_bar(feed_id: FeedId) -> Elem {
+fn view_bottom_bar(feed_id: FeedId) -> Html {
     BottomBarFormButtons::default()
         .on_cancel(move |e| {
             e.press_down()
@@ -298,21 +298,21 @@ fn view_bottom_bar(feed_id: FeedId) -> Elem {
         .view()
 }
 
-fn view_unselected_root() -> Elem {
+fn view_unselected_root() -> Html {
     div()
         .id("unselected")
         .class("flex-1 flex flex-col p-4 pt-5 overflow-y-auto overflow-x-hidden")
 }
 
-fn view_unselected_loading() -> Elem {
+fn view_unselected_loading() -> Html {
     view_unselected_root().child(SpinnerBlock::default().view())
 }
 
-fn view_unselected(model: &ViewModel) -> Elem {
+fn view_unselected(model: &ViewModel) -> Html {
     view_unselected_root().child(view_search_results_content(&model))
 }
 
-fn view_search_results_content(model: &ViewModel) -> Elem {
+fn view_search_results_content(model: &ViewModel) -> Html {
     if model.tags.len() == 0 {
         return div()
             .class("w-full overflow-hidden flex-1 flex items-start justify-start font-bold text-lg break-all")
@@ -324,7 +324,7 @@ fn view_search_results_content(model: &ViewModel) -> Elem {
         .child(view_search_results_frag(&model))
 }
 
-fn view_search_results_frag(model: &ViewModel) -> Elem {
+fn view_search_results_frag(model: &ViewModel) -> Html {
     frag().children(
         model
             .to_tags()
@@ -337,6 +337,6 @@ fn view_search_results_frag(model: &ViewModel) -> Elem {
                     .view()
                     .data_on_clicked_tag(&feed_tag.encode())
             })
-            .collect::<Vec<Elem>>(),
+            .collect::<Vec<Html>>(),
     )
 }

@@ -1,5 +1,5 @@
 use crate::core::{
-    html::{children::text_unsafe, frag, img, span, Elem},
+    html::{children::text_unsafe, frag, img, span, Html},
     js::Js,
 };
 
@@ -21,7 +21,7 @@ impl Avatar {
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let class = format!(
             "inline-block aspect-square flex-shrink-0 overflow-hidden rounded-full bg-white/40 {}",
             self.class,

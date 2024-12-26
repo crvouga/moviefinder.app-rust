@@ -1,7 +1,7 @@
 use super::{super::login_with_sms, route::Route};
 use crate::{
     core::{
-        html::{form, frag, Elem},
+        html::{form, frag, Html},
         http::response_writer::ResponseWriter,
         ui::drawer::{Drawer, DrawerBody, DrawerTitle},
     },
@@ -36,7 +36,7 @@ pub async fn respond(
     }
 }
 
-fn view_must_login_drawer(message: &str) -> Elem {
+fn view_must_login_drawer(message: &str) -> Html {
     Drawer::default()
         .model_open("signal_is_drawer_open")
         .initial_open(true)

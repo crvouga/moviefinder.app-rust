@@ -7,13 +7,13 @@ impl Image {
         Self {}
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         // img().class("w-full object-cover bg-neutral-700")
         elem("image-element")
     }
 }
 
-impl Elem {
+impl Html {
     pub fn src_image_element(self) -> Self {
         // self
         self.src("./image-element.js")

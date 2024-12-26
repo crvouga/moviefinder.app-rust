@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::html::{div, Elem},
+    core::html::{div, Html},
     list::{list::List, list_id::ListId, list_item_id::ListItemId, list_screen},
     media::{interaction::interaction_name::InteractionName, media_id::MediaId},
     ui::route::AppRoute,
@@ -17,7 +17,7 @@ pub struct MediaInteractionList {
 }
 
 impl List for MediaInteractionList {
-    fn view_art(&self, class: &str) -> Elem {
+    fn view_art(&self, class: &str) -> Html {
         div()
             .class("bg-gradient-to-br from-[#D38ABF] via-[#434EA9] to-[#07413A]")
             .class(class)

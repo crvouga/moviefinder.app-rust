@@ -194,7 +194,7 @@ pub async fn respond(
     }
 }
 
-fn view_screen_enter_phone(country_codes: Vec<PhoneNumberCountryCode>) -> Elem {
+fn view_screen_enter_phone(country_codes: Vec<PhoneNumberCountryCode>) -> Html {
     form()
         .class("w-full h-full flex flex-col")
         .data_signal(SIGNAL_PHONE_NUMBER, "")
@@ -257,7 +257,7 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumberCountryCode>) -> Elem {
         )
 }
 
-fn view_select_country_code_input(country_codes: Vec<PhoneNumberCountryCode>) -> Elem {
+fn view_select_country_code_input(country_codes: Vec<PhoneNumberCountryCode>) -> Html {
     let options: Vec<SelectOption> = country_codes
         .iter()
         .map(|c| {
@@ -295,7 +295,7 @@ fn view_select_country_code_input(country_codes: Vec<PhoneNumberCountryCode>) ->
         .id("country_code")
 }
 
-fn view_screen_enter_code(phone_number: &str) -> Elem {
+fn view_screen_enter_code(phone_number: &str) -> Html {
     form()
         .class("w-full h-full flex flex-col")
         .data_signal(SIGNAL_CODE, "''")

@@ -8,7 +8,7 @@ use super::icon;
 pub struct SearchBar {
     url: String,
     indicator: String,
-    input: Option<Box<dyn Fn(Elem) -> Elem>>,
+    input: Option<Box<dyn Fn(Html) -> Html>>,
 }
 
 impl SearchBar {
@@ -22,12 +22,12 @@ impl SearchBar {
         self
     }
 
-    pub fn input(mut self, input: impl Fn(Elem) -> Elem + 'static) -> Self {
+    pub fn input(mut self, input: impl Fn(Html) -> Html + 'static) -> Self {
         self.input = Some(Box::new(input));
         self
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         let map_input = self.input.unwrap_or_else(|| Box::new(|x| x));
         label()
             .class(

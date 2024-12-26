@@ -15,7 +15,7 @@ impl Root {
         Self { url }
     }
 
-    pub fn view(self) -> Elem {
+    pub fn view(self) -> Html {
         html()
         .lang("en")
         .style("background-color: #000")
