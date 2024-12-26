@@ -18,6 +18,7 @@ impl Root {
     pub fn view(self) -> Elem {
         html()
         .lang("en")
+        .style("background-color: #000")
         .child(
             head().children(vec![
                 meta().charset("UTF-8"),
@@ -26,6 +27,7 @@ impl Root {
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
                 link().rel("stylesheet").href("./output.css"),
+                // style().child_text_unsafe(include_str!("../../public/output.css")),
                 link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
                 script().src_datastar_cdn().defer(),
                 script().src_drawer_element().defer(),
