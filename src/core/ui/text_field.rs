@@ -80,7 +80,7 @@ impl TextField {
                     )
                     .child(
                         button()
-                            .type_("button")
+                            .type_button()
                             .tab_index(0)
                             .data_on(|b| {
                                 b.press_down()

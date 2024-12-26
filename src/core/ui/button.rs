@@ -64,7 +64,7 @@ impl Button {
         .class(&self.size.to_class())
         .class(&self.color.to_class())
         .map(map_button)
-        .type_("button")
+        .type_button()
         .map(|e: Html| {
             if let Some(indicator) = self.indicator {
                 e.data_indicator(&indicator).data_attributes("aria-busy", &signal_indicator).data_attributes("disabled", &signal_indicator)

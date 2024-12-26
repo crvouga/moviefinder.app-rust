@@ -10,6 +10,12 @@ impl Error {
             message: message.into(),
         }
     }
+
+    pub fn namespace(&self, namespace: &str) -> Self {
+        Error {
+            message: format!("{}: {}", namespace, self.message),
+        }
+    }
 }
 
 impl std::fmt::Display for Error {

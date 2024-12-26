@@ -44,6 +44,21 @@ impl PhoneNumber {
     }
 }
 
+pub fn add_country_code(country_code: &str, phone_number: &str) -> String {
+    let country_code = country_code.trim();
+    let phone_number = phone_number.trim();
+
+    if phone_number.starts_with("+") {
+        return phone_number.to_string();
+    }
+
+    format!(
+        "+{}{}",
+        country_code.replace("+", ""),
+        phone_number.replace("+", "")
+    )
+}
+
 pub fn ensure_country_code(
     country_codes: Vec<String>,
     country_code: &str,
@@ -88,6 +103,10 @@ mod tests {
 
     #[test]
     fn test_ensure_country_code() {
+        assert_eq!(
+            ensure_country_code(vec!["1".to_string()], "1", "4802098698"),
+            "+14802098698"
+        );
         assert_eq!(
             ensure_country_code(vec![], "1", "5555555555"),
             "+15555555555"

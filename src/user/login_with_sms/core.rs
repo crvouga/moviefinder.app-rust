@@ -7,9 +7,22 @@ use crate::{
         user_session::user_session_::UserSession,
     },
 };
+
+#[derive(Debug)]
 pub enum SendCodeError {
     InvalidPhoneNumber(String),
     Error(String),
+}
+
+impl From<interface::SendCodeError> for SendCodeError {
+    fn from(e: interface::SendCodeError) -> Self {
+        match e {
+            interface::SendCodeError::InvalidPhoneNumber => {
+                SendCodeError::InvalidPhoneNumber("Invalid phone number".to_string())
+            }
+            interface::SendCodeError::Error(err) => SendCodeError::Error(err.to_string()),
+        }
+    }
 }
 
 pub async fn send_code(ctx: &Ctx, phone_number: &str) -> Result<(), SendCodeError> {
@@ -19,22 +32,32 @@ pub async fn send_code(ctx: &Ctx, phone_number: &str) -> Result<(), SendCodeErro
         ));
     }
 
-    ctx.user_verify_sms
-        .send_code(&phone_number)
-        .await
-        .map_err(|e| match e {
-            interface::SendCodeError::InvalidPhoneNumber => {
-                SendCodeError::InvalidPhoneNumber("Invalid phone number".to_string())
-            }
-            interface::SendCodeError::Error(err) => SendCodeError::Error(err.to_string()),
-        })?;
+    ctx.user_verify_sms.send_code(&phone_number).await?;
 
     Ok(())
 }
 
+#[derive(Debug)]
 pub enum VerifyCodeError {
     InvalidCode(String),
     Error(crate::core::error::Error),
+}
+
+impl From<interface::VerifyCodeError> for VerifyCodeError {
+    fn from(e: interface::VerifyCodeError) -> Self {
+        match e {
+            interface::VerifyCodeError::WrongCode => {
+                VerifyCodeError::InvalidCode("Wrong code".to_string())
+            }
+            interface::VerifyCodeError::Error(err) => VerifyCodeError::Error(err),
+        }
+    }
+}
+
+impl From<crate::core::error::Error> for VerifyCodeError {
+    fn from(e: crate::core::error::Error) -> Self {
+        VerifyCodeError::Error(e)
+    }
 }
 
 pub async fn verify_code(
@@ -49,19 +72,13 @@ pub async fn verify_code(
 
     ctx.user_verify_sms
         .verify_code(&phone_number, &code_input)
-        .await
-        .map_err(|e| match e {
-            interface::VerifyCodeError::WrongCode => {
-                VerifyCodeError::InvalidCode("Wrong code".to_string())
-            }
-            interface::VerifyCodeError::Error(err) => VerifyCodeError::Error(err),
-        })?;
+        .await?;
 
     let existing_account = ctx
         .user_account_db
         .find_one_by_phone_number(&phone_number)
         .await
-        .map_err(VerifyCodeError::Error)?;
+        .map_err(|e| e.namespace("Existing account"))?;
 
     let account_new = existing_account.unwrap_or(UserAccount::new(phone_number.to_string()));
 
@@ -71,7 +88,7 @@ pub async fn verify_code(
         .user_profile_db
         .find_one_by_user_id(&user_id)
         .await
-        .map_err(VerifyCodeError::Error)?;
+        .map_err(|e| e.namespace("Existing profile"))?;
 
     let profile_new = existing_profile.unwrap_or(UserProfile::new(&user_id));
 
@@ -79,13 +96,13 @@ pub async fn verify_code(
         .user_session_db
         .find_by_session_id(&session_id)
         .await
-        .map_err(VerifyCodeError::Error)?;
+        .map_err(|e| e.namespace("Existing session"))?;
 
     let session_new = existing_session.unwrap_or(UserSession::new(&user_id, &session_id));
 
     transact_user_logged_in(ctx, &account_new, &profile_new, &session_new)
         .await
-        .map_err(VerifyCodeError::Error)?;
+        .map_err(|e| e.namespace("Transact user logged in"))?;
 
     Ok(())
 }

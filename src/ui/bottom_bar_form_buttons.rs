@@ -53,7 +53,7 @@ impl BottomBarFormButtons {
                     .color_gray()
                     .view()
                     .data_on(on_cancel)
-                    .type_("button")
+                    .type_button()
                     .id("bottom-bar-form-cancel-button")
                     .class("flex-1"),
             )
@@ -68,7 +68,7 @@ impl BottomBarFormButtons {
                         Some(ref indicator) => e.data_indicator(&indicator),
                         None => e,
                     })
-                    .type_("submit")
+                    .type_submit()
                     .class("flex-1"),
             )
     }

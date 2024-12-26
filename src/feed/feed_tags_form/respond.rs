@@ -233,7 +233,7 @@ fn view_selected(model: &ViewModel) -> Html {
         )
         .child(
             button()
-                .type_("button")
+                .type_button()
                 .data_show("signal_selected_tags_ids.value?.length > 0")
                 .data_on(|b| {
                     b.press_down()

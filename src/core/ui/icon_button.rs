@@ -43,7 +43,7 @@ impl IconButton {
             .class("enabled:active:opacity-active")
             .class("disabled:opacity-40 disabled:cursor-not-allowed")
             .class("rounded bg-transparent")
-            .type_("button")
+            .type_button()
             .map(|e| match self.bind_disabled {
                 Some(bind_disabled) => e.data_attributes("disabled", &bind_disabled),
                 None => e,

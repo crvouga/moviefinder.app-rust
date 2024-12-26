@@ -41,6 +41,14 @@ impl Html {
         self.attr("type", type_)
     }
 
+    pub fn type_submit(self) -> Self {
+        self.type_("submit")
+    }
+
+    pub fn type_button(self) -> Self {
+        self.type_("button")
+    }
+
     pub fn type_module(self) -> Self {
         self.type_("module")
     }

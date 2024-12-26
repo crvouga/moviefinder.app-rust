@@ -37,7 +37,8 @@ impl UserAccountDb for KeyValueDb {
         let maybe_user_id = self
             .user_id_by_phone_number
             .get::<UserId>(phone_number)
-            .await?;
+            .await
+            .unwrap_or_default();
 
         let user_id = match maybe_user_id {
             Some(id) => id,
@@ -51,7 +52,11 @@ impl UserAccountDb for KeyValueDb {
         &self,
         user_id: &UserId,
     ) -> Result<Option<UserAccount>, crate::core::error::Error> {
-        self.account_by_user_id.get(user_id.as_str()).await
+        Ok(self
+            .account_by_user_id
+            .get::<UserAccount>(user_id.as_str())
+            .await
+            .unwrap_or(None))
     }
 
     async fn put(

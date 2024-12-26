@@ -10,7 +10,7 @@ use crate::{
         html::*,
         http::response_writer::ResponseWriter,
         js::Js,
-        phone_number::{country_code::PhoneNumberCountryCode, ensure_country_code},
+        phone_number::{add_country_code, country_code::PhoneNumberCountryCode},
         ui::{
             button::Button,
             select::{Select, SelectOption},
@@ -88,16 +88,7 @@ pub async fn respond(
                 .map(|s| s.clone())
                 .unwrap_or_default();
 
-            let country_codes = ctx.phone_number_country_code_db.get_all().await;
-
-            let phone_number_input = ensure_country_code(
-                country_codes
-                    .iter()
-                    .map(|c| c.country_code.clone())
-                    .collect(),
-                &country_code_input,
-                &phone_number_input,
-            );
+            let phone_number_input = add_country_code(&country_code_input, &phone_number_input);
 
             let sent = core::send_code(ctx, &phone_number_input).await;
 
@@ -251,7 +242,7 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumberCountryCode>) -> Html {
                             .view()
                             .id("send_code")
                             .class("w-full")
-                            .type_("submit"),
+                            .type_submit(),
                     ),
                 ),
         )
@@ -351,7 +342,7 @@ fn view_screen_enter_code(phone_number: &str) -> Html {
                             .view()
                             .id("verify-code")
                             .class("w-full")
-                            .type_("submit"),
+                            .type_submit(),
                     ),
                 ),
         )

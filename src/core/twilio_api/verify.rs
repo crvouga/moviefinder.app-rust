@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
-
 use super::TwilioApi;
 use crate::core::http::method::Method;
 use crate::core::http::request::Request;
 use crate::core::url::query_params::QueryParams;
 use crate::core::url::Url;
 use crate::core::url_encoded;
+use serde::{Deserialize, Serialize};
 
 pub enum VerifyCodeError {
     WrongCode,
@@ -56,27 +55,26 @@ impl TwilioApi {
             .map_err(SendCodeError::Error)?;
 
         if response.status_code <= 299 && response.status_code >= 200 {
-            Ok(())
-        } else {
-            #[derive(Debug, Deserialize, Serialize)]
-            struct BodyError {
-                code: u16,
-            }
-
-            let body_error: BodyError = serde_json::from_slice(&response.body.clone()).unwrap();
-
-            // https://www.twilio.com/docs/api/errors/60200
-            if body_error.code == 60200 {
-                return Err(SendCodeError::InvalidPhoneNumber);
-            }
-
-            Err(SendCodeError::Error(crate::core::error::Error::new(
-                format!(
-                    "Failed to send code: {:?}",
-                    String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
-                ),
-            )))
+            return Ok(());
         }
+        #[derive(Debug, Deserialize, Serialize)]
+        struct BodyError {
+            code: u16,
+        }
+
+        let body_error: BodyError = serde_json::from_slice(&response.body.clone()).unwrap();
+
+        // https://www.twilio.com/docs/api/errors/60200
+        if body_error.code == 60200 {
+            return Err(SendCodeError::InvalidPhoneNumber);
+        }
+
+        Err(SendCodeError::Error(crate::core::error::Error::new(
+            format!(
+                "Failed to send code: {:?}",
+                String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
+            ),
+        )))
     }
 
     pub async fn verify_verify_code(
@@ -125,35 +123,41 @@ impl TwilioApi {
         if response.status_code <= 299 && response.status_code >= 200 {
             #[derive(Debug, Deserialize, Serialize)]
             struct BodyOk {
-                valid: bool,
+                valid: Option<bool>,
             }
 
-            let body_ok = serde_json::from_slice::<BodyOk>(&response.body).unwrap();
+            let body_ok: BodyOk = serde_json::from_str(&String::from_utf8_lossy(&response.body))?;
 
-            if body_ok.valid {
+            if body_ok.valid.unwrap_or_default() {
                 return Ok(());
             }
 
             return Err(VerifyCodeError::WrongCode);
-        } else {
-            #[derive(Debug, Deserialize, Serialize)]
-            struct BodyError {
-                code: u16,
-            }
-
-            let body_error: BodyError = serde_json::from_slice(&response.body.clone()).unwrap();
-
-            // https://www.twilio.com/docs/errors/60200
-            if body_error.code == 60200 {
-                return Err(VerifyCodeError::WrongCode);
-            }
-
-            Err(VerifyCodeError::Error(crate::core::error::Error::new(
-                format!(
-                    "Failed to verify code: {:?}",
-                    String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
-                ),
-            )))
         }
+
+        #[derive(Debug, Deserialize, Serialize)]
+        struct BodyError {
+            code: Option<u16>,
+        }
+
+        let body_error: BodyError = serde_json::from_str(&String::from_utf8_lossy(&response.body))?;
+
+        // https://www.twilio.com/docs/errors/60200
+        if body_error.code.unwrap_or_default() == 60200 {
+            return Err(VerifyCodeError::WrongCode);
+        }
+
+        Err(VerifyCodeError::Error(crate::core::error::Error::new(
+            format!(
+                "Failed to verify code: {:?}",
+                String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
+            ),
+        )))
+    }
+}
+
+impl From<serde_json::Error> for VerifyCodeError {
+    fn from(err: serde_json::Error) -> Self {
+        VerifyCodeError::Error(crate::core::error::Error::new(err.to_string()))
     }
 }
