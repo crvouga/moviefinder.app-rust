@@ -96,7 +96,19 @@ impl Screen {
         main()
             .id("screen")
             .class("w-full h-full flex flex-col overflow-hidden relative")
-            .data_signal_location()
+            .data_signal("signal_location", "location.pathname")
+            .data_signal("signal_loaded_screens", "[]")
+            .data_signal("signal_preteched_screens", "[]")
+            .data_on(|e| {
+                e.e("event_location_changed")
+                    .js("signal_location.value = location.pathname")
+                    .js(&Js::if_then_else(
+                        "!signal_loaded_screens.value.includes(signal_location.value)",
+                        &Js::sse("location.pathname"),
+                        "null",
+                    ))
+            })
+            .data_on(|e| e.load().js(&js_dispatch_location_changed()))
             .child(
                 SpinnerBlock::default()
                     .view()
@@ -119,22 +131,6 @@ impl Html {
         //         "null",
         //     ))
         // })
-    }
-
-    fn data_signal_location(self) -> Self {
-        self.data_signal("signal_location", "location.pathname")
-            .data_signal("signal_loaded_screens", "[]")
-            .data_signal("signal_preteched_screens", "[]")
-            .data_on(|e| {
-                e.e("event_location_changed")
-                    .js("signal_location.value = location.pathname")
-                    .js(&Js::if_then_else(
-                        "!signal_loaded_screens.value.includes(signal_location.value)",
-                        &Js::sse("location.pathname"),
-                        "null",
-                    ))
-            })
-            .data_on(|e| e.load().js(&js_dispatch_location_changed()))
     }
 }
 
