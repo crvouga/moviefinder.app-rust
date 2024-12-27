@@ -205,7 +205,7 @@ impl Ctx {
             Fake,
         }
 
-        let verify_sms_impl = if env.stage.is_local() && false {
+        let verify_sms_impl = if env.stage.is_local() {
             VerifySmsImpl::Fake
         } else {
             VerifySmsImpl::Twilio
