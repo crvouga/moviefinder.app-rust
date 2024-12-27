@@ -25,7 +25,7 @@ impl Js {
     //     format!("{} === {}", left, right)
     // }
 
-    pub fn if_then_else(condition: &str, then: &str, else_: &str) -> String {
+    pub fn ternary(condition: &str, then: &str, else_: &str) -> String {
         format!("{} ? {} : {}", condition, then, else_)
     }
 

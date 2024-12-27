@@ -99,13 +99,17 @@ impl Screen {
             .data_signal("signal_location", "location.pathname")
             .data_signal("signal_loaded_screens", "[]")
             .data_signal("signal_preteched_screens", "[]")
+            .data_signal(
+                "signal_client_id",
+                "Math.random().toString(36).substring(2)",
+            )
             .data_on(|e| {
                 e.e("event_location_changed")
                     .js("signal_location.value = location.pathname")
-                    .js(&Js::if_then_else(
-                        "!signal_loaded_screens.value.includes(signal_location.value)",
-                        &Js::sse("location.pathname"),
+                    .js(&Js::ternary(
+                        "signal_loaded_screens.value.includes(location.pathname)",
                         "null",
+                        &Js::sse("location.pathname"),
                     ))
             })
             .data_on(|e| e.load().js(&js_dispatch_location_changed()))
@@ -121,16 +125,6 @@ impl Screen {
 impl Html {
     pub fn preload_screen(self, _url: &str) -> Self {
         self
-        // .data_on(|e| {
-        //     e.load().js(&Js::if_then_else(
-        //         &format!("!signal_preteched_screens.value.includes('{}')", url),
-        //         &Js::statments(vec![
-        //             format!("signal_preteched_screens.value = Array.from(new Set(signal_preteched_screens.value.concat(['{}')))", url),
-        //             Js::sse(&Js::quote(url)),
-        //         ]),
-        //         "null",
-        //     ))
-        // })
     }
 }
 
