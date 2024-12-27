@@ -20,9 +20,8 @@ use crate::{
     },
     ctx::Ctx,
     req::Req,
-    route,
     ui::route::AppRoute,
-    user::{self, account_screen},
+    user::account_screen,
 };
 
 const SIGNAL_IS_SUBMITTING: &str = "signal_is_submitting";
@@ -176,7 +175,7 @@ pub async fn respond(
                         .await?
                         .map(|s| s.user_id);
 
-                    account_screen::redirect_to(ctx, r, w, &user_id).await?;
+                    account_screen::respond::redirect_to(ctx, r, w, &user_id).await?;
 
                     Ok(())
                 }
@@ -203,7 +202,7 @@ fn view_screen_enter_phone(country_codes: Vec<PhoneNumberCountryCode>) -> Html {
         .child(
             TopBar::default()
                 .title("Login with phone")
-                .back_url(route::Route::User(user::route::Route::AccountScreen).url())
+                .back_url(account_screen::route::Route::Screen.url())
                 .view(),
         )
         .child(

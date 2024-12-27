@@ -8,12 +8,10 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), crate::core::error::Error> {
     match route {
-        Route::AccountScreen => {
-            account_screen::respond(ctx, r, w, &r.user_id(ctx).await.ok()).await
-        }
-        Route::LoginWithSms(child) => login_with_sms::respond::respond(ctx, r, child, w).await,
-        Route::Logout(child) => logout::respond::respond(ctx, r, child, w).await,
-        Route::EditProfile(child) => edit_profile::respond::respond(ctx, r, child, w).await,
-        Route::Login(child) => login::respond::respond(ctx, r, child, w).await,
+        Route::AccountScreen(route) => account_screen::respond::respond(ctx, r, route, w).await,
+        Route::LoginWithSms(route) => login_with_sms::respond::respond(ctx, r, route, w).await,
+        Route::Logout(route) => logout::respond::respond(ctx, r, route, w).await,
+        Route::EditProfile(route) => edit_profile::respond::respond(ctx, r, route, w).await,
+        Route::Login(route) => login::respond::respond(ctx, r, route, w).await,
     }
 }

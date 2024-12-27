@@ -14,7 +14,10 @@ use crate::{
         bottom_bar_form_buttons::{BottomBarFormButtons, SIGNAL_IS_SUBMITTING},
         route::AppRoute,
     },
-    user::{self, user_id::UserId, user_profile::user_profile_::UserProfile, username::Username},
+    user::{
+        self, account_screen, user_id::UserId, user_profile::user_profile_::UserProfile,
+        username::Username,
+    },
 };
 use std::time::Duration;
 
@@ -94,7 +97,8 @@ pub async fn respond(
 
             ctx.user_profile_db.put(uow(), &profile_new).await?;
 
-            user::account_screen::redirect_to(ctx, r, w, &r.user_id(ctx).await.ok()).await?;
+            user::account_screen::respond::redirect_to(ctx, r, w, &r.user_id(ctx).await.ok())
+                .await?;
 
             w.send_toast_dark("Profile updated").await?;
 
@@ -115,7 +119,7 @@ async fn respond_failed_to_load(
     w.send_toast_dark("User not found. Try logging in again")
         .await?;
 
-    user::account_screen::redirect_to(ctx, r, w, &None).await?;
+    user::account_screen::respond::redirect_to(ctx, r, w, &None).await?;
 
     Ok(())
 }
@@ -128,7 +132,7 @@ fn view_screen_root() -> Html {
         .child_signals_json(false)
         .child(
             TopBar::default()
-                .back_url(user::route::Route::AccountScreen.url())
+                .back_url(account_screen::route::Route::Screen.url())
                 .title("Edit Profile")
                 .view(),
         )
@@ -199,7 +203,7 @@ fn view_screen(profile: UserProfile) -> Html {
             BottomBarFormButtons::default()
                 .on_cancel(|e| {
                     e.press_down()
-                        .push_url(&user::route::Route::AccountScreen.url())
+                        .push_url(&account_screen::route::Route::Screen.url())
                 })
                 .view()
                 .id("bottom-bar-form"),

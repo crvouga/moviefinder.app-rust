@@ -5,7 +5,7 @@ use crate::{
     list::{list::List, list_id::ListId, list_item_id::ListItemId, list_screen},
     media::{interaction::interaction_name::InteractionName, media_id::MediaId},
     ui::route::AppRoute,
-    user::{self, user_id::UserId},
+    user::{account_screen, user_id::UserId},
 };
 
 use super::route::Route;
@@ -41,7 +41,7 @@ impl List for MediaInteractionList {
 
     fn details_url(&self) -> String {
         Route::ListScreen(list_screen::route::Route::Screen {
-            back_url: user::route::Route::AccountScreen.url(),
+            back_url: account_screen::route::Route::Screen.url(),
             list: MediaInteractionList {
                 user_id: self.user_id.clone(),
                 interaction_name: self.interaction_name.clone(),

@@ -129,7 +129,7 @@ pub async fn respond(
     }
 }
 
-pub async fn respond_feed_screen(
+pub async fn respond_screen(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,

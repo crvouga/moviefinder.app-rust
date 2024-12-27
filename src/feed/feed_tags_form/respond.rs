@@ -69,7 +69,7 @@ pub async fn respond(
             }
             .url();
 
-            feed_screen::respond::respond_feed_screen(ctx, r, w, feed_id).await?;
+            feed_screen::respond::respond_screen(ctx, r, w, feed_id).await?;
 
             w.send_script(&Js::push_url(&url_new)).await?;
 

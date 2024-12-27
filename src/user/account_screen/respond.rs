@@ -1,9 +1,3 @@
-use children::text;
-
-use super::{
-    edit_profile, login_with_sms, logout, route::Route, user_account::user_account_::UserAccount,
-    user_id::UserId, user_profile::user_profile_::UserProfile,
-};
 use crate::{
     core::{
         html::*,
@@ -15,7 +9,29 @@ use crate::{
     media::interaction::interaction_list,
     req::Req,
     ui::{bottom_bar::BottomBar, route::AppRoute},
+    user::{
+        edit_profile, login_with_sms, logout, user_account::user_account_::UserAccount,
+        user_id::UserId, user_profile::user_profile_::UserProfile,
+    },
 };
+use children::text;
+
+use super::route::Route;
+
+pub async fn respond(
+    ctx: &Ctx,
+    r: &Req,
+    route: &Route,
+    w: &mut ResponseWriter,
+) -> Result<(), crate::core::error::Error> {
+    match route {
+        Route::Screen => {
+            respond_screen(ctx, r, w, &r.user_id(ctx).await.ok()).await?;
+
+            Ok(())
+        }
+    }
+}
 
 pub async fn redirect_to(
     ctx: &Ctx,
@@ -24,23 +40,28 @@ pub async fn redirect_to(
     user_id: &Option<UserId>,
 ) -> Result<(), crate::core::error::Error> {
     let r = Req {
-        url: Route::AccountScreen.url(),
+        url: Route::Screen.url(),
         ..r.clone()
     };
 
-    respond(ctx, &r, w, user_id).await?;
+    respond_screen(ctx, &r, w, user_id).await?;
 
     w.send_script(&Js::push_url(&r.url)).await?;
 
     Ok(())
 }
 
-pub async fn respond(
+async fn respond_screen(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
 ) -> Result<(), crate::core::error::Error> {
+    let req = &Req {
+        url: Route::Screen.url(),
+        ..r.clone()
+    };
+    let r = req;
     match user_id {
         None => w.send_screen(r, view(ViewModel::LoggedOut)).await,
 
