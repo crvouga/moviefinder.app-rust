@@ -5,7 +5,7 @@ use std::{sync::Arc, time::Duration};
 use crate::core::{error::Error, posix::Posix, unit_of_work::UnitOfWork};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum CacheResult<T> {
+pub enum Cached<T> {
     Fresh(T),
     Stale(T),
     Missing,
@@ -13,8 +13,8 @@ pub enum CacheResult<T> {
 }
 
 #[async_trait]
-pub trait CacheDb: Send + Sync {
-    async fn get_bytes(&self, now: Posix, key: &str) -> CacheResult<Vec<u8>>;
+pub trait Cache: Send + Sync {
+    async fn get_bytes(&self, now: Posix, key: &str) -> Cached<Vec<u8>>;
 
     async fn put_bytes(
         &self,
@@ -25,14 +25,15 @@ pub trait CacheDb: Send + Sync {
         value: &[u8],
     ) -> Result<(), Error>;
 
+    #[allow(dead_code)]
     async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error>;
 
-    fn namespace(&self, namespace: Vec<String>) -> Box<dyn CacheDb>;
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn Cache>;
 }
 
 #[async_trait]
-pub trait CacheDbExt: CacheDb {
-    async fn get_now<T>(&self, key: &str) -> CacheResult<T>
+pub trait CacheDbExt: Cache {
+    async fn get_now<T>(&self, key: &str) -> Cached<T>
     where
         T: DeserializeOwned + Send,
     {
@@ -52,27 +53,27 @@ pub trait CacheDbExt: CacheDb {
         self.put(uow, ttl, Posix::now(), key, value).await
     }
 
-    async fn get<T>(&self, now: Posix, key: &str) -> CacheResult<T>
+    async fn get<T>(&self, now: Posix, key: &str) -> Cached<T>
     where
         T: DeserializeOwned + Send,
     {
         let got = self.get_bytes(now, key).await;
 
         match got {
-            CacheResult::Err(e) => CacheResult::Err(e),
-            CacheResult::Missing => CacheResult::Missing,
-            CacheResult::Stale(bytes) => {
+            Cached::Err(e) => Cached::Err(e),
+            Cached::Missing => Cached::Missing,
+            Cached::Stale(bytes) => {
                 let parsed = serde_json::from_slice(&bytes).map_err(|e| Error::new(e.to_string()));
                 match parsed {
-                    Ok(value) => CacheResult::Stale(value),
-                    Err(e) => CacheResult::Err(e),
+                    Ok(value) => Cached::Stale(value),
+                    Err(e) => Cached::Err(e),
                 }
             }
-            CacheResult::Fresh(bytes) => {
+            Cached::Fresh(bytes) => {
                 let parsed = serde_json::from_slice(&bytes).map_err(|e| Error::new(e.to_string()));
                 match parsed {
-                    Ok(value) => CacheResult::Fresh(value),
-                    Err(e) => CacheResult::Err(e),
+                    Ok(value) => Cached::Fresh(value),
+                    Err(e) => Cached::Err(e),
                 }
             }
         }
@@ -97,6 +98,6 @@ pub trait CacheDbExt: CacheDb {
 }
 
 #[async_trait]
-impl<T: CacheDb + ?Sized> CacheDbExt for T {}
+impl<T: Cache + ?Sized> CacheDbExt for T {}
 
-pub type CacheDbDyn = Arc<dyn CacheDb>;
+pub type CacheDbDyn = Arc<dyn Cache>;

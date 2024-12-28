@@ -6,7 +6,7 @@ mod tests {
         core::{
             cache_db::{
                 impl_key_value_db::ImplKeyValueDb,
-                interface::{CacheDb, CacheDbExt, CacheResult},
+                interface::{Cache, CacheDbExt, Cached},
             },
             posix::Posix,
             unit_of_work::UnitOfWork,
@@ -32,7 +32,7 @@ mod tests {
     }
 
     struct Fixture {
-        pub cache_db: Box<dyn CacheDb>,
+        pub cache_db: Box<dyn Cache>,
     }
 
     async fn fixtures() -> Vec<Fixture> {
@@ -53,7 +53,7 @@ mod tests {
 
             // Because of the extension trait, we specify the type we expect from get<T>.
             let before = f.cache_db.get::<String>(Posix::now(), &item.id).await;
-            assert_eq!(before, CacheResult::Missing);
+            assert_eq!(before, Cached::Missing);
 
             let put = f
                 .cache_db
@@ -68,7 +68,7 @@ mod tests {
             assert!(put.is_ok());
 
             let after = f.cache_db.get::<String>(Posix::now(), &item.id).await;
-            assert_eq!(after, CacheResult::Fresh(item_serialized));
+            assert_eq!(after, Cached::Fresh(item_serialized));
         }
     }
 
@@ -92,13 +92,13 @@ mod tests {
             assert!(put.is_ok());
 
             let after = f.cache_db.get::<String>(Posix::now(), &item.id).await;
-            assert_eq!(after, CacheResult::Fresh(item_serialized.clone()));
+            assert_eq!(after, Cached::Fresh(item_serialized.clone()));
 
             let zap = f.cache_db.zap(uow.clone(), &item.id).await;
             assert!(zap.is_ok());
 
             let after_zap = f.cache_db.get::<String>(Posix::now(), &item.id).await;
-            assert_eq!(after_zap, CacheResult::Missing);
+            assert_eq!(after_zap, Cached::Missing);
         }
     }
 
@@ -124,13 +124,13 @@ mod tests {
             assert!(put.is_ok());
 
             let after = f.cache_db.get::<String>(now.clone(), &item.id).await;
-            assert_eq!(after, CacheResult::Fresh(item_serialized.clone()));
+            assert_eq!(after, Cached::Fresh(item_serialized.clone()));
 
             let after_ttl = f
                 .cache_db
                 .get::<String>(now.future(Duration::from_secs(2)), &item.id)
                 .await;
-            assert_eq!(after_ttl, CacheResult::Stale(item_serialized.clone()));
+            assert_eq!(after_ttl, Cached::Stale(item_serialized.clone()));
         }
     }
 }

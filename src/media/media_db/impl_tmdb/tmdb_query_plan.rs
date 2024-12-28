@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::tmdb_query_plan_item::TmdbQueryPlanItem;
 use crate::{
     core::{
@@ -22,8 +24,8 @@ impl TmdbQueryPlan {
     pub async fn execute(
         self,
         cache_db: CacheDbDyn,
-        tmdb_api: &TmdbApi,
-        tmdb_config: &TmdbConfig,
+        tmdb_api: Arc<TmdbApi>,
+        tmdb_config: Arc<TmdbConfig>,
         query: &MediaQuery,
     ) -> Result<Paginated<Media>, crate::core::error::Error> {
         let mut all_items: Vec<Media> = vec![];
@@ -31,7 +33,7 @@ impl TmdbQueryPlan {
 
         for item in self.items.iter() {
             let result = item
-                .execute(cache_db.clone(), tmdb_api, tmdb_config)
+                .execute(cache_db.clone(), tmdb_api.clone(), tmdb_config.clone())
                 .await?;
             total += result.total;
             all_items.extend(result.items);

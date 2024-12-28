@@ -1,6 +1,6 @@
 use crate::{
     core::{
-        cache_db::interface::CacheDbDyn,
+        cache_db::{cached_query::CachedQuery, interface::CacheDbDyn},
         pagination::{PageBased, Paginated},
         query::{QueryFilter, QueryOp},
         tmdb_api::{
@@ -11,6 +11,7 @@ use crate::{
             },
             TmdbApi, TMDB_PAGE_SIZE,
         },
+        unit_of_work::uow,
     },
     media::{
         genre::genre_id::GenreId,
@@ -20,7 +21,7 @@ use crate::{
         media_type::MediaType,
     },
 };
-use std::{collections::HashSet, vec};
+use std::{collections::HashSet, sync::Arc, time::Duration, vec};
 
 #[derive(Debug, Clone)]
 pub enum TmdbQueryPlanItem {
@@ -38,18 +39,37 @@ pub struct GetDiscoverMovieParams {
 impl TmdbQueryPlanItem {
     pub async fn execute(
         &self,
-        _cache_db: CacheDbDyn,
-        tmdb_api: &TmdbApi,
-        tmdb_config: &TmdbConfig,
+        cache_db: CacheDbDyn,
+        tmdb_api: Arc<TmdbApi>,
+        tmdb_config: Arc<TmdbConfig>,
     ) -> Result<Paginated<Media>, crate::core::error::Error> {
         match self {
             TmdbQueryPlanItem::GetMovieDetails { media_id } => {
-                let movie_details_response = tmdb_api
-                    .movie_details(media_id.as_str())
-                    .await
-                    .map_err(|e| crate::core::error::Error::new(e))?;
+                let media_id_owned = media_id.clone();
 
-                let movie = Media::from((tmdb_config, movie_details_response));
+                let tmdb_api_clone = Arc::clone(&tmdb_api);
+                let cache_db_clone = cache_db.clone();
+
+                let movie_details_response = CachedQuery::new()
+                    .cache_db(cache_db_clone)
+                    .key(format!("movie_details_{}", media_id.as_str()))
+                    .strategy_strictly_fresh()
+                    .ttl(Duration::from_secs(60 * 60 * 24)) // 24 hours
+                    .uow(uow())
+                    .query(move || {
+                        let tmdb_api = Arc::clone(&tmdb_api_clone);
+                        let media_id = media_id_owned.clone();
+                        async move {
+                            tmdb_api
+                                .movie_details(media_id.as_str())
+                                .await
+                                .map_err(|e| crate::core::error::Error::new(e))
+                        }
+                    })
+                    .execute()
+                    .await?;
+
+                let movie = Media::from((tmdb_config.as_ref(), movie_details_response));
 
                 Ok(Paginated {
                     items: vec![movie],
@@ -82,7 +102,7 @@ impl TmdbQueryPlanItem {
                     .clone()
                     .into_iter()
                     .flat_map(|res| res.results.unwrap_or_default())
-                    .map(|result| Media::from((tmdb_config, result)))
+                    .map(|result| Media::from((tmdb_config.as_ref(), result)))
                     .filter(|media| seen.insert(media.id.clone()))
                     .skip(offset)
                     .take(params.limit.clone())

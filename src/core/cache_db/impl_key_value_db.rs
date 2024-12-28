@@ -1,4 +1,4 @@
-use super::interface::{CacheDb, CacheResult};
+use super::interface::{Cache, Cached};
 use crate::core::{
     error::Error,
     key_value_db::interface::{KeyValueDbDyn, KeyValueDbExt},
@@ -34,17 +34,17 @@ impl ImplKeyValueDb {
 }
 
 #[async_trait]
-impl CacheDb for ImplKeyValueDb {
-    async fn get_bytes(&self, now: Posix, key: &str) -> CacheResult<Vec<u8>> {
+impl Cache for ImplKeyValueDb {
+    async fn get_bytes(&self, now: Posix, key: &str) -> Cached<Vec<u8>> {
         let got = self.entries.get::<Entry>(key).await;
 
         let maybe_entry = match got {
             Ok(entry) => entry,
-            Err(e) => return CacheResult::Err(e),
+            Err(e) => return Cached::Err(e),
         };
 
         let entry = match maybe_entry {
-            None => return CacheResult::Missing,
+            None => return Cached::Missing,
             Some(entry) => entry,
         };
 
@@ -53,10 +53,10 @@ impl CacheDb for ImplKeyValueDb {
         let is_stale = lifetime >= lifespan;
 
         if is_stale {
-            return CacheResult::Stale(entry.value);
+            return Cached::Stale(entry.value);
         }
 
-        CacheResult::Fresh(entry.value)
+        Cached::Fresh(entry.value)
     }
 
     async fn put_bytes(
@@ -81,7 +81,7 @@ impl CacheDb for ImplKeyValueDb {
         self.entries.zap(uow, key).await
     }
 
-    fn namespace(&self, namespace: Vec<String>) -> Box<dyn CacheDb> {
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn Cache> {
         let new_namespace: Vec<String> = self
             .namepsace
             .clone()

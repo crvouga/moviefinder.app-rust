@@ -38,7 +38,7 @@ impl MediaDb for Tmdb {
         &self,
         query: MediaQuery,
     ) -> Result<Paginated<Media>, crate::core::error::Error> {
-        let tmdb_config = self.tmdb_api.config().await?;
+        let tmdb_config = Arc::new(self.tmdb_api.config().await?);
 
         let query_plan: TmdbQueryPlan = query.clone().into();
 
@@ -47,7 +47,12 @@ impl MediaDb for Tmdb {
         }
 
         let result = query_plan
-            .execute(self.cache_db.clone(), &self.tmdb_api, &tmdb_config, &query)
+            .execute(
+                self.cache_db.clone(),
+                self.tmdb_api.clone(),
+                tmdb_config.clone(),
+                &query,
+            )
             .await?;
 
         Ok(result)
