@@ -72,6 +72,7 @@ impl ResponseWriter {
         if signal_loaded_screens_prev.contains(&url) {
             fragments(screen)
                 .selector(&css_selector_for_id(&url))
+                .merge_mode("outer")
                 .send(self)
                 .await?;
         } else {
