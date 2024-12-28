@@ -1,6 +1,6 @@
 use super::{
     super::{feed_::Feed, feed_id::FeedId, feed_item::FeedItem, feed_tags_form},
-    route::Route,
+    route::{self, Route},
 };
 use crate::{
     core::{
@@ -50,12 +50,6 @@ pub async fn respond(
             respond_screen_contents(ctx, r, w, &feed_id).await?;
 
             Ok(())
-        }
-
-        Route::FeedScreen { feed_id } => {
-            w.send_screen(r, view_screen()).await?;
-
-            respond_screen_contents(ctx, r, w, feed_id).await
         }
 
         Route::ChangedSlide { feed_id } => {
@@ -379,6 +373,7 @@ pub fn view_slide_content(feed_item: &FeedItem) -> Html {
                         b.press_down().push_url(
                             &media::details::route::Route::MediaDetailsScreen {
                                 media_id: media.id.clone(),
+                                back_url: route::Route::FeedScreenDefault.url(),
                             }
                             .url(),
                         )

@@ -6,10 +6,8 @@ use crate::{
         ui::{error, image::Image, top_bar::TopBar},
     },
     ctx::Ctx,
-    feed::feed_screen,
     media::{media_::Media, media_db::interface::MediaQueryField},
     req::Req,
-    ui::route::AppRoute,
 };
 
 use super::route::Route;
@@ -21,8 +19,10 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), crate::core::error::Error> {
     match route {
-        Route::MediaDetailsScreen { media_id } => {
-            let model = ViewModel::Loading;
+        Route::MediaDetailsScreen { media_id, back_url } => {
+            let model = ViewModel::Loading {
+                back_url: back_url.clone(),
+            };
 
             w.send_screen(r, model.view_screen()).await?;
 
@@ -51,7 +51,10 @@ pub async fn respond(
                 Some(media) => media,
             };
 
-            let model = ViewModel::Loaded { media };
+            let model = ViewModel::Loaded {
+                media,
+                back_url: back_url.clone(),
+            };
 
             w.send_screen(r, model.view_screen()).await?;
 
@@ -61,11 +64,18 @@ pub async fn respond(
 }
 
 enum ViewModel {
-    Loading,
-    Loaded { media: Media },
+    Loading { back_url: String },
+    Loaded { back_url: String, media: Media },
 }
 
 impl ViewModel {
+    fn bacl_url(&self) -> String {
+        match self {
+            ViewModel::Loading { back_url } => back_url.clone(),
+            ViewModel::Loaded { back_url, .. } => back_url.clone(),
+        }
+    }
+
     fn view_screen(&self) -> Html {
         div()
             .class("flex flex-col")
@@ -85,7 +95,7 @@ impl ViewModel {
         };
 
         TopBar::default()
-            .back_url(feed_screen::route::Route::FeedScreenDefault.url())
+            .back_url(self.bacl_url())
             .title(title)
             .view()
             .id("top-bar")

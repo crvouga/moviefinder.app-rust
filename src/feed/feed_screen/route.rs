@@ -6,8 +6,6 @@ use crate::feed::feed_id::FeedId;
 pub enum Route {
     FeedScreenDefault,
 
-    FeedScreen { feed_id: FeedId },
-
     IntersectedBottom { feed_id: FeedId },
 
     ChangedSlide { feed_id: FeedId },

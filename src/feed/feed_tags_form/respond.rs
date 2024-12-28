@@ -64,10 +64,7 @@ pub async fn respond(
 
             w.send_signal("signal_is_saving", "false").await?;
 
-            let url_new = feed_screen::route::Route::FeedScreen {
-                feed_id: feed_id.clone(),
-            }
-            .url();
+            let url_new = feed_screen::route::Route::FeedScreenDefault.url();
 
             feed_screen::respond::respond_screen(ctx, r, w, feed_id).await?;
 
@@ -288,11 +285,11 @@ impl Html {
     }
 }
 
-fn view_bottom_bar(feed_id: FeedId) -> Html {
+fn view_bottom_bar(_feed_id: FeedId) -> Html {
     BottomBarFormButtons::default()
         .on_cancel(move |e| {
             e.press_down()
-                .push_url(&feed_screen::route::Route::FeedScreen { feed_id }.url())
+                .push_url(&feed_screen::route::Route::FeedScreenDefault.url())
         })
         .submit_indicator("signal_is_submitting")
         .view()

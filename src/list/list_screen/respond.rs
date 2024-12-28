@@ -38,6 +38,7 @@ pub async fn respond<TList: List + Debug>(
             let model = ViewModel {
                 back_url: Some(back_url.clone()),
                 list: Some(list.clone()),
+                current_url: r.url.clone(),
             };
 
             w.send_screen(r, view(model)).await?;
@@ -88,7 +89,7 @@ pub async fn respond<TList: List + Debug>(
 
             let namespace = to_namepsace(Some(list.clone()));
 
-            w.send_fragment(view_list_items(&namespace, list_items, media))
+            w.send_fragment(view_list_items(&r.url, &namespace, list_items, media))
                 .await?;
 
             Ok(())
@@ -100,6 +101,7 @@ pub async fn respond<TList: List + Debug>(
 pub struct ViewModel<TList: List> {
     pub list: Option<TList>,
     pub back_url: Option<String>,
+    pub current_url: String,
 }
 
 fn to_namepsace<TList: List>(list: Option<TList>) -> String {
@@ -138,11 +140,17 @@ pub fn view<T: List>(model: ViewModel<T>) -> Html {
                                 .child_text(&name.unwrap_or_default()),
                         ),
                 )
-                .child(view_list_items(&namespace, RemoteResult::Loading, vec![])),
+                .child(view_list_items(
+                    model.current_url.as_str(),
+                    &namespace,
+                    RemoteResult::Loading,
+                    vec![],
+                )),
         )
 }
 
 fn view_list_items(
+    current_url: &str,
     namespace: &str,
     list_items: RemoteResult<Paginated<ListItem>, crate::core::error::Error>,
     media: Vec<Media>,
@@ -172,7 +180,8 @@ fn view_list_items(
                             let found = media.iter().find(|m| m.id == media_id).cloned();
                             match found {
                                 Some(media) => {
-                                    let details_url = media.details_route().url();
+                                    let details_url =
+                                        media.details_route(current_url.to_owned()).url();
                                     Some(
                                         ViewListItem::default()
                                             .title(media.title)
