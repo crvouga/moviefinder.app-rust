@@ -50,11 +50,11 @@ impl TmdbQueryPlanItem {
                 let tmdb_api_clone = Arc::clone(&tmdb_api);
                 let cache_db_clone = cache_db.clone();
 
-                let movie_details_response = CachedQuery::new()
+                let tmdb_movie_details = CachedQuery::new()
                     .cache_db(cache_db_clone)
                     .key(format!("movie_details_{}", media_id.as_str()))
                     .strategy_strictly_fresh()
-                    .ttl(Duration::from_secs(60 * 60 * 24)) // 24 hours
+                    .max_age(Duration::from_secs(60 * 60 * 24)) // 24 hours
                     .uow(uow())
                     .query(move || {
                         let tmdb_api = Arc::clone(&tmdb_api_clone);
@@ -67,9 +67,10 @@ impl TmdbQueryPlanItem {
                         }
                     })
                     .execute()
-                    .await?;
+                    .await
+                    .to_result()?;
 
-                let movie = Media::from((tmdb_config.as_ref(), movie_details_response));
+                let movie = Media::from((tmdb_config.as_ref(), tmdb_movie_details));
 
                 Ok(Paginated {
                     items: vec![movie],

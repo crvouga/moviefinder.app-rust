@@ -2,7 +2,7 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use super::interface::{CacheDbDyn, CacheDbExt, Cached};
 use crate::core::{error::Error, unit_of_work::UnitOfWork};
-use std::{future::Future, pin::Pin, time::Duration};
+use std::{fmt::Debug, future::Future, pin::Pin, time::Duration};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CachedQueryStrategy {
@@ -19,22 +19,21 @@ impl Default for CachedQueryStrategy {
 
 pub struct CachedQuery<T>
 where
-    T: Serialize + DeserializeOwned + Sync + Send + Clone + 'static, // Added 'static lifetime
+    T: Serialize + DeserializeOwned + Sync + Send + Clone + 'static,
 {
     uow: Option<UnitOfWork>,
     cache_db: Option<CacheDbDyn>,
-    // Updated to store a closure returning a boxed Future
     query: Option<
         Box<dyn Fn() -> Pin<Box<dyn Future<Output = Result<T, Error>> + Send>> + Send + Sync>,
     >,
     key: String,
-    ttl: Duration,
-    strategy: CachedQueryStrategy, // Fixed typo from 'stragegy' to 'strategy'
+    max_age: Duration,
+    strategy: CachedQueryStrategy,
 }
 
 impl<T> CachedQuery<T>
 where
-    T: Serialize + DeserializeOwned + Send + Sync + Clone + 'static, // Ensure 'static lifetime for futures
+    T: Serialize + DeserializeOwned + Debug + Send + Sync + Clone + 'static,
 {
     pub fn new() -> Self {
         Self {
@@ -42,7 +41,7 @@ where
             cache_db: None,
             query: None,
             key: String::new(),
-            ttl: Duration::from_secs(60),
+            max_age: Duration::from_secs(60),
             strategy: CachedQueryStrategy::default(),
         }
     }
@@ -57,7 +56,6 @@ where
         self
     }
 
-    /// Accepts an asynchronous closure that returns a `Future`.
     pub fn query<F, Fut>(mut self, query: F) -> Self
     where
         F: Fn() -> Fut + Send + Sync + 'static,
@@ -67,7 +65,6 @@ where
         self
     }
 
-    /// Optional helper method for clarity.
     pub fn query_async<F, Fut>(mut self, query: F) -> Self
     where
         F: Fn() -> Fut + Send + Sync + 'static,
@@ -82,8 +79,8 @@ where
         self
     }
 
-    pub fn ttl(mut self, ttl: Duration) -> Self {
-        self.ttl = ttl;
+    pub fn max_age(mut self, max_age: Duration) -> Self {
+        self.max_age = max_age;
         self
     }
 
@@ -97,19 +94,24 @@ where
         self
     }
 
-    /// Executes the cached query.
-    pub async fn execute(self) -> Result<T, Error> {
-        let cache_db = self
-            .cache_db
-            .ok_or_else(|| Error::new("Cache DB is not set"))?;
-        let uow = self
-            .uow
-            .ok_or_else(|| Error::new("Unit of Work is not set"))?;
-        let query = self.query.ok_or_else(|| Error::new("Query is not set"))?;
+    pub async fn execute(self) -> Cached<T> {
+        let cache_db = match self.cache_db {
+            Some(cache_db) => cache_db,
+            None => return Cached::Err(Error::new("CacheDb is not set")),
+        };
+
+        let uow = match self.uow {
+            Some(uow) => uow,
+            None => return Cached::Err(Error::new("UnitOfWork is not set")),
+        };
+
+        let query = match self.query {
+            Some(query) => query,
+            None => return Cached::Err(Error::new("Query is not set")),
+        };
 
         match self.strategy {
             CachedQueryStrategy::StaleWhileRevalidate => {
-                // Implement this strategy as needed
                 unimplemented!()
             }
 
@@ -117,14 +119,41 @@ where
                 let cached = cache_db.get_now(&self.key).await;
 
                 match cached {
-                    Cached::Fresh(value) => Ok(value),
-                    Cached::Err(e) => Err(e),
-                    Cached::Stale(_) | Cached::Missing => {
-                        let fresh_value = query().await?;
-                        cache_db
-                            .put_now(uow, self.ttl, &self.key, fresh_value.clone())
-                            .await?;
-                        Ok(fresh_value)
+                    Cached::Err(e) => Cached::Err(e),
+                    Cached::Fresh(value) => Cached::Fresh(value),
+                    Cached::Stale(_value) => {
+                        let queried = query().await;
+
+                        let fresh_value = match queried.clone() {
+                            Ok(value) => value,
+                            Err(e) => return Cached::Err(e),
+                        };
+
+                        let put = cache_db
+                            .put_now(uow, self.max_age, &self.key, fresh_value.clone())
+                            .await;
+
+                        match put {
+                            Err(e) => Cached::Err(e),
+                            Ok(_) => Cached::Fresh(fresh_value),
+                        }
+                    }
+                    Cached::Missing => {
+                        let queried = query().await;
+
+                        let fresh_value = match queried.clone() {
+                            Ok(value) => value,
+                            Err(e) => return Cached::Err(e),
+                        };
+
+                        let put = cache_db
+                            .put_now(uow, self.max_age, &self.key, fresh_value.clone())
+                            .await;
+
+                        match put {
+                            Err(e) => Cached::Err(e),
+                            Ok(_) => Cached::Fresh(fresh_value),
+                        }
                     }
                 }
             }

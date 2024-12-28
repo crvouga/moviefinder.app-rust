@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
-use std::{sync::Arc, time::Duration};
+use std::{fmt::Debug, sync::Arc, time::Duration};
 
 use crate::core::{error::Error, posix::Posix, unit_of_work::UnitOfWork};
 
@@ -10,6 +10,23 @@ pub enum Cached<T> {
     Stale(T),
     Missing,
     Err(Error),
+}
+
+impl<T> Cached<T> {
+    pub fn to_result(self) -> Result<T, Error> {
+        match self {
+            Cached::Fresh(value) => Ok(value),
+            Cached::Stale(value) => Ok(value),
+            Cached::Missing => Err(Error::new("Cache miss")),
+            Cached::Err(e) => Err(e),
+        }
+    }
+}
+
+impl<T> From<Error> for Cached<T> {
+    fn from(error: Error) -> Self {
+        Cached::Err(error)
+    }
 }
 
 #[async_trait]
@@ -35,9 +52,11 @@ pub trait Cache: Send + Sync {
 pub trait CacheDbExt: Cache {
     async fn get_now<T>(&self, key: &str) -> Cached<T>
     where
-        T: DeserializeOwned + Send,
+        T: DeserializeOwned + Send + Debug,
     {
-        self.get(Posix::now(), key).await
+        let got = self.get(Posix::now(), key).await;
+        println!("get: {}\ngot: {:?}", key, got);
+        got
     }
 
     async fn put_now<T>(
@@ -50,7 +69,9 @@ pub trait CacheDbExt: Cache {
     where
         T: Serialize + Send + Sync,
     {
-        self.put(uow, ttl, Posix::now(), key, value).await
+        let put = self.put(uow, ttl, Posix::now(), key, value).await;
+        println!("put: {}\nput: {:?}", key, put);
+        put
     }
 
     async fn get<T>(&self, now: Posix, key: &str) -> Cached<T>
