@@ -45,6 +45,6 @@ impl InteractionAction {
     }
 }
 
-pub fn to_all_interaction_actions() -> Vec<InteractionAction> {
+pub fn _to_all_interaction_actions() -> Vec<InteractionAction> {
     vec![InteractionAction::Add, InteractionAction::Retract]
 }

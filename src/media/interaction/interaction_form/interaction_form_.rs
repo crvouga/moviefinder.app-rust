@@ -1,6 +1,6 @@
 use crate::media::interaction::{
     interaction_::MediaInteraction,
-    interaction_action::{to_all_interaction_actions, InteractionAction},
+    interaction_action::{InteractionAction, _to_all_interaction_actions},
     interaction_name::{to_all_interaction_names, InteractionName},
 };
 use serde::{Deserialize, Serialize};
@@ -51,11 +51,11 @@ fn to_next_interaction_form(
 
 pub type Interaction = (InteractionName, InteractionAction);
 
-pub fn to_all_interactions() -> Vec<Interaction> {
+pub fn _to_all_interactions() -> Vec<Interaction> {
     let mut all_interaction_buttons: Vec<Interaction> = vec![];
 
     for interaction_name in to_all_interaction_names() {
-        for interaction_action in to_all_interaction_actions() {
+        for interaction_action in _to_all_interaction_actions() {
             all_interaction_buttons.push((interaction_name.clone(), interaction_action.clone()));
         }
     }
