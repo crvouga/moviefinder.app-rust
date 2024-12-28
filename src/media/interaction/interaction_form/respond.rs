@@ -1,5 +1,4 @@
-use super::interaction_form_::to_available_interactions;
-use super::interaction_form_::{self, InteractionForm};
+use super::interaction_form_::{self, to_available_interactions, InteractionForm};
 use super::route::Route;
 use crate::core::html::Html;
 use crate::core::posix::Posix;

@@ -58,7 +58,7 @@ impl ResponseWriter {
         );
 
         signal_loaded_screens_new.sort();
-
+        self.state.insert("signal_loaded_screens", url.clone());
         self.send_signal(
             "signal_loaded_screens",
             &serde_json::to_string(&signal_loaded_screens_new).unwrap_or("[]".to_owned()),
@@ -82,8 +82,6 @@ impl ResponseWriter {
                 .send(self)
                 .await?;
         }
-
-        self.state.insert("signal_loaded_screens", url);
 
         Ok(())
     }
