@@ -217,7 +217,7 @@ fn view_top_bar_loading() -> Html {
 
 fn view_top_bar_link_root(feed_id: &FeedId) -> Html {
     view_top_bar_root().data_on(|b| {
-        b.press_down().push_url(
+        b.press_up().push_url(
             &feed_tags_form::route::Route::FeedTagsFormScreen {
                 feed_id: feed_id.clone(),
             }
@@ -370,7 +370,7 @@ pub fn view_slide_content(feed_item: &FeedItem) -> Html {
                     .tab_index(0)
                     .role_button()
                     .data_on(|b| {
-                        b.press_down().push_url(
+                        b.click().push_url(
                             &media::details::route::Route::MediaDetailsScreen {
                                 media_id: media.id.clone(),
                                 back_url: route::Route::FeedScreenDefault.url(),

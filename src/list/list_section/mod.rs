@@ -42,7 +42,7 @@ impl<T: List + 'static> ListSection<T> {
                             .view()
                             .data_on({
                                 let list = list.clone();
-                                move |e| e.press_down().push_url(&list.details_url())
+                                move |e| e.press_up().push_url(&list.details_url())
                             })
                     })
                     .collect(),

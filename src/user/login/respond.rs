@@ -60,7 +60,7 @@ fn view_must_login_drawer(message: &str) -> Html {
                 .child(
                     BottomBarFormButtons::default()
                         .border(false)
-                        .on_cancel(|b| b.press_down().js("signal_is_drawer_open.value = false"))
+                        .on_cancel(|b| b.press_up().js("signal_is_drawer_open.value = false"))
                         .submit_label("Login")
                         .view(),
                 ),

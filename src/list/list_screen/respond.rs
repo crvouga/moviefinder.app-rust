@@ -192,7 +192,7 @@ fn view_list_items(
                                                     .src(media.poster.to_middle_res())
                                             })
                                             .view()
-                                            .data_on(|e| e.press_down().push_url(&details_url)),
+                                            .data_on(|e| e.press_up().push_url(&details_url)),
                                     )
                                 }
                                 None => Some(

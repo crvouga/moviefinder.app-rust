@@ -83,7 +83,7 @@ impl TextField {
                             .type_button()
                             .tab_index(0)
                             .data_on(|b| {
-                                b.press_down()
+                                b.press_up()
                                     .js("evt.target.parentNode.querySelector('input').dispatchEvent(new Event('clear'))")
                             })
                             .aria_label("clear search")

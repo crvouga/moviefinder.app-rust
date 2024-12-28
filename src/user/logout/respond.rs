@@ -47,7 +47,7 @@ pub fn view_open_logout_drawer_button() -> Button {
         .color_primary()
         .label("Logout")
         .indicator("signal_indicator_logout")
-        .map_button(|e| e.data_on(|b| b.press_down().sse(&Route::LogoutDrawer.url())))
+        .map_button(|e| e.data_on(|b| b.press_up().sse(&Route::LogoutDrawer.url())))
 }
 
 fn view_logout_drawer() -> Html {
@@ -73,7 +73,7 @@ fn view_logout_drawer() -> Html {
                 )
                 .child(
                     BottomBarFormButtons::default()
-                        .on_cancel(|b| b.press_down().js("signal_is_drawer_open.value = false"))
+                        .on_cancel(|b| b.press_up().js("signal_is_drawer_open.value = false"))
                         .border(false)
                         .submit_indicator("signal_is_submitting")
                         .submit_label("Logout")

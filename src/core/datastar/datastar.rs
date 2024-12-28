@@ -183,27 +183,29 @@ impl DataOn {
     //     }
     // }
 
-    // pub fn pointerdown(self) -> Self {
-    //     Self {
-    //         event: "pointerdown".to_string(),
-    //         modifiers: vec![],
-    //         js: vec![],
-    //     }
-    // }
+    #[allow(dead_code)]
+    pub fn pointer_down(self) -> Self {
+        Self {
+            event: "pointerdown".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
 
-    // pub fn pointerup(self) -> Self {
-    //     Self {
-    //         event: "pointerup".to_string(),
-    //         modifiers: vec![],
-    //         js: vec![],
-    //     }
-    // }
-
-    // pub fn press_up(self) -> Self {
-    //     self.click()
-    // }
+    #[allow(dead_code)]
+    pub fn pointer_up(self) -> Self {
+        Self {
+            event: "pointerup".to_string(),
+            modifiers: vec![],
+            js: vec![],
+        }
+    }
 
     pub fn press_down(self) -> Self {
+        self.pointer_down()
+    }
+
+    pub fn press_up(self) -> Self {
         self.click()
     }
 

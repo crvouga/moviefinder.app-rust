@@ -145,7 +145,7 @@ pub fn view_open_edit_profile_screen_button(user_id: UserId) -> Button {
         .indicator("signal_edit_profile_button_indicator")
         .map_button(move |e| {
             e.data_on(|b| {
-                b.press_down().push_url(
+                b.press_up().push_url(
                     &Route::Screen {
                         user_id: user_id.clone(),
                     }
@@ -202,7 +202,7 @@ fn view_screen(profile: UserProfile) -> Html {
         .child(
             BottomBarFormButtons::default()
                 .on_cancel(|e| {
-                    e.press_down()
+                    e.press_up()
                         .push_url(&account_screen::route::Route::Screen.url())
                 })
                 .view()

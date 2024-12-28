@@ -153,7 +153,7 @@ fn view_screen_logged_out() -> Html {
                         .view()
                         .id("login-button")
                         .data_on(|b| {
-                            b.press_down()
+                            b.press_up()
                                 .push_url(&login_with_sms::route::Route::ScreenPhone.url())
                         }),
                 ),
