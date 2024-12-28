@@ -23,9 +23,10 @@ impl Posix {
         Self(future)
     }
 
-    pub fn diff(&self, other: &Self) -> Duration {
-        let diff = other.0 - self.0;
-        Duration::from_secs(diff as u64)
+    pub fn diff(&self, other: &Posix) -> Duration {
+        let max = self.0.max(other.0);
+        let min = self.0.min(other.0);
+        Duration::from_secs((max - min) as u64)
     }
 
     pub fn as_i64(&self) -> i64 {

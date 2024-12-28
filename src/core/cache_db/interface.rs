@@ -36,7 +36,7 @@ pub trait Cache: Send + Sync {
     async fn put_bytes(
         &self,
         uow: UnitOfWork,
-        ttl: Duration,
+        max_age: Duration,
         now: Posix,
         key: &str,
         value: &[u8],

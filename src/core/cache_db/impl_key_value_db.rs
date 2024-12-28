@@ -11,10 +11,10 @@ use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Entry {
-    key: String,
-    value: Vec<u8>,
-    ttl: Duration,
-    inserted_at_posix: Posix,
+    key: Option<String>,
+    value: Option<Vec<u8>>,
+    max_age: Option<Duration>,
+    inserted_at_posix: Option<Posix>,
 }
 
 pub struct ImplKeyValueDb {
@@ -48,30 +48,40 @@ impl Cache for ImplKeyValueDb {
             Some(entry) => entry,
         };
 
-        let lifetime = now.diff(&entry.inserted_at_posix);
-        let lifespan = entry.ttl;
+        let inserted_at_posix = match entry.inserted_at_posix {
+            None => return Cached::Missing,
+            Some(inserted_at_posix) => inserted_at_posix,
+        };
+
+        let lifetime = now.diff(&inserted_at_posix);
+        let lifespan = entry.max_age.unwrap_or_default();
         let is_stale = lifetime >= lifespan;
 
+        let value = match entry.value {
+            None => return Cached::Missing,
+            Some(value) => value,
+        };
+
         if is_stale {
-            return Cached::Stale(entry.value);
+            return Cached::Stale(value);
         }
 
-        Cached::Fresh(entry.value)
+        Cached::Fresh(value)
     }
 
     async fn put_bytes(
         &self,
         uow: UnitOfWork,
-        ttl: Duration,
+        max_age: Duration,
         now: Posix,
         key: &str,
         value: &[u8],
     ) -> Result<(), Error> {
         let entry = Entry {
-            key: key.to_string(),
-            value: value.to_vec(),
-            ttl,
-            inserted_at_posix: now,
+            key: Some(key.to_string()),
+            value: Some(value.to_vec()),
+            max_age: Some(max_age),
+            inserted_at_posix: Some(now),
         };
 
         self.entries.put(uow, key, &entry).await

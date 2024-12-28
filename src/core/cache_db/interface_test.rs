@@ -133,4 +133,37 @@ mod tests {
             assert_eq!(after_ttl, Cached::Stale(item_serialized.clone()));
         }
     }
+
+    #[tokio::test]
+    async fn test_ttl_day() {
+        for f in fixtures().await {
+            let uow = UnitOfWork::new();
+            let item = Item::random();
+            let item_serialized = serde_json::to_string(&item).unwrap_or_default();
+
+            let now = Posix::now();
+
+            let put = f
+                .cache_db
+                .put(
+                    uow.clone(),
+                    Duration::from_secs(60 * 60 * 24),
+                    now.clone(),
+                    &item.id,
+                    &item_serialized,
+                )
+                .await;
+            assert!(put.is_ok());
+
+            let after = f.cache_db.get::<String>(now.clone(), &item.id).await;
+            assert_eq!(after, Cached::Fresh(item_serialized.clone()));
+
+            let after_ttl = f
+                .cache_db
+                .get::<String>(now.future(Duration::from_secs(60 * 60 * 2)), &item.id)
+                .await;
+
+            assert_eq!(after_ttl, Cached::Fresh(item_serialized.clone()));
+        }
+    }
 }
