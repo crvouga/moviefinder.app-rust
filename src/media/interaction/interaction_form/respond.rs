@@ -122,21 +122,11 @@ fn to_form_id(media_id: &MediaId) -> String {
 }
 
 pub fn view(media_id: &MediaId, form: Option<InteractionForm>) -> Html {
-    view_icon_buttons(media_id.clone(), form).id(&to_form_id(media_id))
-}
-
-fn view_width() -> Html {
     div()
-        .class("select-none opacity-0")
-        .aria_hidden_true()
-        .child_text(&"_".repeat(to_max_display_string_length()))
-}
-
-fn view_icon_buttons(media_id: MediaId, interaction_form: Option<InteractionForm>) -> Html {
-    div()
+        .id(&to_form_id(media_id))
         .class("flex flex-col gap-2 pb-4")
         .child(view_width())
-        .map(|e| match interaction_form {
+        .map(|e| match form {
             None => e.children(
                 view_buttons_disabled()
                     .into_iter()
@@ -161,6 +151,13 @@ fn view_icon_buttons(media_id: MediaId, interaction_form: Option<InteractionForm
                 )
             }
         })
+}
+
+fn view_width() -> Html {
+    div()
+        .class("select-none opacity-0")
+        .aria_hidden_true()
+        .child_text(&"_".repeat(to_max_display_string_length()))
 }
 
 fn is_selected(action: &InteractionAction) -> bool {
