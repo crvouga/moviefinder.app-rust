@@ -21,7 +21,7 @@ impl FeedTagsFormStateDb {
     pub fn new(logger: Arc<dyn Logger>, key_value_db: Arc<dyn KeyValueDb>) -> Self {
         Self {
             logger: logger.child("form_state_db"),
-            key_value_db: key_value_db.child(vec![
+            key_value_db: key_value_db.namespace(vec![
                 "feed".to_string(),
                 "controls".to_string(),
                 "form-state".to_string(),

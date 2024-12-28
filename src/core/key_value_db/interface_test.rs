@@ -171,7 +171,7 @@ mod tests {
             let after = f.key_value_db.get::<String>(&item.id).await;
             assert_eq!(after.unwrap(), Some(item_serialized.clone()));
 
-            let child = f.key_value_db.child(vec!["child".to_string()]);
+            let child = f.key_value_db.namespace(vec!["child".to_string()]);
             let child_item = Item::random();
             let child_item_serialized = serde_json::to_string(&child_item).unwrap_or_default();
 

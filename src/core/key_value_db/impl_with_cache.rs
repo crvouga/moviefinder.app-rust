@@ -48,10 +48,10 @@ impl KeyValueDb for WithCache {
         Ok(())
     }
 
-    fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
         Box::new(WithCache {
-            source: self.source.child(namespace.clone()).into(),
-            cache: self.cache.child(namespace).into(),
+            source: self.source.namespace(namespace.clone()).into(),
+            cache: self.cache.namespace(namespace).into(),
         })
     }
 }

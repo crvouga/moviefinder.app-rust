@@ -19,11 +19,11 @@ impl KeyValueDb {
         Self {
             session_by_session_id: key_value_db
                 .clone()
-                .child(vec!["session_by_session_id".to_string()])
+                .namespace(vec!["session_by_session_id".to_string()])
                 .into(),
 
             session_id_by_user_id: key_value_db
-                .child(vec!["session_id_by_user_id".to_string()])
+                .namespace(vec!["session_id_by_user_id".to_string()])
                 .into(),
         }
     }

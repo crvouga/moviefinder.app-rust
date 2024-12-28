@@ -86,7 +86,7 @@ impl KeyValueDb for HashMap {
         Ok(())
     }
 
-    fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
         let new_namespace: Vec<String> = self
             .namespace
             .iter()

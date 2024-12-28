@@ -15,7 +15,7 @@ pub struct KeyValueDb {
 impl KeyValueDb {
     pub fn new(key_value_db: KeyValueDbDyn) -> Self {
         Self {
-            key_value_db: key_value_db.child(vec!["feed".to_string()]).into(),
+            key_value_db: key_value_db.namespace(vec!["feed".to_string()]).into(),
         }
     }
 }

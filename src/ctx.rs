@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use crate::{
     core::{
+        cache_db::{self, interface::CacheDbDyn},
         db_conn_sql::{self, interface::DbConnSqlDyn},
         http::{self, client::HttpClientDyn},
         key_value_db::{self, interface::KeyValueDbDyn},
@@ -44,6 +45,7 @@ use std::sync::Arc;
 pub struct Ctx {
     pub log: LoggerDyn,
     pub key_value_db: KeyValueDbDyn,
+    pub cache_db: CacheDbDyn,
     pub db_conn_sql: DbConnSqlDyn,
     pub http_client: HttpClientDyn,
     pub tmdb_api: Arc<TmdbApi>,
@@ -142,12 +144,20 @@ impl Ctx {
             KeyValueDbImpl::HashMap => Arc::new(key_value_db::impl_hash_map::HashMap::new()),
         };
 
+        let cache_db: CacheDbDyn = Arc::new(cache_db::impl_key_value_db::ImplKeyValueDb::new(
+            key_value_db.clone(),
+        ));
+
         let tmdb_api = Arc::new(tmdb_api::TmdbApi::new(
             http_client.clone(),
             env.tmdb_api_read_access_token.clone(),
         ));
 
-        let media_db = Arc::new(media_db::impl_tmdb::Tmdb::new(log.noop(), tmdb_api.clone()));
+        let media_db = Arc::new(media_db::impl_tmdb::Tmdb::new(
+            log.noop(),
+            tmdb_api.clone(),
+            cache_db.clone(),
+        ));
 
         let media_interaction_db = Arc::new(
             media::interaction::interaction_db::impl_postgres::Postgres::new(db_conn_sql.clone()),
@@ -239,10 +249,11 @@ impl Ctx {
         Ctx {
             log,
             twilio_api,
+            tmdb_api,
+            cache_db,
             http_client,
             key_value_db,
             db_conn_sql,
-            tmdb_api,
             media_db,
             media_genre_db,
             media_person_db,

@@ -43,9 +43,9 @@ impl KeyValueDb for CachedPostgres {
         self.impl_with_cache.zap(uow, key).await
     }
 
-    fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
         Box::new(Self {
-            impl_with_cache: self.impl_with_cache.child(namespace.clone()),
+            impl_with_cache: self.impl_with_cache.namespace(namespace.clone()),
             impl_postgres: self.impl_postgres.clone(),
             impl_hash_map: self.impl_hash_map.clone(),
         })

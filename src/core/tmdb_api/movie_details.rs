@@ -8,7 +8,7 @@ use crate::{
 
 use super::{config::TmdbConfig, TmdbApi};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BelongsToCollection {
     pub id: i64,
     pub name: String,
@@ -16,13 +16,13 @@ pub struct BelongsToCollection {
     pub backdrop_path: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Genre {
     pub id: i64,
     pub name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ProductionCompany {
     pub id: i64,
     pub logo_path: Option<String>,
@@ -30,19 +30,19 @@ pub struct ProductionCompany {
     pub origin_country: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ProductionCountry {
     pub iso_3166_1: String,
     pub name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SpokenLanguage {
     pub iso_639_1: String,
     pub name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MovieDetails {
     pub adult: Option<bool>,
     pub backdrop_path: Option<String>,

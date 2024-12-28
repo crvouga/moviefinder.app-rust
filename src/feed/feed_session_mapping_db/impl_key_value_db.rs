@@ -18,7 +18,7 @@ impl KeyValueDb {
     pub fn new(key_value_db: KeyValueDbDyn) -> Self {
         Self {
             key_value_db: key_value_db
-                .child(vec!["session-feed-mapping".to_string()])
+                .namespace(vec!["session-feed-mapping".to_string()])
                 .into(),
         }
     }

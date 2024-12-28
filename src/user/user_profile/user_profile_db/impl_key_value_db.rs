@@ -18,11 +18,11 @@ impl KeyValueDb {
         Self {
             profile_by_user_id: key_value_db
                 .clone()
-                .child(vec!["profile_by_user_id".to_string()])
+                .namespace(vec!["profile_by_user_id".to_string()])
                 .into(),
 
             user_id_by_username: key_value_db
-                .child(vec!["user_id_by_username".to_string()])
+                .namespace(vec!["user_id_by_username".to_string()])
                 .into(),
         }
     }

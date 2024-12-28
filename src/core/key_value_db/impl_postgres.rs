@@ -218,7 +218,7 @@ impl KeyValueDb for Postgres {
     //
     // 4) child:
     //
-    fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb> {
         let namespace_new = self
             .namespace
             .iter()

@@ -23,6 +23,11 @@ impl Posix {
         Self(future)
     }
 
+    pub fn diff(&self, other: &Self) -> Duration {
+        let diff = other.0 - self.0;
+        Duration::from_secs(diff as u64)
+    }
+
     pub fn as_i64(&self) -> i64 {
         self.0
     }
@@ -31,5 +36,21 @@ impl Posix {
 impl From<i64> for Posix {
     fn from(value: i64) -> Self {
         Self(value)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub enum PosixNow {
+    #[default]
+    SystemTime,
+    Static(Posix),
+}
+
+impl PosixNow {
+    pub fn now(&self) -> Posix {
+        match self {
+            Self::Static(posix) => *posix,
+            Self::SystemTime => Posix::now(),
+        }
     }
 }

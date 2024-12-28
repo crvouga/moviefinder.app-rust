@@ -1,6 +1,9 @@
 use super::interface::{MediaDb, MediaQuery};
 use crate::{
-    core::{logger::interface::LoggerDyn, pagination::Paginated, tmdb_api::TmdbApi},
+    core::{
+        cache_db::interface::CacheDbDyn, logger::interface::LoggerDyn, pagination::Paginated,
+        tmdb_api::TmdbApi,
+    },
     info,
     media::media_::Media,
 };
@@ -12,15 +15,19 @@ pub mod tmdb_query_plan;
 pub mod tmdb_query_plan_item;
 pub struct Tmdb {
     tmdb_api: Arc<TmdbApi>,
+    cache_db: CacheDbDyn,
     logger: LoggerDyn,
 }
 
 impl Tmdb {
-    pub fn new(logger: LoggerDyn, tmdb_api: Arc<TmdbApi>) -> Tmdb {
-        let logger_new = logger.child("impl_tmdb");
+    pub fn new(logger: LoggerDyn, tmdb_api: Arc<TmdbApi>, cache_db: CacheDbDyn) -> Tmdb {
+        let logger = logger.child("impl_tmdb");
         Tmdb {
             tmdb_api,
-            logger: logger_new,
+            logger,
+            cache_db: cache_db
+                .namespace(vec!["media_db".to_string(), "tmdb_api".to_string()])
+                .into(),
         }
     }
 }
@@ -35,14 +42,12 @@ impl MediaDb for Tmdb {
 
         let query_plan: TmdbQueryPlan = query.clone().into();
 
-        info!(self.logger, "query= {:?}", query);
-        info!(self.logger, "query_plan=");
         for item in query_plan.items.iter() {
             info!(self.logger, "\t{:?}", item);
         }
 
         let result = query_plan
-            .execute(&self.tmdb_api, &tmdb_config, &query)
+            .execute(self.cache_db.clone(), &self.tmdb_api, &tmdb_config, &query)
             .await?;
 
         Ok(result)

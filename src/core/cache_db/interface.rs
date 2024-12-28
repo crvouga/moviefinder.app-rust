@@ -1,81 +1,102 @@
-use crate::core::error::Error;
+use async_trait::async_trait;
+use serde::{de::DeserializeOwned, Serialize};
+use std::{sync::Arc, time::Duration};
 
-#[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
-pub enum GetStrategy {
-    /// Use cache if available; otherwise fetch from source.
-    /// If stale is detected, optionally refresh in background.
-    CacheFirst,
-    /// Always re-fetch from the source, optionally updating the cache if successful.
-    SourceFirst,
-    /// Serve stale data if the cache is expired, while asynchronously revalidating.
-    StaleWhileRevalidate,
+use crate::core::{error::Error, posix::Posix, unit_of_work::UnitOfWork};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum CacheResult<T> {
+    Fresh(T),
+    Stale(T),
+    Missing,
+    Err(Error),
 }
 
-#[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
-pub enum PutStrategy {
-    /// Update both cache and underlying store immediately (write-through).
-    WriteThrough,
-    /// Update cache now, persist asynchronously to store (write-back).
-    WriteBack,
-    /// Bypass cache and only write to store.
-    NoCache,
-    // etc.
-}
+#[async_trait]
+pub trait CacheDb: Send + Sync {
+    async fn get_bytes(&self, now: Posix, key: &str) -> CacheResult<Vec<u8>>;
 
-#[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
-pub enum DeleteStrategy {
-    /// Remove from cache only.
-    EvictFromCache,
-    /// Remove from store only, leaving stale data in cache.
-    EvictFromStore,
-    /// Remove from both.
-    EvictAll,
-}
-
-#[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
-pub enum ClearStrategy {
-    /// Clear the cache only.
-    ClearCache,
-    /// Clear the underlying store only.
-    ClearStore,
-    /// Clear both cache and store.
-    ClearAll,
-}
-
-#[allow(dead_code)]
-pub trait CacheDb {
-    fn get_with_strategy(&self, key: &str, strategy: GetStrategy)
-        -> Result<Option<Vec<u8>>, Error>;
-
-    fn put_with_strategy(
+    async fn put_bytes(
         &self,
+        uow: UnitOfWork,
+        ttl: Duration,
+        now: Posix,
         key: &str,
         value: &[u8],
-        strategy: PutStrategy,
     ) -> Result<(), Error>;
 
-    fn delete_with_strategy(&self, key: &str, strategy: DeleteStrategy) -> Result<(), Error>;
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error>;
 
-    fn clear_with_strategy(&self, strategy: ClearStrategy) -> Result<(), Error>;
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn CacheDb>;
+}
 
-    // Optionally, keep simplified wrappers to avoid specifying a strategy every time:
-    fn get(&self, key: &str) -> Result<Option<Vec<u8>>, Error> {
-        self.get_with_strategy(key, GetStrategy::CacheFirst)
+#[async_trait]
+pub trait CacheDbExt: CacheDb {
+    async fn get_now<T>(&self, key: &str) -> CacheResult<T>
+    where
+        T: DeserializeOwned + Send,
+    {
+        self.get(Posix::now(), key).await
     }
 
-    fn put(&self, key: &str, value: &[u8]) -> Result<(), Error> {
-        self.put_with_strategy(key, value, PutStrategy::WriteThrough)
+    async fn put_now<T>(
+        &self,
+        uow: UnitOfWork,
+        ttl: Duration,
+        key: &str,
+        value: T,
+    ) -> Result<(), Error>
+    where
+        T: Serialize + Send + Sync,
+    {
+        self.put(uow, ttl, Posix::now(), key, value).await
     }
 
-    fn delete(&self, key: &str) -> Result<(), Error> {
-        self.delete_with_strategy(key, DeleteStrategy::EvictAll)
+    async fn get<T>(&self, now: Posix, key: &str) -> CacheResult<T>
+    where
+        T: DeserializeOwned + Send,
+    {
+        let got = self.get_bytes(now, key).await;
+
+        match got {
+            CacheResult::Err(e) => CacheResult::Err(e),
+            CacheResult::Missing => CacheResult::Missing,
+            CacheResult::Stale(bytes) => {
+                let parsed = serde_json::from_slice(&bytes).map_err(|e| Error::new(e.to_string()));
+                match parsed {
+                    Ok(value) => CacheResult::Stale(value),
+                    Err(e) => CacheResult::Err(e),
+                }
+            }
+            CacheResult::Fresh(bytes) => {
+                let parsed = serde_json::from_slice(&bytes).map_err(|e| Error::new(e.to_string()));
+                match parsed {
+                    Ok(value) => CacheResult::Fresh(value),
+                    Err(e) => CacheResult::Err(e),
+                }
+            }
+        }
     }
 
-    fn clear(&self) -> Result<(), Error> {
-        self.clear_with_strategy(ClearStrategy::ClearAll)
+    async fn put<T>(
+        &self,
+        uow: UnitOfWork,
+        ttl: Duration,
+        now: Posix,
+        key: &str,
+        value: T,
+    ) -> Result<(), Error>
+    where
+        T: Serialize + Send + Sync,
+    {
+        let bytes = serde_json::to_vec(&value).map_err(|e| Error::new(e.to_string()))?;
+        self.put_bytes(uow, ttl, now, key, &bytes)
+            .await
+            .map_err(|e| Error::new(e.to_string()))
     }
 }
+
+#[async_trait]
+impl<T: CacheDb + ?Sized> CacheDbExt for T {}
+
+pub type CacheDbDyn = Arc<dyn CacheDb>;

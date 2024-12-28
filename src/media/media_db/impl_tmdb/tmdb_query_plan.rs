@@ -1,6 +1,7 @@
 use super::tmdb_query_plan_item::TmdbQueryPlanItem;
 use crate::{
     core::{
+        cache_db::interface::CacheDbDyn,
         pagination::Paginated,
         query::{QueryFilter, QueryOp},
         tmdb_api::{config::TmdbConfig, TmdbApi},
@@ -20,7 +21,8 @@ pub struct TmdbQueryPlan {
 impl TmdbQueryPlan {
     pub async fn execute(
         self,
-        config: &TmdbApi,
+        cache_db: CacheDbDyn,
+        tmdb_api: &TmdbApi,
         tmdb_config: &TmdbConfig,
         query: &MediaQuery,
     ) -> Result<Paginated<Media>, crate::core::error::Error> {
@@ -28,7 +30,9 @@ impl TmdbQueryPlan {
         let mut total = 0;
 
         for item in self.items.iter() {
-            let result = item.execute(config, tmdb_config).await?;
+            let result = item
+                .execute(cache_db.clone(), tmdb_api, tmdb_config)
+                .await?;
             total += result.total;
             all_items.extend(result.items);
         }

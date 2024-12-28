@@ -9,7 +9,7 @@ pub trait KeyValueDb: Send + Sync {
     async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Error>;
     async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), Error>;
     async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error>;
-    fn child(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb>;
+    fn namespace(&self, namespace: Vec<String>) -> Box<dyn KeyValueDb>;
 }
 
 #[async_trait]
