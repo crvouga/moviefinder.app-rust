@@ -4,7 +4,6 @@ use crate::{
         dynamic_data::DynamicData,
         html::*,
         http::response_writer::ResponseWriter,
-        js::Js,
         ui::{chip::ChipSize, search_bar::SearchBar, spinner_block::SpinnerBlock},
         unit_of_work::UnitOfWork,
     },
@@ -64,11 +63,7 @@ pub async fn respond(
 
             w.send_signal("signal_is_saving", "false").await?;
 
-            let url_new = feed_screen::route::Route::FeedScreenDefault.url();
-
-            feed_screen::respond::respond_screen(ctx, r, w, feed_id).await?;
-
-            w.send_script(&Js::push_url(&url_new)).await?;
+            feed_screen::respond::redirect_to(ctx, r, w, feed_id).await?;
 
             Ok(())
         }

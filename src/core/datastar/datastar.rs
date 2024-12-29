@@ -454,11 +454,7 @@ impl Fragments {
 
 impl ResponseWriter {
     pub async fn send_fragment(&mut self, elem: Html) -> Result<(), crate::core::error::Error> {
-        sse()
-            .event_merge_fragments()
-            .data_fragments(elem)
-            .send(self)
-            .await
+        fragments(elem).send(self).await
     }
 
     pub async fn send_signals(

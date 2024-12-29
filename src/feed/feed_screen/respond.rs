@@ -9,6 +9,7 @@ use crate::{
         dynamic_data::DynamicData,
         html::*,
         http::response_writer::ResponseWriter,
+        js::Js,
         session::session_id::SessionId,
         ui::{self, chip::ChipSize, icon, image::Image, top_bar::TopBarRoot},
         unit_of_work::UnitOfWork,
@@ -123,20 +124,27 @@ pub async fn respond(
     }
 }
 
-pub async fn respond_screen(
+pub async fn redirect_to(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
     feed_id: &FeedId,
 ) -> Result<(), crate::core::error::Error> {
+    let r = &Req {
+        url: route::Route::FeedScreenDefault.url(),
+        ..r.clone()
+    };
+
     w.send_screen(r, view_screen()).await?;
 
     respond_screen_contents(ctx, r, w, feed_id).await?;
 
+    w.send_script(&Js::push_url(&r.url)).await?;
+
     Ok(())
 }
 
-pub async fn respond_screen_contents(
+async fn respond_screen_contents(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
