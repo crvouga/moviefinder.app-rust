@@ -22,10 +22,10 @@ use crate::{
 };
 use std::cmp::max;
 
-pub const LIMIT: usize = 3;
-pub struct ViewModel {
-    pub feed_id: FeedId,
-    pub feed: Feed,
+const LIMIT: usize = 3;
+struct ViewModel {
+    feed_id: FeedId,
+    feed: Feed,
 }
 
 pub async fn respond(
@@ -171,7 +171,7 @@ async fn respond_screen_contents(
     Ok(())
 }
 
-pub async fn put_feed(
+async fn put_feed(
     ctx: &Ctx,
     session_id: &SessionId,
     feed: &Feed,
@@ -192,7 +192,7 @@ pub async fn put_feed(
     Ok(())
 }
 
-pub async fn get_feed_items(
+async fn get_feed_items(
     ctx: &Ctx,
     feed: &Feed,
 ) -> Result<Vec<FeedItem>, crate::core::error::Error> {
@@ -244,7 +244,7 @@ fn view_top_bar(model: &ViewModel) -> Html {
         .child(view_open_controls_button())
 }
 
-pub fn view_screen() -> Html {
+fn view_screen() -> Html {
     div()
         .id("screen")
         .class("w-full flex-1 flex items-center justify-center flex-col overflow-hidden")
@@ -317,7 +317,7 @@ fn view_slide_root() -> Html {
     ui::swiper::slide()
 }
 
-pub const BOTTOM_ID: &str = "feed-bottom";
+const BOTTOM_ID: &str = "feed-bottom";
 
 fn view_slide_bottom(feed_id: &FeedId) -> Html {
     view_slide_root()
@@ -333,7 +333,7 @@ fn view_slide_bottom(feed_id: &FeedId) -> Html {
         .child(view_slide_content_loading())
 }
 
-pub fn view_slide_bottom_empty() -> Html {
+fn view_slide_bottom_empty() -> Html {
     view_slide_root()
         .id(BOTTOM_ID)
         .class("w-full h-full flex items-center justify-center flex-col gap-4")
@@ -345,7 +345,7 @@ pub fn view_slide_bottom_empty() -> Html {
         )
 }
 
-pub fn view_slide(feed_item: &FeedItem) -> Html {
+fn view_slide(feed_item: &FeedItem) -> Html {
     view_slide_root()
         .attr("data-feed-index", &feed_item.to_feed_index().to_string())
         .child(view_slide_content(feed_item))
@@ -362,7 +362,7 @@ fn view_slide_content_loading() -> Html {
     )
 }
 
-pub fn view_slide_content(feed_item: &FeedItem) -> Html {
+fn view_slide_content(feed_item: &FeedItem) -> Html {
     match feed_item {
         FeedItem::Media {
             media,
