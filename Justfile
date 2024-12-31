@@ -39,9 +39,9 @@ test: #
   
 test-unit: #
   clear && STAGE=test TEST_ENV=unit cargo test
+
 test-int: #
   clear && STAGE=test TEST_ENV=int cargo test
-
 
 cloc: #
   npx cloc src

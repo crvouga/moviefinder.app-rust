@@ -125,7 +125,7 @@ impl Ctx {
         let key_value_db_impl = if env.test_env.is_unit() {
             KeyValueDbImpl::HashMap
         } else {
-            KeyValueDbImpl::Postgres
+            KeyValueDbImpl::CachedPostgres
         };
 
         info!(log, "key value db impl: {:?}", key_value_db_impl);
