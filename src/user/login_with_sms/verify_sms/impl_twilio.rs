@@ -16,28 +16,35 @@ impl Twilio {
 #[async_trait]
 impl VerifySms for Twilio {
     async fn send_code(&self, phone_number: &str) -> Result<(), SendCodeError> {
-        self.twilio_api
-            .verify_send_code(phone_number)
-            .await
-            .map_err(|err| match err {
-                twilio_api::verify::SendCodeError::InvalidPhoneNumber => {
-                    SendCodeError::InvalidPhoneNumber
-                }
-                twilio_api::verify::SendCodeError::Error(err) => SendCodeError::Error(err),
-            })?;
-
+        self.twilio_api.verify_send_code(phone_number).await?;
         Ok(())
     }
 
     async fn verify_code(&self, phone_number: &str, code: &str) -> Result<(), VerifyCodeError> {
         self.twilio_api
             .verify_verify_code(phone_number, code)
-            .await
-            .map_err(|err| match err {
-                twilio_api::verify::VerifyCodeError::WrongCode => VerifyCodeError::WrongCode,
-                twilio_api::verify::VerifyCodeError::Error(err) => VerifyCodeError::Error(err),
-            })?;
+            .await?;
 
         Ok(())
+    }
+}
+
+impl From<twilio_api::verify::SendCodeError> for SendCodeError {
+    fn from(err: twilio_api::verify::SendCodeError) -> Self {
+        match err {
+            twilio_api::verify::SendCodeError::InvalidPhoneNumber => {
+                SendCodeError::InvalidPhoneNumber
+            }
+            twilio_api::verify::SendCodeError::Error(err) => SendCodeError::Error(err),
+        }
+    }
+}
+
+impl From<twilio_api::verify::VerifyCodeError> for VerifyCodeError {
+    fn from(err: twilio_api::verify::VerifyCodeError) -> Self {
+        match err {
+            twilio_api::verify::VerifyCodeError::WrongCode => VerifyCodeError::WrongCode,
+            twilio_api::verify::VerifyCodeError::Error(err) => VerifyCodeError::Error(err),
+        }
     }
 }
