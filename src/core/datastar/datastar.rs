@@ -98,11 +98,13 @@ impl DataIntersects {
         self
     }
 
+    #[allow(dead_code)]
     pub fn js(mut self, js: &str) -> Self {
         self.actions.push(js.to_string());
         self
     }
 
+    #[allow(dead_code)]
     pub fn once(mut self) -> Self {
         self.modifiers.push("once".to_string());
         self
@@ -155,13 +157,6 @@ impl DataOn {
     pub fn click(self) -> Self {
         Self {
             event: "click".to_string(),
-            modifiers: vec![],
-            js: vec![],
-        }
-    }
-    pub fn pop_state(self) -> Self {
-        Self {
-            event: "popstate".to_string(),
             modifiers: vec![],
             js: vec![],
         }
@@ -288,6 +283,7 @@ impl DataOn {
     //     self
     // }
 
+    #[allow(dead_code)]
     pub fn window(mut self) -> Self {
         self.modifiers.push("window".to_string());
         self
@@ -304,10 +300,6 @@ impl DataOn {
 
     pub fn push_url(self, url: &str) -> Self {
         self.js(&Js::push_url(url))
-    }
-
-    pub fn push_then_sse(self, url: &str) -> Self {
-        self.push_url(url).sse(url)
     }
 }
 
@@ -341,6 +333,7 @@ impl Html {
         self.attr_unsafe(&format!("data-bind-{}", value), "")
     }
 
+    #[allow(dead_code)]
     pub fn data_ref(self, value: &str) -> Self {
         self.attr_unsafe("data-ref", value)
     }

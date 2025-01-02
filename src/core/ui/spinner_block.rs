@@ -8,7 +8,7 @@ pub struct SpinnerBlock {
 }
 
 impl SpinnerBlock {
-    pub fn label(mut self, label: &str) -> Self {
+    pub fn _label(mut self, label: &str) -> Self {
         self.label = Some(label.to_owned());
         self
     }

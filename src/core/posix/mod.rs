@@ -48,6 +48,7 @@ pub enum PosixNow {
 }
 
 impl PosixNow {
+    #[allow(dead_code)]
     pub fn now(&self) -> Posix {
         match self {
             Self::Static(posix) => *posix,

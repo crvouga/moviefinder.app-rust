@@ -65,6 +65,7 @@ where
         self
     }
 
+    #[allow(dead_code)]
     pub fn query_async<F, Fut>(mut self, query: F) -> Self
     where
         F: Fn() -> Fut + Send + Sync + 'static,
@@ -84,6 +85,7 @@ where
         self
     }
 
+    #[allow(dead_code)]
     pub fn strategy(mut self, strategy: CachedQueryStrategy) -> Self {
         self.strategy = strategy;
         self

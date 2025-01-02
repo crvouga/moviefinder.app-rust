@@ -13,8 +13,9 @@ impl Js {
         "''".to_string()
     }
 
-    pub fn statments(statments: Vec<String>) -> String {
-        statments.join("; ")
+    #[allow(dead_code)]
+    pub fn statements(statements: Vec<String>) -> String {
+        statements.join("; ")
     }
 
     // pub fn dot_length(value: &str) -> String {
@@ -42,6 +43,7 @@ impl Js {
         format!("(typeof ({}) === 'string')", value)
     }
 
+    #[allow(dead_code)]
     pub fn replace_url(url: &str) -> String {
         format!("window.history.replaceState(null, '', '{}')", url)
     }
@@ -58,6 +60,7 @@ impl Js {
         format!("document.querySelector('{}').focus()", selector)
     }
 
+    #[allow(dead_code)]
     pub fn console_log(message: &str) -> String {
         format!("console.log({})", message)
     }
