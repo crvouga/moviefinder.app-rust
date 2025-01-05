@@ -5,7 +5,7 @@ pub struct TopBarRoot {}
 
 impl TopBarRoot {
     pub fn view(&self) -> Html {
-        div().class("flex items-center justify-center shrink-0 w-full border-b h-bar font-bold text-lg text-center truncate")
+        div().class("flex items-center justify-center shrink-0 w-full border-b_  h-bar font-bold text-lg text-center truncate")
     }
 }
 

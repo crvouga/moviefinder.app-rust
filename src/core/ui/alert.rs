@@ -26,7 +26,7 @@ impl Alert {
         match self.variant {
             AlertVariant::Error => {
                 div()
-                .class("relative flex w-full items-center justify-start rounded border border-red-400 bg-red-800 px-4 py-3 text-white")
+                .class("relative flex w-full items-center justify-start rounded border_  border-red-400 bg-red-800 px-4 py-3 text-white")
                 .child_text(&self.label)
             }
         }

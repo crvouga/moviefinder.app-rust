@@ -22,7 +22,7 @@ impl ButtonGroup {
     // }
     pub fn view(self) -> Html {
         div()
-            .class("flex items-center justify-center w-full border-t")
+            .class("flex items-center justify-center w-full border-t_")
             .class(match self.orientation {
                 ButtonGroupOrientation::Horizontal => "flex-row min-h-bar",
                 // ButtonGroupOrientation::Vertical => "flex-col",

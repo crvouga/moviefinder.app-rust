@@ -38,7 +38,7 @@ impl BottomBarFormButtons {
     pub fn view(self) -> Html {
         let on_cancel = self.on_cancel.unwrap_or_else(|| Box::new(|d| d));
         let submit_label = self.submit_label.unwrap_or_else(|| "Submit".to_string());
-        let border = self.border.unwrap_or(true);
+        let border_ = self.border.unwrap_or(true);
 
         div()
             .id("bottom-bar-form")
@@ -46,7 +46,7 @@ impl BottomBarFormButtons {
             .class(
                 "flex-none flex flex-row items-center justify-center p-4  gap-4 min-h-bar w-full",
             )
-            .class(if border { "border-t" } else { "" })
+            .class(if border_ { "border-t_" } else { "" })
             .child(
                 Button::default()
                     .label("Cancel")

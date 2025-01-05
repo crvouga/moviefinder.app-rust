@@ -69,7 +69,7 @@ impl Toast {
             .class(match self.variant {
                 // ToastVariant::Success => "bg-green-600 text-white",
                 ToastVariant::Dark => "bg-neutral-700 text-white",
-                ToastVariant::Error => "border-red-600 border bg-red-800 text-white",
+                ToastVariant::Error => "border-red-600 border_  bg-red-800 text-white",
             })
             .child(div().class("flex-1").child(unsafe_text(&self.message.replace("\n", ""))))
             .child(

@@ -42,7 +42,7 @@ impl Root {
             .data_on(|e| e.load().js(&Js::push_url(&self.url)))
             .child(
                 div()
-                    .class("h-full max-h-[915px] w-full max-w-[520px] border box-border rounded overflow-hidden flex flex-col relative")
+                    .class("h-full max-h-[915px] w-full max-w-[520px] min-[520px]:border box-border_ rounded overflow-hidden flex flex-col relative")
                     .child(Screen::default().view())
                     .child(Toast::view_root())
                     .child(Drawer::view_root())

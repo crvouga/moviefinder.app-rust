@@ -109,7 +109,7 @@ impl ViewModel {
 
         div()
             .id("backdrop")
-            .class("w-full aspect-video overflow-hidden border-b")
+            .class("w-full aspect-video overflow-hidden border-b_")
             .child(
                 Image::new()
                     .view()
