@@ -64,7 +64,7 @@ impl Drawer {
                 .child(
                     div()
                         .class(
-                            "h-fit max-h-full w-full overflow-hidden border_  bg-black rounded-t-2xl",
+                            "h-fit max-h-full w-full overflow-hidden border bg-black rounded-t-2xl",
                         )
                         .child(self.content.unwrap_or(frag())),
                 ),
