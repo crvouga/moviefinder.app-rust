@@ -16,7 +16,10 @@ use crate::{
     },
     ctx::Ctx,
     debug,
-    media::{self, interaction::interaction_form},
+    media::{
+        self,
+        interaction::interaction_form::{self, respond::InteractionFormOrientation},
+    },
     req::Req,
     ui::{bottom_bar::BottomBar, route::AppRoute},
 };
@@ -116,8 +119,14 @@ pub async fn respond(
                 .filter_map(|feed_item| feed_item.to_media_id())
                 .collect::<Vec<_>>();
 
-            interaction_form::respond::respond_interaction_form(ctx, w, user_id.clone(), media_ids)
-                .await?;
+            interaction_form::respond::respond_interaction_form(
+                ctx,
+                w,
+                user_id.clone(),
+                media_ids,
+                InteractionFormOrientation::Vertical,
+            )
+            .await?;
 
             Ok(())
         }
@@ -392,7 +401,7 @@ fn view_slide_content(feed_item: &FeedItem) -> Html {
             )
             .child(
                 div().class("absolute bottom-0 right-0").child(
-                    interaction_form::respond::view(&media.id, None)
+                    interaction_form::respond::view(InteractionFormOrientation::Vertical, &media.id, None)
                 )
             ),
     }
