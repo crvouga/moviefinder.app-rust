@@ -4,6 +4,7 @@ pub mod button;
 pub mod button_group;
 pub mod chip;
 pub mod drawer;
+pub mod empty_state;
 pub mod error;
 pub mod head_injector;
 pub mod icon;

@@ -8,6 +8,7 @@ use crate::{
         remote_result::RemoteResult,
         ui::{
             alert::Alert,
+            empty_state::EmptyState,
             image::Image,
             list::{ViewList, ViewListItem},
             top_bar::TopBar,
@@ -171,40 +172,54 @@ fn view_list_items(
                     })
                     .collect(),
             ),
-            RemoteResult::Ok(list_items) => ViewList::default().view().children(
-                list_items
-                    .items
-                    .into_iter()
-                    .filter_map(|item| match item.variant {
-                        ListItemVariant::Media(media_id) => {
-                            let found = media.iter().find(|m| m.id == media_id).cloned();
-                            match found {
-                                Some(media) => {
-                                    let details_url =
-                                        media.details_route(current_url.to_owned()).url();
-                                    Some(
-                                        ViewListItem::default()
-                                            .title(media.title)
-                                            .art(move |class| {
-                                                Image::new()
-                                                    .view()
-                                                    .class(&class)
-                                                    .src(media.poster.to_middle_res())
-                                            })
-                                            .view()
-                                            .data_on(|e| e.press_up().push_url(&details_url)),
-                                    )
-                                }
-                                None => Some(
-                                    ViewListItem::default()
-                                        .title("...".to_owned())
-                                        .art(|class| Image::new().view().class(&class))
-                                        .view(),
-                                ),
-                            }
-                        }
-                    })
-                    .collect(),
-            ),
+            RemoteResult::Ok(list_items) => view_list_items_loaded(current_url, media, list_items),
         })
+}
+
+fn view_list_items_loaded(
+    current_url: &str,
+    media: Vec<Media>,
+    list_items: Paginated<ListItem>,
+) -> Html {
+    if list_items.total == 0 {
+        return EmptyState::default()
+            // .icon(|c| icon::solid::list(&c))
+            .title("No items found")
+            .view();
+    }
+
+    ViewList::default().view().children(
+        list_items
+            .items
+            .into_iter()
+            .filter_map(|item| match item.variant {
+                ListItemVariant::Media(media_id) => {
+                    let found = media.iter().find(|m| m.id == media_id).cloned();
+                    match found {
+                        Some(media) => {
+                            let details_url = media.details_route(current_url.to_owned()).url();
+                            Some(
+                                ViewListItem::default()
+                                    .title(media.title)
+                                    .art(move |class| {
+                                        Image::new()
+                                            .view()
+                                            .class(&class)
+                                            .src(media.poster.to_middle_res())
+                                    })
+                                    .view()
+                                    .data_on(|e| e.press_up().push_url(&details_url)),
+                            )
+                        }
+                        None => Some(
+                            ViewListItem::default()
+                                .title("...".to_owned())
+                                .art(|class| Image::new().view().class(&class))
+                                .view(),
+                        ),
+                    }
+                }
+            })
+            .collect(),
+    )
 }
