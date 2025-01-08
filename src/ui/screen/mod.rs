@@ -18,7 +18,7 @@ fn ensure_leading_slash(url: &str) -> String {
     }
 }
 
-fn dedupe<T: Eq + std::hash::Hash + Clone>(v: Vec<T>) -> Vec<T> {
+fn dedup<T: Eq + std::hash::Hash + Clone>(v: Vec<T>) -> Vec<T> {
     let mut seen = std::collections::HashSet::new();
     v.into_iter().filter(|e| seen.insert(e.clone())).collect()
 }
@@ -49,7 +49,7 @@ impl ResponseWriter {
             .map(|s| s.to_owned())
             .collect::<Vec<String>>();
 
-        let mut signal_loaded_screens_new = dedupe(
+        let mut signal_loaded_screens_new = dedup(
             signal_loaded_screens_prev
                 .iter()
                 .chain(std::iter::once(&url))
@@ -97,7 +97,7 @@ impl Screen {
             .class("w-full h-full flex flex-col overflow-hidden relative")
             .data_signal("signal_location", "location.pathname")
             .data_signal("signal_loaded_screens", "[]")
-            .data_signal("signal_preteched_screens", "[]")
+            .data_signal("signal_prefetched_screens", "[]")
             .data_signal(
                 "signal_client_id",
                 "Math.random().toString(36).substring(2)",

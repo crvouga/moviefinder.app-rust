@@ -26,6 +26,8 @@
     "popstate",
     "posix",
     "psql",
+    "pushstate",
+    "replacestate",
     "reqwest",
     "Reswap",
     "retarget",
