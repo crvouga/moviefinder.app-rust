@@ -87,7 +87,7 @@ pub async fn respond<TList: List + Debug>(
                 .unwrap_or_default()
                 .items;
 
-            let namespace = to_namepsace(Some(list.clone()));
+            let namespace = to_namespace(Some(list.clone()));
 
             w.send_fragment(view_list_items(&r.url, &namespace, list_items, media))
                 .await?;
@@ -104,7 +104,7 @@ pub struct ViewModel<TList: List> {
     pub current_url: String,
 }
 
-fn to_namepsace<TList: List>(list: Option<TList>) -> String {
+fn to_namespace<TList: List>(list: Option<TList>) -> String {
     let namespace: String = list.clone().map_or("list".to_string(), |l| {
         let list = l.clone();
         let id = list.id();
@@ -116,7 +116,7 @@ fn to_namepsace<TList: List>(list: Option<TList>) -> String {
 
 pub fn view<T: List>(model: ViewModel<T>) -> Html {
     let list = model.list.clone();
-    let namespace = to_namepsace(list.clone());
+    let namespace = to_namespace(list.clone());
     let name = list.clone().map(|l| l.name());
     let art = list.map(|l| l.view_art("size-32 rounded shrink-0"));
 
