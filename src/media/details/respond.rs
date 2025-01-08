@@ -6,7 +6,14 @@ use crate::{
         ui::{error, image::Image, top_bar::TopBar},
     },
     ctx::Ctx,
-    media::{media_::Media, media_db::interface::MediaQueryField},
+    media::{
+        interaction::interaction_form::{
+            self, interaction_form_view_config::InteractionFormViewConfig,
+        },
+        media_::Media,
+        media_db::interface::MediaQueryField,
+        media_id::MediaId,
+    },
     req::Req,
 };
 
@@ -22,6 +29,7 @@ pub async fn respond(
         Route::MediaDetailsScreen { media_id, back_url } => {
             let model = ViewModel::Loading {
                 back_url: back_url.clone(),
+                media_id: media_id.clone(),
             };
 
             w.send_screen(r, model.view_screen()).await?;
@@ -54,25 +62,57 @@ pub async fn respond(
             let model = ViewModel::Loaded {
                 media,
                 back_url: back_url.clone(),
+                media_id: media_id.clone(),
             };
 
             w.send_screen(r, model.view_screen()).await?;
+
+            let user_id = r.user_id(ctx).await?;
+
+            interaction_form::respond::respond_interaction_form(
+                ctx,
+                w,
+                user_id,
+                vec![to_interaction_form_view_config(media_id.clone())],
+            )
+            .await?;
 
             Ok(())
         }
     }
 }
 
+fn to_interaction_form_view_config(media_id: MediaId) -> InteractionFormViewConfig {
+    InteractionFormViewConfig::default()
+        .media_id(media_id)
+        .namespace("media-details".to_owned())
+        .orientation_horizontal()
+}
+
 enum ViewModel {
-    Loading { back_url: String },
-    Loaded { back_url: String, media: Media },
+    Loading {
+        back_url: String,
+        media_id: MediaId,
+    },
+    Loaded {
+        back_url: String,
+        media_id: MediaId,
+        media: Media,
+    },
 }
 
 impl ViewModel {
-    fn bacl_url(&self) -> String {
+    fn back_url(&self) -> String {
         match self {
-            ViewModel::Loading { back_url } => back_url.clone(),
+            ViewModel::Loading { back_url, .. } => back_url.clone(),
             ViewModel::Loaded { back_url, .. } => back_url.clone(),
+        }
+    }
+
+    fn media_id(&self) -> MediaId {
+        match self {
+            ViewModel::Loading { media_id, .. } => media_id.clone(),
+            ViewModel::Loaded { media_id, .. } => media_id.clone(),
         }
     }
 
@@ -95,7 +135,7 @@ impl ViewModel {
         };
 
         TopBar::default()
-            .back_url(self.bacl_url())
+            .back_url(self.back_url())
             .title(title)
             .view()
             .id("top-bar")
@@ -123,6 +163,7 @@ impl ViewModel {
             .id("content")
             .class("flex flex-col gap-4 items-center")
             .child(self.view_content_title())
+            .child(to_interaction_form_view_config(self.media_id()).view())
             .child(self.view_content_description())
     }
 

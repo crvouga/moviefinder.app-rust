@@ -18,7 +18,10 @@ use crate::{
     debug,
     media::{
         self,
-        interaction::interaction_form::{self, respond::InteractionFormOrientation},
+        interaction::interaction_form::{
+            self, interaction_form_view_config::InteractionFormViewConfig,
+        },
+        media_id::MediaId,
     },
     req::Req,
     ui::{bottom_bar::BottomBar, route::AppRoute},
@@ -123,14 +126,23 @@ pub async fn respond(
                 ctx,
                 w,
                 user_id.clone(),
-                media_ids,
-                InteractionFormOrientation::Vertical,
+                media_ids
+                    .iter()
+                    .map(|media_id| to_interaction_form_view_config(media_id.clone()))
+                    .collect(),
             )
             .await?;
 
             Ok(())
         }
     }
+}
+
+fn to_interaction_form_view_config(media_id: MediaId) -> InteractionFormViewConfig {
+    InteractionFormViewConfig::default()
+        .media_id(media_id)
+        .namespace("feed".to_owned())
+        .orientation_vertical()
 }
 
 pub async fn redirect_to(
@@ -401,7 +413,7 @@ fn view_slide_content(feed_item: &FeedItem) -> Html {
             )
             .child(
                 div().class("absolute bottom-0 right-0").child(
-                    interaction_form::respond::view(InteractionFormOrientation::Vertical, &media.id, None)
+                    to_interaction_form_view_config(media.id.clone()).view()
                 )
             ),
     }

@@ -1,8 +1,7 @@
-use serde::{Deserialize, Serialize};
-
-use super::interaction_form_::{self, to_available_interactions, InteractionForm};
+use super::interaction_form_::{self, to_available_interactions};
+use super::interaction_form_view_config::{InteractionFormOrientation, InteractionFormViewConfig};
 use super::route::Route;
-use crate::core::html::Html;
+use crate::core::html::{frag, Html};
 use crate::core::posix::Posix;
 use crate::core::unit_of_work::uow;
 use crate::info;
@@ -28,22 +27,17 @@ pub async fn respond(
     w: &mut ResponseWriter,
 ) -> Result<(), crate::core::error::Error> {
     match route {
-        Route::Form {
-            orientation,
-            media_id,
-        } => {
+        Route::Form { view_config } => {
             let user_id = r.user_id(ctx).await?;
 
-            respond_interaction_form(ctx, w, user_id, vec![media_id.clone()], orientation.clone())
-                .await?;
+            respond_interaction_form(ctx, w, user_id, vec![view_config.clone()]).await?;
 
             Ok(())
         }
         Route::Record {
-            action: interaction_action,
-            name: interaction_name,
-            media_id,
-            orientation,
+            action,
+            name,
+            view_config,
         } => {
             let maybe_user_id = r.user_id(ctx).await.ok();
 
@@ -59,9 +53,9 @@ pub async fn respond(
             let interaction_new = MediaInteraction {
                 id: MediaInteractionId::default(),
                 created_at_posix: Posix::now(),
-                interaction_name: interaction_name.clone(),
-                interaction_action: interaction_action.clone(),
-                media_id: media_id.clone(),
+                interaction_name: name.clone(),
+                interaction_action: action.clone(),
+                media_id: view_config.media_id.clone(),
                 user_id,
             };
 
@@ -73,27 +67,39 @@ pub async fn respond(
 
             let user_id = r.user_id(ctx).await?;
 
-            respond_interaction_form(ctx, w, user_id, vec![media_id.clone()], orientation.clone())
-                .await?;
+            respond_interaction_form(ctx, w, user_id, vec![view_config.clone()]).await?;
 
             Ok(())
         }
     }
 }
+
 pub async fn respond_interaction_form(
     ctx: &Ctx,
     w: &mut ResponseWriter,
     user_id: UserId,
-    media_ids: Vec<MediaId>,
-    orientation: InteractionFormOrientation,
+    view_configs: Vec<InteractionFormViewConfig>,
 ) -> Result<(), crate::core::error::Error> {
+    let media_ids = view_configs
+        .iter()
+        .map(|c| c.media_id.clone())
+        .collect::<Vec<MediaId>>();
     let interactions_by_media_id = get_interactions_by_media_id(ctx, user_id, media_ids).await;
+    let view_configs_by_media_id: HashMap<MediaId, InteractionFormViewConfig> = view_configs
+        .into_iter()
+        .map(|view_config| (view_config.media_id.clone(), view_config))
+        .collect();
 
     for (media_id, interactions) in interactions_by_media_id {
-        let interaction_form = interaction_form_::derive(interactions);
+        let form = interaction_form_::derive(interactions);
 
-        w.send_fragment(view(orientation, &media_id, Some(interaction_form)))
-            .await?;
+        let view_config = view_configs_by_media_id
+            .get(&media_id)
+            .cloned()
+            .unwrap_or_default()
+            .form(form);
+
+        w.send_fragment(view_config.view()).await?;
     }
 
     Ok(())
@@ -125,30 +131,29 @@ async fn get_interactions_by_media_id(
     interactions_by_media_id
 }
 
-fn to_form_id(media_id: &MediaId) -> String {
-    format!("media-interaction-form-{}", media_id.as_str())
+fn to_form_id(namespace: &str, media_id: &MediaId) -> String {
+    format!("media-interaction-form-{}-{}", namespace, media_id.as_str())
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
-pub enum InteractionFormOrientation {
-    Vertical,
-    Horizontal,
+impl InteractionFormViewConfig {
+    pub fn view(self) -> Html {
+        view(&self)
+    }
 }
 
-pub fn view(
-    orientation: InteractionFormOrientation,
-    media_id: &MediaId,
-    form: Option<InteractionForm>,
-) -> Html {
+fn view(config: &InteractionFormViewConfig) -> Html {
     div()
-        .id(&to_form_id(media_id))
+        .id(&to_form_id(&config.namespace, &config.media_id))
         .class("flex gap-2")
-        .class(match orientation {
+        .class(match config.orientation {
             InteractionFormOrientation::Vertical => "flex-col pb-4",
-            InteractionFormOrientation::Horizontal => "flex-row",
+            InteractionFormOrientation::Horizontal => "flex-row items-center justify-center",
         })
-        .child(view_width())
-        .map(|e| match form {
+        .child(match config.orientation {
+            InteractionFormOrientation::Vertical => view_width(),
+            InteractionFormOrientation::Horizontal => frag(),
+        })
+        .map(|e| match config.form {
             None => e.children(
                 view_buttons_disabled()
                     .into_iter()
@@ -157,14 +162,12 @@ pub fn view(
             ),
 
             Some(interaction_form) => {
-                let available_interactions = to_available_interactions(interaction_form);
+                let available_interactions = to_available_interactions(&interaction_form);
 
                 e.children(
                     available_interactions
                         .iter()
-                        .map(|(name, action)| {
-                            view_icon_button_enabled(&action, &name, &media_id, orientation)
-                        })
+                        .map(|(name, action)| view_icon_button_enabled(config, &action, &name))
                         .chain(
                             view_buttons_disabled()
                                 .into_iter()
@@ -174,6 +177,26 @@ pub fn view(
                         .collect::<Vec<Html>>(),
                 )
             }
+        })
+}
+
+fn view_icon_button_enabled(
+    view_config: &InteractionFormViewConfig,
+    action: &InteractionAction,
+    name: &InteractionName,
+) -> Html {
+    view_icon_button_base(&action, &name)
+        .active(is_selected(&action))
+        .view()
+        .data_on(|e| {
+            e.press_down().sse(
+                &Route::Record {
+                    action: action.clone(),
+                    name: name.clone(),
+                    view_config: view_config.clone(),
+                }
+                .url(),
+            )
         })
 }
 
@@ -200,28 +223,6 @@ fn view_icon_button_base(action: &InteractionAction, name: &InteractionName) -> 
         .icon(name.view_icon(is_selected(action), "size-9"))
         .text(&name.to_display_string())
         .id(&to_id(name, action, false))
-}
-
-fn view_icon_button_enabled(
-    action: &InteractionAction,
-    name: &InteractionName,
-    media_id: &MediaId,
-    orientation: InteractionFormOrientation,
-) -> Html {
-    view_icon_button_base(&action, &name)
-        .active(is_selected(&action))
-        .view()
-        .data_on(|e| {
-            e.press_down().sse(
-                &Route::Record {
-                    action: action.clone(),
-                    name: name.clone(),
-                    media_id: media_id.clone(),
-                    orientation,
-                }
-                .url(),
-            )
-        })
 }
 
 fn view_icon_button_disabled(action: &InteractionAction, name: &InteractionName) -> Html {

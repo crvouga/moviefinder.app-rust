@@ -1,22 +1,17 @@
-use serde::{Deserialize, Serialize};
-
-use crate::media::{
-    interaction::{interaction_action::InteractionAction, interaction_name::InteractionName},
-    media_id::MediaId,
+use super::interaction_form_view_config::InteractionFormViewConfig;
+use crate::media::interaction::{
+    interaction_action::InteractionAction, interaction_name::InteractionName,
 };
-
-use super::respond::InteractionFormOrientation;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Route {
     Form {
-        media_id: MediaId,
-        orientation: InteractionFormOrientation,
+        view_config: InteractionFormViewConfig,
     },
     Record {
-        media_id: MediaId,
         name: InteractionName,
         action: InteractionAction,
-        orientation: InteractionFormOrientation,
+        view_config: InteractionFormViewConfig,
     },
 }

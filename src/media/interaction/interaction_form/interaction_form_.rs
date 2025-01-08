@@ -5,7 +5,7 @@ use crate::media::interaction::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum InteractionForm {
     Initial,
     Seen,
@@ -63,7 +63,7 @@ pub fn _to_all_interactions() -> Vec<Interaction> {
     all_interaction_buttons
 }
 
-pub fn to_available_interactions(interaction_form: InteractionForm) -> Vec<Interaction> {
+pub fn to_available_interactions(interaction_form: &InteractionForm) -> Vec<Interaction> {
     match interaction_form {
         InteractionForm::Initial => vec![
             (InteractionName::Seen, InteractionAction::Add),
