@@ -5,7 +5,7 @@ pub struct ViewList;
 
 impl ViewList {
     pub fn view(self) -> Html {
-        div().class("w-full flex flex-col")
+        div().class("w-full flex flex-col pb-12")
     }
 }
 
