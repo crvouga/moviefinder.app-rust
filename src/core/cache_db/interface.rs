@@ -55,7 +55,7 @@ pub trait CacheDbExt: Cache {
         T: DeserializeOwned + Send + Debug,
     {
         let got = self.get(Posix::now(), key).await;
-        println!("get: {}\ngot: {:?}", key, got);
+        //  println!("get: {}\ngot: {:?}", key, got);
         got
     }
 
@@ -70,7 +70,7 @@ pub trait CacheDbExt: Cache {
         T: Serialize + Send + Sync,
     {
         let put = self.put(uow, ttl, Posix::now(), key, value).await;
-        println!("put: {}\nput: {:?}", key, put);
+        //  println!("put: {}\nput: {:?}", key, put);
         put
     }
 
