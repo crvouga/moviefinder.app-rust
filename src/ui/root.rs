@@ -26,7 +26,35 @@ impl Root {
                 title().child_text("moviefinder.app"),
                 meta().name("description").content("Find movies and TV shows to watch"),
                 link().rel("icon").type_("image/svg+xml").href("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>"),
-                link().rel("stylesheet").href("./output.css"),
+                // link().rel("stylesheet").href("./output.css"),
+                script().src_tailwind_play_cdn(),
+                script()
+                    .type_("text/javascript")
+                    .child_text_unsafe("
+                        tailwind.config = {
+                            theme: {
+                                extend: {
+                                    spacing: {
+                                        bar: \"5rem\"
+                                    },
+                                    colors: {
+                                        placeholder: \"#a3a3a3\",
+                                        skeleton: \"#3f3f46\"
+                                    },
+                                    borderColor: {
+                                        DEFAULT: \"#3f3f46\"
+                                    },
+                                    textColor: {
+                                        secondary: \"#d4d4d8\",
+                                        muted: \"#a3a3a3\"
+                                    },
+                                    opacity: {
+                                        active: \"0.5\"
+                                    }
+                                }
+                            }
+                        }
+                    "),
                 // style().child_text_unsafe(include_str!("../../public/output.css")),
                 link().rel("preconnect").href(TMDB_IMAGE_BASE_URL),
                 script().src_datastar_cdn().defer(),

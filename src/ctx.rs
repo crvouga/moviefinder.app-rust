@@ -99,7 +99,9 @@ impl Ctx {
             Postgres,
         }
 
-        let db_conn_sql_impl = if env.test_env.is_unit() {
+        let use_noop = env.test_env.is_unit() || true;
+
+        let db_conn_sql_impl = if use_noop {
             DbConnSqlImpl::Noop
         } else {
             DbConnSqlImpl::Postgres
@@ -122,7 +124,9 @@ impl Ctx {
             CachedPostgres,
         }
 
-        let key_value_db_impl = if env.test_env.is_unit() {
+        let use_hash_map = env.test_env.is_unit() || true;
+
+        let key_value_db_impl = if use_hash_map {
             KeyValueDbImpl::HashMap
         } else {
             KeyValueDbImpl::CachedPostgres
@@ -215,7 +219,9 @@ impl Ctx {
             Fake,
         }
 
-        let verify_sms_impl = if env.stage.is_local() {
+        let use_fake = env.stage.is_local() || true;
+
+        let verify_sms_impl = if use_fake {
             VerifySmsImpl::Fake
         } else {
             VerifySmsImpl::Twilio
