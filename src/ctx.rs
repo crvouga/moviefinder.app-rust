@@ -99,7 +99,7 @@ impl Ctx {
             Postgres,
         }
 
-        let use_noop = env.test_env.is_unit() || true;
+        let use_noop = env.test_env.is_unit();
 
         let db_conn_sql_impl = if use_noop {
             DbConnSqlImpl::Noop
@@ -124,7 +124,7 @@ impl Ctx {
             CachedPostgres,
         }
 
-        let use_hash_map = env.test_env.is_unit() || true;
+        let use_hash_map = env.test_env.is_unit();
 
         let key_value_db_impl = if use_hash_map {
             KeyValueDbImpl::HashMap
@@ -219,7 +219,7 @@ impl Ctx {
             Fake,
         }
 
-        let use_fake = env.stage.is_local() || true;
+        let use_fake = env.stage.is_local();
 
         let verify_sms_impl = if use_fake {
             VerifySmsImpl::Fake

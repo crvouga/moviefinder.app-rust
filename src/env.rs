@@ -15,7 +15,8 @@ pub struct Env {
 
 impl Env {
     pub fn load() -> Env {
-        let stage = EnvStage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
+        let stage: EnvStage =
+            EnvStage::from_str(env::var("STAGE").unwrap_or("".to_string()).as_str());
 
         core::env::load(".env").unwrap_or(());
 
