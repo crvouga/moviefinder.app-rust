@@ -48,7 +48,7 @@ impl UserSessionDb for KeyValueDb {
     async fn find_by_session_id(
         &self,
         session_id: &SessionId,
-    ) -> Result<Option<UserSession>, crate::core::error::Error> {
+    ) -> Result<Option<UserSession>, crate::core::error::CoreError> {
         self.session_by_session_id
             .get::<UserSession>(session_id.as_str())
             .await
@@ -58,7 +58,7 @@ impl UserSessionDb for KeyValueDb {
         &self,
         uow: UnitOfWork,
         session: &UserSession,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         let session_id = session.session_id.as_str().to_string();
         let user_id = session.user_id.as_str().to_string();
 
@@ -77,7 +77,7 @@ impl UserSessionDb for KeyValueDb {
         &self,
         uow: UnitOfWork,
         session_id: &SessionId,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         let session = self.find_by_session_id(session_id).await?;
 
         if let Some(session) = session {

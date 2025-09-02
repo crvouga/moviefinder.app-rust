@@ -39,7 +39,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::FeedScreenDefault => {
             w.send_screen(r, view_screen()).await?;
@@ -150,7 +150,7 @@ pub async fn redirect_to(
     r: &Req,
     w: &mut ResponseWriter,
     feed_id: &FeedId,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     let r = &Req {
         url: route::Route::FeedScreenDefault.url(),
         ..r.clone()
@@ -170,7 +170,7 @@ async fn respond_screen_contents(
     r: &Req,
     w: &mut ResponseWriter,
     feed_id: &FeedId,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     w.send_fragment(view_top_bar_loading_with_link(&feed_id))
         .await?;
 
@@ -196,7 +196,7 @@ async fn put_feed(
     ctx: &Ctx,
     session_id: &SessionId,
     feed: &Feed,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     debug!(ctx.log, "put_feed: {:?}", feed);
 
     UnitOfWork::transact(|uow| async move {
@@ -216,7 +216,7 @@ async fn put_feed(
 async fn get_feed_items(
     ctx: &Ctx,
     feed: &Feed,
-) -> Result<Vec<FeedItem>, crate::core::error::Error> {
+) -> Result<Vec<FeedItem>, crate::core::error::CoreError> {
     let query = feed.to_media_query(LIMIT);
 
     let paginated = ctx.media_db.query(query).await?;

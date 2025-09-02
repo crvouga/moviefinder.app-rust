@@ -1,7 +1,7 @@
 use serde::{de::DeserializeOwned, Serialize};
 
 use super::interface::{CacheDbDyn, CacheDbExt, Cached};
-use crate::core::{error::Error, unit_of_work::UnitOfWork};
+use crate::core::{error::CoreError, unit_of_work::UnitOfWork};
 use std::{fmt::Debug, future::Future, pin::Pin, time::Duration};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -24,7 +24,7 @@ where
     uow: Option<UnitOfWork>,
     cache_db: Option<CacheDbDyn>,
     query: Option<
-        Box<dyn Fn() -> Pin<Box<dyn Future<Output = Result<T, Error>> + Send>> + Send + Sync>,
+        Box<dyn Fn() -> Pin<Box<dyn Future<Output = Result<T, CoreError>> + Send>> + Send + Sync>,
     >,
     key: String,
     max_age: Duration,
@@ -59,7 +59,7 @@ where
     pub fn query<F, Fut>(mut self, query: F) -> Self
     where
         F: Fn() -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<T, Error>> + Send + 'static,
+        Fut: Future<Output = Result<T, CoreError>> + Send + 'static,
     {
         self.query = Some(Box::new(move || Box::pin(query())));
         self
@@ -69,7 +69,7 @@ where
     pub fn query_async<F, Fut>(mut self, query: F) -> Self
     where
         F: Fn() -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<T, Error>> + Send + 'static,
+        Fut: Future<Output = Result<T, CoreError>> + Send + 'static,
     {
         self.query = Some(Box::new(move || Box::pin(query())));
         self
@@ -99,17 +99,17 @@ where
     pub async fn execute(self) -> Cached<T> {
         let cache_db = match self.cache_db {
             Some(cache_db) => cache_db,
-            None => return Cached::Err(Error::new("CacheDb is not set")),
+            None => return Cached::Err(CoreError::new("CacheDb is not set")),
         };
 
         let uow = match self.uow {
             Some(uow) => uow,
-            None => return Cached::Err(Error::new("UnitOfWork is not set")),
+            None => return Cached::Err(CoreError::new("UnitOfWork is not set")),
         };
 
         let query = match self.query {
             Some(query) => query,
-            None => return Cached::Err(Error::new("Query is not set")),
+            None => return Cached::Err(CoreError::new("Query is not set")),
         };
 
         match self.strategy {

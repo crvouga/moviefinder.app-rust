@@ -23,7 +23,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::Screen => {
             respond_screen(ctx, r, w, &r.user_id(ctx).await.ok()).await?;
@@ -38,7 +38,7 @@ pub async fn redirect_to(
     r: &Req,
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     let r = Req {
         url: Route::Screen.url(),
         ..r.clone()
@@ -56,7 +56,7 @@ async fn respond_screen(
     r: &Req,
     w: &mut ResponseWriter,
     user_id: &Option<UserId>,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     let req = &Req {
         url: Route::Screen.url(),
         ..r.clone()
@@ -100,7 +100,7 @@ async fn respond_failed_to_load(
     r: &Req,
     w: &mut ResponseWriter,
     message: &str,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     w.send_toast_dark(message).await?;
     w.send_screen(r, view(ViewModel::LoggedOut)).await?;
     Ok(())

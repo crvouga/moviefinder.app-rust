@@ -16,5 +16,5 @@ pub trait MediaPersonDb: Send + Sync {
     async fn query(
         &self,
         query: PersonQuery,
-    ) -> Result<Paginated<Person>, crate::core::error::Error>;
+    ) -> Result<Paginated<Person>, crate::core::error::CoreError>;
 }

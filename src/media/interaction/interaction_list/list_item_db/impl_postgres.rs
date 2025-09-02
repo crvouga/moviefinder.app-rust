@@ -37,7 +37,7 @@ impl MediaInteractionListItemDb for ImplPostgres {
         pagination: Pagination,
         user_id: UserId,
         interaction_name: InteractionName,
-    ) -> Result<Paginated<ListItem>, crate::core::error::Error> {
+    ) -> Result<Paginated<ListItem>, crate::core::error::CoreError> {
         let list = MediaInteractionList {
             user_id: user_id.clone(),
             interaction_name: interaction_name.clone(),

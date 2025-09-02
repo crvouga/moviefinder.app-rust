@@ -22,11 +22,11 @@ impl KeyValueDb {
 
 #[async_trait]
 impl FeedDb for KeyValueDb {
-    async fn get(&self, feed_id: FeedId) -> Result<Option<Feed>, crate::core::error::Error> {
+    async fn get(&self, feed_id: FeedId) -> Result<Option<Feed>, crate::core::error::CoreError> {
         self.key_value_db.get(feed_id.as_str()).await
     }
 
-    async fn put(&self, uow: UnitOfWork, feed: Feed) -> Result<(), crate::core::error::Error> {
+    async fn put(&self, uow: UnitOfWork, feed: Feed) -> Result<(), crate::core::error::CoreError> {
         self.key_value_db
             .put(uow, feed.feed_id.as_str(), &feed)
             .await

@@ -33,7 +33,7 @@ impl UserAccountDb for KeyValueDb {
     async fn find_one_by_phone_number(
         &self,
         phone_number: &str,
-    ) -> Result<Option<UserAccount>, crate::core::error::Error> {
+    ) -> Result<Option<UserAccount>, crate::core::error::CoreError> {
         let maybe_user_id = self
             .user_id_by_phone_number
             .get::<UserId>(phone_number)
@@ -51,7 +51,7 @@ impl UserAccountDb for KeyValueDb {
     async fn find_one_by_user_id(
         &self,
         user_id: &UserId,
-    ) -> Result<Option<UserAccount>, crate::core::error::Error> {
+    ) -> Result<Option<UserAccount>, crate::core::error::CoreError> {
         Ok(self
             .account_by_user_id
             .get::<UserAccount>(user_id.as_str())
@@ -63,7 +63,7 @@ impl UserAccountDb for KeyValueDb {
         &self,
         uow: UnitOfWork,
         account: &UserAccount,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         let user_id = account.user_id.as_str().to_string();
         let phone_number = account.phone_number.clone();
 

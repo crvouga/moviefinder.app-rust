@@ -13,7 +13,7 @@ impl ImplNoop {
 
 #[async_trait]
 impl HttpClient for ImplNoop {
-    async fn send(&self, _request: Request) -> Result<Response, crate::core::error::Error> {
+    async fn send(&self, _request: Request) -> Result<Response, crate::core::error::CoreError> {
         Ok(Response::new(200))
     }
 }

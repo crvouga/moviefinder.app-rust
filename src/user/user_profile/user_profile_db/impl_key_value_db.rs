@@ -33,7 +33,7 @@ impl UserProfileDb for KeyValueDb {
     async fn find_one_by_user_id(
         &self,
         user_id: &UserId,
-    ) -> Result<Option<UserProfile>, crate::core::error::Error> {
+    ) -> Result<Option<UserProfile>, crate::core::error::CoreError> {
         self.profile_by_user_id.get(&user_id.as_str()).await
     }
 
@@ -41,7 +41,7 @@ impl UserProfileDb for KeyValueDb {
         &self,
         uow: UnitOfWork,
         profile: &UserProfile,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         let user_id = profile.user_id.as_str().to_string();
         let username = profile.username.clone();
 

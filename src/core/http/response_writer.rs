@@ -38,7 +38,7 @@ impl ResponseWriter {
         self
     }
 
-    pub async fn write_headers(&mut self) -> Result<(), crate::core::error::Error> {
+    pub async fn write_headers(&mut self) -> Result<(), crate::core::error::CoreError> {
         if self.headers_sent {
             return Ok(());
         }
@@ -65,7 +65,7 @@ impl ResponseWriter {
         Ok(())
     }
 
-    pub async fn write_body(&mut self, body: &[u8]) -> Result<(), crate::core::error::Error> {
+    pub async fn write_body(&mut self, body: &[u8]) -> Result<(), crate::core::error::CoreError> {
         if !self.headers_sent {
             self.write_headers().await?;
         }
@@ -75,14 +75,14 @@ impl ResponseWriter {
         Ok(())
     }
 
-    pub async fn end(&mut self) -> Result<(), crate::core::error::Error> {
+    pub async fn end(&mut self) -> Result<(), crate::core::error::CoreError> {
         if !self.headers_sent {
             self.write_headers().await?;
         }
         self.stream
             .flush()
             .await
-            .map_err(|e| crate::core::error::Error::new(&e.to_string()))
+            .map_err(|e| crate::core::error::CoreError::new(&e.to_string()))
     }
 }
 

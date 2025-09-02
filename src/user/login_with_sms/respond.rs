@@ -37,7 +37,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::ScreenPhone => {
             w.send_signal(SIGNAL_IS_SUBMITTING, "false").await?;

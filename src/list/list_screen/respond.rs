@@ -29,7 +29,7 @@ pub async fn respond<TList: List + Debug>(
     r: &Req,
     route: &Route<TList>,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::IntersectedBottom { list } => {
             println!("IntersectedBottom: {:?}", list);
@@ -153,7 +153,7 @@ pub fn view<T: List>(model: ViewModel<T>) -> Html {
 fn view_list_items(
     current_url: &str,
     namespace: &str,
-    list_items: RemoteResult<Paginated<ListItem>, crate::core::error::Error>,
+    list_items: RemoteResult<Paginated<ListItem>, crate::core::error::CoreError>,
     media: Vec<Media>,
 ) -> Html {
     div()

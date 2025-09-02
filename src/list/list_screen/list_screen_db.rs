@@ -10,5 +10,5 @@ pub trait ListScreenDb<TList: List + Clone + 'static>: Send + Sync {
         &self,
         pagination: Pagination,
         list: TList,
-    ) -> Result<Paginated<ListItem>, crate::core::error::Error>;
+    ) -> Result<Paginated<ListItem>, crate::core::error::CoreError>;
 }

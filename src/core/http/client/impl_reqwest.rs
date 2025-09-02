@@ -32,7 +32,7 @@ impl ImplReqwest {
 
 #[async_trait]
 impl HttpClient for ImplReqwest {
-    async fn send(&self, request: Request) -> Result<Response, crate::core::error::Error> {
+    async fn send(&self, request: Request) -> Result<Response, crate::core::error::CoreError> {
         debug!(self.logger, "send {:?}", request);
 
         if let Some(dur) = self.simulate_latency {
@@ -42,7 +42,7 @@ impl HttpClient for ImplReqwest {
         let client = Client::new();
         let reqwest_request = request.to_reqwest_request()?;
         let reqwest_response = client.execute(reqwest_request).await.map_err(|e| {
-            crate::core::error::Error::new(format!("Failed to send request: {:?}", e))
+            crate::core::error::CoreError::new(format!("Failed to send request: {:?}", e))
         })?;
         let response = Response::from_reqwest_response(reqwest_response).await?;
 
@@ -51,7 +51,7 @@ impl HttpClient for ImplReqwest {
 }
 
 impl Request {
-    fn to_reqwest_request(self) -> Result<reqwest::Request, crate::core::error::Error> {
+    fn to_reqwest_request(self) -> Result<reqwest::Request, crate::core::error::CoreError> {
         let mut req = reqwest::Request::new(self.method.into(), self.url.into());
 
         *req.body_mut() = Some(reqwest::Body::from(self.body));
@@ -59,7 +59,7 @@ impl Request {
         let headers = req.headers_mut();
         for (key, value) in self.headers {
             let val = HeaderValue::from_str(value.as_str())
-                .map_err(|e| crate::core::error::Error::new(e.to_string()))?;
+                .map_err(|e| crate::core::error::CoreError::new(e.to_string()))?;
             headers.insert(
                 HeaderName::from_lowercase(&key.to_lowercase().as_bytes()).unwrap(),
                 val,
@@ -96,7 +96,7 @@ impl Into<reqwest::Url> for Url {
 impl Response {
     pub async fn from_reqwest_response(
         reqwest_response: reqwest::Response,
-    ) -> Result<Self, crate::core::error::Error> {
+    ) -> Result<Self, crate::core::error::CoreError> {
         let status_code = reqwest_response.status().as_u16();
         let headers = reqwest_response
             .headers()
@@ -113,7 +113,7 @@ impl Response {
             .bytes()
             .await
             .map_err(|e| {
-                crate::core::error::Error::new(format!("Failed to read response body: {:?}", e))
+                crate::core::error::CoreError::new(format!("Failed to read response body: {:?}", e))
             })?
             .to_vec();
 

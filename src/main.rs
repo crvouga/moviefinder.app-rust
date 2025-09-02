@@ -42,7 +42,7 @@ async fn respond(
     ctx: Arc<Ctx>,
     request: Request,
     mut w: ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     request.write_session_id_cookie(&mut w);
 
     let maybe_route = request.route();
@@ -66,7 +66,7 @@ async fn respond(
         "{:?} session_id={:?} payload={:?}", maybe_route, r.session_id, r.payload
     );
 
-    let result: Result<(), crate::core::error::Error> =
+    let result: Result<(), crate::core::error::CoreError> =
         match (maybe_route, request.is_datastar_request()) {
             (Some(route), true) => respond::respond(&ctx, &r, &route, &mut w).await,
 
@@ -106,7 +106,7 @@ async fn response_root(
     _r: &Request,
     w: &mut ResponseWriter,
     url: String,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     let html: &String = &root::Root::new(url).view().render_with_doctype();
 
     w.content("text/html", html.as_bytes()).await
@@ -134,7 +134,7 @@ async fn response_public(
     file_path: &str,
     _r: &Request,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     if let Ok(mut file) = tokio::fs::File::open(file_path).await {
         let mut buffer = Vec::new();
         tokio::io::AsyncReadExt::read_to_end(&mut file, &mut buffer).await?;
@@ -149,7 +149,7 @@ async fn respond_fallback(
     ctx: &Ctx,
     r: &Req,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     w.send_script(&Js::push_url(
         &feed_screen::route::Route::FeedScreenDefault.url(),
     ))

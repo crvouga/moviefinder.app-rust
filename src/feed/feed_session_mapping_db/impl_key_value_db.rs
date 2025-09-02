@@ -29,7 +29,7 @@ impl FeedSessionMappingDb for KeyValueDb {
     async fn get(
         &self,
         session_id: SessionId,
-    ) -> Result<Option<FeedId>, crate::core::error::Error> {
+    ) -> Result<Option<FeedId>, crate::core::error::CoreError> {
         match self.key_value_db.get(session_id.as_str()).await {
             Ok(Some(value)) => Ok(Some(value)),
             Ok(None) => Ok(None),
@@ -42,7 +42,7 @@ impl FeedSessionMappingDb for KeyValueDb {
         uow: UnitOfWork,
         session_id: SessionId,
         feed_id: FeedId,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         self.key_value_db
             .put(uow, session_id.as_str(), &feed_id)
             .await?;

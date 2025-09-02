@@ -12,7 +12,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::vec;
 
-use crate::core::error::Error;
+use crate::core::error::CoreError;
 
 pub struct Postgres {
     db_conn_sql: DbConnSqlDyn,
@@ -43,7 +43,7 @@ impl KeyValueDb for Postgres {
     //
     // 1) get_bytes:
     //
-    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Error> {
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, CoreError> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         let mut query = Sql::new("SELECT value FROM key_value WHERE key = :key");
@@ -65,7 +65,7 @@ impl KeyValueDb for Postgres {
     //
     // 2) put_bytes:
     //
-    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), Error> {
+    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), CoreError> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
         let new_value_str = String::from_utf8_lossy(value).to_string();
 
@@ -159,7 +159,7 @@ impl KeyValueDb for Postgres {
     //
     // 3) zap:
     //
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), CoreError> {
         let namespaced_key = to_namespaced_key(&self.namespace, key);
 
         // Grab the old value for rollback

@@ -2,29 +2,29 @@ use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use std::{fmt::Debug, sync::Arc, time::Duration};
 
-use crate::core::{error::Error, posix::Posix, unit_of_work::UnitOfWork};
+use crate::core::{error::CoreError, posix::Posix, unit_of_work::UnitOfWork};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Cached<T> {
     Fresh(T),
     Stale(T),
     Missing,
-    Err(Error),
+    Err(CoreError),
 }
 
 impl<T> Cached<T> {
-    pub fn to_result(self) -> Result<T, Error> {
+    pub fn to_result(self) -> Result<T, CoreError> {
         match self {
             Cached::Fresh(value) => Ok(value),
             Cached::Stale(value) => Ok(value),
-            Cached::Missing => Err(Error::new("Cache miss")),
+            Cached::Missing => Err(CoreError::new("Cache miss")),
             Cached::Err(e) => Err(e),
         }
     }
 }
 
-impl<T> From<Error> for Cached<T> {
-    fn from(error: Error) -> Self {
+impl<T> From<CoreError> for Cached<T> {
+    fn from(error: CoreError) -> Self {
         Cached::Err(error)
     }
 }
@@ -40,10 +40,10 @@ pub trait Cache: Send + Sync {
         now: Posix,
         key: &str,
         value: &[u8],
-    ) -> Result<(), Error>;
+    ) -> Result<(), CoreError>;
 
     #[allow(dead_code)]
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error>;
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), CoreError>;
 
     fn namespace(&self, namespace: Vec<String>) -> Box<dyn Cache>;
 }
@@ -65,7 +65,7 @@ pub trait CacheDbExt: Cache {
         ttl: Duration,
         key: &str,
         value: T,
-    ) -> Result<(), Error>
+    ) -> Result<(), CoreError>
     where
         T: Serialize + Send + Sync,
     {
@@ -84,14 +84,16 @@ pub trait CacheDbExt: Cache {
             Cached::Err(e) => Cached::Err(e),
             Cached::Missing => Cached::Missing,
             Cached::Stale(bytes) => {
-                let parsed = serde_json::from_slice(&bytes).map_err(|e| Error::new(e.to_string()));
+                let parsed =
+                    serde_json::from_slice(&bytes).map_err(|e| CoreError::new(e.to_string()));
                 match parsed {
                     Ok(value) => Cached::Stale(value),
                     Err(e) => Cached::Err(e),
                 }
             }
             Cached::Fresh(bytes) => {
-                let parsed = serde_json::from_slice(&bytes).map_err(|e| Error::new(e.to_string()));
+                let parsed =
+                    serde_json::from_slice(&bytes).map_err(|e| CoreError::new(e.to_string()));
                 match parsed {
                     Ok(value) => Cached::Fresh(value),
                     Err(e) => Cached::Err(e),
@@ -107,14 +109,14 @@ pub trait CacheDbExt: Cache {
         now: Posix,
         key: &str,
         value: T,
-    ) -> Result<(), Error>
+    ) -> Result<(), CoreError>
     where
         T: Serialize + Send + Sync,
     {
-        let bytes = serde_json::to_vec(&value).map_err(|e| Error::new(e.to_string()))?;
+        let bytes = serde_json::to_vec(&value).map_err(|e| CoreError::new(e.to_string()))?;
         self.put_bytes(uow, ttl, now, key, &bytes)
             .await
-            .map_err(|e| Error::new(e.to_string()))
+            .map_err(|e| CoreError::new(e.to_string()))
     }
 }
 

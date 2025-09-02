@@ -3,7 +3,7 @@ use super::{
     interface::KeyValueDb,
 };
 use crate::core::{
-    db_conn_sql::interface::DbConnSqlDyn, error::Error, logger::interface::LoggerDyn,
+    db_conn_sql::interface::DbConnSqlDyn, error::CoreError, logger::interface::LoggerDyn,
     unit_of_work::UnitOfWork,
 };
 use async_trait::async_trait;
@@ -31,15 +31,15 @@ impl CachedPostgres {
 
 #[async_trait]
 impl KeyValueDb for CachedPostgres {
-    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Error> {
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, CoreError> {
         self.impl_with_cache.get_bytes(key).await
     }
 
-    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), Error> {
+    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), CoreError> {
         self.impl_with_cache.put_bytes(uow, key, value).await
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), CoreError> {
         self.impl_with_cache.zap(uow, key).await
     }
 

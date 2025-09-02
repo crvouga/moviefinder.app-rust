@@ -37,7 +37,7 @@ impl MediaDb for Tmdb {
     async fn query(
         &self,
         query: MediaQuery,
-    ) -> Result<Paginated<Media>, crate::core::error::Error> {
+    ) -> Result<Paginated<Media>, crate::core::error::CoreError> {
         let tmdb_config = Arc::new(self.tmdb_api.config().await?);
 
         let query_plan: TmdbQueryPlan = query.clone().into();

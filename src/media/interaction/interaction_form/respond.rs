@@ -25,7 +25,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::Form { view_config } => {
             let user_id = r.user_id(ctx).await?;
@@ -79,7 +79,7 @@ pub async fn respond_interaction_form(
     w: &mut ResponseWriter,
     user_id: UserId,
     view_configs: Vec<InteractionFormViewConfig>,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     let media_ids = view_configs
         .iter()
         .map(|c| c.media_id.clone())

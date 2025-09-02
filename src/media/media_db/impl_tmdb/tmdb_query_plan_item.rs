@@ -42,7 +42,7 @@ impl TmdbQueryPlanItem {
         cache_db: CacheDbDyn,
         tmdb_api: Arc<TmdbApi>,
         tmdb_config: Arc<TmdbConfig>,
-    ) -> Result<Paginated<Media>, crate::core::error::Error> {
+    ) -> Result<Paginated<Media>, crate::core::error::CoreError> {
         match self {
             TmdbQueryPlanItem::GetMovieDetails { media_id } => {
                 let media_id_owned = media_id.clone();
@@ -63,7 +63,7 @@ impl TmdbQueryPlanItem {
                             tmdb_api
                                 .movie_details(media_id.as_str())
                                 .await
-                                .map_err(|e| crate::core::error::Error::new(e))
+                                .map_err(|e| crate::core::error::CoreError::new(e))
                         }
                     })
                     .execute()
@@ -92,7 +92,7 @@ impl TmdbQueryPlanItem {
                     let result = request.await;
                     match result {
                         Ok(val) => discover_responses.push(val),
-                        Err(err) => return Err(crate::core::error::Error::new(err)),
+                        Err(err) => return Err(crate::core::error::CoreError::new(err)),
                     }
                 }
 

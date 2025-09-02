@@ -1,5 +1,5 @@
 use super::interface::{to_namespaced_key, KeyValueDb};
-use crate::core::{error::Error, unit_of_work::UnitOfWork};
+use crate::core::{error::CoreError, unit_of_work::UnitOfWork};
 use async_trait::async_trait;
 use std::sync::{Arc, RwLock};
 
@@ -25,13 +25,13 @@ impl HashMap {
 
 #[async_trait]
 impl KeyValueDb for HashMap {
-    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Error> {
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, CoreError> {
         let namespaced_key = self.to_namespaced_key(key);
         let map = self.map.read().unwrap();
         Ok(map.get(&namespaced_key).cloned())
     }
 
-    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), Error> {
+    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), CoreError> {
         let namespaced_key = self.to_namespaced_key(key);
         let map_arc = Arc::clone(&self.map);
 
@@ -60,7 +60,7 @@ impl KeyValueDb for HashMap {
         Ok(())
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), CoreError> {
         let namespaced_key = self.to_namespaced_key(key);
         let map_arc = Arc::clone(&self.map);
 

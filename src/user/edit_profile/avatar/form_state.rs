@@ -30,7 +30,7 @@ impl FormState {
         ctx: &Ctx,
         profile: &UserProfile,
         form_state: &FormState,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         let key = to_key(&profile);
 
         ctx.key_value_db.put(uow(), &key, form_state).await?;

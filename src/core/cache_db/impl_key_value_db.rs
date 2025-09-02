@@ -1,6 +1,6 @@
 use super::interface::{Cache, Cached};
 use crate::core::{
-    error::Error,
+    error::CoreError,
     key_value_db::interface::{KeyValueDbDyn, KeyValueDbExt},
     posix::Posix,
     unit_of_work::UnitOfWork,
@@ -76,7 +76,7 @@ impl Cache for ImplKeyValueDb {
         now: Posix,
         key: &str,
         value: &[u8],
-    ) -> Result<(), Error> {
+    ) -> Result<(), CoreError> {
         let entry = Entry {
             key: Some(key.to_string()),
             value: Some(value.to_vec()),
@@ -87,7 +87,7 @@ impl Cache for ImplKeyValueDb {
         self.entries.put(uow, key, &entry).await
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), CoreError> {
         self.entries.zap(uow, key).await
     }
 

@@ -28,7 +28,7 @@ impl ResponseWriter {
         &mut self,
         r: &Req,
         screen: Html,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         let url = ensure_leading_slash(&r.url);
 
         let fallback: &Vec<String> = &Vec::new();

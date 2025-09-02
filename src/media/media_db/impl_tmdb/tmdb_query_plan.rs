@@ -27,7 +27,7 @@ impl TmdbQueryPlan {
         tmdb_api: Arc<TmdbApi>,
         tmdb_config: Arc<TmdbConfig>,
         query: &MediaQuery,
-    ) -> Result<Paginated<Media>, crate::core::error::Error> {
+    ) -> Result<Paginated<Media>, crate::core::error::CoreError> {
         let mut all_items: Vec<Media> = vec![];
         let mut total = 0;
 

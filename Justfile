@@ -2,7 +2,7 @@ check: #
   clear && cargo check && cargo fmt
 
 run: #
-  clear && just kp && export STAGE=local && just watch
+  clear && just kp && export STAGE=local && c
 
 kp: #
   npx kill-port 3000

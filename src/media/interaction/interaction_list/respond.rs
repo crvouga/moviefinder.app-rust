@@ -22,7 +22,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::ListScreen(route) => list_screen::respond::respond(ctx, ctx, r, route, w).await,
 
@@ -46,7 +46,7 @@ impl ListScreenDb<MediaInteractionList> for Ctx {
         &self,
         pagination: Pagination,
         list: MediaInteractionList,
-    ) -> Result<Paginated<ListItem>, crate::core::error::Error> {
+    ) -> Result<Paginated<ListItem>, crate::core::error::CoreError> {
         self.media_interaction_list_item_db
             .find_by_user_id_and_interaction_name(pagination, list.user_id, list.interaction_name)
             .await

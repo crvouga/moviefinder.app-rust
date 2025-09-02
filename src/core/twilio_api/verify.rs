@@ -8,12 +8,12 @@ use serde::{Deserialize, Serialize};
 
 pub enum VerifyCodeError {
     WrongCode,
-    Error(crate::core::error::Error),
+    Error(crate::core::error::CoreError),
 }
 
 pub enum SendCodeError {
     InvalidPhoneNumber,
-    Error(crate::core::error::Error),
+    Error(crate::core::error::CoreError),
 }
 
 impl TwilioApi {
@@ -69,7 +69,7 @@ impl TwilioApi {
             return Err(SendCodeError::InvalidPhoneNumber);
         }
 
-        Err(SendCodeError::Error(crate::core::error::Error::new(
+        Err(SendCodeError::Error(crate::core::error::CoreError::new(
             format!(
                 "Failed to send code: {:?}",
                 String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
@@ -147,7 +147,7 @@ impl TwilioApi {
             return Err(VerifyCodeError::WrongCode);
         }
 
-        Err(VerifyCodeError::Error(crate::core::error::Error::new(
+        Err(VerifyCodeError::Error(crate::core::error::CoreError::new(
             format!(
                 "Failed to verify code: {:?}",
                 String::from_utf8(response.body).unwrap_or("Unknown error".to_string())
@@ -158,6 +158,6 @@ impl TwilioApi {
 
 impl From<serde_json::Error> for VerifyCodeError {
     fn from(err: serde_json::Error) -> Self {
-        VerifyCodeError::Error(crate::core::error::Error::new(err.to_string()))
+        VerifyCodeError::Error(crate::core::error::CoreError::new(err.to_string()))
     }
 }

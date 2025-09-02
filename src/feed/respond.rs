@@ -6,7 +6,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::FeedScreen(child) => feed_screen::respond::respond(&ctx, r, child, w).await,
         Route::Tags(child) => feed_tags_form::respond::respond(&ctx, r, child, w).await,

@@ -14,7 +14,7 @@ impl ResponseWriter {
     pub async fn respond_login_drawer(
         &mut self,
         message: &str,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         self.send_fragment(view_must_login_drawer(message)).await?;
 
         Ok(())
@@ -26,7 +26,7 @@ pub async fn respond(
     _r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::LoginDrawer => {
             w.send_fragment(view_must_login_drawer("")).await?;

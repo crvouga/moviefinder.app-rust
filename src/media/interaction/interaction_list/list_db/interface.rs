@@ -9,5 +9,5 @@ pub trait MediaInteractionListDb: Send + Sync {
     async fn find_by_user_id(
         &self,
         user_id: UserId,
-    ) -> Result<Vec<MediaInteractionList>, crate::core::error::Error>;
+    ) -> Result<Vec<MediaInteractionList>, crate::core::error::CoreError>;
 }

@@ -32,7 +32,7 @@ impl FeedTagsFormStateDb {
     pub async fn get(
         &self,
         feed_id: &FeedId,
-    ) -> Result<Option<FormState>, crate::core::error::Error> {
+    ) -> Result<Option<FormState>, crate::core::error::CoreError> {
         debug!(self.logger, "get {:?}", feed_id);
         self.key_value_db.get(feed_id.as_str()).await
     }
@@ -41,7 +41,7 @@ impl FeedTagsFormStateDb {
         &self,
         uow: UnitOfWork,
         form_state: &FormState,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         debug!(self.logger, "put {:?}", form_state);
 
         self.key_value_db

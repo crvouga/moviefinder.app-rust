@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use std::sync::Arc;
 
 use super::interface::KeyValueDb;
-use crate::core::error::Error;
+use crate::core::error::CoreError;
 use crate::core::unit_of_work::UnitOfWork;
 
 #[derive(Clone)]
@@ -19,7 +19,7 @@ impl WithCache {
 
 #[async_trait]
 impl KeyValueDb for WithCache {
-    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Error> {
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, CoreError> {
         // 1) check the cache
         if let Some(bytes) = self.cache.get_bytes(key).await? {
             return Ok(Some(bytes));
@@ -36,13 +36,13 @@ impl KeyValueDb for WithCache {
         Ok(None)
     }
 
-    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), Error> {
+    async fn put_bytes(&self, uow: UnitOfWork, key: &str, value: &[u8]) -> Result<(), CoreError> {
         self.source.put_bytes(uow.clone(), key, value).await?;
         self.cache.put_bytes(uow, key, value).await?;
         Ok(())
     }
 
-    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), Error> {
+    async fn zap(&self, uow: UnitOfWork, key: &str) -> Result<(), CoreError> {
         self.source.zap(uow.clone(), key).await?;
         self.cache.zap(uow, key).await?;
         Ok(())

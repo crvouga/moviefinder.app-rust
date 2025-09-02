@@ -439,21 +439,21 @@ impl Fragments {
         self
     }
 
-    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), crate::core::error::Error> {
+    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), crate::core::error::CoreError> {
         self.sse.send(w).await?;
         Ok(())
     }
 }
 
 impl ResponseWriter {
-    pub async fn send_fragment(&mut self, elem: Html) -> Result<(), crate::core::error::Error> {
+    pub async fn send_fragment(&mut self, elem: Html) -> Result<(), crate::core::error::CoreError> {
         fragments(elem).send(self).await
     }
 
     pub async fn send_signals(
         &mut self,
         signals: Vec<(&str, &str)>,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         let key_value_pairs = signals
             .iter()
             .map(|(k, v)| format!("{}: {}", k, v))
@@ -473,11 +473,11 @@ impl ResponseWriter {
         &mut self,
         key: &str,
         value: &str,
-    ) -> Result<(), crate::core::error::Error> {
+    ) -> Result<(), crate::core::error::CoreError> {
         self.send_signals(vec![(key, value)]).await
     }
 
-    pub async fn send_script(&mut self, script: &str) -> Result<(), crate::core::error::Error> {
+    pub async fn send_script(&mut self, script: &str) -> Result<(), crate::core::error::CoreError> {
         sse()
             .event_execute_script()
             .data_script(script)

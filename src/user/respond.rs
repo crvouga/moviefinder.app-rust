@@ -6,7 +6,7 @@ pub async fn respond(
     r: &Req,
     route: &Route,
     w: &mut ResponseWriter,
-) -> Result<(), crate::core::error::Error> {
+) -> Result<(), crate::core::error::CoreError> {
     match route {
         Route::AccountScreen(route) => account_screen::respond::respond(ctx, r, route, w).await,
         Route::LoginWithSms(route) => login_with_sms::respond::respond(ctx, r, route, w).await,

@@ -8,11 +8,11 @@ use crate::{
 #[async_trait]
 pub trait FeedSessionMappingDb: Send + Sync {
     async fn get(&self, session_id: SessionId)
-        -> Result<Option<FeedId>, crate::core::error::Error>;
+        -> Result<Option<FeedId>, crate::core::error::CoreError>;
     async fn put(
         &self,
         uow: UnitOfWork,
         session_id: SessionId,
         feed_id: FeedId,
-    ) -> Result<(), crate::core::error::Error>;
+    ) -> Result<(), crate::core::error::CoreError>;
 }

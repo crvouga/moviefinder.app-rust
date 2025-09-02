@@ -110,7 +110,7 @@ impl Ctx {
         let db_conn_sql: DbConnSqlDyn = match db_conn_sql_impl {
             DbConnSqlImpl::Noop => Arc::new(db_conn_sql::impl_noop::ImplNoop::new()),
             DbConnSqlImpl::Postgres => Arc::new(
-                db_conn_sql::impl_postgres::Postgres::new(log.noop(), &env.database_url)
+                db_conn_sql::impl_postgres::Postgres::new(log.clone(), &env.database_url)
                     .await
                     .unwrap()
                     .simulate_latency(env.simulate_latency),

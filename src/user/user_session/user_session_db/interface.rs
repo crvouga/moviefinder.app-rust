@@ -13,15 +13,15 @@ pub trait UserSessionDb: Send + Sync {
     async fn find_by_session_id(
         &self,
         session_id: &SessionId,
-    ) -> Result<Option<UserSession>, crate::core::error::Error>;
+    ) -> Result<Option<UserSession>, crate::core::error::CoreError>;
     async fn put(
         &self,
         uow: UnitOfWork,
         session: &UserSession,
-    ) -> Result<(), crate::core::error::Error>;
+    ) -> Result<(), crate::core::error::CoreError>;
     async fn zap(
         &self,
         uow: UnitOfWork,
         session_id: &SessionId,
-    ) -> Result<(), crate::core::error::Error>;
+    ) -> Result<(), crate::core::error::CoreError>;
 }

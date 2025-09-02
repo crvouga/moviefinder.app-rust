@@ -13,5 +13,5 @@ pub trait MediaInteractionListItemDb: Send + Sync {
         pagination: Pagination,
         user_id: UserId,
         interaction_name: InteractionName,
-    ) -> Result<Paginated<ListItem>, crate::core::error::Error>;
+    ) -> Result<Paginated<ListItem>, crate::core::error::CoreError>;
 }
