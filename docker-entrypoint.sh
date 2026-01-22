@@ -6,7 +6,7 @@ POSTGRES_USER="${POSTGRES_USER:-moviefinder-app}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-moviefinder-app}"
 POSTGRES_DB="${POSTGRES_DB:-moviefinder-app}"
 POSTGRES_DATA_DIR="/var/lib/postgresql/16/main"
-POSTGRES_LOG="/tmp/postgres.log"
+POSTGRES_LOG="/var/lib/postgresql/postgres.log"
 
 echo "Starting PostgreSQL initialization..."
 
@@ -39,9 +39,11 @@ if [ ! -d "$POSTGRES_DATA_DIR" ] || [ -z "$(ls -A $POSTGRES_DATA_DIR 2>/dev/null
     echo "PostgreSQL data directory initialized"
 fi
 
-# Ensure log file is writable
-touch "$POSTGRES_LOG"
-chown postgres:postgres "$POSTGRES_LOG"
+# Ensure log file directory is writable
+mkdir -p "$(dirname "$POSTGRES_LOG")"
+chown -R postgres:postgres "$(dirname "$POSTGRES_LOG")" 2>/dev/null || true
+touch "$POSTGRES_LOG" 2>/dev/null || true
+chown postgres:postgres "$POSTGRES_LOG" 2>/dev/null || true
 
 # Start PostgreSQL in the background using postgres binary directly
 echo "Starting PostgreSQL server..."
