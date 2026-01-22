@@ -54,7 +54,7 @@ impl Toast {
 
     pub fn view(self) -> Html {
         let duration_ms = self.duration.as_millis();
-        let js_close = r#"{ const toastContent = document.getElementById('toast-content'); if (toastContent) { toastContent.classList.replace('animate-slide-down', 'animate-slide-up'); setTimeout(() => { toastContent.remove(); }, 200); } }"#;
+        let js_close = r#"const toastContent = document.getElementById('toast-content'); if (toastContent) { toastContent.classList.replace('animate-slide-down', 'animate-slide-up'); setTimeout(() => { toastContent.remove(); }, 200); }"#;
         let js_close_click = r#"(function() { const toastContent = document.getElementById('toast-content'); if (toastContent) { toastContent.classList.replace('animate-slide-down', 'animate-slide-up'); setTimeout(() => { toastContent.remove(); }, 200); } })()"#;
 
         Self::view_root()
@@ -62,11 +62,6 @@ impl Toast {
             div()
             .id("toast-content")
             .class("w-full h-fit p-4 text-lg font-bold pointer-events-auto rounded overflow-hidden animate-slide-down items-center flex z-50")
-            .data_on(|b|
-                    b.load()
-                    .js(&format!("const duration = {}", duration_ms))
-                    .js(&js_timeout(self.duration, js_close))
-            )
             .class(match self.variant {
                 // ToastVariant::Success => "bg-green-600 text-white",
                 ToastVariant::Dark => "bg-neutral-700 text-white",
@@ -75,7 +70,6 @@ impl Toast {
             .child(div().class("flex-1").child(unsafe_text(&self.message.replace("\n", ""))))
             .child(
                 button().aria_label("close toast")
-                .on_click(js_close_click)
                 .child(icon::solid::x_mark("size-8"))
             )
         )
@@ -83,12 +77,14 @@ impl Toast {
 }
 
 fn js_timeout(duration: Duration, js: &str) -> String {
-    format!("setTimeout(() => {}, {})", js, duration.as_millis())
+    format!("setTimeout(() => {{ {} }}, {})", js, duration.as_millis())
 }
 
 impl ResponseWriter {
-    pub async fn send_toast(&mut self, toast: Toast) -> Result<(), crate::core::error::CoreError> {
-        self.send_fragment(toast.view()).await
+    pub async fn send_toast(&mut self, _toast: Toast) -> Result<(), crate::core::error::CoreError> {
+        // Toasts are disabled.
+        // self.send_fragment(toast.view()).await
+        Ok(())
     }
 
     pub async fn send_toast_dark(
