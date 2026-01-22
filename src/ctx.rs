@@ -219,7 +219,7 @@ impl Ctx {
             Fake,
         }
 
-        let use_fake = env.stage.is_local();
+        let use_fake = env.stage.is_local() && false;
 
         let verify_sms_impl = if use_fake {
             VerifySmsImpl::Fake
