@@ -115,16 +115,36 @@ EOSQL
 echo "Database user and database setup complete"
 
 # Set DATABASE_URL environment variable (with SSL disabled for local development)
-# This overrides any DATABASE_URL from .env file
 export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?sslmode=disable"
 
 echo "DATABASE_URL set to: $DATABASE_URL"
+
+# Update .env file in the container to have the correct DATABASE_URL
+# This ensures that when the application loads .env, it gets the correct value
+if [ -f "/app/.env" ]; then
+    echo "Updating .env file with correct DATABASE_URL..."
+    # Use awk to safely replace only lines that start with DATABASE_URL=
+    # This preserves all other lines exactly as they are
+    awk -v new_db_url="DATABASE_URL=\"postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?sslmode=disable\"" '
+        /^DATABASE_URL=/ { 
+            print new_db_url
+            found=1
+            next
+        }
+        { print }
+        END {
+            if (!found) {
+                print new_db_url
+            }
+        }
+    ' /app/.env > /app/.env.tmp && mv /app/.env.tmp /app/.env
+fi
 
 # Run database migrations
 echo "Running database migrations..."
 dbmate --url "$DATABASE_URL" up
 echo "Database migrations completed successfully"
 
-# Start the application with DATABASE_URL in the environment
+# Start the application
 echo "Starting application..."
-exec env DATABASE_URL="$DATABASE_URL" "$@"
+exec "$@"
