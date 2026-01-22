@@ -123,10 +123,10 @@ echo "DATABASE_URL set to: $DATABASE_URL"
 # This ensures that when the application loads .env, it gets the correct value
 if [ -f "/app/.env" ]; then
     echo "Updating .env file with correct DATABASE_URL..."
-    # Use awk to safely replace only lines that start with DATABASE_URL=
+    # Use awk to safely replace any line that starts with DATABASE_URL= (with or without quotes, with or without spaces)
     # This preserves all other lines exactly as they are
     awk -v new_db_url="DATABASE_URL=\"postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?sslmode=disable\"" '
-        /^DATABASE_URL=/ { 
+        /^[[:space:]]*DATABASE_URL[[:space:]]*=/ { 
             print new_db_url
             found=1
             next
@@ -138,6 +138,7 @@ if [ -f "/app/.env" ]; then
             }
         }
     ' /app/.env > /app/.env.tmp && mv /app/.env.tmp /app/.env
+    echo "Updated .env file with DATABASE_URL pointing to localhost"
 fi
 
 # Run database migrations

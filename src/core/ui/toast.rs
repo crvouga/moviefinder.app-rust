@@ -54,7 +54,8 @@ impl Toast {
 
     pub fn view(self) -> Html {
         let duration_ms = self.duration.as_millis();
-        let js_close = "document.getElementById('toast-content').classList.replace('animate-slide-down', 'animate-slide-up')";
+        let js_close = r#"{ const toastContent = document.getElementById('toast-content'); if (toastContent) { toastContent.classList.replace('animate-slide-down', 'animate-slide-up'); setTimeout(() => { toastContent.remove(); }, 200); } }"#;
+        let js_close_click = r#"(function() { const toastContent = document.getElementById('toast-content'); if (toastContent) { toastContent.classList.replace('animate-slide-down', 'animate-slide-up'); setTimeout(() => { toastContent.remove(); }, 200); } })()"#;
 
         Self::view_root()
         .child(
@@ -74,7 +75,7 @@ impl Toast {
             .child(div().class("flex-1").child(unsafe_text(&self.message.replace("\n", ""))))
             .child(
                 button().aria_label("close toast")
-                .on_click(js_close)
+                .on_click(js_close_click)
                 .child(icon::solid::x_mark("size-8"))
             )
         )

@@ -1,7 +1,7 @@
 use core::{
     http::{request::Request, response_writer::ResponseWriter},
     js::Js,
-    logger::{impl_console::ConsoleLogger, interface::{Logger, LoggerDyn}},
+    logger::{impl_console::ConsoleLogger, interface::LoggerDyn},
     mime_type::mime_type,
 };
 use ctx::Ctx;
