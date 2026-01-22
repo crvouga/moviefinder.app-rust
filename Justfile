@@ -62,7 +62,7 @@ tw-build: #
   ./tailwindcss -i ./public/input.css -o ./public/output.css --minify
 
 preview: #
-  docker build -t moviefinder-app . && docker run --rm -it -p 3000:3000 --env-file .env moviefinder-app
+  docker build --no-cache -t moviefinder-app-rust . && docker run --rm -it -p 3000:3000 --env-file .env moviefinder-app-rust
 
 preview-fresh: #
   just db-destroy && just db-start && just preview
