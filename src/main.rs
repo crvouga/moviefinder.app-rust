@@ -1,6 +1,7 @@
 use core::{
     http::{request::Request, response_writer::ResponseWriter},
     js::Js,
+    logger::{impl_console::ConsoleLogger, interface::{Logger, LoggerDyn}},
     mime_type::mime_type,
 };
 use ctx::Ctx;
@@ -27,6 +28,17 @@ mod user;
 async fn main() {
     let env = Env::load();
 
+    // Create a logger for startup operations
+    let log: LoggerDyn = Arc::new(ConsoleLogger::new(vec!["app".to_string()]));
+
+    // Run database migrations
+    info!(log, "Running database migrations...");
+    if let Err(e) = run_migrations(&log, &env.database_url).await {
+        error!(log, "Failed to run database migrations: {}", e);
+        std::process::exit(1);
+    }
+    info!(log, "Database migrations completed successfully");
+
     let address = format!("0.0.0.0:{}", env.port);
 
     let ctx = Arc::new(Ctx::new(&env).await);
@@ -36,6 +48,32 @@ async fn main() {
     core::http::server::start(&address, move |r, w| respond(ctx.clone(), r, w))
         .await
         .unwrap();
+}
+
+async fn run_migrations(log: &LoggerDyn, database_url: &str) -> Result<(), String> {
+    use tokio::process::Command;
+
+    info!(log, "Executing dbmate migrations...");
+
+    let output = Command::new("dbmate")
+        .arg("--url")
+        .arg(database_url)
+        .arg("up")
+        .output()
+        .await
+        .map_err(|e| format!("Failed to execute dbmate: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("dbmate migration failed: {}", stderr));
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    if !stdout.is_empty() {
+        info!(log, "dbmate output: {}", stdout);
+    }
+
+    Ok(())
 }
 
 async fn respond(

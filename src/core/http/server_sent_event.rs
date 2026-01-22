@@ -21,7 +21,10 @@ impl ServerSentEvent {
         self
     }
 
-    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), crate::core::error::CoreError> {
+    pub async fn send(
+        &mut self,
+        w: &mut ResponseWriter,
+    ) -> Result<(), crate::core::error::CoreError> {
         w.write_sse_event(&self.event, self.data.iter().map(|s| s.as_str()).collect())
             .await
     }

@@ -25,6 +25,9 @@ db-start: #
 db-stop: #
   sudo docker-compose -f ./db/docker-compose.local.yml down
 
+db-destroy: #
+  sudo docker-compose -f ./db/docker-compose.local.yml down -v
+
 db-up: #
   npx dbmate -e DATABASE_URL up
 
@@ -60,3 +63,6 @@ tw-build: #
 
 preview: #
   docker build -t moviefinder-app . && docker run --rm --env-file .env moviefinder-app
+
+preview-fresh: #
+  just db-destroy && just db-start && just preview

@@ -15,7 +15,10 @@ impl Req {
             .ok_or(crate::core::error::CoreError::new("Not found"))
     }
 
-    pub async fn user_profile(&self, ctx: &Ctx) -> Result<UserProfile, crate::core::error::CoreError> {
+    pub async fn user_profile(
+        &self,
+        ctx: &Ctx,
+    ) -> Result<UserProfile, crate::core::error::CoreError> {
         let user_id = self.user_id(ctx).await?;
 
         ctx.user_profile_db

@@ -439,7 +439,10 @@ impl Fragments {
         self
     }
 
-    pub async fn send(&mut self, w: &mut ResponseWriter) -> Result<(), crate::core::error::CoreError> {
+    pub async fn send(
+        &mut self,
+        w: &mut ResponseWriter,
+    ) -> Result<(), crate::core::error::CoreError> {
         self.sse.send(w).await?;
         Ok(())
     }

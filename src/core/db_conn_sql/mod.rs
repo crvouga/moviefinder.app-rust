@@ -20,7 +20,8 @@ where
     raw_rows
         .into_iter()
         .map(|value| {
-            serde_json::from_value(value).map_err(|e| crate::core::error::CoreError::new(e.to_string()))
+            serde_json::from_value(value)
+                .map_err(|e| crate::core::error::CoreError::new(e.to_string()))
         })
         .collect()
 }
