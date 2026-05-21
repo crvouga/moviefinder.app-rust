@@ -325,7 +325,12 @@ impl Attr for DataOn {
 
 impl Html {
     pub fn src_datastar_cdn(self) -> Self {
-        self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js")
+        // Pinned to v0.21.4 because this codebase uses the v0.x signal-access
+        // syntax (e.g. `signal_loaded_screens.value.includes(...)`).
+        // Datastar v1+ removed the `.value` accessor and requires a `$` prefix
+        // (`$signal_loaded_screens`), which would break every `data-show`,
+        // `data-on-*` and computed expression in the project.
+        self.src("https://cdn.jsdelivr.net/gh/starfederation/datastar@v0.21.4/bundles/datastar.js")
             .type_module()
     }
 

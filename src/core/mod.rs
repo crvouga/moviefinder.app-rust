@@ -25,7 +25,6 @@ pub mod remote_result;
 pub mod session;
 pub mod sql;
 pub mod struct_ext;
-pub mod tailwind;
 pub mod tmdb_api;
 pub mod twilio_api;
 pub mod ui;

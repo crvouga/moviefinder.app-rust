@@ -20,6 +20,20 @@ RUN echo "Installing dbmate..." \
     && chmod +x /usr/local/bin/dbmate \
     && echo "dbmate installed successfully"
 
+# Install Tailwind CSS standalone CLI (pinned to last v3 release; v4 changed
+# config format and would break tailwind.config.js).
+RUN echo "Installing Tailwind CSS CLI..." \
+    && ARCH=$(dpkg --print-architecture) \
+    && case "$ARCH" in \
+         amd64) TW_ARCH="x64" ;; \
+         arm64) TW_ARCH="arm64" ;; \
+         *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
+       esac \
+    && curl -fsSL -o /usr/local/bin/tailwindcss \
+        "https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-${TW_ARCH}" \
+    && chmod +x /usr/local/bin/tailwindcss \
+    && echo "Tailwind CSS CLI installed"
+
 # Copy source code
 RUN echo "Copying source code..."
 COPY . .
@@ -27,6 +41,12 @@ COPY . .
 # Copy and set up entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Compile Tailwind once production source is in place. Output is served as a
+# static asset by the app at GET /output.css.
+RUN echo "Compiling Tailwind CSS..." \
+    && tailwindcss -i ./public/input.css -o ./public/output.css --minify \
+    && echo "Tailwind CSS compiled"
 
 # Build the Rust application
 RUN echo "Building Rust application..." \
